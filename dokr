@@ -1,0 +1,3 @@
+#!/usr/bin/env python
+
+print("hey there, this is my first pip package")
