@@ -1,0 +1,708 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Image Analyse &mdash; FRED Tools 0.0.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Getting Subimage" href="GettingSubimage.html" />
+    <link rel="prev" title="Image Reading and Writing" href="ReadWrite.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #00007fff" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> FRED Tools
+          
+
+          
+            
+            <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Collaboration.html">Collaboration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Citation.html">Citation and References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Changelog.html">Changelog</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Image Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FRED Tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Image Analyse</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Documentation/ImageAnalyse.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="image-analyse">
+<h1>Image Analyse<a class="headerlink" href="#image-analyse" title="Permalink to this headline">¶</a></h1>
+<p>A collection of useful functions for image analysis. The image must be an instance of a SimpleITK image.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getExtent">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getExtent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extent of an image.</p>
+<p>The function gets extent of an image defined as a SimpleITK image object.
+Extent mean the coordinates of the most side voxels’ borders
+in each direction. It is assumed that the coordinate system is in [mm].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tuple of extent values in form ((xmin,xmax),(ymin,ymax),…)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getExtMpl" title="fredtools.getExtMpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExtMpl</span></code></a></dt><dd><p>get extent of a SimpleITK image object describing a slice in matplotlib format.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getSize">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getSize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get size of an image.</p>
+<p>The function gets size of an image defined as a SimpleITK image object
+in each direction. The size is defined as the absolute difference of
+the image extent. It is assumed that the coordinate system is in [mm].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tuple of sizes in each direction in form (xSize,ySize,…)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getExtent" title="fredtools.getExtent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExtent</span></code></a></dt><dd><p>Get extent of an image.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getImageCenter">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getImageCenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getImageCenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get centre of an image.</p>
+<p>The function calculates the centre of an image defined as a SimpleITK image object
+in each direction. It is assumed that the coordinate system is in [mm].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tuple of image centre coordinates as in form (xCenter,yCenter,…)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getMassCenter" title="fredtools.getMassCenter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getMassCenter</span></code></a></dt><dd><p>get centre of mass of an image.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getMassCenter">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getMassCenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getMassCenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get centre of mass of an image.</p>
+<p>The function calculates the centre of mass of an image defined as
+a SimpleITK image object in each direction. It is assumed that
+the coordinate system is in [mm].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tuple of image centre of mass coordinates as in form (xMassCenter,yMassCenter,…)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getImageCenter" title="fredtools.getImageCenter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getImageCenter</span></code></a></dt><dd><p>get centre of an image.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getVoxelCentres">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getVoxelCentres</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getVoxelCentres" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get voxel centres.</p>
+<p>The function gets voxels’ centres in each direction of an image
+defined as a SimpleITK image object. It is assumed that the coordinate
+system is in [mm].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of tuples with voxels’ centres in each
+direction in form ([x0,x1,…],[y0,y1,…],…)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.displayImageInfo">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">displayImageInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.displayImageInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display some information about image.</p>
+<p>The function displays information about an image given as a SimpleITK image object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Reading image from file and displaying the image information.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">imgCT</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;CT.mhd&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">displayImageInfo</span><span class="p">(</span><span class="n">imgCT</span><span class="p">)</span>
+<span class="go">### displayImageInfo ###</span>
+<span class="go"># dims (xyz) =  [511 415 218]</span>
+<span class="go"># pixel size [mm] =  [0.68359375 0.68359375 1.2       ]</span>
+<span class="go"># origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]</span>
+<span class="go"># x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]</span>
+<span class="go"># y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]</span>
+<span class="go"># z-spatial voxel centre [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]</span>
+<span class="go"># x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =&gt;   349.316406</span>
+<span class="go"># y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =&gt;   283.691406</span>
+<span class="go"># z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =&gt;   261.600000</span>
+<span class="go"># volume = 25924053.15 mm3  =&gt;  25.92 litre</span>
+<span class="go"># data type:  16-bit signed integer</span>
+<span class="go"># range: from  -1024  to  3071</span>
+<span class="go"># sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )</span>
+<span class="go"># non-zero (dose=0)  voxels  = 46188861 (99.91%) =&gt; 25.90 litre</span>
+<span class="go"># non-air (HU&gt;-1000) voxels  = 15065800 (32.59%) =&gt; 8.45 litre</span>
+<span class="go">########################</span>
+</pre></div>
+</div>
+<p>The same can be displayed when reading the image.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">imgCT</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;CT.mhd&#39;</span><span class="p">,</span> <span class="n">displayInfo</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">### readMHD ###</span>
+<span class="go"># dims (xyz) =  [511 415 218]</span>
+<span class="go"># pixel size [mm] =  [0.68359375 0.68359375 1.2       ]</span>
+<span class="go"># origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]</span>
+<span class="go"># x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]</span>
+<span class="go"># y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]</span>
+<span class="go"># z-spatial voxel centre [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]</span>
+<span class="go"># x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =&gt;   349.316406</span>
+<span class="go"># y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =&gt;   283.691406</span>
+<span class="go"># z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =&gt;   261.600000</span>
+<span class="go"># volume = 25924053.15 mm3  =&gt;  25.92 litre</span>
+<span class="go"># data type:  16-bit signed integer</span>
+<span class="go"># range: from  -1024  to  3071</span>
+<span class="go"># sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )</span>
+<span class="go"># non-zero (dose=0)  voxels  = 46188861 (99.91%) =&gt; 25.90 litre</span>
+<span class="go"># non-air (HU&gt;-1000) voxels  = 15065800 (32.59%) =&gt; 8.45 litre</span>
+<span class="go">###############</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getExtMpl">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getExtMpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getExtMpl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extent of a slice in format consistent with imshow of matplotlib module.</p>
+<p>The function gets extent of an image defined as a SimpleITK image object
+describing a slice. Extent mean the coordinates of the most side pixels’ borders
+in each direction and are returned in format (left, right, bottom, top), which is
+consistent with the <code class="docutils literal notranslate"><span class="pre">extent</span></code> optional parameter of <code class="docutils literal notranslate"><span class="pre">imshow</span></code> of
+<code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot</span></code> module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image describing a slice.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tuple of extent values in form (left, right, bottom, top).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow</span></code></dt><dd><p>displaying 2D images.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getExtent" title="fredtools.getExtent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExtent</span></code></a></dt><dd><p>get extent of the image in each direction.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getSize" title="fredtools.getSize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSize</span></code></a></dt><dd><p>get size of the image in each direction.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.arr" title="fredtools.arr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arr</span></code></a></dt><dd><p>get squeezed array from image.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Assuming that the <cite>img</cite> is describing a slice (e.g. the shape is [100,1,300,1]), the line:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">fredtools</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">getExtMpl</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>will display a 2D image of shape 100x300 px in real coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.isPointInside">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">isPointInside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.isPointInside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if point is inside the image extent.</p>
+<p>The function checks if a point or list of points are inside
+the extent of an image defined as a SimpleITK image object
+The dimension of points must match the dimension of the img.
+The points at the border of the image (equal to the image extent)
+are considered to be inside the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A single or a tuple of boolean values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>single or tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getExtent" title="fredtools.getExtent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExtent</span></code></a></dt><dd><p>get extent of the image in each direction.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Let’s assume that the <cite>img</cite> is a 3D image with extent:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">getExtent</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="go">((-175.0, 174.3),</span>
+<span class="go"> (-354.6, -70.9),</span>
+<span class="go"> (-786.2, -524.6))</span>
+</pre></div>
+</div>
+<p>It means that the <cite>img</cite> expands from -175.0 to 174.3, from -354.6 to-70.9
+and from -786.2 to -524.6 in X,Y and Z directions, respectively. Let’s check
+if the point [0,0,0] and a list of points [[0,0,0],[0,-100,-600],[-175,-354.6,-786.2]]
+are inside the image extent:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">isPointInside</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">isPointInside</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span><span class="o">-</span><span class="mi">600</span><span class="p">],[</span><span class="o">-</span><span class="mi">175</span><span class="p">,</span><span class="o">-</span><span class="mf">354.6</span><span class="p">,</span><span class="o">-</span><span class="mf">786.2</span><span class="p">]])</span>
+<span class="go">(False, True, True)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getStatistics">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getStatistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getStatistics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get statistics of image</p>
+<p>The function gets basic statistics of an image defined as
+a SimpleITK image object. It is basically a wrapper for
+SimpleITK.StatisticsImageFilter routine executed on the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SimpleITK image filter with image statistics.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SimpleITK filter</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimpleITK.StatisticsImageFilter</span></code></dt><dd><p>more about possible statistics.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>It is assumed that the img is a 3D dose distribution.
+Some statistics of the image, like the mean, standard deviation
+or sum can be calculated.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">getStatistics</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span><span class="o">.</span><span class="n">GetMean</span><span class="p">()</span>
+<span class="go">-732.6387321958799</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span><span class="o">.</span><span class="n">GetSigma</span><span class="p">()</span>
+<span class="go">468.4351857326367</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span><span class="o">.</span><span class="n">GetSum</span><span class="p">()</span>
+<span class="go">-33870013138.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.compareImgFoR">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">compareImgFoR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.compareImgFoR" title="Permalink to this definition">¶</a></dt>
+<dd><p>compare two images frame of reference</p>
+<p>The function gets two images defined as instances of a SimpleITK image
+object and compares the frame of reference, i.e. dimension, size, origin
+and spacing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img1</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>img2</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>decimals</strong> (<em>int</em><em>, </em><em>optional</em>) – Use rounding to given number of decimals when comparing origin and spacing (def. 3).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A true pr false value describing if the images are the same
+in the sense of the field of reference.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.pos">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get voxels’ centres for axes of size different than one.</p>
+<p>The function calculates the voxels’ centres of an image defined
+as SimpleITK image object in each direction, only for those axes for
+which the size is more than one. The function us useful for plotting profiles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple with voxels’ centres for image describing a profile
+(the size in only one direction is greater than one) or list of tuples
+for all directions for which the size is greated than one.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple or list of tuples</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getVoxelCentres" title="fredtools.getVoxelCentres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getVoxelCentres</span></code></a></dt><dd><p>get voxels’ centres of the image in each direction.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.vec" title="fredtools.vec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vec</span></code></a></dt><dd><p>get vector with values for the img describing a profile.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Let’s assume that the <cite>img</cite> is a 3D image describing a profile, so is of size [1,200,1].
+It is possible to get the voxels’ centres only in Y direction:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="go">(-174.658203125,</span>
+<span class="go"> -173.974609375,</span>
+<span class="go"> ...</span>
+<span class="go">)</span>
+</pre></div>
+</div>
+<p>This can be used for plotting profiles. The line:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fredtools</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">fredtools</span><span class="o">.</span><span class="n">vec</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>will plot the profile in Y direction of the image.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.arr">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">arr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get squeezed array from image.</p>
+<p>The function gets a squeezed array (with no unitary dimensions) from
+an image defined as SimpleITK image object. This can be used for plotting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A numpy array with no unitary dimensions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.pos" title="fredtools.pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code></a></dt><dd><p>get voxels’ centres for axes of size different than one.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getExtMpl" title="fredtools.getExtMpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExtMpl</span></code></a></dt><dd><p>Get extent of a slice in format consistent with imshow of matplotlib module.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.vec" title="fredtools.vec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vec</span></code></a></dt><dd><p>get vector with values for the img describing a profile.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Assuming that the <cite>img</cite> is describing a slice (e.g. the shape is [100,1,300,1]), the line:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">fredtools</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">getExtMpl</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>will display a 2D image of shape 100x300 px in real coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.vec">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get 1D array from image describing a profile.</p>
+<p>The function gets a squeezed (with no unitary dimensions), 1D array from
+an image defined as SimpleITK image object describing a profile.
+This can be used for plotting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image describing a profile.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 1D numpy array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.pos" title="fredtools.pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code></a></dt><dd><p>get voxels’ centres for axes of size different than one.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.arr" title="fredtools.arr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arr</span></code></a></dt><dd><p>Get squeezed array from image.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Assuming that the <cite>img</cite> is describing a profile (e.g. the shape is [1,1,300,1]), the line:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fredtools</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">fredtools</span><span class="o">.</span><span class="n">vec</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>will plot the profile in Z direction of the image.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="GettingSubimage.html" class="btn btn-neutral float-right" title="Getting Subimage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ReadWrite.html" class="btn btn-neutral float-left" title="Image Reading and Writing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright FRED collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

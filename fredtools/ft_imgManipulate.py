@@ -125,7 +125,7 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
     imgMask : SimpleITK Image
         Object of a SimpleITK image describing a mask.
     value : scalar
-        value to be set.
+        value to be set (the type will be mapped to the type of `img`).
     outside : bool, optional
         Determine if the values should be set outside the mask
         (where mask values are equal to 0) or inside the mask
