@@ -118,7 +118,7 @@ def _isSITK_mask(img, raiseError=False):
 
     ft._isSITK(img, raiseError=True)
     stat = getStatistics(img)
-    instanceBool = (stat.GetMaximum() == 1) and (stat.GetMinimum() == 0)
+    instanceBool = (stat.GetMaximum() == 1) and (stat.GetMinimum() == 0) and (img.GetPixelIDTypeAsString() == "8-bit unsigned integer")
 
     if raiseError and not instanceBool:
         raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK image but not describing a simple mask. Mask image should contain only voxels with values 0 and 1.")
@@ -143,17 +143,3 @@ def ITK2SITK(imgITK):
     imgSITK.SetSpacing(list(imgITK.GetSpacing()))
     imgSITK.SetDirection(itk.GetArrayFromMatrix(imgITK.GetDirection()).flatten())
     return imgSITK
-
-
-# def _getITKtype(img, displayInfo=False):
-#     r"""Return type of itk image."""
-#     if _isLP(img):
-#         return "lineProfile"
-#     elif _isITK2D(img):
-#         return "itk2D"
-#     elif _isITK3D(img):
-#         return "itk3D"
-#     elif _isITK4D(img):
-#         return "itk4D"
-#     else:
-#         raise TypeError(f"The object '{type(img)}' is not an instance of an itk image nor a lineProfile.")

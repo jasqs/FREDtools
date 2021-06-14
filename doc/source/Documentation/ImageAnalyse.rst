@@ -1,7 +1,7 @@
 Image Analyse
 =================================
 
-A collection of usefull functions for image analysis. The image must be an instance of a SimpleITK image.
+A collection of useful functions for image analysis. The image must be an instance of a SimpleITK image.
 
 .. autofunction:: fredtools.getExtent
 
@@ -21,9 +21,12 @@ A collection of usefull functions for image analysis. The image must be an insta
 
 .. autofunction:: fredtools.getStatistics
 
+.. autofunction:: fredtools.compareImgFoR
+
 .. autofunction:: fredtools.pos
 
 .. autofunction:: fredtools.arr
 
 .. autofunction:: fredtools.vec
+
 

@@ -1,7 +1,7 @@
 Image Reading and Writing
 =================================
 
-A collection of usefull functions for reading and writing images are implemented. The supported image type are:
+A collection of useful functions for reading and writing images are implemented. The supported image type are:
 
 *   MetaImage format in double (\*.mhd+\*.raw) or single files (only \*.mhd),
 *   Map3D images, i.e. an obsolate format used by the FRED Monte Carlo engine for saving 3D images (not recommended),
@@ -21,7 +21,7 @@ MetaImage files (\*.mhd, \*.mha)
 Map3D images (\*.m3d)
 ------------------------------------------------
 
-.. caution:: The Map3D file format is obsolete and it is not recomended to be used to store the image data. Use MetaImage file format instead.
+.. caution:: The Map3D file format is obsolete and it is not recommended to be used to store the image data. Use MetaImage file format instead.
 
 .. autofunction:: fredtools.readMap3D
 

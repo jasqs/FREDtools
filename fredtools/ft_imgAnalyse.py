@@ -428,6 +428,7 @@ def _getAxesNumberNotUnity(img):
 
     return tuple(axesNumberNotUnity)
 
+
 def _getDirectionArray(img):
     """Get direction in form of 2D array.
 
@@ -452,6 +453,7 @@ def _getDirectionArray(img):
 
     ft._isSITK(img, raiseError=True)
     return np.array(img.GetDirection()).reshape(img.GetDimension(), img.GetDimension())
+
 
 def getExtMpl(img):
     """Get extent of a slice in format consistent with imshow of matplotlib module.
@@ -704,8 +706,6 @@ def isPointInside(img, point, displayInfo=False):
     return isIns[0] if len(isIns) == 1 else tuple(isIns)
 
 
-
-
 def getStatistics(img, displayInfo=False):
     """Get statistics of image
 
@@ -756,3 +756,66 @@ def getStatistics(img, displayInfo=False):
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return stat
+
+
+def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
+    """compare two images frame of reference
+
+    The function gets two images defined as instances of a SimpleITK image
+    object and compares the frame of reference, i.e. dimension, size, origin
+    and spacing.
+
+    Parameters
+    ----------
+    img1 : SimpleITK Image
+        Object of a SimpleITK image.
+    img2 : SimpleITK Image
+        Object of a SimpleITK image.
+    decimals: int, optional
+        Use rounding to given number of decimals when comparing origin and spacing (def. 3).
+    displayInfo : bool, optional
+        Displays a summary of the function results (def. False).
+
+    Returns
+    -------
+    bool
+        A true pr false value describing if the images are the same
+        in the sense of the field of reference.
+
+    """
+    import fredtools as ft
+    import numpy as np
+
+    ft._isSITK(img1, raiseError=True)
+    ft._isSITK(img2, raiseError=True)
+
+    # compare dimension
+    dimensionMatch = img1.GetDimension() == img2.GetDimension()
+
+    # compare size
+    sizeMatch = img1.GetSize() == img2.GetSize()
+
+    # compare origin
+    originMatch = np.all(np.round(np.array(img1.GetOrigin()), decimals=decimals) == np.round(np.array(img2.GetOrigin()), decimals=decimals))
+
+    # compare spacing
+    spacingMatch = np.all(np.round(np.array(img1.GetSpacing()), decimals=decimals) == np.round(np.array(img2.GetSpacing()), decimals=decimals))
+
+    match = dimensionMatch and sizeMatch and originMatch and spacingMatch
+
+    # compare values
+    if match:
+        valuesMatch = np.all(ft.arr(img1) == ft.arr(img1))
+    else:
+        valuesMatch = False
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print("# Dimension matching:      ", dimensionMatch)
+        print("# Size matching:           ", sizeMatch)
+        print("# Origin matching:         ", originMatch, f"({decimals} decimals tolarance)")
+        print("# Spacing matching:        ", spacingMatch, f"({decimals} decimals tolarance)")
+        print("# Pixel-to-pixel matching: ", valuesMatch)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return match

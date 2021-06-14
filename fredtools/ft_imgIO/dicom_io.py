@@ -393,37 +393,134 @@ def getExternalName(fileName, displayInfo=False):
 
 
 def getCT(fileNames, displayInfo=False):
-    """TODO: Read CT to itk object.
+    """Get image from dicom series.
 
-    The function reads list of CT dicom files to an itk object.
+    The function reads a series of dicom files and creates an instance
+    of a SimpleITK object. The dicom files should come from the same Series
+    and have the same frame of reference.
 
     Parameters
     ----------
-    fileNames : list of paths
-        List of paths to CT dicom files.
+    fileNames : array_like
+        An iterable (list, tuple, etc.) of paths to dicoms.
     displayInfo : bool, optional
         Displays a summary of the function results (def. False).
 
     Returns
     -------
-    itkImage
-        Object of an itk image.
+    SimpleITK Image
+        Object of a SimpleITK image.
 
+    See Also
+    --------
+    sortDicoms : get names of dicoms in a folder sorted by the dicom type.
     """
-    from gatetools import read_dicom
     import numpy as np
     import fredtools as ft
+    import pydicom as dicom
+    import SimpleITK as sitk
 
+    # check if all files are CT type
     for fileName in fileNames:
         if not getDicomType(fileName) == "CT":
-            raise ValueError("File {:s} is not a CT dicom.".format(fileName))
+            raise ValueError(f"File {fileName} is not a CT dicom.")
 
-    img = read_dicom(fileNames).astype(np.int16)
-    img = ft.ITK2SITK(img)
+    # read dicoms' tags
+    dicomSeries = []
+    for fileName in fileNames:
+        dicomSeries.append(dicom.read_file(fileName))
 
+    # check if all dicoms have Frame of Reference UID tag
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if "FrameOfReferenceUID" not in dicomSimple:
+            raise TypeError(f"No 'FrameOfReferenceUID' tag in {fileName}.")
+
+    # check if Frame of Reference UID is the same for all dicoms
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if dicomSimple.FrameOfReferenceUID != dicomSeries[0].FrameOfReferenceUID:
+            raise TypeError(f"Frame of Reference UID for dicom {fileName} is different than for {fileNames[0]}.")
+
+    # check if all dicoms have Series Instance UID tag
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if "SeriesInstanceUID" not in dicomSimple:
+            raise TypeError(f"No 'SeriesInstanceUID' tag in {fileName}.")
+
+    # check if Series Instance UID is the same for all dicoms
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if dicomSimple.SeriesInstanceUID != dicomSeries[0].SeriesInstanceUID:
+            raise TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
+
+    # get slice location
+    slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomSeries))
+
+    # sort fileNames according to the Slice Location tag
+    slicesLocationSorted, fileNamesSorted = zip(*sorted(zip(slicesLocation, fileNames)))
+
+    # check if slice location spacing is constant
+    slicesLocationSpacingTolerance = 4  # decimal points (4 means 0.0001 tolerance)
+    if np.unique(np.round(np.diff(np.array(slicesLocationSorted)), decimals=slicesLocationSpacingTolerance)).size != 1:
+        raise ValueError(f"Slice location spacing is not constant with tolerance {10**-slicesLocationSpacingTolerance:.0E}")
+
+    # read dicom series
+    img = sitk.ReadImage(fileNamesSorted)
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return img
+
+
+def getRD(fileNames, displayInfo=False):
+    """Get image from dicom.
+
+    The function reads a single dicom file or an iterable of dicom files
+    and creates an instance or tuple of instances of a SimpleITK object.
+
+    Parameters
+    ----------
+    fileNames : string or array_like
+        A path or an iterable (list, tuple, etc.) of paths to dicoms.
+    displayInfo : bool, optional
+        Displays a summary of the function results (def. False).
+
+    Returns
+    -------
+    SimpleITK Image or tuple
+        Object or tuple of objects of a SimpleITK image.
+
+    See Also
+    --------
+    sortDicoms : get names of dicoms in a folder sorted by the dicom type.
+    """
+    import SimpleITK as sitk
+    import pydicom as dicom
+    import fredtools as ft
+
+    # if fileName is a single string then make it a single element list
+    if isinstance(fileNames, str):
+        fileNames = [fileNames]
+
+    imgOut = []
+    for fileName in fileNames:
+        # read dicom tags
+        dicomTag = dicom.read_file(fileName)
+
+        # find dose scaling
+        scaling = 1
+        if "DoseGridScaling" in dicomTag:
+            scaling = dicomTag.DoseGridScaling
+
+        img = sitk.ReadImage(fileName, outputPixelType=sitk.sitkFloat64)
+
+        # scale image values
+        img *= scaling
+
+        imgOut.append(img)
+
+        if displayInfo:
+            print(f"### {ft._currentFuncName()} ###")
+            ft.ft_imgAnalyse._displayImageInfo(img)
+            print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgOut[0] if len(imgOut) == 1 else tuple(imgOut)

@@ -27,11 +27,9 @@ The development version is available on GitHub.
 Development
 ----------------------------
 Everyone is invited to support the development of the FRED tools and to add functionalities needed for a specific application.
-All the new functions or classes sould be documented according to numpydoc style. Check `numpydoc website <https://numpydoc.readthedocs.io>`_ for the style guide and examples.
+All the new functions or classes should be documented according to numpydoc style. Check `numpydoc website <https://numpydoc.readthedocs.io>`_ for the style guide and examples.
 
-
-
-
+The FRED tools documentation is written in reStructuredText format and build with sphinx in version 4.0.2 using sphinx_rtd_theme template in version 0.5.2.
 
 .. toctree::
    :maxdepth: 1
