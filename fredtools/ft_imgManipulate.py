@@ -92,7 +92,7 @@ def cropImgToMask(img, imgMask, displayInfo=False):
     ft._isSITK(img, raiseError=True)
     ft._isSITK_mask(imgMask, raiseError=True)
 
-    if ft.compareImgFoR(img, imgMask):
+    if not ft.compareImgFoR(img, imgMask):
         raise ValueError(f"FoR of the 'img' {img.GetSize()} must be the same as the FoR of the 'imgMask' {imgMask.GetSize()}.")
 
     labelStatistics = sitk.LabelStatisticsImageFilter()
@@ -149,7 +149,7 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
     ft._isSITK(img, raiseError=True)
     ft._isSITK_mask(imgMask, raiseError=True)
 
-    if ft.compareImgFoR(img, imgMask):
+    if not ft.compareImgFoR(img, imgMask):
         raise ValueError(f"FoR of the 'img' {img.GetSize()} must be the same as the FoR of the 'imgMask' {imgMask.GetSize()}.")
 
     if outside:

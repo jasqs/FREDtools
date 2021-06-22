@@ -1,0 +1,7 @@
+itk==5.2.0.post2
+fredtools==0.2.6
+numpy==1.17.4
+pydicom==2.1.2
+gatetools==0.10.1
+pandas==1.2.4
+SimpleITK==2.0.2

@@ -1,6 +1,8 @@
-from .ft_imgIO.dicom_io import *
-from .ft_imgIO.mhd_io import *
-from .ft_imgIO.map3d_io import *
+# from .ft_io_dicom import *
+from .ft_imgIO import *
+
+# from .ft_io_mhd import *
+# from .ft_io_map3d import *
 
 from .ft_imgAnalyse import *
 from .ft_imgGetSubimg import *
@@ -11,6 +13,9 @@ import itk
 import SimpleITK as sitk
 
 import sys
+
+version_info = [0, 2, 12]
+__version__ = ".".join(map(str, version_info))
 
 
 def _currentFuncName(n=0):
