@@ -418,11 +418,12 @@ def getCT(fileNames, displayInfo=False):
     import numpy as np
     import fredtools as ft
     import pydicom as dicom
+    import warnings
     import SimpleITK as sitk
 
     # check if all files are CT type
     for fileName in fileNames:
-        if not getDicomType(fileName) == "CT":
+        if not ft.getDicomType(fileName) == "CT":
             raise ValueError(f"File {fileName} is not a CT dicom.")
 
     # read dicoms' tags
@@ -450,8 +451,18 @@ def getCT(fileNames, displayInfo=False):
         if dicomSimple.SeriesInstanceUID != dicomSeries[0].SeriesInstanceUID:
             raise TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
 
+    # check if all dicoms have Slice Location tag
+    sliceLosationPresent = []
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        sliceLosationPresent.append("SliceLocation" in dicomSimple)
+    if not all(sliceLosationPresent):
+        warnings.warn("Warning: All dicom files are of CT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
+
     # get slice location
-    slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomSeries))
+    if not all(sliceLosationPresent):
+        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.ImagePositionPatient[2]), dicomSeries))
+    else:
+        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomSeries))
 
     # sort fileNames according to the Slice Location tag
     slicesLocationSorted, fileNamesSorted = zip(*sorted(zip(slicesLocation, fileNames)))
