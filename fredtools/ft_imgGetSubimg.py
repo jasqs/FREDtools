@@ -190,7 +190,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, disp
     slSize[slSize == 0] = 1
 
     # determine origin 3D
-    slOrigin3D = np.array(point)
+    slOrigin3D = np.array(point, dtype="float64")
     slOrigin3D[axisNo] = np.array(img.GetOrigin())[axisNo]
 
     # generate slice
@@ -494,7 +494,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
 
     # correct point is needed
     if len(point) < img.GetDimension():
-        pointCorr = np.array(img.GetOrigin())
+        pointCorr = np.array(img.GetOrigin(), dtype="float64")
         pointCorr[list(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))] = point
         point = pointCorr
 
