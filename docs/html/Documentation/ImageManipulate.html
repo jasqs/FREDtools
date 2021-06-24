@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Image Manipulate &mdash; FRED Tools 0.0.2 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.3.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.0.2
+                0.3.0
               </div>
             
           
@@ -342,6 +342,46 @@ of references of all images must be the same.</p>
 <dd class="field-odd"><p>SimpleITK Image</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.createCylindricalMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createCylindricalMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createCylindricalMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a cylindrical Mask in image field of reference</p>
+<p>The function creates a cylindrical mask with a given <cite>dimension</cite> and height
+calculated from the starting and ending poits of the cylinder in the frame of
+references of an image defined as SimpleITK image object describing a 3D image.
+Only 3D images are supported. The routine might be helpful for instance for making
+a geometrical acceptance correction of a chamber used for Bragg peak measurements.
+The routine was adapted from a GitHub repository: <a class="reference external" href="https://github.com/heydude1337/SimplePhantomToolkit/">https://github.com/heydude1337/SimplePhantomToolkit/</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
+<li><p><strong>startPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the centre of the first cylinder base.</p></li>
+<li><p><strong>endPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the centre of the second cylinder base.</p></li>
+<li><p><strong>dimension</strong> (<em>scalar</em>) – Dimension of the cylinder.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instance of a SimpleITK image object describing a mask (i.e. type ‘uint8’ with 0/1 values).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to image to create a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>crop an image to mask.</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 </div>

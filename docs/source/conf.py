@@ -14,6 +14,7 @@ import os
 import sphinx_rtd_theme
 import sys
 sys.path.insert(0, os.path.abspath('./../../'))
+from fredtools import __version__
 
 
 # -- Project information -----------------------------------------------------
@@ -23,9 +24,9 @@ copyright = 'FRED collaboration'
 author = 'FRED collaboration'
 
 # The full version, including alpha/beta/rc tags
-version = '0.0.2'
+version = __version__
 # The full version, including alpha/beta/rc tags.
-release = '0.0.2'
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # If your documentation needs a minimal Sphinx version, state it here.
