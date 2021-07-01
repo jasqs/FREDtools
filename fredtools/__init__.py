@@ -8,13 +8,14 @@ from .ft_imgAnalyse import *
 from .ft_imgGetSubimg import *
 from .ft_imgManipulate import *
 from .ft_simTools import *
+from .ft_dvh import *
 
 import itk
 import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 3, 1]
+version_info = [0, 4, 0]
 __version__ = ".".join(map(str, version_info))
 
 
@@ -148,3 +149,23 @@ def ITK2SITK(imgITK):
     imgSITK.SetSpacing(list(imgITK.GetSpacing()))
     imgSITK.SetDirection(itk.GetArrayFromMatrix(imgITK.GetDirection()).flatten())
     return imgSITK
+
+
+def _getCPUNo(CPUNo="auto"):
+    r"""Determine number of CPU cores to be used for functions exploiting multiprocessing"""
+    from os import cpu_count
+    from numpy import isscalar
+
+    if not CPUNo:
+        return None
+    elif isinstance(CPUNo, str):
+        if CPUNo.lower() in ["none", "non", "single", "one"]:
+            return 1
+        elif CPUNo.lower() in ["auto"]:
+            return cpu_count()
+        else:
+            raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognised. Only a scalar number or 'auto' or 'none' are possible.")
+    elif isscalar(CPUNo):
+        return CPUNo
+    else:
+        raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognised. Only a scalar number or 'auto' or 'none' are possible.")

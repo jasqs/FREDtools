@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>DVH Analyse &mdash; FRED Tools 0.4.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #00007fff" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> FRED Tools
+          
+
+          
+            
+            <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Collaboration.html">Collaboration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Citation.html">Citation and References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Changelog.html">Changelog</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FRED Tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>DVH Analyse</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Documentation/dvhAnalyse.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dvh-analyse">
+<h1>DVH Analyse<a class="headerlink" href="#dvh-analyse" title="Permalink to this headline">¶</a></h1>
+<p>A collection of useful functions for Dose-Volume Histograms (DVH) analysis.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getDVH">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDVH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dosePrescribed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseLevelStep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampleImg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDVH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate DVH for structure.</p>
+<p>The function calculates a dose-volume histogram (DVH) for voxels inside
+a structure named <cite>structName</cite> and defined in structure dicom file.
+The image can be resampled before mapping to increase the resolution and
+the routine supports multiple CPU computation. The routine exploits and returns
+dicompylercore.dvh.DVH class to hold the DVH. Read more about the dicompyler-core
+DVH module on <a class="reference external" href="https://dicompyler-core.readthedocs.io/en/latest/index.html">https://dicompyler-core.readthedocs.io/en/latest/index.html</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
+<li><p><strong>RSfileName</strong> (<em>path</em>) – String path to RS dicom file.</p></li>
+<li><p><strong>structName</strong> (<em>string</em>) – Name of the structure to calculate the DVH in.</p></li>
+<li><p><strong>dosePrescribed</strong> (<em>scalar</em>) – Target prescription dose.</p></li>
+<li><p><strong>doseLevelStep</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Size of dose bins (def. 0.01).</p></li>
+<li><p><strong>resampleImg</strong> (<em>scalar</em><em>, </em><em>array_like</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if and how to resample the image while mapping the structure.
+Can be a scalar, then the same number will be used for each axis,
+3-element iterable defining the voxel size for each axis, or <cite>None</cite> meaning
+no interpolation (def. None).</p></li>
+<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em>) – Define if the multiprocessing should be used and how many cores should
+be exploited (def. ‘auto’). Can be None, then no multiprocessing will be used,
+a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
+or a scalar defining the number of CPU cored to be used (def. ‘auto’).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instance of a dicompylercore.dvh.DVH class holding the DVH.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dicompylercore DVH</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">dicompylercore</span></code></dt><dd><p>more information about the dicompylercore.dvh.DVH.</p>
+</dd>
+<dt><a class="reference internal" href="ImageManipulate.html#fredtools.resampleImg" title="fredtools.resampleImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resampleImg</span></code></a></dt><dd><p>resample image.</p>
+</dd>
+<dt><a class="reference internal" href="ImageManipulate.html#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>map structure to image.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright FRED collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
