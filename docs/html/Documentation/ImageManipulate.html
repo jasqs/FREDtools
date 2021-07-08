@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Image Manipulate &mdash; FRED Tools 0.4.0 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.5.1 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.4.0
+                0.5.1
               </div>
             
           
@@ -106,6 +106,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
@@ -181,20 +182,49 @@
 <p>A collection of useful functions to manipulate and change images. The image must be an instance of a SimpleITK image and the functions are mostly wrappers for SimpleITK image filters. Check <a class="reference external" href="https://simpleitk.readthedocs.io/en/master/filters.html">SimpleITK filters</a> for available methods of filtering, registration, etc.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.mapStructToImg">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mapStructToImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mapStructToImg" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mapStructToImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'centreInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mapStructToImg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Map structure to image and create a mask.</p>
 <p>The function reads a <cite>structName</cite> structure from RS dicom file and maps it to
-the frame of reference of <cite>img</cite> defined a SimpleITK image object. The function
-exploits the functionality of <code class="docutils literal notranslate"><span class="pre">gatetools</span></code>. The created mask is an image with
-the same frame of reference (origin. spacing, direction and size) as the <cite>img</cite>.
-The frame of reference of the <cite>img</cite> is not specified, in particular, the Z-spacing
-does not have to be the same as the structure Z-spacing.</p>
+the frame of reference of <cite>img</cite> defined a SimpleITK image object. The created
+mask is an image with the same frame of reference (origin. spacing, direction
+and size) as the <cite>img</cite> with voxels inside the contour and 0 outside. It is
+assumed that the image is 3D and  has an unitary direction, which means that
+the axes describe X,Y and Z directions, respectively. The frame of reference
+of the <cite>img</cite> is not specified, in particular, the Z-spacing does not have to
+be the same as the structure Z-spacing.</p>
+<p>Two methods of mapping voxels are available of are available: ‘allinside’, which
+maps the voxels which are all inside the contour (including voxel size and edges),
+and ‘centreInside’ (default method), which maps only the centre of the voxels.</p>
+<p>Two algorithms of mapping are available: ‘matplotlib’, which utilises the
+matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
+the algorithm described in <a class="reference internal" href="#rcf7e617f0ae7-1" id="id1">[1]</a>.</p>
+<p>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image 3D image.</p></li>
 <li><p><strong>RSfileName</strong> (<em>string</em>) – Path String to dicom file with structures (RS file).</p></li>
 <li><p><strong>structName</strong> (<em>string</em>) – Name of the structure to be mapped.</p></li>
+<li><p><strong>method</strong> (<em>{'centreInside'</em><em>, </em><em>'allInside'}</em><em>, </em><em>optional</em>) – <p>Method of calculation (def. ‘centreInside’):</p>
+<blockquote>
+<div><ul>
+<li><p>’centreInside’ : map the voxels which are all inside the contour.</p></li>
+<li><p>’allInside’ : map only the centre of the voxels.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>algorithm</strong> (<em>{'smparallel'</em><em>, </em><em>'matplotlib'}</em><em>, </em><em>optional</em>) – <p>Algorithm of calculation (def. ‘smparallel’):</p>
+<blockquote>
+<div><ul>
+<li><p>’smparallel’ : use matplotlib to calculate the voxels inside contours.</p></li>
+<li><p>’matplotlib’ : use multiprocessing sm algorithm to calculate the voxels inside contours.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em>) – Define if the multiprocessing should be used and how many cores should
+be exploited (def. ‘auto’). Can be None, then no multiprocessing will be used,
+a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
+or a scalar defining the number of CPU cored to be used (def. ‘auto’).</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
 </ul>
 </dd>
@@ -208,14 +238,60 @@ does not have to be the same as the structure Z-spacing.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">gatetools.region_of_interest</span></code></dt><dd><p>reading structure from RS file.</p>
+<dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>Crop image to mask boundary.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDVH</span></code></dt><dd><p>calculate DVH for structure</p>
 </dd>
 </dl>
 </div>
 <p class="rubric">Notes</p>
-<p>The implementation is correct but slow. It is planned to make it
-faster by implementation of multiprocessing or moving the implementation
-to GPU.</p>
+<p>1. the functionality of <code class="docutils literal notranslate"><span class="pre">gatetools</span></code> package has been tested but it turned
+out that it does not consider holes and detached structures. Therefore a new
+approach has been implemented</p>
+<p>2. Although the implementation exploits multiple CPU computation using numba
+functionality, it would be recommended to move this functionality to GPU. Such implementation
+is described in <a class="reference internal" href="#rcf7e617f0ae7-1" id="id2">[1]</a> but has not been tested yet.</p>
+<p>3. Two methods of mapping voxels are available of are available: ‘allinside’, which
+maps the voxels which are all inside the contour (including voxel size and edges),
+and ‘centreInside’ (default method), which maps only the centre of the voxels.
+Obviously, the ‘centreInside’ method is faster. On the other hand it usually calculates
+the volume of the structure sligtly larger than the real volume. Contrary, the ‘allinside’
+method should always calculate smaller volume and should converge to the real volume while
+the <cite>img</cite> resolutiuon increases.</p>
+<p>4. Two algorithms of mapping are available: ‘matplotlib’, which utilises the
+matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
+the algorithm described in <a class="reference internal" href="#rcf7e617f0ae7-1" id="id3">[1]</a> (search for ‘Comparison of different methods’) along with numba functionality of
+multiprocessing <a class="reference internal" href="#rcf7e617f0ae7-2" id="id4">[2]</a> (default algorithm). The ‘matplotlib’
+algorithm calculates on a single CPU thread and is the slowest but it does not require
+any specific modules to be installed (basically the matplotlib) and should work on eny platform.
+The ‘smparallel’ has been adapted from the above mentioned conversations and no significant
+changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
+(Varian Eclipse 15.6) and the standard ‘matplotlib’ method, showing no significant difference.
+Because, the ‘smparallel’ method utilises numba module to speed and parallelise the computation,
+it might happen that it will not work on all platforms. Basically, the numba and tbb packages
+should be installed, but no testing on other platforms has been done.</p>
+<p>5. The mapping is done for each contour separately and based on the direction (CW or CCW)
+of the contour it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
+The mapping of each contour is done in 2D, meaning slice by slice. The resulting image has
+the voxel size and shape the same as the input <cite>img</cite> in X and Y directions. The voxel size
+in Z direction is calculated based on the contour slice distances, taking into account
+gaps, holes and detached contours. The shape of the image in Z direction is equal to
+the contour boundings in Z direction, enlarged by 1 px (<code class="docutils literal notranslate"><span class="pre">sliceAddNo</span></code> parameter). Such
+image mask, is then resampled to the frame of reference of the input <cite>img</cite>. In fact,
+the resampling is applied only to Z direction, because the frame of reference of X and Y
+directions are the same as the input <cite>img</cite>.</p>
+<ol class="arabic simple" start="6">
+<li><p>It is also described on</p></li>
+</ol>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="rcf7e617f0ae7-1"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>,<a href="#id3">3</a>)</span></dt>
+<dd><p><a class="reference external" href="https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python">https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python</a></p>
+</dd>
+<dt class="label" id="rcf7e617f0ae7-2"><span class="brackets"><a class="fn-backref" href="#id4">2</a></span></dt>
+<dd><p><a class="reference external" href="http://numba.pydata.org/">http://numba.pydata.org/</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

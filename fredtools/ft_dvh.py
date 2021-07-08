@@ -5,7 +5,7 @@ def _DVH_DoseLevelVolume(doseLevelArr):
     return doseLevelArr[0], np.sum(doseLevelArr[1] >= doseLevelArr[0])
 
 
-def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, CPUNo="auto", displayInfo=False):
+def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, method="centreInside", algorithm="smparallel", CPUNo="auto", displayInfo=False):
     """Calculate DVH for structure.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
@@ -32,6 +32,18 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
         Can be a scalar, then the same number will be used for each axis,
         3-element iterable defining the voxel size for each axis, or `None` meaning
         no interpolation (def. None).
+    method: {'centreInside', 'allInside'}, optional
+        Method of calculation (def. 'centreInside'):
+
+            -  'centreInside' : map the voxels which are all inside the contour.
+            -  'allInside' : map only the centre of the voxels.
+
+    algorithm: {'smparallel', 'matplotlib'}, optional
+        Algorithm of calculation (def. 'smparallel'):
+
+            -  'smparallel' : use matplotlib to calculate the voxels inside contours.
+            -  'matplotlib' : use multiprocessing sm algorithm to calculate the voxels inside contours.
+
     CPUNo : {'auto', 'none'}, scalar or None
         Define if the multiprocessing should be used and how many cores should
         be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
@@ -49,13 +61,22 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
     --------
         dicompylercore: more information about the dicompylercore.dvh.DVH.
         resampleImg: resample image.
-        mapStructToImg: map structure to image.
+        mapStructToImg: map structure to image (refer for more information about mapping algorithms).
+
+    Notes
+    -----
+    Although, the 'allInside' method seems have more sense, the method 'centreInside' shows
+    more consistent results to clinical Treatment Planning System Varian Eclipse 15.6. Nevertheless,
+    both methods should, in theory, converge to the same results while the voxel size of the input 'img'
+    decreasses. The comparison has been made for different structures of small/large volumes, with holes
+    and with detached contours, with the image voxels size down to [0.2, 0.2, 0.2] mm. Consider, that
+    decreasing the input image voxel size (for instance by the resampleImg function), its shape
+    increases and the memory footprint increases.
     """
     from dicompylercore import dvh
     from multiprocessing import Pool
     import fredtools as ft
     import numpy as np
-    import SimpleITK as sitk
 
     ft._isSITK3D(img, raiseError=True)
     if not ft.getDicomType(RSfileName) == "RS":
@@ -63,13 +84,10 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
 
     # get structure info
     structList = ft.getRSInfo(RSfileName)
-    if not structName in list(structList.name):
+    if structName not in list(structList.name):
         raise ValueError(f"Cannot find the structure '{structName}' in {RSfileName} dicom file with structures.")
     else:
         struct = structList.loc[structList.name == structName]
-
-    # map structure to original image
-    imgROI = ft.mapStructToImg(img=img, RSfileName=RSfileName, structName=structName)
 
     # get number of CPUs to be used for computation
     CPUNo = ft._getCPUNo(CPUNo)
@@ -82,16 +100,14 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
             resampleImg = list(resampleImg)
 
         if not len(resampleImg) == img.GetDimension():
-            raise ValueError(f"Shape of 'spacing' is {spacing} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
+            raise ValueError(f"Shape of 'spacing' is {resampleImg} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
 
-        # enlarge ROI
-        imgROIEnlarged = sitk.BinaryDilate(imgROI, [4] * img.GetDimension())
-        # crop image to enlarged ROI
-        img = ft.cropImgToMask(img=img, imgMask=imgROIEnlarged)
         # resample croped image
         img = ft.resampleImg(img=img, spacing=resampleImg)
-        # map structure to resampled img
-        imgROI = ft.mapStructToImg(img=img, RSfileName=RSfileName, structName=structName)
+
+    # map structure to resampled img
+    imgROI = ft.mapStructToImg(img=img, RSfileName=RSfileName, structName=structName, CPUNo=CPUNo, method=method, algorithm=algorithm)
+    # print(ft.arr(imgROI).sum() * np.prod(np.array(imgROI.GetSpacing())) / 1e3)
 
     # remove values outside ROI
     img = ft.setValueMask(img, imgROI, value=np.nan)

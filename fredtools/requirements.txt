@@ -1,7 +1,8 @@
 itk==5.2.0.post2
-fredtools==0.2.6
+numba==0.53.1
 numpy==1.17.4
-pydicom==2.1.2
-gatetools==0.10.1
 pandas==1.2.4
+pydicom==2.1.2
+dicompyler_core==0.5.5
+matplotlib==3.4.2
 SimpleITK==2.0.2

@@ -15,7 +15,7 @@ import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 4, 0]
+version_info = [0, 5, 1]
 __version__ = ".".join(map(str, version_info))
 
 
@@ -124,7 +124,7 @@ def _isSITK_mask(img, raiseError=False):
 
     ft._isSITK(img, raiseError=True)
     stat = getStatistics(img)
-    instanceBool = (stat.GetMaximum() == 1) and (stat.GetMinimum() == 0) and (img.GetPixelIDTypeAsString() == "8-bit unsigned integer")
+    instanceBool = (stat.GetMaximum() in [0, 1]) and (stat.GetMinimum() in [0, 1]) and (img.GetPixelIDTypeAsString() == "8-bit unsigned integer")
 
     if raiseError and not instanceBool:
         raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK image but not describing a simple mask. Mask image should contain only voxels with values 0 and 1.")

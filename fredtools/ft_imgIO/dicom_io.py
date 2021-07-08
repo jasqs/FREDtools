@@ -409,7 +409,7 @@ def getCT(fileNames, displayInfo=False):
     Returns
     -------
     SimpleITK Image
-        Object of a SimpleITK image.
+        Object of a SimpleITK image of sitk.sitkInt16 (int16) type.
 
     See Also
     --------
@@ -473,7 +473,7 @@ def getCT(fileNames, displayInfo=False):
         raise ValueError(f"Slice location spacing is not constant with tolerance {10**-slicesLocationSpacingTolerance:.0E}")
 
     # read dicom series
-    img = sitk.ReadImage(fileNamesSorted)
+    img = sitk.ReadImage(fileNamesSorted, outputPixelType=sitk.sitkInt16)
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
@@ -535,3 +535,69 @@ def getRD(fileNames, displayInfo=False):
             print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return imgOut[0] if len(imgOut) == 1 else tuple(imgOut)
+
+
+def _getStructureContoursByName(RSfileName, structName):
+    """Get structure contour and info.
+
+    The function reads a dicom with RS structures and returns the contours
+    as a list of numpy.array, as well as the contour info, such as: name,
+    index, type and colour
+
+    Parameters
+    ----------
+    RSfileName : string
+        Path String to dicom file with structures (RS file).
+    structName : string
+        Name of the structure.
+
+    Returns
+    -------
+    tuple
+        A 2-element tuple where the first element is a list of Nx3
+        numpy arrays describing X,Y,Z coordinates of the structure
+        for each sequence, and the second element is a dictionary
+        with the structure info.
+    """
+    import pydicom as dicom
+    import numpy as np
+    import fredtools as ft
+
+    if not ft.getDicomType(RSfileName) == "RS":
+        raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
+
+    dicomRS = dicom.read_file(RSfileName)
+
+    for StructureSetROISequence in dicomRS.StructureSetROISequence:
+        if StructureSetROISequence.ROIName == structName:
+            ROINumber = StructureSetROISequence.ROINumber
+            break
+        else:
+            ROINumber = None
+    ROIinfo = {"Number": int(StructureSetROISequence.ROINumber), "Name": StructureSetROISequence.ROIName, "GenerationAlgorithm": StructureSetROISequence.ROIGenerationAlgorithm}
+    # raise error if no structName found
+    if not ROINumber:
+        raise ValueError(f"The structure named '{structName}' is not in the {RSfileName}.")
+
+    # get ROI type
+    for RTROIObservationsSequence in dicomRS.RTROIObservationsSequence:
+        if RTROIObservationsSequence.ReferencedROINumber == ROINumber:
+            ROIinfo["Type"] = RTROIObservationsSequence.RTROIInterpretedType
+
+    for ROIContourSequence in dicomRS.ROIContourSequence:
+        if ROIContourSequence.ReferencedROINumber == ROINumber:
+            ROIinfo["Color"] = ROIContourSequence.ROIDisplayColor
+            ContourSequence = ROIContourSequence.ContourSequence
+    # get contour as a list of Nx3 numpy array for each contour
+    StructureContours = [np.reshape(Contour.ContourData, [len(Contour.ContourData) // 3, 3]) for Contour in ContourSequence]
+
+    return StructureContours, ROIinfo
+
+
+# get CW (True) or CCW (False) direction for each contour
+def _checkContourCWDirection(contour):
+    import numpy as np
+
+    """Check if the contour has CW (True) or CCW (False) direction"""
+    result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
+    return result < 0

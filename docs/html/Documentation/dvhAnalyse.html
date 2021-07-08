@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>DVH Analyse &mdash; FRED Tools 0.4.0 documentation</title>
+  <title>DVH Analyse &mdash; FRED Tools 0.5.1 documentation</title>
   
 
   
@@ -43,7 +43,9 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Getting Subimage" href="GettingSubimage.html" />
+    <link rel="prev" title="Image Analyse" href="ImageAnalyse.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -70,7 +72,7 @@
             
             
               <div class="version">
-                0.4.0
+                0.5.1
               </div>
             
           
@@ -101,9 +103,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../Introduction/Changelog.html">Changelog</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Documentation:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DVH Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
@@ -179,7 +182,7 @@
 <p>A collection of useful functions for Dose-Volume Histograms (DVH) analysis.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getDVH">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDVH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dosePrescribed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseLevelStep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampleImg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDVH" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDVH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dosePrescribed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseLevelStep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampleImg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'centreInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDVH" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate DVH for structure.</p>
 <p>The function calculates a dose-volume histogram (DVH) for voxels inside
 a structure named <cite>structName</cite> and defined in structure dicom file.
@@ -199,6 +202,22 @@ DVH module on <a class="reference external" href="https://dicompyler-core.readth
 Can be a scalar, then the same number will be used for each axis,
 3-element iterable defining the voxel size for each axis, or <cite>None</cite> meaning
 no interpolation (def. None).</p></li>
+<li><p><strong>method</strong> (<em>{'centreInside'</em><em>, </em><em>'allInside'}</em><em>, </em><em>optional</em>) – <p>Method of calculation (def. ‘centreInside’):</p>
+<blockquote>
+<div><ul>
+<li><p>’centreInside’ : map the voxels which are all inside the contour.</p></li>
+<li><p>’allInside’ : map only the centre of the voxels.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>algorithm</strong> (<em>{'smparallel'</em><em>, </em><em>'matplotlib'}</em><em>, </em><em>optional</em>) – <p>Algorithm of calculation (def. ‘smparallel’):</p>
+<blockquote>
+<div><ul>
+<li><p>’smparallel’ : use matplotlib to calculate the voxels inside contours.</p></li>
+<li><p>’matplotlib’ : use multiprocessing sm algorithm to calculate the voxels inside contours.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em>) – Define if the multiprocessing should be used and how many cores should
 be exploited (def. ‘auto’). Can be None, then no multiprocessing will be used,
 a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
@@ -220,10 +239,18 @@ or a scalar defining the number of CPU cored to be used (def. ‘auto’).</p></
 </dd>
 <dt><a class="reference internal" href="ImageManipulate.html#fredtools.resampleImg" title="fredtools.resampleImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resampleImg</span></code></a></dt><dd><p>resample image.</p>
 </dd>
-<dt><a class="reference internal" href="ImageManipulate.html#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>map structure to image.</p>
+<dt><a class="reference internal" href="ImageManipulate.html#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>map structure to image (refer for more information about mapping algorithms).</p>
 </dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>Although, the ‘allInside’ method seems have more sense, the method ‘centreInside’ shows
+more consistent results to clinical Treatment Planning System Varian Eclipse 15.6. Nevertheless,
+both methods should, in theory, converge to the same results while the voxel size of the input ‘img’
+decreasses. The comparison has been made for different structures of small/large volumes, with holes
+and with detached contours, with the image voxels size down to [0.2, 0.2, 0.2] mm. Consider, that
+decreasing the input image voxel size (for instance by the resampleImg function), its shape
+increases and the memory footprint increases.</p>
 </dd></dl>
 
 </div>
@@ -233,6 +260,10 @@ or a scalar defining the number of CPU cored to be used (def. ‘auto’).</p></
            
           </div>
           <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="GettingSubimage.html" class="btn btn-neutral float-right" title="Getting Subimage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ImageAnalyse.html" class="btn btn-neutral float-left" title="Image Analyse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 

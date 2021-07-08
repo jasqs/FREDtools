@@ -1,21 +1,50 @@
-def mapStructToImg(img, RSfileName, structName, displayInfo=False):
+def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm="smparallel", CPUNo="auto", displayInfo=False):
     """Map structure to image and create a mask.
 
     The function reads a `structName` structure from RS dicom file and maps it to
-    the frame of reference of `img` defined a SimpleITK image object. The function
-    exploits the functionality of ``gatetools``. The created mask is an image with
-    the same frame of reference (origin. spacing, direction and size) as the `img`.
-    The frame of reference of the `img` is not specified, in particular, the Z-spacing
-    does not have to be the same as the structure Z-spacing.
+    the frame of reference of `img` defined a SimpleITK image object. The created
+    mask is an image with the same frame of reference (origin. spacing, direction
+    and size) as the `img` with voxels inside the contour and 0 outside. It is
+    assumed that the image is 3D and  has an unitary direction, which means that
+    the axes describe X,Y and Z directions, respectively. The frame of reference
+    of the `img` is not specified, in particular, the Z-spacing does not have to
+    be the same as the structure Z-spacing.
+
+    Two methods of mapping voxels are available of are available: 'allinside', which
+    maps the voxels which are all inside the contour (including voxel size and edges),
+    and 'centreInside' (default method), which maps only the centre of the voxels.
+
+    Two algorithms of mapping are available: 'matplotlib', which utilises the
+    matplotlib.path.Path.contains_points functionality, and 'smparallel', which exploits
+    the algorithm described in [1]_.
+
+    .
 
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        Object of a SimpleITK image 3D image.
     RSfileName : string
         Path String to dicom file with structures (RS file).
     structName : string
         Name of the structure to be mapped.
+    method: {'centreInside', 'allInside'}, optional
+        Method of calculation (def. 'centreInside'):
+
+            -  'centreInside' : map the voxels which are all inside the contour.
+            -  'allInside' : map only the centre of the voxels.
+
+    algorithm: {'smparallel', 'matplotlib'}, optional
+        Algorithm of calculation (def. 'smparallel'):
+
+            -  'smparallel' : use matplotlib to calculate the voxels inside contours.
+            -  'matplotlib' : use multiprocessing sm algorithm to calculate the voxels inside contours.
+
+    CPUNo : {'auto', 'none'}, scalar or None
+        Define if the multiprocessing should be used and how many cores should
+        be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
+        a string 'auto', then the number of cores will be determined by os.cpu_count(),
+        or a scalar defining the number of CPU cored to be used (def. 'auto').
     displayInfo : bool, optional
         Displays a summary of the function results (def. False).
 
@@ -26,35 +55,233 @@ def mapStructToImg(img, RSfileName, structName, displayInfo=False):
 
     See Also
     --------
-        gatetools.region_of_interest: reading structure from RS file.
+        cropImgToMask: Crop image to mask boundary.
+        getDVH: calculate DVH for structure
 
     Notes
     -----
-    The implementation is correct but slow. It is planned to make it
-    faster by implementation of multiprocessing or moving the implementation
-    to GPU.
+    1. the functionality of ``gatetools`` package has been tested but it turned
+    out that it does not consider holes and detached structures. Therefore a new
+    approach has been implemented
+
+    2. Although the implementation exploits multiple CPU computation using numba
+    functionality, it would be recommended to move this functionality to GPU. Such implementation
+    is described in [1]_ but has not been tested yet.
+
+    3. Two methods of mapping voxels are available of are available: 'allinside', which
+    maps the voxels which are all inside the contour (including voxel size and edges),
+    and 'centreInside' (default method), which maps only the centre of the voxels.
+    Obviously, the 'centreInside' method is faster. On the other hand it usually calculates
+    the volume of the structure sligtly larger than the real volume. Contrary, the 'allinside'
+    method should always calculate smaller volume and should converge to the real volume while
+    the `img` resolutiuon increases.
+
+    4. Two algorithms of mapping are available: 'matplotlib', which utilises the
+    matplotlib.path.Path.contains_points functionality, and 'smparallel', which exploits
+    the algorithm described in [1]_ (search for 'Comparison of different methods') along with numba functionality of
+    multiprocessing [2]_ (default algorithm). The 'matplotlib'
+    algorithm calculates on a single CPU thread and is the slowest but it does not require
+    any specific modules to be installed (basically the matplotlib) and should work on eny platform.
+    The 'smparallel' has been adapted from the above mentioned conversations and no significant
+    changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
+    (Varian Eclipse 15.6) and the standard 'matplotlib' method, showing no significant difference.
+    Because, the 'smparallel' method utilises numba module to speed and parallelise the computation,
+    it might happen that it will not work on all platforms. Basically, the numba and tbb packages
+    should be installed, but no testing on other platforms has been done.
+
+    5. The mapping is done for each contour separately and based on the direction (CW or CCW)
+    of the contour it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
+    The mapping of each contour is done in 2D, meaning slice by slice. The resulting image has
+    the voxel size and shape the same as the input `img` in X and Y directions. The voxel size
+    in Z direction is calculated based on the contour slice distances, taking into account
+    gaps, holes and detached contours. The shape of the image in Z direction is equal to
+    the contour boundings in Z direction, enlarged by 1 px (``sliceAddNo`` parameter). Such
+    image mask, is then resampled to the frame of reference of the input `img`. In fact,
+    the resampling is applied only to Z direction, because the frame of reference of X and Y
+    directions are the same as the input `img`.
+
+    6. It is also described on
+
+    References
+    ----------
+    .. [1] https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python
+    .. [2] http://numba.pydata.org/
     """
-    import gatetools as gt
     import numpy as np
     import fredtools as ft
-    import pydicom as dicom
+    import SimpleITK as sitk
+
+    if algorithm.lower() in ["smparallel", "sm"]:
+        from numba import set_num_threads
+        from .smparallel import is_inside_sm_parallel
+
+        # set number of CPU to be used by numba
+        if not CPUNo:
+            set_num_threads(ft._getCPUNo(1))
+        else:
+            set_num_threads(ft._getCPUNo(CPUNo))
+    elif algorithm.lower() in ["matplotlib", "mlp"]:
+        import matplotlib.path as path
+    else:
+        raise ValueError(f"The algorithm '{algorithm}'' can not be recognised.")
 
     if not ft._isSITK3D(img, raiseError=True):
         raise ValueError(f"The image is a SimpleITK image of dimension {img.GetDimension()}. Only mapping ROI to 3D images are supported now.")
 
-    imgITK = ft.SITK2ITK(img)
-    ROI = gt.region_of_interest(ds=dicom.read_file(RSfileName), roi_id=structName)
-    imgROIITK = ROI.get_mask(imgITK, corrected=False)
-    imgROI = ft.ITK2SITK(imgROIITK)
+    if not ft.getDicomType(RSfileName) == "RS":
+        raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
+
+    # check if method is correct
+    if not method.lower() in ["centreinside", "centerinside", "centre", "center", "allinside", "all"]:
+        raise ValueError(f"The method '{method}' can not be recognised. Only ('centerinside','allinside') are possible")
+
+    # get structure contour and struct info
+    StructureContours, StructInfo = ft.dicom_io._getStructureContoursByName(RSfileName, structName)
+
+    # add the first point at the end of the contour for each contour (to make shure that the contour is closed)
+    StructureContours = [np.append(StructureContour, np.expand_dims(StructureContour[0], axis=0), axis=0) for StructureContour in StructureContours]
+    # check if all Z positions are the same for each contour
+    for StructureContour in StructureContours:
+        if not len(np.unique(StructureContour[:, 2])) == 1:
+            raise ValueError(f"Not all Z (depth) position in controur are the same.")
+    # get depth for each contour
+    StructureContoursDepth = np.array([StructureContour[0, 2] for StructureContour in StructureContours])
+    # get controur spacing in Z direction as the minimum spacing between individual contours excluding 0.
+    """
+    note: spacing 0 means that holes or detached contours exist in the structure
+    note: more than single spacing (excluding 0) means that a gap exists in the structure
+    """
+    StructureContoursSpacing = np.unique(np.round(np.diff(np.sort(StructureContoursDepth)), decimals=3))
+    StructureContoursSpacing = StructureContoursSpacing[StructureContoursSpacing != 0].min()
+    # get structure bounding box, i.e. the min-max positions of vertices.
+    """
+    note: this is not extent because it takes the positions of vertices and not the positions of voxels' borders
+    """
+    StructureBBox = (
+        (np.array([StructureContour[:, 0].min() for StructureContour in StructureContours]).min(), np.array([StructureContour[:, 0].max() for StructureContour in StructureContours]).max()),
+        (np.array([StructureContour[:, 1].min() for StructureContour in StructureContours]).min(), np.array([StructureContour[:, 1].max() for StructureContour in StructureContours]).max()),
+        (StructureContoursDepth.min(), StructureContoursDepth.max()),
+    )
+    # get CW (True) or CCW (False) direction for each contour
+    StructureContoursDirection = [ft.ft_imgIO.dicom_io._checkContourCWDirection(StructureContour) for StructureContour in StructureContours]
+
+    ### prepare mask
+    # enlarge mask for depths +/- min/max of depths (add sliceAddNo depth slices at the beginning and ad the end)
+    sliceAddNo = 1
+    MaskDepths = np.round(
+        np.arange(StructureContoursDepth.min() - StructureContoursSpacing * sliceAddNo, StructureContoursDepth.max() + StructureContoursSpacing * sliceAddNo, StructureContoursSpacing), 3
+    )
+    # prepare an empty mask
+    StructureContoursMask = np.zeros([len(MaskDepths), img.GetSize()[1], img.GetSize()[0]], dtype="bool")
+    imgMask = sitk.GetImageFromArray(StructureContoursMask.astype("uint8"))
+    imgMask.SetOrigin([img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
+    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
+
+    imgX_px, imgY_px = np.meshgrid(np.arange(imgMask.GetSize()[0]), np.arange(imgMask.GetSize()[1]))
+    imgPos_px = np.concatenate((np.expand_dims(imgX_px.flatten(), 1), np.expand_dims(imgY_px.flatten(), 1)), axis=1)
+
+    # prepare empty mask
+    StructureContoursMask = np.zeros((MaskDepths.size, imgMask.GetSize()[1], imgMask.GetSize()[0]), dtype="bool")
+
+    for MaskDepth_idx, MaskDepth in enumerate(MaskDepths):
+        # get list of indices of StructureContours for MaskDepth
+        StructureContoursIdx = np.where(StructureContoursDepth == MaskDepth)[0]
+
+        # skip calculation of the mask if no structure exists for MaskDepth
+        if not np.any(StructureContoursIdx):
+            continue
+
+        for StructureContourIdx in StructureContoursIdx:
+            StructureContour_rw = StructureContours[StructureContourIdx]
+
+            # convert vertices from real world coordinate to pixel coordinate
+            StructureContour_px = np.array([imgMask.TransformPhysicalPointToContinuousIndex(Vertex) for Vertex in StructureContour_rw])
+
+            ### remove all pixels from Mask that for sure are not inside the contour based on the contour boundaries
+            """
+            note: pixel coordinates of the contour bounding box (x1, x2, y1, y2) enlarged by StructureContourBBoxEnlarge_px px (floored/ceiled to int)
+            """
+            StructureContourBBoxEnlarge_px = 1
+            StructureContourBBox_px = np.array(
+                [
+                    np.floor(StructureContour_px[:, 0].min()) - StructureContourBBoxEnlarge_px,
+                    np.ceil(StructureContour_px[:, 0].max()) + StructureContourBBoxEnlarge_px,
+                    np.floor(StructureContour_px[:, 1].min()) - StructureContourBBoxEnlarge_px,
+                    np.ceil(StructureContour_px[:, 1].max()) + StructureContourBBoxEnlarge_px,
+                ]
+            )
+            # correct StructureContourBBox_px in case when the structure is larger than the image
+            StructureContourBBox_px[StructureContourBBox_px < 0] = 0
+            StructureContourBBox_px[1] = imgPos_px[:, 0].max() if StructureContourBBox_px[1] > imgPos_px[:, 0].max() else StructureContourBBox_px[1]
+            StructureContourBBox_px[3] = imgPos_px[:, 1].max() if StructureContourBBox_px[3] > imgPos_px[:, 1].max() else StructureContourBBox_px[3]
+            # correct StructureContourBBox_px in case when the structure is not inside the image at all
+            StructureContourBBox_px[0] = StructureContourBBox_px[1] if StructureContourBBox_px[0] > StructureContourBBox_px[1] else StructureContourBBox_px[0]
+            StructureContourBBox_px[2] = StructureContourBBox_px[3] if StructureContourBBox_px[2] > StructureContourBBox_px[3] else StructureContourBBox_px[2]
+
+            StructureContourBBox_px = StructureContourBBox_px.astype("uint32")
+            # logical vector of image positions inside the enlarged contour bounding box
+            imgPosInsideStructureContourBBox_px = np.logical_and(
+                np.logical_and(imgPos_px[:, 0] >= StructureContourBBox_px[0], imgPos_px[:, 0] <= StructureContourBBox_px[1]),
+                np.logical_and(imgPos_px[:, 1] >= StructureContourBBox_px[2], imgPos_px[:, 1] <= StructureContourBBox_px[3]),
+            )
+
+            # get only those image pixel position that are inside the enlarged contour bounding box
+            imgPosToMap_px = imgPos_px[imgPosInsideStructureContourBBox_px, :]
+
+            # contour bounding box shape
+            StructureContourBBoxShape_px = (np.diff(StructureContourBBox_px[[0, 1]])[0] + 1, np.diff(StructureContourBBox_px[[2, 3]])[0] + 1)
+
+            if method.lower() in ["allinside", "all"]:
+                # calculate mask only for pixels all inside (for CW contour direction) or all outside (for CCW contour direction) the contour
+                StructureContourMask = []
+                for shift_px in [[0.5, 0.5], [0.5, -0.5], [-0.5, 0.5], [-0.5, -0.5]]:
+                    if algorithm.lower() in ["matplotlib", "mlp"]:
+                        StructureContourPath_px = path.Path(StructureContour_px[:, 0:2] + shift_px, closed=True)
+                        StructureContourMask.append(np.reshape(StructureContourPath_px.contains_points(imgPosToMap_px, radius=1e-9), StructureContourBBoxShape_px[::-1]))
+                    elif algorithm.lower() in ["smparallel", "sm"]:
+                        StructureContourMask.append(np.reshape(is_inside_sm_parallel(imgPosToMap_px, StructureContour_px[:, 0:2] + shift_px), StructureContourBBoxShape_px[::-1]))
+                if StructureContoursDirection[StructureContourIdx]:
+                    StructureContourMask = np.logical_and.reduce(StructureContourMask)
+                else:
+                    StructureContourMask = np.logical_or.reduce(StructureContourMask)
+            elif method.lower() in ["centreinside", "centerinside", "centre", "center"]:
+                if algorithm.lower() in ["matplotlib", "mlp"]:
+                    StructureContourPath_px = path.Path(StructureContour_px[:, 0:2], closed=True)
+                    StructureContourMask = np.reshape(StructureContourPath_px.contains_points(imgPosToMap_px, radius=1e-9), StructureContourBBoxShape_px[::-1])
+                elif algorithm.lower() in ["smparallel", "sm"]:
+                    StructureContourMask = np.reshape(is_inside_sm_parallel(imgPosToMap_px, StructureContour_px[:, 0:2]), StructureContourBBoxShape_px[::-1])
+
+            # add pad to StructureContourMask to obtain the same shape in X/Y as the imgMask
+            StructureContourMask = np.pad(
+                StructureContourMask,
+                pad_width=((StructureContourBBox_px[2], imgMask.GetSize()[1] - StructureContourBBox_px[3] - 1), (StructureContourBBox_px[0], imgMask.GetSize()[0] - StructureContourBBox_px[1] - 1)),
+                constant_values=False,
+            )
+
+            # add mask for slice (2D image) to StructureContoursMask (3D image) taking into account if the contour is CW (structure) or CCW (hole)
+            if StructureContoursDirection[StructureContourIdx]:
+                StructureContoursMask[MaskDepth_idx, :, :] = np.logical_or(StructureContoursMask[MaskDepth_idx, :, :], StructureContourMask)
+            else:
+                StructureContoursMask[MaskDepth_idx, :, :] = np.logical_xor(StructureContoursMask[MaskDepth_idx, :, :], StructureContourMask)
+
+    # make SimpleITK mask
+    imgMask = sitk.GetImageFromArray(StructureContoursMask.astype("uint8"))
+    imgMask.SetOrigin([img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
+    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
+
+    # interpolate mask to input image
+    imgMask = sitk.Cast(imgMask, sitk.sitkFloat32)
+    imgMask = sitk.Resample(imgMask, img, interpolator=ft.ft_imgGetSubimg._setSITKInterpolator(imgMask, interpolation="linear"))
+    imgMask = sitk.BinaryThreshold(imgMask, lowerThreshold=0.5, upperThreshold=100, insideValue=1, outsideValue=0)
+    imgMask = sitk.Cast(imgMask, sitk.sitkUInt8)
 
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
-        print("# Structure name: '{:s}'".format(ROI.roiname))
-        print("# Structure index: {:s}".format(ROI.roinr))
-        print("# Structure volume: {:.3f} cm3".format(ft.arr(imgROI).sum() * np.prod(np.array(imgROI.GetSpacing())) / 1e3))
-        ft.ft_imgAnalyse._displayImageInfo(imgROI)
+        print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
+        print("# Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3))
+        ft.ft_imgAnalyse._displayImageInfo(imgMask)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
-    return imgROI
+    return imgMask
 
 
 def cropImgToMask(img, imgMask, displayInfo=False):
