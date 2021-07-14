@@ -280,26 +280,72 @@ def _displayImageInfo(img):
 
     ft._isSITK(img, raiseError=True)
 
-    extent_mm = getExtent(img)
-    size_mm = getSize(img)
+    extent_mm = ft.getExtent(img)
+    size_mm = ft.getSize(img)
     axesNames = ["x", "y", "z", "t"]
-
+    #     voxelVolume = np.prod(img.GetSpacing())
     arr = sitk.GetArrayFromImage(img)
-    voxelCentres = getVoxelCentres(img)
+    voxelCentres = ft.getVoxelCentres(img)
+    isMask = ft._isSITK_mask(img)
+
+    if ft._isSITK_point(img):
+        print("# {:d}D image describing{:s} point (0D)".format(img.GetDimension(), " mask" if isMask else ""))
+    elif ft._isSITK_profile(img):
+        print("# {:d}D image describing{:s} profile (1D)".format(img.GetDimension(), " mask" if isMask else ""))
+    elif ft._isSITK_slice(img):
+        print("# {:d}D image describing{:s} slice (2D)".format(img.GetDimension(), " mask" if isMask else ""))
+    elif ft._isSITK_volume(img):
+        print("# {:d}D image describing{:s} volume (3D)".format(img.GetDimension(), " mask" if isMask else ""))
+    elif ft._isSITK_timevolume(img):
+        print("# {:d}D image describing{:s} time volume (4D)".format(img.GetDimension()))
+
     print("# dims ({:s}) = ".format("".join(axesNames[: img.GetDimension()])), np.array(img.GetSize()))
-    print("# pixel size [mm] = ", np.array(img.GetSpacing()))
+    print("# voxel size [mm] = ", np.array(img.GetSpacing()))
     print("# origin [mm]     = ", np.array(img.GetOrigin()))
     for vox, axisName in zip(voxelCentres, axesNames):
-        print("# {:s}-spatial voxel centre [mm] = ".format(axisName), _generateSpatialCentresString(vox))
+        print("# {:s}-spatial voxel centre [mm] = ".format(axisName), ft.ft_imgAnalyse._generateSpatialCentresString(vox))
     for ext, axisName in zip(extent_mm, axesNames):
-        print("# {:s}-spatial extent [mm] = ".format(axisName), _generateExtentString(ext))
+        print("# {:s}-spatial extent [mm] = ".format(axisName), ft.ft_imgAnalyse._generateExtentString(ext))
 
-    print("# volume = {:.2f} mm3  =>  {:.2f} litre".format(np.prod(np.array(size_mm)), np.prod(np.array(size_mm)) / 1e6))
-    print("# data type: ", img.GetPixelIDTypeAsString())
-    print("# range: from ", arr.min(), " to ", arr.max())
-    print("# sum =", arr.sum(), ", mean =", arr.mean(), "(", arr.std(), ")")
-    print("# non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} litre".format((arr != 0).sum(), (arr != 0).sum() / arr.size, np.prod(img.GetSpacing()) * (arr != 0).sum() / 1e6))
-    print("# non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} litre".format((arr > -1000).sum(), (arr > -1000).sum() / arr.size, np.prod(img.GetSpacing()) * (arr > -1000).sum() / 1e6))
+    realSize = [size for idx, size in enumerate(ft.getSize(img)) if img.GetSize()[idx] > 1]
+    if ft._isSITK_profile(img):
+        print("# length = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realSize), np.prod(realSize) / 1e1))
+    elif ft._isSITK_slice(img):
+        print("# area = {:.2f} mm2  =>  {:.2f} cm2".format(np.prod(realSize), np.prod(realSize) / 1e2))
+    elif ft._isSITK_volume(img):
+        print("# volume = {:.2f} mm3  =>  {:.2f} l".format(np.prod(realSize), np.prod(realSize) / 1e6))
+    elif ft._isSITK_timevolume(img):
+        print("# time volume = {:.2f} mm3*s  =>  {:.2f} l*s".format(np.prod(realSize), np.prod(realSize) / 1e6))
+
+    realVoxelSize = [size for idx, size in enumerate(img.GetSpacing()) if img.GetSize()[idx] > 1]
+    if ft._isSITK_profile(img):
+        print("# step size = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e1))
+    elif ft._isSITK_slice(img):
+        print("# pixel area = {:.2f} mm2  =>  {:.2f} cm2".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2))
+    elif ft._isSITK_volume(img):
+        print("# voxel volume = {:.2f} mm3  =>  {:.2f} ul".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+    elif ft._isSITK_timevolume(img):
+        print("# voxel time volume = {:.2f} mm3*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+
+    print("# data type: ", img.GetPixelIDTypeAsString(), "with NaN values" if np.any(np.isnan(arr)) else "")
+    print("# range: from ", np.nanmin(arr), " to ", np.nanmax(arr))
+    print("# sum =", np.nansum(arr), ", mean =", np.nanmean(arr), "(", np.nanstd(arr), ")")
+
+    nonZeroVoxels = (arr[~np.isnan(arr)] != 0).sum()
+    nonAirVoxels = (arr[~np.isnan(arr)] > -1000).sum()
+
+    if ft._isSITK_profile(img):
+        print("# non-zero (dose=0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e1))
+        print("# non-air (HU>-1000) values  = {:d} ({:.2%}) => {:.2f} cm".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e1))
+    elif ft._isSITK_slice(img):
+        print("# non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm2".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2))
+        print("# non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm2".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2))
+    elif ft._isSITK_volume(img):
+        print("# non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6))
+        print("# non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6))
+    elif ft._isSITK_timevolume(img):
+        print("# non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6))
+        print("# non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6))
 
 
 def displayImageInfo(img):

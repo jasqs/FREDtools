@@ -15,7 +15,7 @@ import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 5, 2]
+version_info = [0, 5, 3]
 __version__ = ".".join(map(str, version_info))
 
 
@@ -87,6 +87,26 @@ def _isSITK(img, raiseError=False):
     instanceBool = isinstance(img, sitk.Image)
     if raiseError and not instanceBool:
         raise TypeError(f"The object '{type(img)}' is not an instance of an SimpleITK image.")
+    return instanceBool
+
+
+def _isSITK_volume(img, raiseError=False):
+
+    ft._isSITK(img, raiseError=True)
+    instanceBool = img.GetSize().count(1) == (img.GetDimension() - 3)
+
+    if raiseError and not instanceBool:
+        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but not describing a volume. Size of 'img' is {img.GetSize()}")
+    return instanceBool
+
+
+def _isSITK_timevolume(img, raiseError=False):
+
+    ft._isSITK(img, raiseError=True)
+    instanceBool = img.GetSize().count(1) == (img.GetDimension() - 4)
+
+    if raiseError and not instanceBool:
+        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but not describing a time volume. Size of 'img' is {img.GetSize()}")
     return instanceBool
 
 
