@@ -594,10 +594,56 @@ def _getStructureContoursByName(RSfileName, structName):
     return StructureContours, ROIinfo
 
 
-# get CW (True) or CCW (False) direction for each contour
 def _checkContourCWDirection(contour):
     import numpy as np
 
     """Check if the contour has CW (True) or CCW (False) direction"""
     result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
     return result < 0
+
+
+def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
+    """Get file name of the RD dose dicom of for given field number.
+
+    The function searches for the RD dose dicom file for a given
+    field number (beam number) and returns its file name.
+
+    Parameters
+    ----------
+    fileNames : array_like
+        An iterable (list, tuple, etc.) of paths to RD dicoms.
+    fieldNumber: scalar, int
+        Field number to find the dicom for.
+    displayInfo : bool, optional
+        Displays a summary of the function results (def. False).
+
+    Returns
+    -------
+    Path string:
+        Path to the RD dose file for the given beam number.
+    """
+    import pydicom as dicom
+    import warnings
+    import fredtools as ft
+
+    for fileName in fileNames:
+        if not ft.getDicomType(fileName) == "RD":
+            warnings.warn(f"File {fileName} is not a RD dicom.")
+            continue
+
+        dicomRD = dicom.read_file(fileName)
+        if fieldNumber == int(dicomRD.ReferencedRTPlanSequence[0].ReferencedFractionGroupSequence[0].ReferencedBeamSequence[0].ReferencedBeamNumber):
+            break
+        else:
+            fileName = ""
+
+    if not fileName:
+        warnings.warn(f"Warning: could not find RD dose dicom file for the field number {fieldNumber}.")
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print(f"# Path to the RD dose dicom with the field number {fieldNumber}:")
+        print(f"# {fileName}")
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return fileName
