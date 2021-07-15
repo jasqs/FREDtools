@@ -271,7 +271,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
 
     # interpolate mask to input image
     imgMask = sitk.Cast(imgMask, sitk.sitkFloat32)
-    imgMask = sitk.Resample(imgMask, img, interpolator=ft.ft_imgGetSubimg._setSITKInterpolator(imgMask, interpolation="linear"))
+    imgMask = sitk.Resample(imgMask, img, interpolator=ft.ft_imgGetSubimg._setSITKInterpolator(interpolation="linear"))
     imgMask = sitk.BinaryThreshold(imgMask, lowerThreshold=0.5, upperThreshold=100, insideValue=1, outsideValue=0)
     imgMask = sitk.Cast(imgMask, sitk.sitkUInt8)
 
@@ -447,7 +447,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
         spacingCorr = spacing
 
     # set interplator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(img, interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # correct spacing according to image direction
     spacingCorr = np.dot(ft.ft_imgAnalyse._getDirectionArray(img).T, spacingCorr)

@@ -1,9 +1,4 @@
-# from .ft_io_dicom import *
 from .ft_imgIO import *
-
-# from .ft_io_mhd import *
-# from .ft_io_map3d import *
-
 from .ft_imgAnalyse import *
 from .ft_imgGetSubimg import *
 from .ft_imgManipulate import *
@@ -15,7 +10,7 @@ import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 5, 3]
+version_info = [0, 5, 4]
 __version__ = ".".join(map(str, version_info))
 
 

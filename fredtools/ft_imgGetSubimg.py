@@ -1,20 +1,11 @@
-import warnings
-import itk
-import SimpleITK as sitk
-import fredtools as ft
-import numpy as np
-
-
-def _setSITKInterpolator(img, interpolation="linear", splineOrder=3):
+def _setSITKInterpolator(interpolation="linear", splineOrder=3):
     """Set SimpleITK interpolator for interpolation method.
 
-    The function is setting a specific interpolation method for an
-    image defined as SimpleITK image object.
+    The function is setting a specific interpolation method for
+    SimpleITK image objects.
 
     Parameters
     ----------
-    img : SimpleITK Image
-        Object of a SimpleITK image.
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
@@ -25,7 +16,7 @@ def _setSITKInterpolator(img, interpolation="linear", splineOrder=3):
     interpolator
         Object of a SimpleITK interpolator.
     """
-    ft._isSITK(img, raiseError=True)
+    import SimpleITK as sitk
 
     # set interpolation method
     if interpolation.lower() == "linear":
@@ -145,6 +136,10 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, disp
     >>> matplotlib.pyplot.ylabel('X [mm] (reversed)')
     """
     import re
+    import warnings
+    import SimpleITK as sitk
+    import fredtools as ft
+    import numpy as np
 
     if not (ft._isSITK3D(img) or ft._isSITK4D(img)):
         raise TypeError(f"The object '{type(img)}' is not an instance of a 3D or 4D SimpleITK image.")
@@ -154,7 +149,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, disp
         raise ValueError(f"Dimension of 'point' {point} does not match 'img' dimension {img.GetDimension()}.")
 
     # set interplator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(img, interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point):
@@ -318,6 +313,10 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, disp
     >>> matplotlib.pyplot.ylabel('Values')
     """
     import re
+    import warnings
+    import SimpleITK as sitk
+    import fredtools as ft
+    import numpy as np
 
     ft._isSITK(img, raiseError=True)
 
@@ -338,7 +337,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, disp
         point = pointCorr
 
     # set interplator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(img, interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point):
@@ -480,6 +479,11 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
     >>> fredtools.arr(fredtools.getPoint(img3D, point=[0,-212.42,-654.8], interpolation='spline', splineOrder=5))
     array(43, dtype=int16)
     """
+    import warnings
+    import SimpleITK as sitk
+    import fredtools as ft
+    import numpy as np
+
     ft._isSITK(img, raiseError=True)
 
     # check if img is already a point
@@ -499,7 +503,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
         point = pointCorr
 
     # set interplator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(img, interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point):
@@ -605,6 +609,9 @@ def getInteg(img, axis="X", displayInfo=False):
     >>> matplotlib.pyplot.ylabel('Values per unitary volume')
     """
     import re
+    import SimpleITK as sitk
+    import fredtools as ft
+    import numpy as np
 
     ft._isSITK(img, raiseError=True)
 
