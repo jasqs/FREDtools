@@ -131,3 +131,5 @@ dmypy.json
 test/
 
 *.code-workspace
+
+examples/exampleData/
