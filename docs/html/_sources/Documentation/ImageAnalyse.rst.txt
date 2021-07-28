@@ -29,4 +29,5 @@ A collection of useful functions for image analysis. The image must be an instan
 
 .. autofunction:: fredtools.vec
 
+.. autofunction:: fredtools.getGIcmap
 

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Image Analyse &mdash; FRED Tools 0.5.1 documentation</title>
+  <title>Image Analyse &mdash; FRED Tools 0.5.7 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.5.1
+                0.5.7
               </div>
             
           
@@ -100,9 +100,8 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Introduction/Collaboration.html">Collaboration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Introduction/Citation.html">Citation and References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Introduction/Changelog.html">Changelog</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Documentation:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Image Analyse</a></li>
@@ -338,8 +337,9 @@ direction in form ([x0,x1,…],[y0,y1,…],…)</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">imgCT</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;CT.mhd&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">displayImageInfo</span><span class="p">(</span><span class="n">imgCT</span><span class="p">)</span>
 <span class="go">### displayImageInfo ###</span>
+<span class="go"># 3D image describing volume (3D)</span>
 <span class="go"># dims (xyz) =  [511 415 218]</span>
-<span class="go"># pixel size [mm] =  [0.68359375 0.68359375 1.2       ]</span>
+<span class="go"># voxel size [mm] =  [0.68359375 0.68359375 1.2       ]</span>
 <span class="go"># origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]</span>
 <span class="go"># x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]</span>
 <span class="go"># y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]</span>
@@ -347,20 +347,22 @@ direction in form ([x0,x1,…],[y0,y1,…],…)</p>
 <span class="go"># x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =&gt;   349.316406</span>
 <span class="go"># y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =&gt;   283.691406</span>
 <span class="go"># z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =&gt;   261.600000</span>
-<span class="go"># volume = 25924053.15 mm3  =&gt;  25.92 litre</span>
+<span class="go"># volume = 25924053.15 mm3  =&gt;  25.92 l</span>
+<span class="go"># voxel volume = 0.56 mm3  =&gt;  0.56 ul</span>
 <span class="go"># data type:  16-bit signed integer</span>
 <span class="go"># range: from  -1024  to  3071</span>
 <span class="go"># sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )</span>
-<span class="go"># non-zero (dose=0)  voxels  = 46188861 (99.91%) =&gt; 25.90 litre</span>
-<span class="go"># non-air (HU&gt;-1000) voxels  = 15065800 (32.59%) =&gt; 8.45 litre</span>
+<span class="go"># non-zero (dose=0)  voxels  = 46188861 (99.91%) =&gt; 25.90 l</span>
+<span class="go"># non-air (HU&gt;-1000) voxels  = 15065800 (32.59%) =&gt; 8.45 l</span>
 <span class="go">########################</span>
 </pre></div>
 </div>
 <p>The same can be displayed when reading the image.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">imgCT</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;CT.mhd&#39;</span><span class="p">,</span> <span class="n">displayInfo</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="go">### readMHD ###</span>
+<span class="go"># 3D image describing volume (3D)</span>
 <span class="go"># dims (xyz) =  [511 415 218]</span>
-<span class="go"># pixel size [mm] =  [0.68359375 0.68359375 1.2       ]</span>
+<span class="go"># voxel size [mm] =  [0.68359375 0.68359375 1.2       ]</span>
 <span class="go"># origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]</span>
 <span class="go"># x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]</span>
 <span class="go"># y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]</span>
@@ -368,12 +370,13 @@ direction in form ([x0,x1,…],[y0,y1,…],…)</p>
 <span class="go"># x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =&gt;   349.316406</span>
 <span class="go"># y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =&gt;   283.691406</span>
 <span class="go"># z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =&gt;   261.600000</span>
-<span class="go"># volume = 25924053.15 mm3  =&gt;  25.92 litre</span>
+<span class="go"># volume = 25924053.15 mm3  =&gt;  25.92 l</span>
+<span class="go"># voxel volume = 0.56 mm3  =&gt;  0.56 ul</span>
 <span class="go"># data type:  16-bit signed integer</span>
 <span class="go"># range: from  -1024  to  3071</span>
 <span class="go"># sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )</span>
-<span class="go"># non-zero (dose=0)  voxels  = 46188861 (99.91%) =&gt; 25.90 litre</span>
-<span class="go"># non-air (HU&gt;-1000) voxels  = 15065800 (32.59%) =&gt; 8.45 litre</span>
+<span class="go"># non-zero (dose=0)  voxels  = 46188861 (99.91%) =&gt; 25.90 l</span>
+<span class="go"># non-air (HU&gt;-1000) voxels  = 15065800 (32.59%) =&gt; 8.45 l</span>
 <span class="go">###############</span>
 </pre></div>
 </div>
@@ -654,6 +657,46 @@ This can be used for plotting</p>
 </pre></div>
 </div>
 <p>will plot the profile in Z direction of the image.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getGIcmap">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getGIcmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxGI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getGIcmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get colormap for Gamma Index images.</p>
+<p>The function creates a colormap for Gamma Index (GI) images,
+that can be used by matplotlib.pyplot.imshow function for
+displaying 2D images. The colormap is created from 0 to
+the <cite>maxGI</cite> value, whereas from 0 to 1 (GI test passed) the colour
+is changing from dark blue to white, and from 1 to <cite>maxGI</cite> it is
+changing from light red to red.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maxGI</strong> (<em>scalar</em>) – Maximum value of the colormap.</p></li>
+<li><p><strong>N</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Number of segments of the colormap (def. 256).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of matplotlib.colors.LinearSegmentedColormap object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>colormap</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcGI</span></code></dt><dd><p>calculate Gamma Index for two images.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>It is assumed that the img is an image describing a slice
+of Gamma Index (GI) values calculate up to maximum value 3.
+To plot the GI map with the GI colormap:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ft</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">getGIcmap</span><span class="p">(</span><span class="n">maxGI</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>

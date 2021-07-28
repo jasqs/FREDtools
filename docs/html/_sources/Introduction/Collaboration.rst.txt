@@ -10,7 +10,4 @@ Collaboration
 
 | :sup:`1` *Institute of Nuclear Physics Polish Academy of Sciences in Kraków, Poland*
 
-| Application of FRED for quality assurance and research in proton radiotherapy, as well as configuration of FRED, specific for a facility, including preparation of beam models. Responsible for new FRED versions testing and validation.
-
-------------
-
+| Main developer of the FRED tools. Application of FRED Monte Carlo for quality assurance and research in proton radiotherapy, as well as configuration of FRED, specific for a facility, including preparation of beam models. Responsible for new FRED versions testing and validation.

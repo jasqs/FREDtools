@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FRED tools documentation &mdash; FRED Tools 0.5.1 documentation</title>
+  <title>FRED tools v. 0.5.7 documentation &mdash; FRED Tools 0.5.7 documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.5.1
+                0.5.7
               </div>
             
           
@@ -99,9 +99,8 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/Collaboration.html">Collaboration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/Citation.html">Citation and References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Introduction/Changelog.html">Changelog</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Documentation:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/ImageAnalyse.html">Image Analyse</a></li>
@@ -157,7 +156,7 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li>FRED tools documentation</li>
+      <li>FRED tools v. 0.5.7 documentation</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -176,18 +175,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="fred-tools-documentation">
-<h1>FRED tools documentation<a class="headerlink" href="#fred-tools-documentation" title="Permalink to this headline">¶</a></h1>
-<p>FRED tools is a collection of python functions for image manipulation and analysis. The basic methods have been developed for analysis of the images produced by the <a class="reference external" href="http://www.fred-mc.org">Monte Carlo FRED</a> in MetaImage format (<a href="#id1"><span class="problematic" id="id2">*</span></a>.mha, <a href="#id3"><span class="problematic" id="id4">*</span></a>.mhd), but they can be applied for images in other formats, e.g. dicom.</p>
+  <div class="section" id="fred-tools-v-fredtoolsversion-documentation">
+<h1>FRED tools v. 0.5.7 documentation<a class="headerlink" href="#fred-tools-v-fredtoolsversion-documentation" title="Permalink to this headline">¶</a></h1>
+<p>FRED tools is a collection of python functions for image manipulation and analysis. The basic methods have been developed for analysis of the images produced by the <a class="reference external" href="http://www.fred-mc.org">Monte Carlo FRED</a> in MetaImage format (*.mha, *.mhd), but they can be applied for images in other formats, e.g. dicom.</p>
 <div class="section" id="basic-concept">
 <h2>Basic Concept<a class="headerlink" href="#basic-concept" title="Permalink to this headline">¶</a></h2>
 <p>The image in the FRED tools is understood to mean scalar or vector image of any dimension from 2D to 5D. All the images read or processed by the functions are <a class="reference external" href="https://simpleitk.readthedocs.io">SimpleITK</a> images, and any SinmpleITK routines can be applied. Check <a class="reference external" href="https://simpleitk.readthedocs.io/en/master/filters.html">SimpleITK filters</a> for available methods of filtering, registration, etc. Because the smallest image dimension supported by SimpleITK is 2D, line profiles, i.e. 1D images are saved as SimpleITK images with the size of only one of the dimension different than one.</p>
 <p>Most of the functions have a bool argument <code class="docutils literal notranslate"><span class="pre">displayInfo</span></code> (default <code class="docutils literal notranslate"><span class="pre">displayInfo=False</span></code>) which can be used for displaying a summary of the function results.</p>
 </div>
+<div class="section" id="documentation-and-tutorial">
+<h2>Documentation and tutorial<a class="headerlink" href="#documentation-and-tutorial" title="Permalink to this headline">¶</a></h2>
+<p>The documentation of the functions implemented in FRED tools is available at <a class="reference external" href="http://www.fredtools.ifj.edu.pl">fredtools.ifj.edu.pl</a> or on the <a class="reference external" href="https://github.com/jasqs/FREDtools">GitHub repository</a>.</p>
+<p>A simple <a class="reference external" href="https://github.com/jasqs/FREDtools/blob/main/examples/FREDtools%20Tutorial.ipynb">tutorial</a> has been prepared to help with starting using FRED tools.</p>
+</div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>The stable version of FRED tools is available via pip.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install fredtools
+</pre></div>
+</div>
+<p>To update existing installation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install --upgrade fredtools
 </pre></div>
 </div>
 <p>The development version is available on GitHub.</p>
@@ -199,16 +207,15 @@
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
 <p>Everyone is invited to support the development of the FRED tools and to add functionalities needed for a specific application.
 All the new functions or classes should be documented according to numpydoc style. Check <a class="reference external" href="https://numpydoc.readthedocs.io">numpydoc website</a> for the style guide and examples.</p>
-<p>The FRED tools documentation is written in reStructuredText format and build with sphinx in version 4.0.2 using sphinx_rtd_theme template in version 0.5.2.</p>
+<p>The FRED tools documentation is written in reStructuredText format and build with sphinx in version 4.1.2 using sphinx_rtd_theme template in version 0.5.1.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/Collaboration.html">Collaboration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/Citation.html">Citation and References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Introduction/Changelog.html">Changelog</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Documentation:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/ImageAnalyse.html">Image Analyse</a></li>

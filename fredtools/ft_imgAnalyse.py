@@ -365,8 +365,9 @@ def displayImageInfo(img):
     >>> imgCT=fredtools.readMHD('CT.mhd')
     >>> fredtools.displayImageInfo(imgCT)
     ### displayImageInfo ###
+    # 3D image describing volume (3D)
     # dims (xyz) =  [511 415 218]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
+    # voxel size [mm] =  [0.68359375 0.68359375 1.2       ]
     # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
     # x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
     # y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
@@ -374,20 +375,22 @@ def displayImageInfo(img):
     # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
     # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
     # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 litre
+    # volume = 25924053.15 mm3  =>  25.92 l
+    # voxel volume = 0.56 mm3  =>  0.56 ul
     # data type:  16-bit signed integer
     # range: from  -1024  to  3071
     # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 litre
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 litre
+    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 l
+    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
     ########################
 
     The same can be displayed when reading the image.
 
     >>> imgCT=fredtools.readMHD('CT.mhd', displayInfo=True)
     ### readMHD ###
+    # 3D image describing volume (3D)
     # dims (xyz) =  [511 415 218]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
+    # voxel size [mm] =  [0.68359375 0.68359375 1.2       ]
     # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
     # x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
     # y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
@@ -395,12 +398,13 @@ def displayImageInfo(img):
     # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
     # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
     # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 litre
+    # volume = 25924053.15 mm3  =>  25.92 l
+    # voxel volume = 0.56 mm3  =>  0.56 ul
     # data type:  16-bit signed integer
     # range: from  -1024  to  3071
     # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 litre
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 litre
+    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 l
+    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
     ###############
     """
     import fredtools as ft

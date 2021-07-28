@@ -11,10 +11,15 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import sphinx
 import sphinx_rtd_theme
 import sys
 sys.path.insert(0, os.path.abspath('./../../'))
 from fredtools import __version__
+
+fredtoolsVersion = __version__
+sphinxVersion = sphinx.__version__
+RTDthemeVersion = sphinx_rtd_theme.__version__
 
 
 # -- Project information -----------------------------------------------------
@@ -24,14 +29,14 @@ copyright = 'FRED collaboration'
 author = 'FRED collaboration'
 
 # The full version, including alpha/beta/rc tags
-version = __version__
+version = fredtoolsVersion
 # The full version, including alpha/beta/rc tags.
 release = __version__
 
 # -- General configuration ---------------------------------------------------
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '4.0.2'
+needs_sphinx = sphinx.__version__
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -103,6 +108,20 @@ rst_prolog = """
     :trim:
 """
 
+fredtoolsVersion = __version__
+sphinxVersion = sphinx.__version__
+RTDthemeVersion = sphinx_rtd_theme.__version__
+
+rst_epilog = """
+.. |fredtoolsVersion| replace:: {:s}
+.. |sphinxVersion| replace:: {:s}
+.. |RTDthemeVersion| replace:: {:s}
+""".format(
+    fredtoolsVersion,
+    sphinxVersion,
+    RTDthemeVersion
+)
+
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
@@ -148,7 +167,6 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'FredTools', u'Fred Tools Documentation',
-     author, 'Fred Tools', 'One line description of project.',
-     'Miscellaneous'),
+    (master_doc, 'FREDtools', u'Fred Tools Documentation',
+     author),
 ]

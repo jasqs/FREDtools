@@ -10,8 +10,11 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", displayInfo
     The folder structure is in form:
 
         folderPath/folderName:
-                    |- F1
-                    |- F2
+
+                    / F1
+
+                    / F2
+
                     ...
 
     Parameters

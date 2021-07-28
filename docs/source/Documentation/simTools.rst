@@ -1,4 +1,9 @@
 Monte Carlo simulation tools
 =================================
 
-To be implemented soon.
+A collection of useful functions for Monte Carlo simulations.
+
+.. autofunction:: fredtools.setFieldsFolderStruct
+
+.. autofunction:: fredtools.readFREDStat
+
