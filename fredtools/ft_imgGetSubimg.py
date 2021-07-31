@@ -648,6 +648,11 @@ def getInteg(img, axis="X", displayInfo=False):
         integ = sitk.SumProjection(integ, projectionDimension=axisAcc)
     integ *= np.prod(np.array(img.GetSpacing())[axesAcc])
 
+    # determine and set new origin
+    origin = list(ft.getImageCenter(img))
+    origin[ft.ft_imgAnalyse._getAxesNumberNotUnity(integ)[0]] = img.GetOrigin()[ft.ft_imgAnalyse._getAxesNumberNotUnity(integ)[0]]
+    integ.SetOrigin(origin)
+
     # flip axes if requested
     if "-" in axis:
         axesFlip = [False] * img.GetDimension()
