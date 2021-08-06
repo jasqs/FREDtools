@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Image Analyse &mdash; FRED Tools 0.5.7 documentation</title>
+  <title>Image Analyse &mdash; FRED Tools 0.6.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.5.7
+                0.6.0
               </div>
             
           
@@ -106,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Image Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
@@ -190,7 +191,7 @@ in each direction. It is assumed that the coordinate system is in [mm].</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -220,7 +221,7 @@ the image extent. It is assumed that the coordinate system is in [mm].</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -249,7 +250,7 @@ in each direction. It is assumed that the coordinate system is in [mm].</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -279,7 +280,7 @@ the coordinate system is in [mm].</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -309,7 +310,7 @@ system is in [mm].</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -332,7 +333,8 @@ direction in form ([x0,x1,…],[y0,y1,…],…)</p>
 <dd class="field-odd"><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>Reading image from file and displaying the image information.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">imgCT</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;CT.mhd&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">displayImageInfo</span><span class="p">(</span><span class="n">imgCT</span><span class="p">)</span>
@@ -380,6 +382,7 @@ direction in form ([x0,x1,…],[y0,y1,…],…)</p>
 <span class="go">###############</span>
 </pre></div>
 </div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -415,12 +418,14 @@ consistent with the <code class="docutils literal notranslate"><span class="pre"
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>Assuming that the <cite>img</cite> is describing a slice (e.g. the shape is [100,1,300,1]), the line:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">fredtools</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">getExtMpl</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>will display a 2D image of shape 100x300 px in real coordinates.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -436,7 +441,7 @@ are considered to be inside the image.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -453,7 +458,8 @@ are considered to be inside the image.</p>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>Let’s assume that the <cite>img</cite> is a 3D image with extent:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">getExtent</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
 <span class="go">((-175.0, 174.3),</span>
@@ -471,6 +477,7 @@ are inside the image extent:</p>
 <span class="go">(False, True, True)</span>
 </pre></div>
 </div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -484,7 +491,7 @@ SimpleITK.StatisticsImageFilter routine executed on the image.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -501,7 +508,8 @@ SimpleITK.StatisticsImageFilter routine executed on the image.</p>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>It is assumed that the img is a 3D dose distribution.
 Some statistics of the image, like the mean, standard deviation
 or sum can be calculated.</p>
@@ -513,6 +521,7 @@ or sum can be calculated.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span><span class="o">.</span><span class="n">GetSum</span><span class="p">()</span>
 <span class="go">-33870013138.0</span>
 </pre></div>
+</div>
 </div>
 </dd></dl>
 
@@ -528,8 +537,8 @@ and spacing.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img1</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
 <li><p><strong>img2</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>decimals</strong> (<em>int</em><em>, </em><em>optional</em>) – Use rounding to given number of decimals when comparing origin and spacing (def. 3).</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>decimals</strong> (<em>int</em><em>, </em><em>optional</em>) – Use rounding to given number of decimals when comparing origin and spacing. (def. 3)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -571,7 +580,8 @@ for all directions for which the size is greated than one.</p>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>Let’s assume that the <cite>img</cite> is a 3D image describing a profile, so is of size [1,200,1].
 It is possible to get the voxels’ centres only in Y direction:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fredtools</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
@@ -586,6 +596,7 @@ It is possible to get the voxels’ centres only in Y direction:</p>
 </pre></div>
 </div>
 <p>will plot the profile in Y direction of the image.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -616,12 +627,14 @@ an image defined as SimpleITK image object. This can be used for plotting</p>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>Assuming that the <cite>img</cite> is describing a slice (e.g. the shape is [100,1,300,1]), the line:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">fredtools</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">fredtools</span><span class="o">.</span><span class="n">getExtMpl</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>will display a 2D image of shape 100x300 px in real coordinates.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -651,12 +664,14 @@ This can be used for plotting</p>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>Assuming that the <cite>img</cite> is describing a profile (e.g. the shape is [1,1,300,1]), the line:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fredtools</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">fredtools</span><span class="o">.</span><span class="n">vec</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>will plot the profile in Z direction of the image.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -673,7 +688,7 @@ changing from light red to red.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>maxGI</strong> (<em>scalar</em>) – Maximum value of the colormap.</p></li>
-<li><p><strong>N</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Number of segments of the colormap (def. 256).</p></li>
+<li><p><strong>N</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Number of segments of the colormap. (def. 256)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -690,12 +705,14 @@ changing from light red to red.</p>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>It is assumed that the img is an image describing a slice
 of Gamma Index (GI) values calculate up to maximum value 3.
 To plot the GI map with the GI colormap:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ft</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">getGIcmap</span><span class="p">(</span><span class="n">maxGI</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
 </pre></div>
+</div>
 </div>
 </dd></dl>
 

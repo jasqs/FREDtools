@@ -24,9 +24,9 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", displayInfo
     RNfileName : path
         Path to RN dicom file of a treatment plan.
     folderName : string
-        Name of the folder to create (def. 'FRED')
+        Name of the folder to create. (def. 'FRED')
     displayInfo : bool
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -63,7 +63,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     fileNameLogOut : string
         A string path to FRED outou logfile (usually in out/log/run.out)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------

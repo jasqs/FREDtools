@@ -75,7 +75,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, disp
     splineOrder : int, optional
         Order of spline interpolation. Must be in range 0-5. (def. 3)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -252,7 +252,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, disp
     splineOrder : int, optional
         Order of spline interpolation. Must be in range 0-5. (def. 3)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -420,7 +420,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
     splineOrder : int, optional
         Order of spline interpolation. Must be in range 0-5. (def. 3)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -549,7 +549,7 @@ def getInteg(img, axis="X", displayInfo=False):
         `X`,`Y`,`-Z`, etc. If the minus sign is found, then the
         image is flipped in the following direction.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------

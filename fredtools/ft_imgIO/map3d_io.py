@@ -14,7 +14,7 @@ def writeMap3D(img, filePath, displayInfo=False):
     filePath : path
         Path to file to be saved.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     See Also
     --------
@@ -80,7 +80,7 @@ def readMap3D(filePath, displayInfo=False):
     filePath : path
         Path to Map3D file to read.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -127,7 +127,7 @@ def readMap3D(filePath, displayInfo=False):
     elif format == 10:
         M = np.zeros(N, dtype=_map3d_datatypeString2dtype(datatype))
         pos = 64
-        [nvxl] = struct.unpack("i", buffer[pos: pos + 4])
+        [nvxl] = struct.unpack("i", buffer[pos : pos + 4])
         pos = pos + 4
         if nvxl > 0:
             Ivxl = np.frombuffer(buffer[pos:], dtype="uint32", count=nvxl)

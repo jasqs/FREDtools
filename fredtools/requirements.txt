@@ -1,8 +1,11 @@
-itk==5.2.0.post2
-numba==0.53.1
-numpy==1.17.4
-pandas==1.2.4
-pydicom==2.1.2
 dicompyler_core==0.5.5
+fredtools==0.2.10
+numpy==1.17.4
+pydicom==2.1.2
+itk==5.2.0.post2
+pandas==1.2.4
 matplotlib==3.4.2
-SimpleITK==2.0.2
+numba==0.53.1
+scipy==1.6.3
+lmfit==1.0.2
+SimpleITK==2.1.0

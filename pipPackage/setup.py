@@ -1,4 +1,10 @@
 '''
+Updating the requirements
+
+in the main folder:
+
+pipreqs fredtools/ --force
+
 Uploading the package on pypi
 
 1. change version in fredtools/__init__.py file

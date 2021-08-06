@@ -117,9 +117,9 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
     searchFolder : path
         The path to be searched.
     recursive : bool, optional
-        Search for files recursively (def. False).
+        Search for files recursively. (def. False)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -185,7 +185,7 @@ def getRNInfo(fileName, displayInfo=False):
     fileName : path
         Path to RN dicom file.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -311,7 +311,7 @@ def getRSInfo(fileName, displayInfo=False):
     fileName : path
         Path to RS dicom file.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -360,7 +360,7 @@ def getExternalName(fileName, displayInfo=False):
     fileName : path
         Path to RS dicom file.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -404,7 +404,7 @@ def getCT(fileNames, displayInfo=False):
     fileNames : array_like
         An iterable (list, tuple, etc.) of paths to dicoms.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -493,7 +493,7 @@ def getRD(fileNames, displayInfo=False):
     fileNames : string or array_like
         A path or an iterable (list, tuple, etc.) of paths to dicoms.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -615,7 +615,7 @@ def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
     fieldNumber: scalar, int
         Field number to find the dicom for.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------

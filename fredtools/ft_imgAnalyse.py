@@ -10,7 +10,7 @@ def getExtent(img, displayInfo=False):
     img : SimpleITK Image
         Object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -56,7 +56,7 @@ def getSize(img, displayInfo=False):
     img : SimpleITK Image
         Object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -95,7 +95,7 @@ def getImageCenter(img, displayInfo=False):
     img : SimpleITK Image
         Object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -134,7 +134,7 @@ def getMassCenter(img, displayInfo=False):
     img : SimpleITK Image
         Object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -178,7 +178,7 @@ def getVoxelCentres(img, displayInfo=False):
     img : SimpleITK Image
         Object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -437,7 +437,7 @@ def _getAxesVectorNotUnity(img):
     Assuming that the `img` shape is [200,1,100,400] (4D image).
 
     >>> fredtools.ft_imgAnalyse._getAxesVectorNotUnity(img)
-    (1,0,1,0)
+    (1,0,1,1)
     """
     import fredtools as ft
 
@@ -468,7 +468,7 @@ def _getAxesNumberNotUnity(img):
     Assuming that the `img` shape is [200,1,100,400] (4D image).
 
     >>> fredtools.ft_imgAnalyse._getAxesNumberNotUnity(img)
-    (0,2)
+    (0, 2, 3)
     """
     import fredtools as ft
 
@@ -693,7 +693,7 @@ def isPointInside(img, point, displayInfo=False):
     img : SimpleITK Image
         Object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -768,7 +768,7 @@ def getStatistics(img, displayInfo=False):
     img : SimpleITK Image
         Object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -822,9 +822,9 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
     img2 : SimpleITK Image
         Object of a SimpleITK image.
     decimals: int, optional
-        Use rounding to given number of decimals when comparing origin and spacing (def. 3).
+        Use rounding to given number of decimals when comparing origin and spacing. (def. 3)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -885,7 +885,7 @@ def getGIcmap(maxGI, N=256):
     maxGI : scalar
         Maximum value of the colormap.
     N : scalar, optional
-        Number of segments of the colormap (def. 256).
+        Number of segments of the colormap. (def. 256)
 
     Returns
     -------

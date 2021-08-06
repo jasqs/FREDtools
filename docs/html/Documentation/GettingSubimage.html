@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Getting Subimage &mdash; FRED Tools 0.5.7 documentation</title>
+  <title>Getting Subimage &mdash; FRED Tools 0.6.0 documentation</title>
   
 
   
@@ -45,7 +45,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Image Manipulate" href="ImageManipulate.html" />
-    <link rel="prev" title="DVH Analyse" href="dvhAnalyse.html" /> 
+    <link rel="prev" title="Bragg Peak Analyse" href="braggPeakAnalyse.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.5.7
+                0.6.0
               </div>
             
           
@@ -106,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Subimage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
@@ -209,7 +210,7 @@ plane <cite>Z-X</cite> will display Z-axis on X-axis in imshow and Y-axis of
 of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -230,7 +231,8 @@ of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>The example below shows how to generate and display a 2D slice along ‘ZX’
 (with reversed X) axes from a 3D image through a specified point of the 3D image.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">img3D</span> <span class="o">=</span> <span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;imageCT.mhd&#39;</span><span class="p">,</span> <span class="n">displayInfo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -276,6 +278,7 @@ of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;X [mm] (reversed)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -302,7 +305,7 @@ should have form of one letter from [XYZT] set with +/- signs
 image is flipped in the following direction.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -323,7 +326,8 @@ image is flipped in the following direction.</p></li>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>The example below shows how to generate and display a 1D profile along ‘Y’
 (reversed) axis from a 3D image through a specified point of the 3D image.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">img3D</span> <span class="o">=</span> <span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;imageCT.mhd&#39;</span><span class="p">,</span> <span class="n">displayInfo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -369,6 +373,7 @@ image is flipped in the following direction.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Values&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -389,7 +394,7 @@ dimension. A warning will be generated if the point is not inside
 the image extent.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -399,7 +404,8 @@ the image extent.</p></li>
 <dd class="field-odd"><p>SimpleITK Image</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>The example below shows how to generate a point value for various interpolation
 types from a 3D image in a specified point of the 3D image.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">img3D</span> <span class="o">=</span> <span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;imageCT.mhd&#39;</span><span class="p">,</span> <span class="n">displayInfo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -450,6 +456,7 @@ types from a 3D image in a specified point of the 3D image.</p>
 <span class="go">array(43, dtype=int16)</span>
 </pre></div>
 </div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -471,7 +478,7 @@ should have form of one letter from [XYZT] set with +/- signs
 (if no sign provided, then + is assumed). For instance it can be:
 <cite>X</cite>,`Y`,`-Z`, etc. If the minus sign is found, then the
 image is flipped in the following direction.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -492,7 +499,8 @@ image is flipped in the following direction.</p></li>
 </dd>
 </dl>
 </div>
-<p class="rubric">Examples</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>The example below shows how to generate and display a 1D integral profile
 along ‘Y’ axis from a 3D image.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">img3D</span> <span class="o">=</span> <span class="n">fredtools</span><span class="o">.</span><span class="n">readMHD</span><span class="p">(</span><span class="s1">&#39;imageCT.mhd&#39;</span><span class="p">,</span> <span class="n">displayInfo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -537,6 +545,7 @@ along ‘Y’ axis from a 3D image.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Values per unitary volume&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
 </dd></dl>
 
 </div>
@@ -548,7 +557,7 @@ along ‘Y’ axis from a 3D image.</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="ImageManipulate.html" class="btn btn-neutral float-right" title="Image Manipulate" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="dvhAnalyse.html" class="btn btn-neutral float-left" title="DVH Analyse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="braggPeakAnalyse.html" class="btn btn-neutral float-left" title="Bragg Peak Analyse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

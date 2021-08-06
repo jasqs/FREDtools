@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.5.7 documentation</title>
+  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.0 documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.5.7
+                0.6.0
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Monte Carlo simulation tools</a></li>
@@ -197,8 +198,8 @@ The folder structure is in form:</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>folderPath</strong> (<em>path</em>) – Path to folder to create the structure.</p></li>
 <li><p><strong>RNfileName</strong> (<em>path</em>) – Path to RN dicom file of a treatment plan.</p></li>
-<li><p><strong>folderName</strong> (<em>string</em>) – Name of the folder to create (def. ‘FRED’)</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>folderName</strong> (<em>string</em>) – Name of the folder to create. (def. ‘FRED’)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -220,7 +221,7 @@ If some information os not available, then a NaN or numpy.nan is returned.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fileNameLogOut</strong> (<em>string</em>) – A string path to FRED outou logfile (usually in out/log/run.out)</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

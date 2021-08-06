@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Image Manipulate &mdash; FRED Tools 0.5.7 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.6.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.5.7
+                0.6.0
               </div>
             
           
@@ -106,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
@@ -196,12 +197,12 @@ maps the voxels which are all inside the contour (including voxel size and edges
 and ‘centreInside’ (default method), which maps only the centre of the voxels.</p>
 <p>Two algorithms of mapping are available: ‘matplotlib’, which utilises the
 matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
-the algorithm described in <a class="reference internal" href="#rcf7e617f0ae7-1" id="id1">[1]</a>.</p>
+the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id1">1</a>.</p>
 <p>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image 3D image.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
 <li><p><strong>RSfileName</strong> (<em>string</em>) – Path String to dicom file with structures (RS file).</p></li>
 <li><p><strong>structName</strong> (<em>string</em>) – Name of the structure to be mapped.</p></li>
 <li><p><strong>method</strong> (<em>{'centreInside'</em><em>, </em><em>'allInside'}</em><em>, </em><em>optional</em>) – <p>Method of calculation (def. ‘centreInside’):</p>
@@ -220,10 +221,10 @@ the algorithm described in <a class="reference internal" href="#rcf7e617f0ae7-1"
 </ul>
 </div></blockquote>
 </p></li>
-<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em>) – Define if the multiprocessing should be used and how many cores should
-be exploited (def. ‘auto’). Can be None, then no multiprocessing will be used,
+<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if the multiprocessing should be used and how many cores should
+be exploited. Can be None, then no multiprocessing will be used,
 a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
-or a scalar defining the number of CPU cored to be used (def. ‘auto’).</p></li>
+or a scalar defining the number of CPU cored to be used. (def. ‘auto’)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
 </ul>
 </dd>
@@ -243,13 +244,14 @@ or a scalar defining the number of CPU cored to be used (def. ‘auto’).</p></
 </dd>
 </dl>
 </div>
-<p class="rubric">Notes</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
 <p>1. the functionality of <code class="docutils literal notranslate"><span class="pre">gatetools</span></code> package has been tested but it turned
 out that it does not consider holes and detached structures. Therefore a new
 approach has been implemented</p>
 <p>2. Although the implementation exploits multiple CPU computation using numba
 functionality, it would be recommended to move this functionality to GPU. Such implementation
-is described in <a class="reference internal" href="#rcf7e617f0ae7-1" id="id2">[1]</a> but has not been tested yet.</p>
+is described in <a class="footnote-reference brackets" href="#id5" id="id2">1</a> but has not been tested yet.</p>
 <p>3. Two methods of mapping voxels are available of are available: ‘allinside’, which
 maps the voxels which are all inside the contour (including voxel size and edges),
 and ‘centreInside’ (default method), which maps only the centre of the voxels.
@@ -259,8 +261,8 @@ method should always calculate smaller volume and should converge to the real vo
 the <cite>img</cite> resolutiuon increases.</p>
 <p>4. Two algorithms of mapping are available: ‘matplotlib’, which utilises the
 matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
-the algorithm described in <a class="reference internal" href="#rcf7e617f0ae7-1" id="id3">[1]</a> (search for ‘Comparison of different methods’) along with numba functionality of
-multiprocessing <a class="reference internal" href="#rcf7e617f0ae7-2" id="id4">[2]</a> (default algorithm). The ‘matplotlib’
+the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id3">1</a> (search for ‘Comparison of different methods’) along with numba functionality of
+multiprocessing <a class="footnote-reference brackets" href="#id6" id="id4">2</a> (default algorithm). The ‘matplotlib’
 algorithm calculates on a single CPU thread and is the slowest but it does not require
 any specific modules to be installed (basically the matplotlib) and should work on eny platform.
 The ‘smparallel’ has been adapted from the above mentioned conversations and no significant
@@ -282,15 +284,18 @@ directions are the same as the input <cite>img</cite>.</p>
 <ol class="arabic simple" start="6">
 <li><p>It is also described on</p></li>
 </ol>
-<p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="rcf7e617f0ae7-1"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>,<a href="#id3">3</a>)</span></dt>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id5"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>,<a href="#id3">3</a>)</span></dt>
 <dd><p><a class="reference external" href="https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python">https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python</a></p>
 </dd>
-<dt class="label" id="rcf7e617f0ae7-2"><span class="brackets"><a class="fn-backref" href="#id4">2</a></span></dt>
+<dt class="label" id="id6"><span class="brackets"><a class="fn-backref" href="#id4">2</a></span></dt>
 <dd><p><a class="reference external" href="http://numba.pydata.org/">http://numba.pydata.org/</a></p>
 </dd>
 </dl>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -308,7 +313,7 @@ each direction. The function exploits SimpleITK.Crop routine.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
 <li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image describing a mask.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -346,7 +351,7 @@ SimpleITK.Mask routine.</p>
 (where mask values are equal to 0) or inside the mask
 (where mask values are equal to 1) (def. True meaning
 outside the mask)</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -384,7 +389,7 @@ SimpleITK.Resample routine.</p>
 <li><p><strong>spacing</strong> (<em>array_like</em>) – New spacing in each direction. The length should be the same as the <cite>img</cite> dimension.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -407,7 +412,7 @@ of references of all images must be the same.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>imgs</strong> (<em>iterable</em>) – An iterable (list, tuple, etc.) of SimpleITK image objects.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -436,7 +441,7 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 <li><p><strong>startPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the centre of the first cylinder base.</p></li>
 <li><p><strong>endPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the centre of the second cylinder base.</p></li>
 <li><p><strong>dimension</strong> (<em>scalar</em>) – Dimension of the cylinder.</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results (def. False).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

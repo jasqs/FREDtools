@@ -26,12 +26,12 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
     dosePrescribed : scalar
         Target prescription dose.
     doseLevelStep : scalar, optional
-        Size of dose bins (def. 0.01).
+        Size of dose bins. (def. 0.01)
     resampleImg : scalar, array_like or None, optional
         Define if and how to resample the image while mapping the structure.
         Can be a scalar, then the same number will be used for each axis,
         3-element iterable defining the voxel size for each axis, or `None` meaning
-        no interpolation (def. None).
+        no interpolation. (def. None)
     method: {'centreInside', 'allInside'}, optional
         Method of calculation (def. 'centreInside'):
 
@@ -50,7 +50,7 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
         a string 'auto', then the number of cores will be determined by os.cpu_count(),
         or a scalar defining the number of CPU cored to be used (def. 'auto').
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------

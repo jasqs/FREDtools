@@ -39,7 +39,7 @@ The development version is available on GitHub.
 Development
 ----------------------------
 Everyone is invited to support the development of the FRED tools and to add functionalities needed for a specific application.
-All the new functions or classes should be documented according to numpydoc style. Check `numpydoc website <https://numpydoc.readthedocs.io>`_ for the style guide and examples.
+All the new functions or classes should be documented according to numpydoc style. Check `numpydoc <https://numpydoc.readthedocs.io>`_ and `napoleon <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html#example-numpy>`_ websites for the style guide and examples.
 
 The FRED tools documentation is written in reStructuredText format and build with sphinx in version |sphinxVersion| using sphinx_rtd_theme template in version |RTDthemeVersion|.
 
@@ -56,6 +56,7 @@ The FRED tools documentation is written in reStructuredText format and build wit
    Documentation/ReadWrite
    Documentation/ImageAnalyse
    Documentation/dvhAnalyse
+   Documentation/braggPeakAnalyse
    Documentation/GettingSubimage
    Documentation/ImageManipulate
    Documentation/simTools

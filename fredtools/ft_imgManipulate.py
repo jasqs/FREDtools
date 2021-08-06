@@ -23,7 +23,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image 3D image.
+        Object of a SimpleITK 3D image.
     RSfileName : string
         Path String to dicom file with structures (RS file).
     structName : string
@@ -40,13 +40,13 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
             -  'smparallel' : use matplotlib to calculate the voxels inside contours.
             -  'matplotlib' : use multiprocessing sm algorithm to calculate the voxels inside contours.
 
-    CPUNo : {'auto', 'none'}, scalar or None
+    CPUNo : {'auto', 'none'}, scalar or None, optional
         Define if the multiprocessing should be used and how many cores should
-        be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
+        be exploited. Can be None, then no multiprocessing will be used,
         a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cored to be used (def. 'auto').
+        or a scalar defining the number of CPU cored to be used. (def. 'auto')
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -301,7 +301,7 @@ def cropImgToMask(img, imgMask, displayInfo=False):
     imgMask : SimpleITK Image
         Object of a SimpleITK image describing a mask.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -359,7 +359,7 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
         (where mask values are equal to 1) (def. True meaning
         outside the mask)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -416,7 +416,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     splineOrder : int, optional
         Order of spline interpolation. Must be in range 0-5. (def. 3)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -500,7 +500,7 @@ def sumImg(imgs, displayInfo=False):
     imgs : iterable
         An iterable (list, tuple, etc.) of SimpleITK image objects.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -547,7 +547,7 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
     dimension : scalar
         Dimension of the cylinder.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------

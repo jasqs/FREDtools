@@ -4,13 +4,14 @@ from .ft_imgGetSubimg import *
 from .ft_imgManipulate import *
 from .ft_simTools import *
 from .ft_dvh import *
+from .ft_braggPeak import *
 
 import itk
 import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 5, 8]
+version_info = [0, 6, 0]
 __version__ = ".".join(map(str, version_info))
 
 

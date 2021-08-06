@@ -13,11 +13,11 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, displayInfo=False):
     filePath : path
         Path to file to be saved.
     singleFile : bool, optional
-        Determine if the MHD is a single file of two files MHD+RAW (def. True)
+        Determine if the MHD is a single file of two files MHD+RAW. (def. True)
     overwrite : bool, optional
-        Overwrite the file if it exists. Otherwise raise an error (def. True)
+        Overwrite the file if it exists. Otherwise raise an error. (def. True)
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     See Also
     --------
@@ -70,7 +70,7 @@ def readMHD(filePath, displayInfo=False):
     filePath : path
         Path to MetaImage file to read.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -103,7 +103,7 @@ def convertMHDtoSingleFile(filePath, displayInfo=False):
     filePath : path
         Path to file to be converted.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     See Also
     --------
@@ -132,7 +132,7 @@ def convertMHDtoDoubleFiles(filePath, displayInfo=False):
     filePath : path
         Path to file to be converted.
     displayInfo : bool, optional
-        Displays a summary of the function results (def. False).
+        Displays a summary of the function results. (def. False)
 
     See Also
     --------
