@@ -27,10 +27,14 @@ class braggPeak:
         of the maximum of the spline interpolation. The Bortfeld fit will be
         performed for the input data in distal of this range. (def. 0.6)
 
+    Examples
+    --------
+    See example jupyter notebook at [2]_
 
     References
     ----------
     .. [1] Bortfeld, T. An analytical approximation of the Bragg curve for therapeutic proton beams. Med. Phys. 24, 2024 (1997).
+    .. [2] `Jupyter notebook of Bragg Peak Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Bragg%20Peak%20analysis%20Tutorial.ipynb>`_
     """
 
     def __init__(self, img, accuracy=0.01, interpolation="spline", splineOrder=3, bortCut=0.6):
