@@ -624,3 +624,41 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
         ft.ft_imgAnalyse._displayImageInfo(imgMask)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
     return imgMask
+
+
+def sumVectorImg(img, displayInfo=False):
+    """Sum vector image.
+
+    The function sums all elements of vector in a vector image
+    defined as instances of a SimpleITK vector image object.
+    The resulting image have the same frame of reference but
+    is a scalar image.
+
+    Parameters
+    ----------
+    img : SimpleITK Vector Image
+        Object of a SimpleITK vector image.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        Object of a SimpleITK image.
+    """
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    ft._isSITK_vector(img, raiseError=True)
+
+    imgs = []
+    for componentIdx in range(img.GetNumberOfComponentsPerPixel()):
+        imgs.append(sitk.VectorIndexSelectionCast(img, componentIdx))
+
+    imgSum = ft.sumImg(imgs)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(imgSum)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+    return imgSum
