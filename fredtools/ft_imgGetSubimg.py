@@ -42,7 +42,7 @@ def _setSITKInterpolator(interpolation="linear", splineOrder=3):
         raise ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
 
 
-def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, displayInfo=False):
+def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, raiseWarrning=True, displayInfo=False):
     """Get 2D slice from image.
 
     The function calculates a 2D slice image through a specified
@@ -74,6 +74,8 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, disp
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
         Order of spline interpolation. Must be in range 0-5. (def. 3)
+    raiseWarrning : bool, optional
+        Raise warnings. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -152,7 +154,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, disp
     interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
-    if not ft.isPointInside(img, point):
+    if not ft.isPointInside(img, point) and raiseWarrning:
         warnings.warn(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
 
     # check if plane is in proper format
@@ -223,8 +225,8 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, disp
     return sl
 
 
-def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, displayInfo=False):
-    """Get 1D profile from image.
+def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, raiseWarrning=True, displayInfo=False):
+    """Get 1D profile from image along axis.
 
     The function calculates a 1D profile image through a specified
     `point` in a specified `axis` from an image defined as SimpleITK
@@ -251,6 +253,8 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, disp
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
         Order of spline interpolation. Must be in range 0-5. (def. 3)
+    raiseWarrning : bool, optional
+        Raise warnings. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -340,7 +344,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, disp
     interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
-    if not ft.isPointInside(img, point):
+    if not ft.isPointInside(img, point) and raiseWarrning:
         warnings.warn(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
 
     # check if axis is in proper format
@@ -398,7 +402,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, disp
     return prof
 
 
-def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=False):
+def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarrning=True, displayInfo=False):
     """Get point value from image.
 
     The function calculates a point value in a specified `point` from an
@@ -419,6 +423,8 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
         Order of spline interpolation. Must be in range 0-5. (def. 3)
+    raiseWarrning : bool, optional
+        Raise warnings. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -496,7 +502,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
             f"Dimension of 'point' {point} is {len(point)}. The 'img' is of dimension {img.GetDimension()} but is describing a {len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))}D image. The 'point' should have dimension {len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))} or {img.GetDimension()}."
         )
 
-    # correct point is needed
+    # correct point if needed
     if len(point) < img.GetDimension():
         pointCorr = np.array(img.GetOrigin(), dtype="float64")
         pointCorr[list(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))] = point
@@ -506,7 +512,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
     interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
-    if not ft.isPointInside(img, point):
+    if not ft.isPointInside(img, point) and raiseWarrning:
         warnings.warn(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
 
     # generate point value
@@ -515,7 +521,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, displayInfo=Fals
         size=[1] * img.GetDimension(),
         outputSpacing=img.GetSpacing(),
         outputDirection=img.GetDirection(),
-        outputOrigin=point,
+        outputOrigin=[float(x) for x in point],
         interpolator=interpolator,
     )
 
