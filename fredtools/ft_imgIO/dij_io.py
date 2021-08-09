@@ -1,4 +1,4 @@
-def readDijFRED(dijFileName, displayInfo=False):
+def readDijFRED(dijFileName, raiseMemError=True, displayInfo=False):
     """Read FRED Dij image to SimpleITK vector image object.
 
     The function reads a Dij (influence matrix) file produced
@@ -10,6 +10,8 @@ def readDijFRED(dijFileName, displayInfo=False):
     ----------
     filePath : path
         Path to FRED Dij file to read.
+    raiseMemError : bool, optional
+        Raise an error if the expected size of the imported array is larger than the available RAM space. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -22,6 +24,7 @@ def readDijFRED(dijFileName, displayInfo=False):
     import SimpleITK as sitk
     import numpy as np
     import fredtools as ft
+    import psutil
 
     with open(dijFileName, "rb") as dijFile_h:
         [sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, pencilBeamNo] = struct.unpack("<3i6f1i", dijFile_h.read(40))
@@ -30,6 +33,10 @@ def readDijFRED(dijFileName, displayInfo=False):
         spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=7) * 10
         offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=7) * 10
         origin = offset + spacing / 2
+
+        if raiseMemError:
+            if psutil.virtual_memory().available < (size * 8 * pencilBeamNo):
+                raise MemoryError(f"The Dij matrix is expected to use {(size*4*pencilBeamNo/1024**3):.2f} GB of RAM but only {psutil.virtual_memory().available/1024**3:.2f} GB is available.")
 
         imgs = []
         fieldIDs = []
