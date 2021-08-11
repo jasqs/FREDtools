@@ -275,6 +275,13 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     imgMask = sitk.BinaryThreshold(imgMask, lowerThreshold=0.5, upperThreshold=100, insideValue=1, outsideValue=0)
     imgMask = sitk.Cast(imgMask, sitk.sitkUInt8)
 
+    # set additional metadata
+    imgMask.SetMetaData("ROIColor", str(StructInfo["Color"]))
+    imgMask.SetMetaData("ROIName", StructInfo["Name"])
+    imgMask.SetMetaData("ROINumber", str(StructInfo["Number"]))
+    imgMask.SetMetaData("ROIGenerationAlgorithm", StructInfo["GenerationAlgorithm"])
+    imgMask.SetMetaData("ROIType", StructInfo["Type"])
+
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
