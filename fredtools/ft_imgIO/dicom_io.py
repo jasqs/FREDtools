@@ -331,9 +331,9 @@ def getRSInfo(fileName, displayInfo=False):
         ROITable = ROITable.append(
             {
                 "ID": structs[struct]["id"],
-                "type": "unclasified" if not structs[struct]["type"] else structs[struct]["type"],
-                "name": structs[struct]["name"],
-                "color": structs[struct]["color"],
+                "ROIType": "unclasified" if not structs[struct]["type"] else structs[struct]["type"],
+                "ROIName": structs[struct]["name"],
+                "ROIColor": structs[struct]["color"],
             },
             ignore_index=True,
         )

@@ -147,9 +147,18 @@ def getMassCenter(img, displayInfo=False):
     """
     import numpy as np
     import itk
+    import SimpleITK as sitk
     import fredtools as ft
 
     ft._isSITK(img, raiseError=True)
+
+    # check if are nan values in the image and replace them with zeros
+    arr = sitk.GetArrayFromImage(img)
+    if np.any(np.isnan(arr)):
+        imgOrg = img
+        arr[np.isnan(arr)] = 0
+        img = sitk.GetImageFromArray(arr)
+        img.CopyInformation(imgOrg)
 
     imgITK = ft.SITK2ITK(img)
     moments = itk.ImageMomentsCalculator.New(imgITK)
