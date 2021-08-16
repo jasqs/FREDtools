@@ -58,7 +58,7 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
 
     Examples
     --------
-    See example jupyter notebook at <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_
+    See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
     """
     import fredtools as ft
     import numpy as np
@@ -195,7 +195,7 @@ class showSlices:
 
     Examples
     --------
-    See example jupyter notebook at <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_
+    See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
     """
 
     def __init__(self, imgCT, imgDose, imgROIs=None, point=None, DCO=0.1, figsize=[15, 5], imgCmap="jet", interactive=True):
