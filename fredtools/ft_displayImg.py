@@ -212,11 +212,11 @@ class showSlices:
         if not point:
             self.point = list(ft.getMassCenter(self.imgDose))
         else:
-            point = list(point)
+            self.point = list(point)
 
         # check if point is correct
-        if len(point) != 3:
-            raise ValueError(f"The `point` must be a 3-element vector and is {point}.")
+        if len(self.point) != 3:
+            raise ValueError(f"The `point` must be a 3-element vector and is {self.point}.")
 
         # set dose threshold
         statDose = ft.getStatistics(self.imgDose)
