@@ -59,4 +59,5 @@ The FRED tools documentation is written in reStructuredText format and build wit
    Documentation/braggPeakAnalyse
    Documentation/GettingSubimage
    Documentation/ImageManipulate
+   Documentation/displayImage
    Documentation/simTools

@@ -1,7 +1,7 @@
 Bragg Peak Analyse
 =================================
 
-Bragg Peak Class.
+A class for a Bragg peak analysis.
 
 .. autoclass:: fredtools.braggPeak
     :members:

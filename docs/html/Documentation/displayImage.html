@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Display Image &mdash; FRED Tools 0.6.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Monte Carlo simulation tools" href="simTools.html" />
+    <link rel="prev" title="Image Manipulate" href="ImageManipulate.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #00007fff" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> FRED Tools
+          
+
+          
+            
+            <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Collaboration.html">Collaboration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Citation.html">Citation and References</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Display Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FRED Tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Display Image</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Documentation/displayImage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="display-image">
+<h1>Display Image<a class="headerlink" href="#display-image" title="Permalink to this headline">¶</a></h1>
+<p>A collection of useful functions and classes for image displaying. The functionalities have been designed to quickly display and analyse 3D images of CT and/or dose (or any other 3D quantity distribution) in jupyter, inlcuding the interactive mode.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.showSlice">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgCmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseVmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showLegend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarrning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display dose slice on a CT slice including contours.</p>
+<p>The function displays on <cite>ax</cite> a <cite>plane</cite> going through <cite>point</cite>
+of a 3D image describing dose overlapped on an image of a CT.
+Basically, it forms a simple wrapper to matplotlib.pyplot.imshow
+allowing for a quick display of a slice from a 3D image of dose
+and/or CT.</p>
+<p>It does not matter which attribute, <cite>imgA</cite> or <cite>imgB</cite>, will describe
+dose od CT. By default, the image of the integer type is treated as the CT
+and the image of the float type is treated as the dose. The CT image is then
+displayed in ‘bone’ colormap and the dose image in <cite>imgCmap</cite> colormap.
+If only one image (<cite>imgA</cite> or <cite>imgB</cite>) of is given, then it is treated as
+a CT image if it is of the integer type, or as a dose image if it is of
+the float type. Thus, the function allows to display only a single image
+of dose or CT. At least one variable, <cite>imgA</cite> or <cite>imgB</cite> must be given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>AxesSubplot</em>) – Axis to plot the image on.</p></li>
+<li><p><strong>imgA</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a SimpleITK 3D image. (def. None)</p></li>
+<li><p><strong>imgB</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a SimpleITK 3D image. (def. None)</p></li>
+<li><p><strong>plane</strong> (<em>str</em><em>, </em><em>optional</em>) – Plane to generate the 2D slice given as a string.
+See fredtools.getSlice for more details. (def. ‘XY’)</p></li>
+<li><p><strong>point</strong> (<em>array_like</em><em>, </em><em>optional</em>) – 3D point to generate the 2D slice through. If None
+then the centre of mass of the 3D dose image (or CT image if
+dose was not given) will be used (def. None)</p></li>
+<li><p><strong>imgCmap</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display dose image slice. (def. ‘jet’)</p></li>
+<li><p><strong>imgROIs</strong> (<em>SimpleITK Image</em><em> or </em><em>list of SimpleITK Images</em><em>, </em><em>optional</em>) – An Instance of a SimpleITK image or list of instances of
+SimpleITK image objects describing a 3D mask. (def. None)</p></li>
+<li><p><strong>doseVmax</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Maximum value on dose map. If None then the
+maximum value of 3D dose image will be used (def. None)</p></li>
+<li><p><strong>showLegend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show legend of the ROI contour names if they exist. (def. True)</p></li>
+<li><p><strong>fontsize</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Basic font size to be used for ticks, labels, legend, etc. (def. 8)</p></li>
+<li><p><strong>raiseWarrning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dose image (or CT image if dose was not given) attached to the axes <cite>ax</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.image.AxesImage</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.showSlices" title="fredtools.showSlices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showSlices</span></code></a></dt><dd><p>show three projections of an 3D image overlapped on CT, also interactively.</p>
+</dd>
+<dt><a class="reference internal" href="GettingSubimage.html#fredtools.getSlice" title="fredtools.getSlice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSlice</span></code></a></dt><dd><p>get 2D image slice from SimpleITK Image.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fredtools.showSlices">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgCT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgDose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCO</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[15,</span> <span class="pre">5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgCmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to display three projections of dose slices on CT slices including contours.</p>
+<p>The class creates a figure with three axes and displays
+three projections (planes), ‘XY’, ‘ZY’ and ‘X-Z’ (reversed Z),
+going through <cite>point</cite>, of a 3D image describing dose
+overlapped on an image of a CT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgCT</strong> (<em>SimpleITK Image</em>) – Object of a 3D SimpleITK image describing a CT.</p></li>
+<li><p><strong>imgDose</strong> (<em>SimpleITK Image</em>) – Object of a 3D SimpleITK image describing dose or any
+other quantity distribution.</p></li>
+<li><p><strong>imgROIs</strong> (<em>SimpleITK Image</em><em> or </em><em>list of SimpleITK Images</em><em>, </em><em>optional</em>) – An Instance of a SimpleITK image or list of instances of
+SimpleITK image objects describing a 3D mask. (def. None)</p></li>
+<li><p><strong>point</strong> (<em>array_like</em><em>, </em><em>optional</em>) – 3D point to generate the 2D slice through. If None
+then the centre of mass of the 3D dose image will
+be used. (def. None)</p></li>
+<li><p><strong>DCO</strong> (<em>float</em><em>, </em><em>optional</em>) – Dose cut-off. The fraction of the maximum value of the dose
+image below which the data will not be displayed. (def. 0.1)</p></li>
+<li><p><strong>figsize</strong> (<em>2-element list</em>) – Width and height of the figure in inches. (def. [15, 5])</p></li>
+<li><p><strong>imgCmap</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display dose image slice. (def. ‘jet’)</p></li>
+<li><p><strong>interactive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display in interactive mode using ipwidgets.
+Works only in jupyter. (def. True)</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>See example jupyter notebook at <a class="footnote-reference brackets" href="#id2" id="id1">1</a></p>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb">Jupyter notebook of Image Display Tutorial</a></p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="simTools.html" class="btn btn-neutral float-right" title="Monte Carlo simulation tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ImageManipulate.html" class="btn btn-neutral float-left" title="Image Manipulate" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright FRED collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

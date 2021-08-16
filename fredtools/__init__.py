@@ -5,14 +5,34 @@ from .ft_imgManipulate import *
 from .ft_simTools import *
 from .ft_dvh import *
 from .ft_braggPeak import *
+from .ft_displayImg import *
 
 import itk
 import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 6, 5]
+version_info = [0, 6, 6]
 __version__ = ".".join(map(str, version_info))
+
+
+def _checkJupyterMode():
+    try:
+        if get_ipython().config["IPKernelApp"]:
+            return True
+    except:
+        return False
+
+
+def _checkMatplotlibBackend():
+    import matplotlib
+
+    if "inline" in matplotlib.get_backend():
+        return "inline"
+    elif "ipympl" in matplotlib.get_backend():
+        return "ipympl"
+    else:
+        return "unknown"
 
 
 def _currentFuncName(n=0):
