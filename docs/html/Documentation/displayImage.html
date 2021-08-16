@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Display Image &mdash; FRED Tools 0.6.7 documentation</title>
+  <title>Display Image &mdash; FRED Tools 0.6.8 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.6.7
+                0.6.8
               </div>
             
           
@@ -235,6 +235,10 @@ maximum value of 3D dose image will be used (def. None)</p></li>
 </dd>
 </dl>
 </div>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>See example jupyter notebook at &lt;<a class="reference external" href="https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb">https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb</a>&gt;`_</p>
+</div>
 </dd></dl>
 
 <dl class="py class">
@@ -244,7 +248,11 @@ maximum value of 3D dose image will be used (def. None)</p></li>
 <p>The class creates a figure with three axes and displays
 three projections (planes), ‘XY’, ‘ZY’ and ‘X-Z’ (reversed Z),
 going through <cite>point</cite>, of a 3D image describing dose
-overlapped on an image of a CT.</p>
+overlapped on an image of a CT. The class can display in
+an interactive mode exploiting ipywidgets functionality,
+allowing to move slices with a mouse well or move slices to
+the point when the mouse button is pressed. All those interactive
+features work with Shift pressed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -267,15 +275,7 @@ Works only in jupyter. (def. True)</p></li>
 </dl>
 <div class="admonition-examples admonition">
 <p class="admonition-title">Examples</p>
-<p>See example jupyter notebook at <a class="footnote-reference brackets" href="#id2" id="id1">1</a></p>
-</div>
-<div class="admonition-references admonition">
-<p class="admonition-title">References</p>
-<dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p><a class="reference external" href="https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb">Jupyter notebook of Image Display Tutorial</a></p>
-</dd>
-</dl>
+<p>See example jupyter notebook at &lt;<a class="reference external" href="https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb">https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb</a>&gt;`_</p>
 </div>
 </dd></dl>
 
