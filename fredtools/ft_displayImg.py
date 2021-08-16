@@ -55,6 +55,10 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
     --------
         showSlices: show three projections of an 3D image overlapped on CT, also interactively.
         getSlice: get 2D image slice from SimpleITK Image.
+
+    Examples
+    --------
+    See example jupyter notebook at <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_
     """
     import fredtools as ft
     import numpy as np
@@ -158,7 +162,11 @@ class showSlices:
     The class creates a figure with three axes and displays
     three projections (planes), 'XY', 'ZY' and 'X-Z' (reversed Z),
     going through `point`, of a 3D image describing dose
-    overlapped on an image of a CT.
+    overlapped on an image of a CT. The class can display in
+    an interactive mode exploiting ipywidgets functionality,
+    allowing to move slices with a mouse well or move slices to
+    the point when the mouse button is pressed. All those interactive
+    features work with Shift pressed.
 
     Parameters
     ----------
@@ -187,11 +195,7 @@ class showSlices:
 
     Examples
     --------
-    See example jupyter notebook at [1]_
-
-    References
-    ----------
-    .. [1] `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_
+    See example jupyter notebook at <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_
     """
 
     def __init__(self, imgCT, imgDose, imgROIs=None, point=None, DCO=0.1, figsize=[15, 5], imgCmap="jet", interactive=True):

@@ -84,10 +84,10 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
 
     # get structure info
     structList = ft.getRSInfo(RSfileName)
-    if structName not in list(structList.name):
+    if structName not in list(structList.ROIName):
         raise ValueError(f"Cannot find the structure '{structName}' in {RSfileName} dicom file with structures.")
     else:
-        struct = structList.loc[structList.name == structName]
+        struct = structList.loc[structList.ROIName == structName]
 
     # get number of CPUs to be used for computation
     CPUNo = ft._getCPUNo(CPUNo)
@@ -136,7 +136,7 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
     doseBins = np.append(doseBins, doseBins[-1] + doseLevelStep)
 
     # generate DVH
-    dvhROI = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=structName, color=struct.color.values[0])
+    dvhROI = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=structName, color=struct.ROIColor.values[0])
 
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")

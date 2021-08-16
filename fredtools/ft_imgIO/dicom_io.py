@@ -343,7 +343,7 @@ def getRSInfo(fileName, displayInfo=False):
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         print("# Found {:d} structures:".format(ROITable.shape[0]))
-        print("#", ROITable.groupby("type")["type"].count())
+        print("#", ROITable.groupby("ROIType")["ROIType"].count())
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return ROITable
@@ -375,7 +375,7 @@ def getExternalName(fileName, displayInfo=False):
     import fredtools as ft
 
     ROIinfo = getRSInfo(fileName)
-    externalName = ROIinfo.loc[ROIinfo.type == "EXTERNAL"].name.values
+    externalName = ROIinfo.loc[ROIinfo.ROIType == "EXTERNAL"].ROIName.values
 
     if len(externalName) == 0:
         raise ValueError(f"No structure of type EXTERNAL is defined in {fileName}")
