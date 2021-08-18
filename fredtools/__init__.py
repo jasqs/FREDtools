@@ -12,7 +12,7 @@ import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 6, 8]
+version_info = [0, 6, 9]
 __version__ = ".".join(map(str, version_info))
 
 
@@ -189,6 +189,23 @@ def _isSITK_vector(img, raiseError=False):
     if raiseError and not instanceBool:
         raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK image but not vector image.")
     return instanceBool
+
+
+def _isSITK_transform(img, raiseError=False):
+    try:
+        return "Transform" in img.GetName()
+    except:
+        if raiseError:
+            raise TypeError(f"The object '{type(img)}' is not an instance of SimspleITK transform object.")
+
+
+def _copyImgMetaData(imgSrc, imgDes):
+    """Copy meta data to the image source to the image destination"""
+    _isSITK(imgSrc, raiseError=True)
+    _isSITK(imgDes, raiseError=True)
+    for key in imgSrc.GetMetaDataKeys():
+        imgDes.SetMetaData(key, imgSrc.GetMetaData(key))
+    return imgDes
 
 
 def SITK2ITK(imgSITK):

@@ -1,4 +1,4 @@
-def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", imgROIs=None, doseVmax=None, showLegend=True, fontsize=8, raiseWarrning=True):
+def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", imgROIs=None, doseVmax=None, showLegend=True, fontsize=8, raiseWarning=True):
     """Display dose slice on a CT slice including contours.
 
     The function displays on `ax` a `plane` going through `point`
@@ -43,7 +43,7 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
         Show legend of the ROI contour names if they exist. (def. True)
     fontsize : scalar, optional
         Basic font size to be used for ticks, labels, legend, etc. (def. 8)
-    raiseWarrning : bool, optional
+    raiseWarning : bool, optional
         Raise warnings. (def. True)
 
     Returns
@@ -118,7 +118,7 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
         # check if imgCT is a 3D SimpleITK image
         ft._isSITK_volume(imgCT)
 
-        slCT = ft.getSlice(imgCT, point=point, plane=plane, raiseWarrning=raiseWarrning)
+        slCT = ft.getSlice(imgCT, point=point, plane=plane, raiseWarning=raiseWarning)
         axesImage = ax.imshow(ft.arr(slCT), cmap="bone", extent=ft.getExtMpl(slCT))
 
     # show Dose slice
@@ -131,13 +131,13 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
             statDose = ft.getStatistics(imgDose)
             doseVmax = statDose.GetMaximum()
 
-        slDose = ft.getSlice(imgDose, point=point, plane=plane, raiseWarrning=raiseWarrning)
+        slDose = ft.getSlice(imgDose, point=point, plane=plane, raiseWarning=raiseWarning)
         axesImage = ax.imshow(ft.arr(slDose), cmap=imgCmap, extent=ft.getExtMpl(slDose), alpha=0.7, vmin=0, vmax=doseVmax)
 
     # show ROIs slice
     if imgROIs:
         for imgROI in imgROIs if isinstance(imgROIs, list) else [imgROIs]:
-            slROI = ft.getSlice(imgROI, point=point, plane=plane, raiseWarrning=raiseWarrning)
+            slROI = ft.getSlice(imgROI, point=point, plane=plane, raiseWarning=raiseWarning)
             color = np.array(re.findall("\d+", imgROI.GetMetaData("ROIColor")), dtype="int") / 255
             if ft.getStatistics(slROI).GetMaximum() > 0:
                 plROI = ax.contour(ft.arr(slROI), extent=ft.getExtMpl(slROI), colors=[color], linewidths=1, origin="upper")
@@ -213,7 +213,7 @@ class showSlices:
         self.imgROIs = imgROIs
 
         # determine point
-        if not point:
+        if not list(point):
             self.point = list(ft.getMassCenter(self.imgDose))
         else:
             self.point = list(point)
@@ -358,7 +358,7 @@ class showSlices:
 
         self.point[2] = Z
         self.removeArtist(self.axs[0])
-        ft.showSlice(self.axs[0], plane="XY", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarrning=False)
+        ft.showSlice(self.axs[0], plane="XY", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarning=False)
         self.replotPointLines()
 
     def showSliceAX1(self, X):
@@ -366,7 +366,7 @@ class showSlices:
 
         self.point[0] = X
         self.removeArtist(self.axs[1])
-        ft.showSlice(self.axs[1], plane="ZY", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarrning=False)
+        ft.showSlice(self.axs[1], plane="ZY", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarning=False)
         self.replotPointLines()
 
     def showSliceAX2(self, Y):
@@ -374,5 +374,5 @@ class showSlices:
 
         self.point[1] = Y
         self.removeArtist(self.axs[2])
-        ft.showSlice(self.axs[2], plane="X-Z", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarrning=False)
+        ft.showSlice(self.axs[2], plane="X-Z", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarning=False)
         self.replotPointLines()

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Getting Subimage &mdash; FRED Tools 0.6.8 documentation</title>
+  <title>Getting Subimage &mdash; FRED Tools 0.6.9 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.6.8
+                0.6.9
               </div>
             
           
@@ -185,7 +185,7 @@ The image must be an instance of a SimpleITK image and the same image, with the 
 calculated user defined interpolation. The interpolation of ‘nearest’, ‘linear’ and ‘spline’ with order from 0 to 5 are available.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getSlice">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarrning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getSlice" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getSlice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get 2D slice from image.</p>
 <p>The function calculates a 2D slice image through a specified
 <cite>point</cite> in a specified <cite>plane</cite> from an image defined as SimpleITK
@@ -211,7 +211,7 @@ plane <cite>Z-X</cite> will display Z-axis on X-axis in imshow and Y-axis of
 of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
-<li><p><strong>raiseWarrning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
+<li><p><strong>raiseWarning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -285,7 +285,7 @@ of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getProfile">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarrning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getProfile" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getProfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get 1D profile from image along axis.</p>
 <p>The function calculates a 1D profile image through a specified
 <cite>point</cite> in a specified <cite>axis</cite> from an image defined as SimpleITK
@@ -307,7 +307,7 @@ should have form of one letter from [XYZT] set with +/- signs
 image is flipped in the following direction.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
-<li><p><strong>raiseWarrning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
+<li><p><strong>raiseWarning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -381,7 +381,7 @@ image is flipped in the following direction.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getPoint">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarrning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getPoint" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get point value from image.</p>
 <p>The function calculates a point value in a specified <cite>point</cite> from an
 image defined as SimpleITK image object. The point is returned as an
@@ -397,7 +397,7 @@ dimension. A warning will be generated if the point is not inside
 the image extent.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
-<li><p><strong>raiseWarrning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
+<li><p><strong>raiseWarning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -471,7 +471,7 @@ types from a 3D image in a specified point of the 3D image.</p>
 from an image defined as SimpleITK image object. The integral profile is
 returned as an instance of a SimpleITK image object of the same dimension
 but describing a profile (the dimension of only one axes is different than one).
-The integral means the sum of the vaxel values multiplied by the voxel volume.
+The integral means the sum of the voxel values multiplied by the voxel volume.
 The routine is usefull to calculate an integral depth dose (IDD) distributions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

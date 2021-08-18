@@ -14,7 +14,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     maps the voxels which are all inside the contour (including voxel size and edges),
     and 'centreInside' (default method), which maps only the centre of the voxels.
 
-    Two algorithms of mapping are available: 'matplotlib', which utilises the
+    Two algorithms of mapping are available: 'matplotlib', which utilizes the
     matplotlib.path.Path.contains_points functionality, and 'smparallel', which exploits
     the algorithm described in [1]_.
 
@@ -72,20 +72,20 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     maps the voxels which are all inside the contour (including voxel size and edges),
     and 'centreInside' (default method), which maps only the centre of the voxels.
     Obviously, the 'centreInside' method is faster. On the other hand it usually calculates
-    the volume of the structure sligtly larger than the real volume. Contrary, the 'allinside'
+    the volume of the structure slightly larger than the real volume. Contrary, the 'allinside'
     method should always calculate smaller volume and should converge to the real volume while
-    the `img` resolutiuon increases.
+    the `img` resolution increases.
 
-    4. Two algorithms of mapping are available: 'matplotlib', which utilises the
+    4. Two algorithms of mapping are available: 'matplotlib', which utilizes the
     matplotlib.path.Path.contains_points functionality, and 'smparallel', which exploits
     the algorithm described in [1]_ (search for 'Comparison of different methods') along with numba functionality of
     multiprocessing [2]_ (default algorithm). The 'matplotlib'
     algorithm calculates on a single CPU thread and is the slowest but it does not require
-    any specific modules to be installed (basically the matplotlib) and should work on eny platform.
+    any specific modules to be installed (basically the matplotlib) and should work on any platform.
     The 'smparallel' has been adapted from the above mentioned conversations and no significant
     changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
     (Varian Eclipse 15.6) and the standard 'matplotlib' method, showing no significant difference.
-    Because, the 'smparallel' method utilises numba module to speed and parallelise the computation,
+    Because, the 'smparallel' method utilizes numba module to speed and parallelise the computation,
     it might happen that it will not work on all platforms. Basically, the numba and tbb packages
     should be installed, but no testing on other platforms has been done.
 
@@ -135,10 +135,10 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     if not method.lower() in ["centreinside", "centerinside", "centre", "center", "allinside", "all"]:
         raise ValueError(f"The method '{method}' can not be recognised. Only ('centerinside','allinside') are possible")
 
-    # get structure contour and struct info
+    # get structure contour and structure info
     StructureContours, StructInfo = ft.dicom_io._getStructureContoursByName(RSfileName, structName)
 
-    # add the first point at the end of the contour for each contour (to make shure that the contour is closed)
+    # add the first point at the end of the contour for each contour (to make sure that the contour is closed)
     StructureContours = [np.append(StructureContour, np.expand_dims(StructureContour[0], axis=0), axis=0) for StructureContour in StructureContours]
     # check if all Z positions are the same for each contour
     for StructureContour in StructureContours:
@@ -295,9 +295,9 @@ def cropImgToMask(img, imgMask, displayInfo=False):
     """Crop image to mask boundary.
 
     The function calculates the boundaries of the `imgMask` defined
-    as an instance of a SinmpleITK image object describing a mask
+    as an instance of a SimpleITK image object describing a mask
     (i.e. type uint8 and only 0/1 values) and crops the `img` defined
-    as an instance of a SinmpleITK image object to these boundaries. The boundaries
+    as an instance of a SimpleITK image object to these boundaries. The boundaries
     mean here the most extreme positions of positive values of the mask in
     each direction. The function exploits SimpleITK.Crop routine.
 
@@ -347,7 +347,7 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
     """Set value inside/outside mask.
 
     The function sets those the values of the `img` defined as an instance of
-    a SinmpleITK object which are inside or outside a mask described by the
+    a SimpleITK object which are inside or outside a mask described by the
     `imgMask` defined as an instance of a SimpleITK object describing a mask
     (i.e. type uint8 and only 0/1 values). The function is a simple wrapper for
     SimpleITK.Mask routine.
@@ -407,7 +407,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     SimpleITK image object to different voxel spacing using
     a specified interpolation method. The assumption is that
     the 'low extent' is not changed, i.e. the coordinates of
-    the corner of the first volex preserved. The size of
+    the corner of the first voxel preserved. The size of
     the interpolated image is calculated to fit all the voxels' centres
     in the original image extent. The function exploits the
     SimpleITK.Resample routine.
@@ -453,7 +453,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     else:
         spacingCorr = spacing
 
-    # set interplator
+    # set interpolator
     interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # correct spacing according to image direction
@@ -537,7 +537,7 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
     """Create a cylindrical Mask in image field of reference
 
     The function creates a cylindrical mask with a given `dimension` and height
-    calculated from the starting and ending poits of the cylinder in the frame of
+    calculated from the starting and ending points of the cylinder in the frame of
     references of an image defined as SimpleITK image object describing a 3D image.
     Only 3D images are supported. The routine might be helpful for instance for making
     a geometrical acceptance correction of a chamber used for Bragg peak measurements.
@@ -669,3 +669,171 @@ def sumVectorImg(img, displayInfo=False):
         ft.ft_imgAnalyse._displayImageInfo(imgSum)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
     return imgSum
+
+
+def _getFORTransformed(img, transform):
+    """Calculate image FOR after transformation.
+
+    The function is calculating a new Field of Reference (FOR) for an image defined
+    as an instance od a SimpleITK image object. The purpose of this calculation is
+    that transformed images can be 'cropped'. This function is calculating new FOR based
+    of the positions of the transformed image corners.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        Object of a SimpleITK image.
+    transform : SimpleITK Transform
+        Object of a SimpleITK transform.
+
+    Returns
+    -------
+    size, origin, spacing, direction
+        Calculated image size, origin, spacing (the same as original)
+        and direction (identity).
+
+    Notes
+    -----
+    The implementation was adapted from the idea presented in
+    https://discourse.itk.org/t/dont-lose-data-with-rotation/3325/2
+    """
+    from itertools import product
+    import numpy as np
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+    ft._isSITK_transform(transform, raiseError=True)
+
+    startPX = [0, 0, 0]
+    endPX = [int(size) for size in np.array(img.GetSize()) - 1]
+    cornersPX = list(product(*zip(startPX, endPX)))
+    cornersRW = [img.TransformIndexToPhysicalPoint(cornerPX) for cornerPX in cornersPX]
+    cornersRWTransformed = [transform.TransformPoint(cornerRW) for cornerRW in cornersRW]
+    sizeRW = np.max(cornersRWTransformed, 0) - np.min(cornersRWTransformed, 0)
+    originRW = np.min(cornersRWTransformed, 0)
+    sizePX = [int(size) for size in np.ceil((sizeRW + 1) / img.GetSpacing())]
+    spacingRW = img.GetSpacing()
+    directionIdentity = np.identity(img.GetDimension()).flatten().tolist()
+
+    return sizePX, originRW, spacingRW, directionIdentity
+
+
+def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue="auto", interpolation="linear", splineOrder=3, displayInfo=False):
+    """Transform an image to Beam's Eye View (BEV).
+
+    The function transforms a 3D image defined as a SimpleITK 3D image object to
+    the Beam's Eye View (BEV) based on the given isocentre position,
+    gantry angle and couch rotation, using defined interpolation method.
+    The BEV Field of Reference (FOR) means that the Z+ direction is along the field
+    (along the beam of relative position [0,0]) and X/Y positions are consistend with
+    the DICOM and FRED Monte Carlo definitions.
+
+    Parameters
+    ----------
+    img : SimpleITK 3D Image
+        Object of a SimpleITK 3D image.
+    isocentrePosition : array_like, (3x1)
+        Position of the isocentre with respect to the `img` FOR.
+    gantryAngle : scalar
+        Rotation of the gantry around the isocentre position in [deg].
+    couchAngle: scalar
+        Rotation of the couch around the isocentre position in [deg].
+    defaultPixelValue: 'auto' or scalar, optional
+        The value to fill the voxels with, outside the original `img`.
+        If 'auto', then the value will be calculated automatically as the
+        minimum value of the `img`. (def. 'auto')
+    interpolation : {'linear', 'nearest', 'spline'}, optional
+        Determine the interpolation method. (def. 'linear')
+    splineOrder : int, optional
+        Order of spline interpolation. Must be in range 0-5. (def. 3)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK 3D Image
+        Object of a transformed SimpleITK 3D image.
+
+    Notes
+    -----
+    The basic workflow follows:
+
+        1. translate the image to the isocentre so to have the isocentre at zero position,
+        2. rotate the couch around the isocentre,
+        3. rotate the gantry around the isocentre,
+        4. rotate and flip image to get BEV.
+
+    Note that the isocentre of the transformed image is at the zero point.
+
+    Note that the isocentre defined in the delivery sequence of the FRED rtplan is
+    a negative isocentre defined in the DICOM RN plan, the couch rotation defined
+    in the delivery sequence of the FRED rtplan is a negative couch rotation defined
+    in the DICOM RN plan, but the gantry rotation defined in the delivery sequence
+    of the FRED rtplan is equal to the gantry rotation the DICOM RN plan.
+    """
+    import numpy as np
+    import SimpleITK as sitk
+    import fredtools as ft
+
+    ft._isSITK3D(img, raiseError=True)
+
+    # set interpolator
+    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+
+    # check if isocentrePosition dimension matches the img dim.
+    if len(isocentrePosition) != img.GetDimension():
+        raise ValueError(f"Dimension of 'isocentrePosition' {isocentrePosition} does not match 'img' dimension {img.GetDimension()}.")
+
+    # determine default pixelvalue
+    if isinstance(defaultPixelValue, str) and defaultPixelValue.lower() == "auto":
+        defaultPixelValue = ft.getStatistics(img).GetMinimum()
+    elif not np.isscalar(defaultPixelValue):
+        raise ValueError(f"The parameter 'defaultPixelValue' must be a scalar or 'auto'")
+
+    # define translation to isocentre (to have isocentre at the zero position)
+    translationTransformIsocentre = sitk.TranslationTransform(img.GetDimension())
+    translationTransformIsocentre.SetOffset(isocentrePosition)
+
+    # define gantry rotation around the zero position
+    eulerTransformGantry = sitk.Euler3DTransform()
+    eulerTransformGantry.SetRotation(angleX=0, angleY=0, angleZ=np.deg2rad(gantryAngle))
+
+    # define couch rotation around the zero position
+    eulerTransformCouch = sitk.Euler3DTransform()
+    eulerTransformCouch.SetRotation(angleX=0, angleY=np.deg2rad(couchAngle), angleZ=0)
+
+    # define rotation and flipping to get BEV (Z+ along the field) and to be consistent with FRED coordinate system of PB
+    rotateBEVTransform = sitk.Euler3DTransform()
+    rotateBEVTransform.SetRotation(angleX=np.deg2rad(-90), angleY=0, angleZ=0)
+    flipXYTransform = sitk.ScaleTransform(img.GetDimension(), (-1, -1, 1))
+    compositTransformBEV = sitk.CompositeTransform(img.GetDimension())
+    compositTransformBEV.AddTransform(rotateBEVTransform)
+    compositTransformBEV.AddTransform(flipXYTransform)
+
+    # define composite transform
+    compositTransform = sitk.CompositeTransform(img.GetDimension())
+    compositTransform.AddTransform(translationTransformIsocentre)
+    compositTransform.AddTransform(eulerTransformCouch)
+    compositTransform.AddTransform(eulerTransformGantry)
+    compositTransform.AddTransform(compositTransformBEV)
+
+    # calculate new FOR for a new, not cropped image
+    size, origin, spacing, direction = ft.ft_imgManipulate._getFORTransformed(img, compositTransform.GetInverse())
+
+    # make transformation with resampling
+    imgBEV = sitk.Resample(
+        img, transform=compositTransform, size=size, outputOrigin=origin, outputSpacing=spacing, interpolator=interpolator, outputDirection=direction, defaultPixelValue=defaultPixelValue
+    )
+
+    # copy metadata if they exist
+    imgBEV = ft._copyImgMetaData(img, imgBEV)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print("# Isocentre position [mm]: ", np.array(isocentrePosition))
+        print("# Gantry angle [deg]: {:.1f}".format(gantryAngle))
+        print("# Couch angle [deg]: {:.1f}".format(couchAngle))
+        ft.ft_imgAnalyse._displayImageInfo(imgBEV)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgBEV

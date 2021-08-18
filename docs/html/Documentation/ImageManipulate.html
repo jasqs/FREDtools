@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Image Manipulate &mdash; FRED Tools 0.6.8 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.6.9 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.6.8
+                0.6.9
               </div>
             
           
@@ -196,7 +196,7 @@ be the same as the structure Z-spacing.</p>
 <p>Two methods of mapping voxels are available of are available: ‘allinside’, which
 maps the voxels which are all inside the contour (including voxel size and edges),
 and ‘centreInside’ (default method), which maps only the centre of the voxels.</p>
-<p>Two algorithms of mapping are available: ‘matplotlib’, which utilises the
+<p>Two algorithms of mapping are available: ‘matplotlib’, which utilizes the
 matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
 the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id1">1</a>.</p>
 <p>.</p>
@@ -257,19 +257,19 @@ is described in <a class="footnote-reference brackets" href="#id5" id="id2">1</a
 maps the voxels which are all inside the contour (including voxel size and edges),
 and ‘centreInside’ (default method), which maps only the centre of the voxels.
 Obviously, the ‘centreInside’ method is faster. On the other hand it usually calculates
-the volume of the structure sligtly larger than the real volume. Contrary, the ‘allinside’
+the volume of the structure slightly larger than the real volume. Contrary, the ‘allinside’
 method should always calculate smaller volume and should converge to the real volume while
-the <cite>img</cite> resolutiuon increases.</p>
-<p>4. Two algorithms of mapping are available: ‘matplotlib’, which utilises the
+the <cite>img</cite> resolution increases.</p>
+<p>4. Two algorithms of mapping are available: ‘matplotlib’, which utilizes the
 matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
 the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id3">1</a> (search for ‘Comparison of different methods’) along with numba functionality of
 multiprocessing <a class="footnote-reference brackets" href="#id6" id="id4">2</a> (default algorithm). The ‘matplotlib’
 algorithm calculates on a single CPU thread and is the slowest but it does not require
-any specific modules to be installed (basically the matplotlib) and should work on eny platform.
+any specific modules to be installed (basically the matplotlib) and should work on any platform.
 The ‘smparallel’ has been adapted from the above mentioned conversations and no significant
 changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
 (Varian Eclipse 15.6) and the standard ‘matplotlib’ method, showing no significant difference.
-Because, the ‘smparallel’ method utilises numba module to speed and parallelise the computation,
+Because, the ‘smparallel’ method utilizes numba module to speed and parallelise the computation,
 it might happen that it will not work on all platforms. Basically, the numba and tbb packages
 should be installed, but no testing on other platforms has been done.</p>
 <p>5. The mapping is done for each contour separately and based on the direction (CW or CCW)
@@ -304,9 +304,9 @@ directions are the same as the input <cite>img</cite>.</p>
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">cropImgToMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.cropImgToMask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crop image to mask boundary.</p>
 <p>The function calculates the boundaries of the <cite>imgMask</cite> defined
-as an instance of a SinmpleITK image object describing a mask
+as an instance of a SimpleITK image object describing a mask
 (i.e. type uint8 and only 0/1 values) and crops the <cite>img</cite> defined
-as an instance of a SinmpleITK image object to these boundaries. The boundaries
+as an instance of a SimpleITK image object to these boundaries. The boundaries
 mean here the most extreme positions of positive values of the mask in
 each direction. The function exploits SimpleITK.Crop routine.</p>
 <dl class="field-list simple">
@@ -338,7 +338,7 @@ each direction. The function exploits SimpleITK.Crop routine.</p>
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setValueMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setValueMask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set value inside/outside mask.</p>
 <p>The function sets those the values of the <cite>img</cite> defined as an instance of
-a SinmpleITK object which are inside or outside a mask described by the
+a SimpleITK object which are inside or outside a mask described by the
 <cite>imgMask</cite> defined as an instance of a SimpleITK object describing a mask
 (i.e. type uint8 and only 0/1 values). The function is a simple wrapper for
 SimpleITK.Mask routine.</p>
@@ -379,7 +379,7 @@ outside the mask)</p></li>
 SimpleITK image object to different voxel spacing using
 a specified interpolation method. The assumption is that
 the ‘low extent’ is not changed, i.e. the coordinates of
-the corner of the first volex preserved. The size of
+the corner of the first voxel preserved. The size of
 the interpolated image is calculated to fit all the voxels’ centres
 in the original image extent. The function exploits the
 SimpleITK.Resample routine.</p>
@@ -430,7 +430,7 @@ of references of all images must be the same.</p>
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createCylindricalMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createCylindricalMask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a cylindrical Mask in image field of reference</p>
 <p>The function creates a cylindrical mask with a given <cite>dimension</cite> and height
-calculated from the starting and ending poits of the cylinder in the frame of
+calculated from the starting and ending points of the cylinder in the frame of
 references of an image defined as SimpleITK image object describing a 3D image.
 Only 3D images are supported. The routine might be helpful for instance for making
 a geometrical acceptance correction of a chamber used for Bragg peak measurements.
@@ -462,6 +462,58 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 <dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>crop an image to mask.</p>
 </dd>
 </dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getImgBEV">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getImgBEV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isocentrePosition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gantryAngle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">couchAngle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultPixelValue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getImgBEV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform an image to Beam’s Eye View (BEV).</p>
+<p>The function transforms a 3D image defined as a SimpleITK 3D image object to
+the Beam’s Eye View (BEV) based on the given isocentre position,
+gantry angle and couch rotation, using defined interpolation method.
+The BEV Field of Reference (FOR) means that the Z+ direction is along the field
+(along the beam of relative position [0,0]) and X/Y positions are consistend with
+the DICOM and FRED Monte Carlo definitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK 3D Image</em>) – Object of a SimpleITK 3D image.</p></li>
+<li><p><strong>isocentrePosition</strong> (<em>array_like</em><em>, </em><em>(</em><em>3x1</em><em>)</em>) – Position of the isocentre with respect to the <cite>img</cite> FOR.</p></li>
+<li><p><strong>gantryAngle</strong> (<em>scalar</em>) – Rotation of the gantry around the isocentre position in [deg].</p></li>
+<li><p><strong>couchAngle</strong> (<em>scalar</em>) – Rotation of the couch around the isocentre position in [deg].</p></li>
+<li><p><strong>defaultPixelValue</strong> (<em>'auto'</em><em> or </em><em>scalar</em><em>, </em><em>optional</em>) – The value to fill the voxels with, outside the original <cite>img</cite>.
+If ‘auto’, then the value will be calculated automatically as the
+minimum value of the <cite>img</cite>. (def. ‘auto’)</p></li>
+<li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
+<li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of a transformed SimpleITK 3D image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SimpleITK 3D Image</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The basic workflow follows:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>translate the image to the isocentre so to have the isocentre at zero position,</p></li>
+<li><p>rotate the couch around the isocentre,</p></li>
+<li><p>rotate the gantry around the isocentre,</p></li>
+<li><p>rotate and flip image to get BEV.</p></li>
+</ol>
+</div></blockquote>
+<p>Note that the isocentre of the transformed image is at the zero point.</p>
+<p>Note that the isocentre defined in the delivery sequence of the FRED rtplan is
+a negative isocentre defined in the DICOM RN plan, the couch rotation defined
+in the delivery sequence of the FRED rtplan is a negative couch rotation defined
+in the DICOM RN plan, but the gantry rotation defined in the delivery sequence
+of the FRED rtplan is equal to the gantry rotation the DICOM RN plan.</p>
 </div>
 </dd></dl>
 

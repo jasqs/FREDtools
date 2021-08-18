@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Display Image &mdash; FRED Tools 0.6.8 documentation</title>
+  <title>Display Image &mdash; FRED Tools 0.6.9 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                0.6.8
+                0.6.9
               </div>
             
           
@@ -183,7 +183,7 @@
 <p>A collection of useful functions and classes for image displaying. The functionalities have been designed to quickly display and analyse 3D images of CT and/or dose (or any other 3D quantity distribution) in jupyter, inlcuding the interactive mode.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.showSlice">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgCmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseVmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showLegend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarrning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlice" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgCmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseVmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showLegend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display dose slice on a CT slice including contours.</p>
 <p>The function displays on <cite>ax</cite> a <cite>plane</cite> going through <cite>point</cite>
 of a 3D image describing dose overlapped on an image of a CT.
@@ -216,7 +216,7 @@ SimpleITK image objects describing a 3D mask. (def. None)</p></li>
 maximum value of 3D dose image will be used (def. None)</p></li>
 <li><p><strong>showLegend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show legend of the ROI contour names if they exist. (def. True)</p></li>
 <li><p><strong>fontsize</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Basic font size to be used for ticks, labels, legend, etc. (def. 8)</p></li>
-<li><p><strong>raiseWarrning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
+<li><p><strong>raiseWarning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
