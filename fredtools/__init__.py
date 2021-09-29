@@ -6,13 +6,14 @@ from .ft_simTools import *
 from .ft_dvh import *
 from .ft_braggPeak import *
 from .ft_displayImg import *
+from .ft_optimisation import *
 
 import itk
 import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 6, 9]
+version_info = [0, 6, 13]
 __version__ = ".".join(map(str, version_info))
 
 

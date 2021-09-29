@@ -64,7 +64,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jasqs/FREDtools",
-    packages=['fredtools', 'fredtools.ft_imgIO'],
+    packages=['fredtools', 'fredtools.ft_imgIO', 'fredtools.ft_optimisation'],
     package_dir={'fredtools': './../fredtools'},
     classifiers=[
         "Programming Language :: Python :: 3",

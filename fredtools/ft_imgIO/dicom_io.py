@@ -110,7 +110,7 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
         -  RS - dicom files of structures
         -  RN - dicom files of radiotherapy plan (also called RP)
         -  RD - dicom files of 1D/2D/3D image (for instance dose distribution)
-        -  Unknown - files with \*.dcm extension that were not recognised.
+        -  Unknown - files with \*.dcm extension that were not recognized.
 
     Parameters
     ----------
@@ -150,13 +150,105 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
         if getDicomType(dicomfileName) == "RD":  # Radiation Therapy Dose Storage
             RDfileNames.append(dicomfileName)
         if getDicomType(dicomfileName) == "Unknown":
-            UnknownfileNames.append(dicomfileName)  # unrecognised dicoms
+            UnknownfileNames.append(dicomfileName)  # unrecognized dicoms
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         print("# Found dicoms: {:d} x CT, {:d} x RS, {:d} x RN, {:d} x RD, {:d} x unknown".format(len(CTfileNames), len(RSfileNames), len(RNfileNames), len(RDfileNames), len(UnknownfileNames)))
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "Unknown": UnknownfileNames}
+
+
+def _getIonBeamDatasetForFieldNumber(fileName, beamNumber):
+    """Get IonBeamDataset for field number.
+
+    The function reads a dicom with an RN plan and returns the IonBeamDataset from
+    the IonBeamSequence for a given beam number.
+
+    Parameters
+    ----------
+    fileName : path
+        Path string to dicom file with plan (RN file).
+    beamNumber : scalar, int
+        The number of the beam to get the IonBeamDataset for.
+
+    Returns
+    -------
+    IonBeamDataset
+        Dataset describing the ion beam as an instance of
+        a pydicom.dataset.Dataset.
+    """
+    import numpy as np
+    import pydicom as dicom
+    import fredtools as ft
+
+    # check if dicom is RN
+    if not ft.dicom_io.getDicomType(fileName) == "RN":
+        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+
+    # check if the beamNumber is an integer scalar
+    if not np.isscalar(beamNumber) or not isinstance(beamNumber, int):
+        raise TypeError(f"The value of 'beamNumber' must be a scalar integer.")
+
+    # read dicom
+    dicomTags = dicom.read_file(fileName)
+
+    # check if IonBeamSequence exists
+    if not "IonBeamSequence" in dicomTags:
+        raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+
+    for IonBeamDataset in dicomTags.IonBeamSequence:
+        if int(IonBeamDataset.BeamNumber) == int(beamNumber):
+            return IonBeamDataset
+    return None
+
+
+def _getReferencedBeamDatasetForFieldNumber(fileName, beamNumber):
+    """Get ReferencedBeamDataset for field number.
+
+    The function reads a dicom with an RN plan and returns the ReferencedBeamDataset from
+    the ReferencedBeamSequence of the FractionGroupSequence[0] for a given beam number.
+
+    Parameters
+    ----------
+    fileName : path
+        Path string to dicom file with plan (RN file).
+    beamNumber : scalar, int
+        The number of the beam to get the IonBeamDataset for.
+
+    Returns
+    -------
+    IonBeamDataset
+        Dataset describing the referenced beam as an instance of
+        a pydicom.dataset.Dataset.
+    """
+    import numpy as np
+    import pydicom as dicom
+    import fredtools as ft
+
+    # check if dicom is RN
+    if not ft.dicom_io.getDicomType(fileName) == "RN":
+        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+
+    # check if the beamNumber is an integer scalar
+    if not np.isscalar(beamNumber) or not isinstance(beamNumber, int):
+        raise TypeError(f"The value of 'beamNumber' must be a scalar integer.")
+
+    # read dicom
+    dicomTags = dicom.read_file(fileName)
+
+    # check if FractionGroupSequence exists
+    if not "FractionGroupSequence" in dicomTags:
+        raise ValueError(f"Can not find 'FractionGroupSequence' in the dicom.")
+
+    # check if ReferencedBeamSequence exists
+    if not "ReferencedBeamSequence" in dicomTags.FractionGroupSequence[0]:
+        raise ValueError(f"Can not find 'ReferencedBeamSequence' in the dicom.")
+
+    for ReferencedBeamDataset in dicomTags.FractionGroupSequence[0].ReferencedBeamSequence:
+        if int(ReferencedBeamDataset.ReferencedBeamNumber) == int(beamNumber):
+            return ReferencedBeamDataset
+    return None
 
 
 def getRNInfo(fileName, displayInfo=False):
@@ -166,19 +258,22 @@ def getRNInfo(fileName, displayInfo=False):
     Following information are saved to a dictionary:
 
         -  *targetStructName* : name of the structure which the plan was prepared for (dose not work for all RN dicoms).
-        -  *numberOfFractionsPlanned* : number of the fractions planned.
-        -  *targetPrescriptionDose* : dose prescribed to the target.
-        -  *targetPrescriptionDose_fieldDose* : dose prescribed to the target calculated as the sum of each field dose.
-        -  *numberOfBeams* : number of the fields.
-        -  *fieldsNumber* : order of the fields to be delivered.
-        -  *fieldsName* : list of field name for each field.
-        -  *fieldsGantryAngle* : list of gantry angle for each field.
-        -  *fieldsCouchRotationAngle* : list of couch angle for each field.
-        -  *fieldsIsoPosition* : list of the isocentre position (X,Y,Z) for each field.
-        -  *fieldsNumberOfRangeShifters* : list of number of range shifters for each field.
-        -  *fieldsRangeShifterID* : list of range shifter ID for each field.
-        -  *fieldsDose* : list of prescribed dose for each field.
-        -  *fieldsMU* : list of prescribed MUs for each field.
+        -  *fractionsNo* : number of the fractions planned.
+        -  *dosePrescribed* : dose prescribed to the target read from DoseReferenceSequence.
+        -  *patientName* : name of the patient (usually empty string for anonymized DICOM)
+        -  *patientBirthDate* : birth date of the patient (usually empty string for anonymized DICOM)
+        -  *patientID* : ID of the patient (often empty string for anonymized DICOM)
+        -  *planLabel* : name of the treatment plan.
+        -  *planDate* : date of the plan creation.
+        -  *planTime* : time of the plan creation.
+        -  *treatmentMachineName* : name of the machine that the plan has been prepared for.
+        -  *totalFieldsNumber* : total number of fields including setup, treatment and other fields.
+        -  *treatmentFieldsNumber* : total number of treatment fields.
+        -  *setupFieldsNumber* : total number of setup fields.
+        -  *otherFieldsNumber* : total number of other fields.
+        -  *manufacturer* : manufacturer of the treatment planning system.
+        -  *softwareVersions* : version of the treatment planning system.
+        -  *stationName* : name of the station on which the plan has been prepared.
 
     Parameters
     ----------
@@ -191,114 +286,333 @@ def getRNInfo(fileName, displayInfo=False):
     -------
     dict
         Dictionary with the RN treatment plan parameters.
+
+    See Also
+    --------
+    getRN : get parameters of the RN plan from RN dicom file.
     """
     import numpy as np
     import fredtools as ft
     import pydicom as dicom
     import warnings
 
-    if not getDicomType(fileName) == "RN":
+    # check if dicom is RN
+    if not ft.dicom_io.getDicomType(fileName) == "RN":
         raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
 
-    try:
-        dicomTags = dicom.read_file(fileName)
-    except dicom.errors.InvalidDicomError:
-        raise ValueError("Warning: could not read file {:s}".format(fileName))
+    # read dicom
+    dicomTags = dicom.read_file(fileName)
 
-    # TargetPrescriptionDose
+    # prepare plan info
+    planInfo = {}
+
+    # get prescribed dose from TargetPrescriptionDose tag of DoseReferenceSequence
     if "TargetPrescriptionDose" in dicomTags.DoseReferenceSequence[0]:
-        targetPrescriptionDose = dicomTags.DoseReferenceSequence[0].TargetPrescriptionDose.real
+        planInfo["dosePrescribed"] = dicomTags.DoseReferenceSequence[0].TargetPrescriptionDose.real
     else:
-        targetPrescriptionDose = np.nan
+        planInfo["dosePrescribed"] = np.nan
 
-    # numberOfFractionsPlanned
-    if "FractionGroupSequence" in dicomTags:
-        if "NumberOfFractionsPlanned" in dicomTags.FractionGroupSequence[0]:
-            numberOfFractionsPlanned = dicomTags.FractionGroupSequence[0].NumberOfFractionsPlanned.real
-
-    # targetStructName
-    if [0x3267, 0x1000] in dicomTags.DoseReferenceSequence[0]:
-        targetStructName = dicomTags.DoseReferenceSequence[0][0x3267, 0x1000].value.decode("utf-8")
+    # get number of fractions from NumberOfFractionsPlanned tag of FractionGroupSequence
+    if ("FractionGroupSequence" in dicomTags) and ("NumberOfFractionsPlanned" in dicomTags.FractionGroupSequence[0]):
+        planInfo["fractionsNo"] = dicomTags.FractionGroupSequence[0].NumberOfFractionsPlanned.real
     else:
-        targetStructName = "unknown"
+        planInfo["fractionsNo"] = np.nan
 
-    fieldsNumber = []
-    fieldsName = []
-    fieldsGantryAngle = []
-    fieldsCouchRotationAngle = []
-    fieldsIsoPosition = []
-    fieldsNumberOfRangeShifters = []
-    fieldsRangeShifterID = []
-    for IonBeamSequence in dicomTags.IonBeamSequence:
-        if IonBeamSequence.TreatmentDeliveryType == "TREATMENT":
-            fieldsNumber.append(IonBeamSequence.BeamNumber.real)
-            fieldsName.append(IonBeamSequence.BeamName)
-            fieldsGantryAngle.append(IonBeamSequence.IonControlPointSequence[0].GantryAngle.real)
-            fieldsCouchRotationAngle.append(IonBeamSequence.IonControlPointSequence[0].PatientSupportAngle.real)
-            fieldsIsoPosition.append(np.array(IonBeamSequence.IonControlPointSequence[0].IsocenterPosition))
-            fieldsNumberOfRangeShifters.append(IonBeamSequence.NumberOfRangeShifters.real)
-            if (IonBeamSequence.NumberOfRangeShifters.real != 0) and ("RangeShifterSequence" in IonBeamSequence):
-                fieldsRangeShifterID.append(IonBeamSequence.RangeShifterSequence[0].RangeShifterID)
-            else:
-                fieldsRangeShifterID.append("")
-    numberOfBeams = len(fieldsNumber)
+    # get target struct name from provate tag of DoseReferenceSequence
+    if ("DoseReferenceSequence" in dicomTags) and ([0x3267, 0x1000] in dicomTags.DoseReferenceSequence[0]):
+        planInfo["targetStructName"] = dicomTags.DoseReferenceSequence[0][0x3267, 0x1000].value.decode("utf-8")
+    else:
+        planInfo["targetStructName"] = "unknown"
 
-    fieldsDose = []
-    fieldsMU = []
-    for fieldNumber in fieldsNumber:
-        for ReferencedBeamSequence in dicomTags.FractionGroupSequence[0].ReferencedBeamSequence:
-            if ReferencedBeamSequence.ReferencedBeamNumber == fieldNumber:
-                fieldsDose.append(ReferencedBeamSequence.BeamDose.real)
-                fieldsMU.append(ReferencedBeamSequence.BeamMeterset.real)
-                continue
-    targetPrescriptionDose_fieldDose = np.nansum(fieldsDose) * numberOfFractionsPlanned
+    # get other plan info
+    planInfo["planLabel"] = dicomTags.RTPlanLabel if "RTPlanLabel" in dicomTags else ""
+    planInfo["planDate"] = dicomTags.RTPlanDate if "RTPlanDate" in dicomTags else ""
+    planInfo["planTime"] = dicomTags.RTPlanTime if "RTPlanTime" in dicomTags else ""
+    planInfo["patientName"] = str(dicomTags.PatientName) if "PatientName" in dicomTags else ""
+    planInfo["patientBirthDate"] = dicomTags.PatientBirthDate if "PatientBirthDate" in dicomTags else ""
+    planInfo["patientID"] = dicomTags.PatientID if "PatientID" in dicomTags else ""
+    planInfo["manufacturer"] = dicomTags.Manufacturer if "Manufacturer" in dicomTags else ""
+    planInfo["softwareVersions"] = dicomTags.SoftwareVersions if "SoftwareVersions" in dicomTags else ""
+    planInfo["stationName"] = dicomTags.StationName if "StationName" in dicomTags else ""
 
-    if np.round(targetPrescriptionDose, 3) != np.round(np.nansum(fieldsDose) * numberOfFractionsPlanned, 3):
-        if np.nansum(fieldsDose) == 0:
-            if displayInfo:
-                warnings.warn("Warning: No 'BeamDose' in ReferencedBeamSequence for any field.")
+    # check if IonBeamSequence exists
+    if not "IonBeamSequence" in dicomTags:
+        raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+
+    # count fields' type and treatment machine name
+    planInfo["totalFieldsNumber"] = int(dicomTags.FractionGroupSequence[0].NumberOfBeams)
+    planInfo["treatmentFieldsNumber"] = 0
+    planInfo["setupFieldsNumber"] = 0
+    planInfo["otherFieldsNumber"] = 0
+    for ifield in range(planInfo["totalFieldsNumber"]):
+        if dicomTags.IonBeamSequence[ifield].TreatmentDeliveryType == "TREATMENT":
+            planInfo["treatmentFieldsNumber"] += 1
+            planInfo["treatmentMachineName"] = dicomTags.IonBeamSequence[ifield].TreatmentMachineName
+        elif dicomTags.IonBeamSequence[ifield].TreatmentDeliveryType == "SETUP":
+            planInfo["setupFieldsNumber"] += 1
         else:
-            if displayInfo:
-                warnings.warn("Warning: 'TargetPrescriptionDose' is different from sum of 'BeamDose' in 'FractionGroupSequence'.")
+            planInfo["otherFieldsNumber"] += 1
 
-    planInfo = {
-        "targetStructName": targetStructName,
-        "numberOfFractionsPlanned": numberOfFractionsPlanned,
-        "targetPrescriptionDose": targetPrescriptionDose,
-        "targetPrescriptionDose_fieldDose": targetPrescriptionDose_fieldDose,
-        "numberOfBeams": numberOfBeams,
-        "fieldsNumber": fieldsNumber,
-        "fieldsName": fieldsName,
-        "fieldsGantryAngle": fieldsGantryAngle,
-        "fieldsCouchRotationAngle": fieldsCouchRotationAngle,
-        "fieldsIsoPosition": fieldsIsoPosition,
-        "fieldsNumberOfRangeShifters": fieldsNumberOfRangeShifters,
-        "fieldsRangeShifterID": fieldsRangeShifterID,
-        "fieldsDose": fieldsDose,
-        "fieldsMU": fieldsMU,
-    }
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
+        print("# Patient name:     '{:s}'".format(planInfo["patientName"]))
+        print("# Plan label:       '{:s}'".format(planInfo["planLabel"]))
+        print("# Plan date:        '{:s}'".format(planInfo["planDate"]))
+        print("# Machine name:     '{:s}'".format(planInfo["treatmentMachineName"]))
         print("# Target structure: '{:s}'".format(planInfo["targetStructName"]))
-        print("# Number of fractions: {:d}".format(planInfo["numberOfFractionsPlanned"]))
-        print("# Target prescription dose for all fractions: {:.3f} Gy RBE (from DoseReferenceSequence)".format(np.round(planInfo["targetPrescriptionDose"], 3)))
-        print("# Target prescription dose for one fraction:  {:.3f} Gy RBE (from DoseReferenceSequence)".format(np.round(planInfo["targetPrescriptionDose"] / planInfo["numberOfFractionsPlanned"], 3)))
-        print("# Target prescription dose for all fractions: {:.3f} Gy RBE (sum of BeamDose in FractionGroupSequence)".format(np.round(planInfo["targetPrescriptionDose_fieldDose"], 3)))
-        print(
-            "# Target prescription dose for one fraction:  {:.3f} Gy RBE (sum of BeamDose in FractionGroupSequence)".format(
-                np.round(planInfo["targetPrescriptionDose_fieldDose"] / planInfo["numberOfFractionsPlanned"], 3)
-            )
-        )
-        print("# Number of fields: {:d}".format(planInfo["numberOfBeams"]))
-        print("# Order of fields: \t\t", list(planInfo["fieldsNumber"]))
-        print("# Number of Range Shifters: \t", list(planInfo["fieldsRangeShifterID"]))
-        print("# Fields Gantry Angle: \t\t", list(planInfo["fieldsGantryAngle"]))
-        print("# Fields Couch Rotation Angle:\t", list(planInfo["fieldsCouchRotationAngle"]))
-        print("# Field dose [Gy RBE]: \t\t", list(np.round(planInfo["fieldsDose"], 3)))
-        print("# Field MU: \t\t\t", list(np.round(planInfo["fieldsMU"], 3)))
-        print("# Isocentre Positions: \n", np.round(planInfo["fieldsIsoPosition"], 3))
+        print("# Number of fractions: {:d}".format(planInfo["fractionsNo"]))
+        print("# Dose pres. (all fractions):    {:.3f} Gy RBE".format(np.round(planInfo["dosePrescribed"], 3)))
+        print("# Dose pres. (single fraction):  {:.3f} Gy RBE".format(np.round(planInfo["dosePrescribed"] / planInfo["fractionsNo"], 3)))
+        print("# Number of treatment fields: {:d}".format(planInfo["treatmentFieldsNumber"]))
+        print("# Number of setup fields:     {:d}".format(planInfo["setupFieldsNumber"]))
         print("#" * len(f"### {ft._currentFuncName()} ###"))
     return planInfo
+
+
+def getRN(fileName, raiseWarning=True, displayInfo=False):
+    """Get parameters of the RN plan from RN dicom file.
+
+    The function reads an RN dicom file and collects general
+    information of the plan, information of each treatment field
+    and information about each scanning pencil beam. The general
+    information about the plan is hold in a dictionary, is extended
+    with comparison to the results of the getRNInfo function
+    (cf. See Also section), and contains following keys:
+
+        -  *targetStructName* : name of the structure which the plan was prepared for (dose not work for all RN dicoms).
+        -  *fractionsNo* : number of the fractions planned.
+        -  *dosePrescribed* : dose prescribed to the target read from DoseReferenceSequence.
+        -  *patientName* : name of the patient (usually empty string for anonymized DICOM)
+        -  *patientBirthDate* : birth date of the patient (usually empty string for anonymized DICOM)
+        -  *patientID* : ID of the patient (often empty string for anonymized DICOM)
+        -  *planLabel* : name of the treatment plan.
+        -  *planDate* : date of the plan creation.
+        -  *planTime* : time of the plan creation.
+        -  *treatmentMachineName* : name of the machine that the plan has been prepared for.
+        -  *totalFieldsNumber* : total number of fields including setup, treatment and other fields.
+        -  *treatmentFieldsNumber* : total number of treatment fields.
+        -  *setupFieldsNumber* : total number of setup fields.
+        -  *otherFieldsNumber* : total number of other fields.
+        -  *manufacturer* : manufacturer of the treatment planning system.
+        -  *softwareVersions* : version of the treatment planning system.
+        -  *stationName* : name of the station on which the plan has been prepared.
+        -  *isocentrePos* : position of the plan isocentre for the first field (if it is not the same for all fields, then a warning is raised)
+
+    Information about the fields is hold in a pandas DataFrame where
+    the rows are in order of the fields delivery. It is assumed here that
+    the order of the fields delivery is the same as the order of the fields
+    in ReferencedBeamSequence of FractionGroupSequence.
+
+    Information about each scanning pencil beam is hold in a pandas DataFrame.
+    The scanning pencil beam information is collected in rows but does not
+    necessary in a delivery order. Usually the delivery order of the spots
+    for each energy layer is defined by the machine during beam delivery
+    and this information can be only taken from the machine log files.
+
+    Parameters
+    ----------
+    fileName : path
+        Path to RN dicom file.
+    raiseWarning : bool, optional
+        Raise warnings. (def. True)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    dict
+        Dictionary with the RN treatment plan parameters.
+    fieldsInfo
+        DataFrame with parameters for each field.
+    fieldsSpotsInfo
+        DataFrame with parameters of each scanning beam.
+
+    See Also
+    --------
+    getRNInfo : get some information from the RN plan from RN dicom file.
+    """
+    import numpy as np
+    import fredtools as ft
+    import pandas as pd
+    import pydicom as dicom
+    import warnings
+
+    # check if dicom is RN
+    if not ft.dicom_io.getDicomType(fileName) == "RN":
+        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+
+    # read dicom
+    dicomTags = dicom.read_file(fileName)
+
+    # get general plan info
+    planInfo = ft.getRNInfo(fileName, displayInfo=False)
+
+    ### get fields information in order of delivery
+    """It is assumed that the order of fields in ReferencedBeamSequence of FractionGroupSequence
+    is the order of delivery."""
+    # prepare fields info
+    fieldsInfo = {}
+    fieldsInfo["deliveryNo"] = []
+    fieldsInfo["fieldNo"] = []
+    fieldsInfo["fieldName"] = []
+    fieldsInfo["gantryAngle"] = []
+    fieldsInfo["couchAngle"] = []
+    fieldsInfo["isocenterPos"] = []
+    fieldsInfo["RSsID"] = []
+    fieldsInfo["snoutPos"] = []
+    fieldsInfo["dose"] = []
+    fieldsInfo["MU"] = []
+    fieldsInfo["cumMsW"] = []  # Final Cumulative Meterset Weight
+    fieldsInfo["energyNo"] = []  #  Number of Control Points / 2
+    fieldsInfo["minEnergy"] = []
+    fieldsInfo["maxEnergy"] = []
+    fieldsInfo["spotsNo"] = []
+    fieldsInfo["nomRange"] = []  #  (0x300b, 0x1004)
+    fieldsInfo["nomSOBPWidth"] = []  #  (0x300b, 0x100e)
+    fieldsInfo["couchPitchAngle"] = []
+    fieldsInfo["couchRollAngle"] = []
+    fieldsInfo["supportID"] = []
+    fieldsInfo["dosePosition"] = []
+    fieldsInfo["magnetToIsoDist"] = []  #  Virtual Source-Axis Distances
+    treatmentMachineNames = []
+    for deliveryNo, ReferencedBeamDataset in enumerate(dicomTags.FractionGroupSequence[0].ReferencedBeamSequence, start=1):
+        IonBeamDataset = _getIonBeamDatasetForFieldNumber(fileName, int(ReferencedBeamDataset.ReferencedBeamNumber))
+        # Continue if couldn't find IonBeamDataset for the IonBeamDataset or the Treatment Delivery Type of the IonBeamDataset is not TREATMENT
+        if not IonBeamDataset or not (IonBeamDataset.TreatmentDeliveryType == "TREATMENT"):
+            continue
+        fieldsInfo["deliveryNo"].append(deliveryNo)
+        fieldsInfo["fieldNo"].append(IonBeamDataset.BeamNumber.real)
+        fieldsInfo["fieldName"].append(IonBeamDataset.BeamName)
+        fieldsInfo["gantryAngle"].append(IonBeamDataset.IonControlPointSequence[0].GantryAngle.real)
+        fieldsInfo["couchAngle"].append(IonBeamDataset.IonControlPointSequence[0].PatientSupportAngle.real)
+        fieldsInfo["couchPitchAngle"].append(IonBeamDataset.IonControlPointSequence[0].TableTopPitchAngle.real)
+        fieldsInfo["couchRollAngle"].append(IonBeamDataset.IonControlPointSequence[0].TableTopRollAngle.real)
+        fieldsInfo["isocenterPos"].append(np.array(IonBeamDataset.IonControlPointSequence[0].IsocenterPosition).tolist())
+        if (IonBeamDataset.NumberOfRangeShifters.real != 0) and ("RangeShifterSequence" in IonBeamDataset):
+            fieldsInfo["RSsID"].append(IonBeamDataset.RangeShifterSequence[0].RangeShifterID)
+        else:
+            fieldsInfo["RSsID"].append("")
+        fieldsInfo["snoutPos"].append(IonBeamDataset.IonControlPointSequence[0].SnoutPosition.real)
+        if "BeamDose" in ReferencedBeamDataset:
+            fieldsInfo["dose"].append(ReferencedBeamDataset.BeamDose.real)
+        else:
+            fieldsInfo["dose"].append(np.nan)
+        fieldsInfo["MU"].append(ReferencedBeamDataset.BeamMeterset.real)
+        fieldsInfo["cumMsW"].append(IonBeamDataset.FinalCumulativeMetersetWeight.real)
+        if "BeamDoseSpecificationPoint" in ReferencedBeamDataset:
+            fieldsInfo["dosePosition"].append(np.array(ReferencedBeamDataset.BeamDoseSpecificationPoint).tolist())
+        else:
+            fieldsInfo["dosePosition"].append(np.nan)
+        fieldsInfo["energyNo"].append(int(IonBeamDataset.NumberOfControlPoints.real / 2))
+        spotsNo = 0
+        energy = []
+        for IonControlPointDataset in IonBeamDataset.IonControlPointSequence:
+            spotsNo += IonControlPointDataset.NumberOfScanSpotPositions
+            energy.append(IonControlPointDataset.NominalBeamEnergy.real)
+        fieldsInfo["minEnergy"].append(np.min(energy))
+        fieldsInfo["maxEnergy"].append(np.max(energy))
+        fieldsInfo["spotsNo"].append(int(spotsNo / 2))
+
+        fieldsInfo["magnetToIsoDist"].append(np.array(IonBeamDataset.VirtualSourceAxisDistances).tolist())
+        if (0x300B, 0x1004) in IonBeamDataset:
+            fieldsInfo["nomRange"].append(IonBeamDataset[(0x300B, 0x1004)].value)
+        if (0x300B, 0x100E) in IonBeamDataset:
+            fieldsInfo["nomSOBPWidth"].append(IonBeamDataset[(0x300B, 0x100E)].value)
+        fieldsInfo["supportID"].append(IonBeamDataset.PatientSupportID)
+        treatmentMachineNames.append(IonBeamDataset.TreatmentMachineName)
+
+    # convert fields info to pandas dataframe
+    fieldsInfo = pd.DataFrame(fieldsInfo)
+    fieldsInfo.set_index("deliveryNo", inplace=True)
+
+    # get treatment machine name as the machine name of the first field
+    planInfo["treatmentMachineName"] = treatmentMachineNames[0]
+
+    # get isocentre position of the first field
+    planInfo["isocentrePos"] = fieldsInfo.isocenterPos.iloc[0]
+
+    ### get spots parameters for each field
+    fieldsSpotsInfo = []
+    for deliveryNo, ReferencedBeamDataset in enumerate(dicomTags.FractionGroupSequence[0].ReferencedBeamSequence, start=1):
+        IonBeamDataset = _getIonBeamDatasetForFieldNumber(fileName, int(ReferencedBeamDataset.ReferencedBeamNumber))
+        # Continue if couldn't find IonBeamDataset for the IonBeamDataset or the Treatment Delivery Type of the IonBeamDataset is not TREATMENT
+        if not IonBeamDataset or not (IonBeamDataset.TreatmentDeliveryType == "TREATMENT"):
+            continue
+        # check if RadiationType is 'PROTON'
+        if not IonBeamDataset.RadiationType == "PROTON":
+            raise TypeError(f"The type of TREATMENT field is not PROTON but {IonBeamDataset.RadiationType}.")
+        # check if the scan mode is MODULATED and beam type is static
+        if not IonBeamDataset.ScanMode == "MODULATED" and not IonBeamDataset.BeamType == "STATIC":
+            raise TypeError(f"The scan mode of the field is not MODULATED and/or beam type is not STATIC.")
+
+        # get spots parameters from IonControlPointSequence
+        slicesInfo = []
+        for sliceIdx, IonControlPointDataset in enumerate(IonBeamDataset.IonControlPointSequence):
+            # skip if the sum of meterset weights is zero
+            if np.sum(IonControlPointDataset.ScanSpotMetersetWeights) == 0:
+                continue
+
+            # number of spots for slice
+            spotsNo = int(IonControlPointDataset.NumberOfScanSpotPositions)
+
+            sliceInfo = {}
+            sliceInfo["deliveryNo"] = [deliveryNo] * spotsNo
+            sliceInfo["energyNo"] = [int(sliceIdx / 2) + 1] * spotsNo
+            sliceInfo["nomEnergy"] = [IonControlPointDataset.NominalBeamEnergy.real] * spotsNo
+            sliceInfo["spotMsW"] = IonControlPointDataset.ScanSpotMetersetWeights
+            sliceInfo["spotPosX"] = IonControlPointDataset.ScanSpotPositionMap[0::2]
+            sliceInfo["spotPosY"] = IonControlPointDataset.ScanSpotPositionMap[1::2]
+            sliceInfo["spotTuneID"] = [float(IonControlPointDataset.ScanSpotTuneID)] * spotsNo
+            sliceInfo["spotPaintingNo"] = [IonControlPointDataset.NumberOfPaintings] * spotsNo
+            sliceInfo = pd.DataFrame(sliceInfo)
+            sliceInfo["spotMU"] = sliceInfo.spotMsW / fieldsInfo.loc[deliveryNo].cumMsW * fieldsInfo.loc[deliveryNo].MU
+            slicesInfo.append(sliceInfo)
+        slicesInfo = pd.concat(slicesInfo)
+        fieldsSpotsInfo.append(slicesInfo)
+
+    fieldsSpotsInfo = pd.concat(fieldsSpotsInfo)
+    fieldsSpotsInfo.index = range(1, fieldsSpotsInfo.shape[0] + 1)
+    fieldsSpotsInfo.index.rename("spotNo", inplace=True)
+
+    # make consistency check and raise warning if raiseWarning==True
+    if raiseWarning:
+        # check if the dose prescribed dose in DoseReferenceSequence is the same as the sum of BeamDose in FractionGroupSequence
+        if not np.round(planInfo["dosePrescribed"], 3) == np.round(np.nansum(fieldsInfo.dose) * planInfo["fractionsNo"], 3):
+            warnings.warn("Warning: 'TargetPrescriptionDose' is different from sum of 'BeamDose' in 'FractionGroupSequence'.")
+        # check if treatment machine name is the same for all fields
+        if not treatmentMachineNames.count(treatmentMachineNames[0]) == len(treatmentMachineNames):
+            warnings.warn("Warning: The machine name is not the same for all fields.")
+        # check if sum of meterset weights for spots is equal with the sum of the cumulative meterset weights for fields
+        if not np.round(fieldsSpotsInfo.spotMsW.sum(), 3) == np.round(fieldsInfo.cumMsW.sum(), 3):
+            warnings.warn("Warning: The sum of meterset weights for spots is not equal to the sum of cumulative metersetweights for fields.")
+        # check if isocentre position is the same for all fields
+        if not (np.array(fieldsInfo.isocenterPos.to_list())[0] == np.array(fieldsInfo.isocenterPos.to_list())).all():
+            warnings.warn("Warning: Isocentre positions are not the same for all TREATMENT fields.")
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print("# Patient name:     '{:s}'".format(planInfo["patientName"]))
+        print("# Plan label:       '{:s}'".format(planInfo["planLabel"]))
+        print("# Plan date:        '{:s}'".format(planInfo["planDate"]))
+        print("# Machine name:     '{:s}'".format(planInfo["treatmentMachineName"]))
+        print("# Target structure: '{:s}'".format(planInfo["targetStructName"]))
+        print(
+            "# Isocentre [mm]:   [{:.2f} {:.2f} {:.2f}]{:s}".format(
+                *planInfo["isocentrePos"],
+                " (the same for all fields)"
+                if (np.array(fieldsInfo.isocenterPos.to_list())[0] == np.array(fieldsInfo.isocenterPos.to_list())).all()
+                else " (first field here but various positions in fields)",
+            )
+        )
+        print("# Number of fractions: {:d}".format(planInfo["fractionsNo"]))
+        print("# Dose pres. (all fractions):    {:.3f} Gy RBE (from DoseReferenceSequence)".format(np.round(planInfo["dosePrescribed"], 3)))
+        print("# Dose pres. (single fraction):  {:.3f} Gy RBE (from DoseReferenceSequence)".format(np.round(planInfo["dosePrescribed"] / planInfo["fractionsNo"], 3)))
+        print("# Dose pres. (all fractions):    {:.3f} Gy RBE (sum of BeamDose in FractionGroupSequence)".format(fieldsInfo.dose.sum() * planInfo["fractionsNo"]))
+        print("# Dose pres. (single fraction):  {:.3f} Gy RBE (sum of BeamDose in FractionGroupSequence)".format(fieldsInfo.dose.sum()))
+        print("# Number of treatment fields: {:d}".format(planInfo["treatmentFieldsNumber"]))
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return planInfo, fieldsInfo, fieldsSpotsInfo
 
 
 def getRSInfo(fileName, displayInfo=False):
@@ -350,7 +664,7 @@ def getRSInfo(fileName, displayInfo=False):
 
 
 def getExternalName(fileName, displayInfo=False):
-    """Get name of the EXTERNAM structure from RS dicom file.
+    """Get name of the EXTERNAL structure from RS dicom file.
 
     The function retrieves the name of the structure of type EXTERNAL from a RS dicom file.
     If more than one structure of type EXTERNAL exists in the RS dicom file, then the first one is returned.
@@ -547,7 +861,7 @@ def _getStructureContoursByName(RSfileName, structName):
     Parameters
     ----------
     RSfileName : string
-        Path String to dicom file with structures (RS file).
+        Path string to dicom file with structures (RS file).
     structName : string
         Name of the structure.
 
@@ -597,7 +911,9 @@ def _getStructureContoursByName(RSfileName, structName):
 def _checkContourCWDirection(contour):
     import numpy as np
 
-    """Check if the contour has CW (True) or CCW (False) direction"""
+    """Check if the contour has CW (True) or CCW (False) direction. 
+    The CW (True) contour direction usually means that it is a filled polygon
+    and the CCW (False) cuntour direction that it is a hole in the filled polygon."""
     result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
     return result < 0
 

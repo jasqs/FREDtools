@@ -138,10 +138,17 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
     if imgROIs:
         for imgROI in imgROIs if isinstance(imgROIs, list) else [imgROIs]:
             slROI = ft.getSlice(imgROI, point=point, plane=plane, raiseWarning=raiseWarning)
-            color = np.array(re.findall("\d+", imgROI.GetMetaData("ROIColor")), dtype="int") / 255
+            if "ROIColor" in imgROI.GetMetaDataKeys():
+                color = np.array(re.findall("\d+", imgROI.GetMetaData("ROIColor")), dtype="int") / 255
+            else:
+                color = np.array([0, 0, 1])
             if ft.getStatistics(slROI).GetMaximum() > 0:
                 plROI = ax.contour(ft.arr(slROI), extent=ft.getExtMpl(slROI), colors=[color], linewidths=1, origin="upper")
-                plROI.collections[0].set_label(imgROI.GetMetaData("ROIName"))
+                if "ROIName" in imgROI.GetMetaDataKeys():
+                    name = imgROI.GetMetaData("ROIName")
+                else:
+                    name = "unknown"
+                plROI.collections[0].set_label(name)
         if len(ax.get_legend_handles_labels()[0]) > 0 and showLegend:
             ax.legend(fontsize=fontsize)
 
@@ -213,7 +220,7 @@ class showSlices:
         self.imgROIs = imgROIs
 
         # determine point
-        if not list(point):
+        if not point:
             self.point = list(ft.getMassCenter(self.imgDose))
         else:
             self.point = list(point)

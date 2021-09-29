@@ -36,6 +36,8 @@ DICOM files (\*.dcm, \*.dicom)
 
 .. autofunction:: fredtools.getRNInfo
 
+.. autofunction:: fredtools.getRN
+
 .. autofunction:: fredtools.getRSInfo
 
 .. autofunction:: fredtools.getExternalName

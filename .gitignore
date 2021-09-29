@@ -133,3 +133,5 @@ test/
 *.code-workspace
 
 examples/exampleData/
+
+fredtools/.vscode/

@@ -644,7 +644,7 @@ def getInteg(img, axis="X", displayInfo=False):
 
     # determine axis to accumulate and axis of integral
     if not axisSimple in axesNameAvailable:
-        raise ValueError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.ndim}. Only {axesNameAvailable} are possible.")
+        raise ValueError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
     axesAcc = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if not x]
     axesInteg = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if x][0]
 
