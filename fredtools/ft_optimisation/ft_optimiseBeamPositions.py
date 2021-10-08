@@ -130,6 +130,10 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance):
     See Also
     --------
         optimiseBeamPositions: Optimise beam positions using various algorithms.
+
+    Notes
+    -----
+    Not implemented yet.
     """
     import numpy as np
     import shapely as sph

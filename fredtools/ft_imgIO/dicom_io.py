@@ -32,7 +32,7 @@ def _getDicomType_tags(dicomTags):
         if dicomTags.SOPClassUID == "1.2.840.10008.5.1.4.1.1.481.2":  # Radiation Therapy Dose Storage
             return "RD"
         else:
-            warnings.warn("Warning: no 'SOPClassUID'. Could not determine the dicom type.")
+            warnings.warn("Warning: no 'SOPClassUID' tag. Could not determine the dicom type.")
             return "Unknown"
 
 
@@ -59,13 +59,17 @@ def _getDicomType_file(dicomFile):
     """
     import pydicom as dicom
     import warnings
+    import fredtools as ft
 
     try:
-        dicomTags = dicom.read_file(dicomFile)
+        SOPClassUID = dicom.read_file(dicomFile, specific_tags=["SOPClassUID"], stop_before_pixels=True)
     except dicom.errors.InvalidDicomError:
         warnings.warn("Warning: could not read file {:s}".format(dicomFile))
         return "Unknown"
-    return _getDicomType_tags(dicomTags)
+    except ValueError:
+        warnings.warn("Warning: the tag 'SOPClassUID' does not exist in file {:s}".format(dicomFile))
+        return "Unknown"
+    return ft.ft_imgIO.dicom_io._getDicomType_tags(SOPClassUID)
 
 
 def getDicomType(dicomVar):
@@ -141,15 +145,16 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
     RDfileNames = []
     UnknownfileNames = []
     for dicomfileName in dicomfileNames:
-        if getDicomType(dicomfileName) == "CT":  # CT Image Storage
+        dicomfileType = getDicomType(dicomfileName)
+        if dicomfileType == "CT":  # CT Image Storage
             CTfileNames.append(dicomfileName)
-        if getDicomType(dicomfileName) == "RS":  # Radiation Therapy Structure Set Storage
+        if dicomfileType == "RS":  # Radiation Therapy Structure Set Storage
             RSfileNames.append(dicomfileName)
-        if getDicomType(dicomfileName) == "RN":  # Radiation Therapy Ion Plan Storage
+        if dicomfileType == "RN":  # Radiation Therapy Ion Plan Storage
             RNfileNames.append(dicomfileName)
-        if getDicomType(dicomfileName) == "RD":  # Radiation Therapy Dose Storage
+        if dicomfileType == "RD":  # Radiation Therapy Dose Storage
             RDfileNames.append(dicomfileName)
-        if getDicomType(dicomfileName) == "Unknown":
+        if dicomfileType == "Unknown":
             UnknownfileNames.append(dicomfileName)  # unrecognized dicoms
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
@@ -516,8 +521,12 @@ def getRN(fileName, raiseWarning=True, displayInfo=False):
         fieldsInfo["magnetToIsoDist"].append(np.array(IonBeamDataset.VirtualSourceAxisDistances).tolist())
         if (0x300B, 0x1004) in IonBeamDataset:
             fieldsInfo["nomRange"].append(IonBeamDataset[(0x300B, 0x1004)].value)
+        else:
+            fieldsInfo["nomRange"].append(np.nan)
         if (0x300B, 0x100E) in IonBeamDataset:
             fieldsInfo["nomSOBPWidth"].append(IonBeamDataset[(0x300B, 0x100E)].value)
+        else:
+            fieldsInfo["nomSOBPWidth"].append(np.nan)
         fieldsInfo["supportID"].append(IonBeamDataset.PatientSupportID)
         treatmentMachineNames.append(IonBeamDataset.TreatmentMachineName)
 
