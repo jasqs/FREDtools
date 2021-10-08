@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.17 documentation</title>
+  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.21 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -33,7 +33,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.17
+                0.6.21
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -88,18 +88,21 @@
 <p>A collection of useful functions for Monte Carlo simulations.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.setFieldsFolderStruct">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setFieldsFolderStruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folderPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RNfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folderName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FRED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setFieldsFolderStruct" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setFieldsFolderStruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folderPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RNfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folderName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FRED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setFieldsFolderStruct" title="Permalink to this definition"></a></dt>
 <dd><p>Create folder structure for each field in treatment plan</p>
 <p>The function creates a folder structure in a given <cite>folderPath</cite> for each field separately.
 The folder structure is in form:</p>
 <blockquote>
 <div><p>folderPath/folderName:</p>
 <blockquote>
-<div><p>/ F1</p>
-<p>/ F2</p>
+<div><p>/ 1_Field2</p>
+<p>/ 2_Field3</p>
+<p>/ 3_Field1</p>
 <p>…</p>
 </div></blockquote>
 </div></blockquote>
+<p>The number at the beginning of the folder name is the delivery nuber
+and the number after <cite>Field</cite> is the number of the field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

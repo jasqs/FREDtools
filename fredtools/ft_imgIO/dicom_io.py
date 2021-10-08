@@ -406,7 +406,7 @@ def getRN(fileName, raiseWarning=True, displayInfo=False):
     Information about the fields is hold in a pandas DataFrame where
     the rows are in order of the fields delivery. It is assumed here that
     the order of the fields delivery is the same as the order of the fields
-    in ReferencedBeamSequence of FractionGroupSequence.
+    in IonBeamSequence.
 
     Information about each scanning pencil beam is hold in a pandas DataFrame.
     The scanning pencil beam information is collected in rows but does not
@@ -480,11 +480,13 @@ def getRN(fileName, raiseWarning=True, displayInfo=False):
     fieldsInfo["dosePosition"] = []
     fieldsInfo["magnetToIsoDist"] = []  #  Virtual Source-Axis Distances
     treatmentMachineNames = []
-    for deliveryNo, ReferencedBeamDataset in enumerate(dicomTags.FractionGroupSequence[0].ReferencedBeamSequence, start=1):
-        IonBeamDataset = _getIonBeamDatasetForFieldNumber(fileName, int(ReferencedBeamDataset.ReferencedBeamNumber))
+    for deliveryNo, IonBeamDataset in enumerate(dicomTags.IonBeamSequence, start=1):
         # Continue if couldn't find IonBeamDataset for the IonBeamDataset or the Treatment Delivery Type of the IonBeamDataset is not TREATMENT
         if not IonBeamDataset or not (IonBeamDataset.TreatmentDeliveryType == "TREATMENT"):
             continue
+
+        ReferencedBeamDataset = _getReferencedBeamDatasetForFieldNumber(fileName, int(IonBeamDataset.BeamNumber))
+
         fieldsInfo["deliveryNo"].append(deliveryNo)
         fieldsInfo["fieldNo"].append(IonBeamDataset.BeamNumber.real)
         fieldsInfo["fieldName"].append(IonBeamDataset.BeamName)
@@ -542,11 +544,13 @@ def getRN(fileName, raiseWarning=True, displayInfo=False):
 
     ### get spots parameters for each field
     fieldsSpotsInfo = []
-    for deliveryNo, ReferencedBeamDataset in enumerate(dicomTags.FractionGroupSequence[0].ReferencedBeamSequence, start=1):
-        IonBeamDataset = _getIonBeamDatasetForFieldNumber(fileName, int(ReferencedBeamDataset.ReferencedBeamNumber))
+    for deliveryNo, IonBeamDataset in enumerate(dicomTags.IonBeamSequence, start=1):
         # Continue if couldn't find IonBeamDataset for the IonBeamDataset or the Treatment Delivery Type of the IonBeamDataset is not TREATMENT
         if not IonBeamDataset or not (IonBeamDataset.TreatmentDeliveryType == "TREATMENT"):
             continue
+
+        ReferencedBeamDataset = _getReferencedBeamDatasetForFieldNumber(fileName, int(IonBeamDataset.BeamNumber))
+
         # check if RadiationType is 'PROTON'
         if not IonBeamDataset.RadiationType == "PROTON":
             raise TypeError(f"The type of TREATMENT field is not PROTON but {IonBeamDataset.RadiationType}.")

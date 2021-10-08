@@ -1,9 +1,4 @@
-import os
-import warnings
-import fredtools as ft
-
-
-def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", displayInfo=False):
+def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=False, displayInfo=False):
     """Create folder structure for each field in treatment plan
 
     The function creates a folder structure in a given `folderPath` for each field separately.
@@ -11,11 +6,16 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", displayInfo
 
         folderPath/folderName:
 
-                    / F1
+                    / 1_Field2
 
-                    / F2
+                    / 2_Field3
+
+                    / 3_Field1
 
                     ...
+
+    The number at the beginning of the folder name is the delivery nuber
+    and the number after `Field` is the number of the field.
 
     Parameters
     ----------
@@ -32,24 +32,39 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", displayInfo
     -------
     path
         Path to created folder structure.
-
     """
-    SimFolder = os.path.join(folderPath, folderName)
-    if not os.path.exists(SimFolder):
-        os.mkdir(SimFolder)
-    else:
-        warnings.warn("Warning: {:s} simulation folder already exists.".format(folderName))
+    import shutil
+    import os
+    import fredtools as ft
+
+    # check if folderPath exists
+    if not os.path.exists(folderPath):
+        raise FileNotFoundError(f"The folder {folderPath} dose not exist.")
+
+    simFolder = os.path.join(folderPath, folderName)
+
+    # check if simulation folder exists
+    if os.path.exists(simFolder) and not overwrite:
+        raise FileExistsError(f"The simulation folder {simFolder} already exists.")
+
+    # remove simulation folder if exists and overwrite=True
+    if os.path.exists(simFolder) and overwrite:
+        shutil.rmtree(simFolder)
+
+    # create simulation folder
+    os.mkdir(simFolder)
 
     # create subfolders for fields
-    planInfo = ft.getRNInfo(RNfileName, displayInfo=False)
-    for fieldNo in planInfo["fieldsNumber"]:
-        if not os.path.exists(os.path.join(SimFolder, "F{:d}".format(fieldNo))):
-            os.mkdir(os.path.join(SimFolder, "F{:d}".format(fieldNo)))
+    planInfo, fieldsInfo, _ = ft.getRN(RNfileName, displayInfo=False)
+    fieldsInfo.reset_index(inplace=True)
+    for _, fieldInfo in fieldsInfo.iterrows():
+        os.mkdir(os.path.join(simFolder, f"{fieldInfo.deliveryNo:d}_Field{fieldInfo.fieldNo:d}"))
+
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
-        print("# Created {:d} field folders in {:s}".format(planInfo["numberOfBeams"], SimFolder))
+        print("# Created {:d} field folders in {:s}".format(planInfo["treatmentFieldsNumber"], simFolder))
         print("#" * len(f"### {ft._currentFuncName()} ###"))
-    return SimFolder
+    return simFolder
 
 
 def readFREDStat(fileNameLogOut, displayInfo=False):
@@ -73,6 +88,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     import os
     import re
     from numpy import nan
+    import fredtools as ft
 
     def scaleUnit(unit):
         if unit == "ns":
