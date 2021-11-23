@@ -18,8 +18,6 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     matplotlib.path.Path.contains_points functionality, and 'smparallel', which exploits
     the algorithm described in [1]_.
 
-    .
-
     Parameters
     ----------
     img : SimpleITK Image

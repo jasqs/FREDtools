@@ -47,13 +47,14 @@ with open("./../README.md", "r") as fh:
 
 
 '''Use generated requirements. To generate requirements run:
-$ pipreqs fredtools
+$ pipreqs fredtools/ --force
 in the main folder. Install pipreqs with 'pip install pipreqs'
 '''
 with open("./../fredtools/requirements.txt", "r") as req_h:
     requirements = req_h.readlines()
 requirements = [req.strip().replace('==', '>=') for req in requirements]
-
+# remove some dependencies
+requirements = [req for req in requirements if 'fitz' not in req]
 
 setuptools.setup(
     name="fredtools",
@@ -64,7 +65,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jasqs/FREDtools",
-    packages=['fredtools', 'fredtools.ft_imgIO', 'fredtools.ft_optimisation'],
+    packages=['fredtools', 'fredtools.ft_imgIO', 'fredtools.ft_optimisation', 'fredtools.ft_gammaIndex'],
     package_dir={'fredtools': './../fredtools'},
     classifiers=[
         "Programming Language :: Python :: 3",

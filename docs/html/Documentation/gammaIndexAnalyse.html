@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gamma Index Analyse &mdash; FRED Tools 0.6.35 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bragg Peak Analyse" href="braggPeakAnalyse.html" />
+    <link rel="prev" title="DVH Analyse" href="dvhAnalyse.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #00007fff" >
+            <a href="../index.html" class="icon icon-home"> FRED Tools
+            <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.35
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Collaboration.html">Collaboration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Citation.html">Citation and References</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ReadWrite.html">Image Reading and Writing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spotAnalyse.html">Spot Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Gamma Index Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="displayImage.html">Display Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #00007fff" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FRED Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Gamma Index Analyse</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Documentation/gammaIndexAnalyse.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gamma-index-analyse">
+<h1>Gamma Index Analyse<a class="headerlink" href="#gamma-index-analyse" title="Permalink to this headline"></a></h1>
+<p>A collection of functions for the Gamma Index analysis.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The GI analysis is performed in an external C++ used as a
+shared library and is still in the development and validation.</p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.calcGammaIndex">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">calcGammaIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgRef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgEval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DTA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DDType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fractionalStepSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gamma'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.calcGammaIndex" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate gamma index map.</p>
+<p>The function calculates the gamma index map using the <cite>imgRef</cite> and <cite>imgEval</cite>,
+defined SimpleITK image objects, as the reference and evaluation images, respectively.
+The gamma index test is performed with defined dose distance (DD) given in [%],
+distance to agreement (DTA) given in the same length unit as the reference image
+(in [mm] by default) and is calculated for the dose values greater or equal than
+a fraction of the maximum dose in the reference image, given by the DCO parameter.
+The gamma index can be calculated for <cite>local</cite> or <cite>global</cite> dose difference in tho modes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>gamma</em>: each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.</p></li>
+<li><p><em>pass-rate</em>: each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.</p></li>
+</ul>
+</div></blockquote>
+<p>The gamma index calculation is performed by an external C++ library complied as a linux shared library.
+The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys <a class="footnote-reference brackets" href="#id2" id="id1">1</a> python library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgRef</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 2D or 3D image describing the reference.</p></li>
+<li><p><strong>imgEval</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 2D or 3D image describing the evaluation.</p></li>
+<li><p><strong>DD</strong> (<em>float</em>) – Dose distance in [%].</p></li>
+<li><p><strong>DTA</strong> (<em>float</em>) – Distance-to-agreement, usually in [mm].</p></li>
+<li><p><strong>DCO</strong> (<em>float</em>) – Lower dose cutoff below which gamma will not be calculated given as the fraction of the maximum reference value.</p></li>
+<li><p><strong>DDType</strong> (<em>{'local'</em><em>, </em><em>'global'}</em><em>, </em><em>optional</em>) – <p>Method of calculating the absolute dose difference criterion. (def. ‘local’):</p>
+<blockquote>
+<div><ul>
+<li><p>’local’ : the absolute dose difference calculated as DD percent of the local reference value.</p></li>
+<li><p>’global’ : the absolute dose difference calculated as DD percent of the maximum reference value.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>stepSize</strong> (<em>float</em><em>, </em><em>optional</em>) – Step size to search for minimum gamma index value. Can be given
+as an absolute value in the reference length unit (for instance in [mm])
+or as the fraction of the distance-to-agreement if fractionalStepSize=True. (def. 10)</p></li>
+<li><p><strong>fractionalStepSize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the <cite>stepSize</cite> should be treated as the absolute value (false)
+or the fraction of the distance-to-agreement (true). (def. True).</p></li>
+<li><p><strong>mode</strong> (<em>{'gamma'</em><em>, </em><em>'pass=-rate'}</em><em>, </em><em>optional</em>) – <p>Mode of calculation. (def. ‘gamma’):</p>
+<blockquote>
+<div><ul>
+<li><p>’gamma’: each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.</p></li>
+<li><p>’pass-rate’: each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if the multiprocessing should be used and how many cores should
+be exploited. Can be None, then no multiprocessing will be used,
+a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
+or a scalar defining the number of CPU cored to be used. (def. ‘auto’)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of a SimpleITK image describing the gamma index. It is of float or integer
+type when the calculation mode is ‘gamma’ or ‘pass-rate’, respectively.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getGIstat" title="fredtools.getGIstat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getGIstat</span></code></a></dt><dd><p>calculate the gamma index statistics including the gamma index pass rate.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://docs.pymedphys.com/">https://docs.pymedphys.com/</a></p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getGIstat">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getGIstat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgGI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getGIstat" title="Permalink to this definition"></a></dt>
+<dd><p>Get statistics of Gamma Index.</p>
+<p>The function calculates Gamma Index statistics from an image defined
+as a SimpleITK image object. Tho modes of the gamma index calculation
+are recognized automatically based on the image type:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>gamma</em> (float): each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1 or numpy.nan.</p></li>
+<li><p><em>pass-rate</em> (integer): each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgGI</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary with the gamma index statistics.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.getExtMpl" title="fredtools.getExtMpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExtMpl</span></code></a></dt><dd><p>get extent of a SimpleITK image object describing a slice in matplotlib format.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dvhAnalyse.html" class="btn btn-neutral float-left" title="DVH Analyse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="braggPeakAnalyse.html" class="btn btn-neutral float-right" title="Bragg Peak Analyse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright FRED collaboration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

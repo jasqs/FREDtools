@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Reading and Writing &mdash; FRED Tools 0.6.21 documentation</title>
+  <title>Image Reading and Writing &mdash; FRED Tools 0.6.35 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.21
+                0.6.35
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -57,12 +57,15 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spotAnalyse.html">Spot Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gammaIndexAnalyse.html">Gamma Index Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="displayImage.html">Display Image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous</a></li>
 </ul>
 
         </div>
@@ -341,28 +344,29 @@ by pydicom.read_file.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getRNInfo">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNInfo" title="Permalink to this definition"></a></dt>
-<dd><p>Get some information from the RN plan from RN dicom file.</p>
+<dd><p>Get some information from the RN plan.</p>
 <p>The function retrieves some usefull information from a RN dicom of a treatment plan.
 Following information are saved to a dictionary:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><em>targetStructName</em> : name of the structure which the plan was prepared for (dose not work for all RN dicoms).</p></li>
-<li><p><em>fractionsNo</em> : number of the fractions planned.</p></li>
+<li><p><em>RNFileName</em> : absolute path to the RN file.</p></li>
 <li><p><em>dosePrescribed</em> : dose prescribed to the target read from DoseReferenceSequence.</p></li>
-<li><p><em>patientName</em> : name of the patient (usually empty string for anonymized DICOM)</p></li>
-<li><p><em>patientBirthDate</em> : birth date of the patient (usually empty string for anonymized DICOM)</p></li>
-<li><p><em>patientID</em> : ID of the patient (often empty string for anonymized DICOM)</p></li>
-<li><p><em>planLabel</em> : name of the treatment plan.</p></li>
-<li><p><em>planDate</em> : date of the plan creation.</p></li>
-<li><p><em>planTime</em> : time of the plan creation.</p></li>
-<li><p><em>treatmentMachineName</em> : name of the machine that the plan has been prepared for.</p></li>
+<li><p><em>fractionNo</em> : number of the fractions planned.</p></li>
+<li><p><em>targetStructName</em> : name of the structure which the plan was prepared for (dose not work for all RN dicoms).</p></li>
+<li><p><em>planLabel</em> : name of the treatment plan (can be empty for anonymized DICOM).</p></li>
+<li><p><em>planDate</em> : date of the plan creation (can be empty for anonymized DICOM).</p></li>
+<li><p><em>planTime</em> : time of the plan creation (can be empty for anonymized DICOM).</p></li>
+<li><p><em>patientName</em> : name of the patient (can be empty for anonymized DICOM).</p></li>
+<li><p><em>patientBirthDate</em> : birth date of the patient (can be empty for anonymized DICOM).</p></li>
+<li><p><em>patientID</em> : ID of the patient (can be empty for anonymized DICOM).</p></li>
+<li><p><em>manufacturer</em> : manufacturer of the treatment planning system.</p></li>
+<li><p><em>softwareVersions</em> : version of the treatment planning system.</p></li>
+<li><p><em>stationName</em> : name of the station on which the plan has been prepared.</p></li>
+<li><p><em>machineName</em> : name of the treatment machine for which the plan was prepared.</p></li>
 <li><p><em>totalFieldsNumber</em> : total number of fields including setup, treatment and other fields.</p></li>
 <li><p><em>treatmentFieldsNumber</em> : total number of treatment fields.</p></li>
 <li><p><em>setupFieldsNumber</em> : total number of setup fields.</p></li>
 <li><p><em>otherFieldsNumber</em> : total number of other fields.</p></li>
-<li><p><em>manufacturer</em> : manufacturer of the treatment planning system.</p></li>
-<li><p><em>softwareVersions</em> : version of the treatment planning system.</p></li>
-<li><p><em>stationName</em> : name of the station on which the plan has been prepared.</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
@@ -382,74 +386,70 @@ Following information are saved to a dictionary:</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRN" title="fredtools.getRN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRN</span></code></a></dt><dd><p>get parameters of the RN plan from RN dicom file.</p>
+<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get summary of parameters for each field defined in RN plan.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get summary of parameters for each spot defined in RN plan.</p>
 </dd>
 </dl>
 </div>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="fredtools.getRN">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRN" title="Permalink to this definition"></a></dt>
-<dd><p>Get parameters of the RN plan from RN dicom file.</p>
-<p>The function reads an RN dicom file and collects general
-information of the plan, information of each treatment field
-and information about each scanning pencil beam. The general
-information about the plan is hold in a dictionary, is extended
-with comparison to the results of the getRNInfo function
-(cf. See Also section), and contains following keys:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><em>targetStructName</em> : name of the structure which the plan was prepared for (dose not work for all RN dicoms).</p></li>
-<li><p><em>fractionsNo</em> : number of the fractions planned.</p></li>
-<li><p><em>dosePrescribed</em> : dose prescribed to the target read from DoseReferenceSequence.</p></li>
-<li><p><em>patientName</em> : name of the patient (usually empty string for anonymized DICOM)</p></li>
-<li><p><em>patientBirthDate</em> : birth date of the patient (usually empty string for anonymized DICOM)</p></li>
-<li><p><em>patientID</em> : ID of the patient (often empty string for anonymized DICOM)</p></li>
-<li><p><em>planLabel</em> : name of the treatment plan.</p></li>
-<li><p><em>planDate</em> : date of the plan creation.</p></li>
-<li><p><em>planTime</em> : time of the plan creation.</p></li>
-<li><p><em>treatmentMachineName</em> : name of the machine that the plan has been prepared for.</p></li>
-<li><p><em>totalFieldsNumber</em> : total number of fields including setup, treatment and other fields.</p></li>
-<li><p><em>treatmentFieldsNumber</em> : total number of treatment fields.</p></li>
-<li><p><em>setupFieldsNumber</em> : total number of setup fields.</p></li>
-<li><p><em>otherFieldsNumber</em> : total number of other fields.</p></li>
-<li><p><em>manufacturer</em> : manufacturer of the treatment planning system.</p></li>
-<li><p><em>softwareVersions</em> : version of the treatment planning system.</p></li>
-<li><p><em>stationName</em> : name of the station on which the plan has been prepared.</p></li>
-<li><p><em>isocentrePos</em> : position of the plan isocentre for the first field (if it is not the same for all fields, then a warning is raised)</p></li>
-</ul>
-</div></blockquote>
-<p>Information about the fields is hold in a pandas DataFrame where
-the rows are in order of the fields delivery. It is assumed here that
-the order of the fields delivery is the same as the order of the fields
-in IonBeamSequence.</p>
-<p>Information about each scanning pencil beam is hold in a pandas DataFrame.
-The scanning pencil beam information is collected in rows but does not
-necessary in a delivery order. Usually the delivery order of the spots
-for each energy layer is defined by the machine during beam delivery
-and this information can be only taken from the machine log files.</p>
+<dt class="sig sig-object py" id="fredtools.getRNFields">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNFields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNFields" title="Permalink to this definition"></a></dt>
+<dd><p>Get parameters of each field defined in the RN file.</p>
+<p>The function retrieves information for each field defined in the RN dicom file.
+A consistency check is performed to check correctness of the parameters written
+in the RN dicom file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fileName</strong> (<em>path</em>) – Path to RN dicom file.</p></li>
-<li><p><strong>raiseWarning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
+<li><p><strong>raiseWarning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings if the consistency check fails. (def. False)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>dict</em> – Dictionary with the RN treatment plan parameters.</p></li>
-<li><p><em>fieldsInfo</em> – DataFrame with parameters for each field.</p></li>
-<li><p><em>fieldsSpotsInfo</em> – DataFrame with parameters of each scanning beam.</p></li>
-</ul>
-</p>
+<dd class="field-even"><p>DataFrame with the fields’ parameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas DataFrame</p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRNInfo" title="fredtools.getRNInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNInfo</span></code></a></dt><dd><p>get some information from the RN plan from RN dicom file.</p>
+<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get summary of parameters for each spot defined in RN plan.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getRNInfo" title="fredtools.getRNInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNInfo</span></code></a></dt><dd><p>get some basic information from the RN plan.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getRNSpots">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNSpots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNSpots" title="Permalink to this definition"></a></dt>
+<dd><p>Get parameters of each spot defined in the RN file.</p>
+<p>The function retrieves information for each spot defined in the RN dicom file.
+All spots are listed in the results, including the spots with zero meterset weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fileName</strong> (<em>path</em>) – Path to RN dicom file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with the spots’ parameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas DataFrame</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get summary of parameters for each field defined in RN plan.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getRNInfo" title="fredtools.getRNInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNInfo</span></code></a></dt><dd><p>get some basic information from the RN plan.</p>
 </dd>
 </dl>
 </div>

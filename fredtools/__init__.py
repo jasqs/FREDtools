@@ -5,15 +5,18 @@ from .ft_imgManipulate import *
 from .ft_simTools import *
 from .ft_dvh import *
 from .ft_braggPeak import *
+from .ft_spotAnalyse import *
 from .ft_displayImg import *
 from .ft_optimisation import *
+from .ft_gammaIndex import *
+from .ft_misc import *
 
 import itk
 import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 6, 21]
+version_info = [0, 6, 35]
 __version__ = ".".join(map(str, version_info))
 
 
@@ -124,6 +127,8 @@ def _isSITK(img, raiseError=False):
 
 
 def _isSITK_volume(img, raiseError=False):
+    import fredtools as ft
+
     ft._isSITK(img, raiseError=True)
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 3)
 
@@ -133,6 +138,8 @@ def _isSITK_volume(img, raiseError=False):
 
 
 def _isSITK_timevolume(img, raiseError=False):
+    import fredtools as ft
+
     ft._isSITK(img, raiseError=True)
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 4)
 
@@ -142,6 +149,7 @@ def _isSITK_timevolume(img, raiseError=False):
 
 
 def _isSITK_slice(img, raiseError=False):
+    import fredtools as ft
 
     ft._isSITK(img, raiseError=True)
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 2)
@@ -152,6 +160,7 @@ def _isSITK_slice(img, raiseError=False):
 
 
 def _isSITK_profile(img, raiseError=False):
+    import fredtools as ft
 
     ft._isSITK(img, raiseError=True)
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 1)
@@ -162,6 +171,7 @@ def _isSITK_profile(img, raiseError=False):
 
 
 def _isSITK_point(img, raiseError=False):
+    import fredtools as ft
 
     ft._isSITK(img, raiseError=True)
     instanceBool = img.GetSize().count(1) == (img.GetDimension())
@@ -172,6 +182,7 @@ def _isSITK_point(img, raiseError=False):
 
 
 def _isSITK_mask(img, raiseError=False):
+    import fredtools as ft
 
     ft._isSITK(img, raiseError=True)
     stat = getStatistics(img)
@@ -183,6 +194,7 @@ def _isSITK_mask(img, raiseError=False):
 
 
 def _isSITK_vector(img, raiseError=False):
+    import fredtools as ft
 
     ft._isSITK(img, raiseError=True)
     instanceBool = "vector" in img.GetPixelIDTypeAsString()
@@ -214,6 +226,7 @@ def SITK2ITK(imgSITK):
     import numpy as np
     import itk
     import SimpleITK as sitk
+    import fredtools as ft
 
     ft._isSITK(imgSITK, raiseError=True)
     imgITK = itk.GetImageFromArray(sitk.GetArrayFromImage(imgSITK), is_vector=imgSITK.GetNumberOfComponentsPerPixel() > 1)
@@ -226,6 +239,7 @@ def SITK2ITK(imgSITK):
 def ITK2SITK(imgITK):
     r"""Convert image from ITK.Image object to SimpleITK.Image object."""
     import SimpleITK as sitk
+    import fredtools as ft
 
     ft._isITK(imgITK, raiseError=True)
     imgSITK = sitk.GetImageFromArray(itk.GetArrayFromImage(imgITK), isVector=imgITK.GetNumberOfComponentsPerPixel() > 1)
@@ -241,7 +255,7 @@ def _getCPUNo(CPUNo="auto"):
     from numpy import isscalar
 
     if not CPUNo:
-        return None
+        return 1
     elif isinstance(CPUNo, str):
         if CPUNo.lower() in ["none", "non", "single", "one"]:
             return 1

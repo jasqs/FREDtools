@@ -292,7 +292,6 @@ def _displayImageInfo(img):
     extent_mm = ft.getExtent(img)
     size_mm = ft.getSize(img)
     axesNames = ["x", "y", "z", "t"]
-    #     voxelVolume = np.prod(img.GetSpacing())
     arr = sitk.GetArrayFromImage(img)
     voxelCentres = ft.getVoxelCentres(img)
     isMask = ft._isSITK_mask(img)
@@ -379,6 +378,17 @@ def _displayImageInfo(img):
             "# non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6),
             "(sum of vectors)" if isVector else "",
         )
+
+    if img.GetMetaDataKeys():
+        print("# Additional metadata:")
+        keyLen = []
+        for key in img.GetMetaDataKeys():
+            keyLen.append(len(key))
+        keyLen = np.max(keyLen)
+        for key in img.GetMetaDataKeys():
+            if "UNKNOWN_PRINT_CHARACTERISTICS" in img.GetMetaData(key):
+                continue
+            print(f"# {key.ljust(keyLen)} : {img.GetMetaData(key)}")
 
 
 def displayImageInfo(img):

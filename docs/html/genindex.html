@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; FRED Tools 0.6.21 documentation</title>
+  <title>Index &mdash; FRED Tools 0.6.35 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
@@ -31,7 +31,7 @@
             <img src="_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.21
+                0.6.35
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -49,12 +49,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/ReadWrite.html">Image Reading and Writing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/ImageAnalyse.html">Image Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation/spotAnalyse.html">Spot Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/dvhAnalyse.html">DVH Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation/gammaIndexAnalyse.html">Gamma Index Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/ImageManipulate.html">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/displayImage.html">Display Image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Documentation/simTools.html">Monte Carlo simulation tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation/misc.html">Miscellaneous</a></li>
 </ul>
 
         </div>
@@ -88,9 +91,11 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -117,9 +122,15 @@
 </li>
       <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.bortfeldFit">bortfeldFit (fredtools.braggPeak property)</a>
 </li>
+      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.bortfeldFitParam">bortfeldFitParam (fredtools.braggPeak property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.bortfeldFitParam">bortfeldFitParam (fredtools.braggPeak property)</a>
+      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.bp">bp (fredtools.braggPeak property)</a>
+</li>
+      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.bpBort">bpBort (fredtools.braggPeak property)</a>
+</li>
+      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.bpInterp">bpInterp (fredtools.braggPeak property)</a>
 </li>
       <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak">braggPeak (class in fredtools)</a>
 </li>
@@ -129,12 +140,16 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Documentation/ImageAnalyse.html#fredtools.compareImgFoR">compareImgFoR() (in module fredtools)</a>
+      <li><a href="Documentation/gammaIndexAnalyse.html#fredtools.calcGammaIndex">calcGammaIndex() (in module fredtools)</a>
 </li>
-      <li><a href="Documentation/ReadWrite.html#fredtools.convertMHDtoDoubleFiles">convertMHDtoDoubleFiles() (in module fredtools)</a>
+      <li><a href="Documentation/simTools.html#fredtools.checkFREDVersion">checkFREDVersion() (in module fredtools)</a>
+</li>
+      <li><a href="Documentation/ImageAnalyse.html#fredtools.compareImgFoR">compareImgFoR() (in module fredtools)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Documentation/ReadWrite.html#fredtools.convertMHDtoDoubleFiles">convertMHDtoDoubleFiles() (in module fredtools)</a>
+</li>
       <li><a href="Documentation/ReadWrite.html#fredtools.convertMHDtoSingleFile">convertMHDtoSingleFile() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/ImageManipulate.html#fredtools.createCylindricalMask">createCylindricalMask() (in module fredtools)</a>
@@ -152,6 +167,14 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.displayInfo">displayInfo (fredtools.braggPeak property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Documentation/spotAnalyse.html#fredtools.fitSpotProfile">fitSpotProfile() (in module fredtools)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -179,16 +202,22 @@
 </li>
       <li><a href="Documentation/ImageAnalyse.html#fredtools.getExtMpl">getExtMpl() (in module fredtools)</a>
 </li>
+      <li><a href="Documentation/simTools.html#fredtools.getFREDVersion">getFREDVersion() (in module fredtools)</a>
+</li>
+      <li><a href="Documentation/simTools.html#fredtools.getFREDVersions">getFREDVersions() (in module fredtools)</a>
+</li>
       <li><a href="Documentation/ImageAnalyse.html#fredtools.getGIcmap">getGIcmap() (in module fredtools)</a>
+</li>
+      <li><a href="Documentation/gammaIndexAnalyse.html#fredtools.getGIstat">getGIstat() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/ImageAnalyse.html#fredtools.getImageCenter">getImageCenter() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/ImageManipulate.html#fredtools.getImgBEV">getImgBEV() (in module fredtools)</a>
 </li>
-      <li><a href="Documentation/GettingSubimage.html#fredtools.getInteg">getInteg() (in module fredtools)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Documentation/GettingSubimage.html#fredtools.getInteg">getInteg() (in module fredtools)</a>
+</li>
       <li><a href="Documentation/ImageAnalyse.html#fredtools.getMassCenter">getMassCenter() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/GettingSubimage.html#fredtools.getPoint">getPoint() (in module fredtools)</a>
@@ -199,9 +228,11 @@
 </li>
       <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.getRInterp">getRInterp() (fredtools.braggPeak method)</a>
 </li>
-      <li><a href="Documentation/ReadWrite.html#fredtools.getRN">getRN() (in module fredtools)</a>
+      <li><a href="Documentation/ReadWrite.html#fredtools.getRNFields">getRNFields() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/ReadWrite.html#fredtools.getRNInfo">getRNInfo() (in module fredtools)</a>
+</li>
+      <li><a href="Documentation/ReadWrite.html#fredtools.getRNSpots">getRNSpots() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/ReadWrite.html#fredtools.getRSInfo">getRSInfo() (in module fredtools)</a>
 </li>
@@ -223,9 +254,7 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.imgBort">imgBort (fredtools.braggPeak property)</a>
-</li>
-      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.imgInterp">imgInterp (fredtools.braggPeak property)</a>
+      <li><a href="Documentation/simTools.html#fredtools.interpolateBeamModel">interpolateBeamModel() (in module fredtools)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -240,6 +269,18 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Documentation/ImageManipulate.html#fredtools.mapStructToImg">mapStructToImg() (in module fredtools)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Documentation/misc.html#fredtools.mergePDF">mergePDF() (in module fredtools)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Documentation/braggPeakAnalyse.html#fredtools.braggPeak.offset">offset (fredtools.braggPeak property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -259,6 +300,8 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Documentation/simTools.html#fredtools.readBeamModel">readBeamModel() (in module fredtools)</a>
+</li>
       <li><a href="Documentation/simTools.html#fredtools.readFREDStat">readFREDStat() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/ReadWrite.html#fredtools.readMap3D">readMap3D() (in module fredtools)</a>
@@ -268,6 +311,8 @@
       <li><a href="Documentation/ReadWrite.html#fredtools.readMHD">readMHD() (in module fredtools)</a>
 </li>
       <li><a href="Documentation/ImageManipulate.html#fredtools.resampleImg">resampleImg() (in module fredtools)</a>
+</li>
+      <li><a href="Documentation/simTools.html#fredtools.runFRED">runFRED() (in module fredtools)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -305,10 +350,12 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Documentation/ReadWrite.html#fredtools.writeMap3D">writeMap3D() (in module fredtools)</a>
+      <li><a href="Documentation/simTools.html#fredtools.writeBeamModel">writeBeamModel() (in module fredtools)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Documentation/ReadWrite.html#fredtools.writeMap3D">writeMap3D() (in module fredtools)</a>
+</li>
       <li><a href="Documentation/ReadWrite.html#fredtools.writeMHD">writeMHD() (in module fredtools)</a>
 </li>
   </ul></td>
