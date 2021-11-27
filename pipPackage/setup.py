@@ -56,15 +56,17 @@ requirements = [req.strip().replace('==', '>=') for req in requirements]
 # remove some dependencies
 requirements = [req for req in requirements if 'fitz' not in req]
 
+# configure setuptools
 setuptools.setup(
     name="fredtools",
     version=__version__,
-    author="FRED Collaboration",
-    author_email="jan.gajewski@ifj.edu.pl",
     description="FRED tools is a collection of python functions for image manipulation and analysis. See more on https://github.com/jasqs/FREDtools.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jasqs/FREDtools",
+    author="FRED Collaboration",
+    author_email="jan.gajewski@ifj.edu.pl",
+    url="https://www.fredtools.ifj.edu.pl/",
+    project_urls={"Repository": "https://github.com/jasqs/FREDtools", "FRED MC": "http://www.fred-mc.org/"},
     packages=['fredtools', 'fredtools.ft_imgIO', 'fredtools.ft_optimisation', 'fredtools.ft_gammaIndex'],
     package_dir={'fredtools': './../fredtools'},
     classifiers=[
@@ -73,6 +75,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.8,<4.0',
+    package_data={'fredtools.ft_gammaIndex': ['libFredGI.so']},
     install_requires=requirements,
     scripts=[]
 )

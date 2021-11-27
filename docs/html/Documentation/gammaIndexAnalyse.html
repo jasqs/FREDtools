@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gamma Index Analyse &mdash; FRED Tools 0.6.35 documentation</title>
+  <title>Gamma Index Analyse &mdash; FRED Tools 0.6.38 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.35
+                0.6.38
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -97,7 +97,7 @@ shared library and is still in the development and validation.</p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.calcGammaIndex">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">calcGammaIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgRef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgEval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DTA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DDType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fractionalStepSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gamma'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.calcGammaIndex" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">calcGammaIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgRef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgEval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DTA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DDType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">globalNorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fractionalStepSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gamma'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.calcGammaIndex" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate gamma index map.</p>
 <p>The function calculates the gamma index map using the <cite>imgRef</cite> and <cite>imgEval</cite>,
 defined SimpleITK image objects, as the reference and evaluation images, respectively.
@@ -113,7 +113,7 @@ The gamma index can be calculated for <cite>local</cite> or <cite>global</cite> 
 </ul>
 </div></blockquote>
 <p>The gamma index calculation is performed by an external C++ library complied as a linux shared library.
-The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys <a class="footnote-reference brackets" href="#id2" id="id1">1</a> python library.</p>
+The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys <a class="footnote-reference brackets" href="#id3" id="id1">1</a> python library.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -130,6 +130,8 @@ The gamma index engine was developed by Angelo Schiavi and validated against PyM
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>globalNorm</strong> (<em>float</em><em>, </em><em>optional</em>) – Global normalisation of the input images. If not given or None then the maximum value of
+the reference image is used. (def. None)</p></li>
 <li><p><strong>stepSize</strong> (<em>float</em><em>, </em><em>optional</em>) – Step size to search for minimum gamma index value. Can be given
 as an absolute value in the reference length unit (for instance in [mm])
 or as the fraction of the distance-to-agreement if fractionalStepSize=True. (def. 10)</p></li>
@@ -157,6 +159,28 @@ type when the calculation mode is ‘gamma’ or ‘pass-rate’, respectively.<
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – <p>Run time error is raised when the execution of the gamma calculation failed.
+    The following error codes can be raised:</p>
+<ul class="simple">
+<li><p>-1 : generic error</p></li>
+<li><p>-20 : value range error</p></li>
+<li><p>-21 : value is nan error</p></li>
+<li><p>-22 : value is inf error</p></li>
+<li><p>-29 : null pointer error</p></li>
+<li><p>-50 : illdefined vector</p></li>
+<li><p>-51 : illdefined dimensions</p></li>
+<li><p>-52 : illdefined spacing</p></li>
+<li><p>-53 : illdefined offset</p></li>
+<li><p>-100 : computation ongoing</p></li>
+<li><p>-101 : setup not complete</p></li>
+<li><p>-102 : criteria not defined</p></li>
+<li><p>-103 : ref map not defined</p></li>
+<li><p>-104 : eval map not defined</p></li>
+<li><p>-105 : computation not done</p></li>
+</ul>
+</p>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -165,11 +189,18 @@ type when the calculation mode is ‘gamma’ or ‘pass-rate’, respectively.<
 </dd>
 </dl>
 </div>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>See example jupyter notebook at <a class="footnote-reference brackets" href="#id4" id="id2">2</a></p>
+</div>
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
 <dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
 <dd><p><a class="reference external" href="https://docs.pymedphys.com/">https://docs.pymedphys.com/</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/jasqs/FREDtools/blob/main/examples/Gamma%20Index%20analysis%20Tutorial.ipynb">Jupyter notebook of Gamma Index Analysis Tutorial</a></p>
 </dd>
 </dl>
 </div>
@@ -205,7 +236,7 @@ are recognized automatically based on the image type:</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.getExtMpl" title="fredtools.getExtMpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExtMpl</span></code></a></dt><dd><p>get extent of a SimpleITK image object describing a slice in matplotlib format.</p>
+<dt><a class="reference internal" href="#fredtools.calcGammaIndex" title="fredtools.calcGammaIndex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcGammaIndex</span></code></a></dt><dd><p>calculate Gamma Index map for two images.</p>
 </dd>
 </dl>
 </div>

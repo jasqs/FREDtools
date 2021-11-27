@@ -1,4 +1,4 @@
-def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, fractionalStepSize=True, mode="gamma", CPUNo="auto", displayInfo=True):
+def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=None, stepSize=10, fractionalStepSize=True, mode="gamma", CPUNo="auto", displayInfo=False):
     """Calculate gamma index map.
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
@@ -33,6 +33,9 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, f
             - 'local' : the absolute dose difference calculated as DD percent of the local reference value.
             - 'global' : the absolute dose difference calculated as DD percent of the maximum reference value.
 
+    globalNorm : float, optional
+        Global normalisation of the input images. If not given or None then the maximum value of
+        the reference image is used. (def. None)
     stepSize : float, optional
         Step size to search for minimum gamma index value. Can be given
         as an absolute value in the reference length unit (for instance in [mm])
@@ -60,13 +63,41 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, f
         Object of a SimpleITK image describing the gamma index. It is of float or integer
         type when the calculation mode is 'gamma' or 'pass-rate', respectively.
 
+    Raises
+    ------
+    RuntimeError
+        Run time error is raised when the execution of the gamma calculation failed.
+        The following error codes can be raised:
+
+
+        - -1 : generic error
+        - -20 : value range error
+        - -21 : value is nan error
+        - -22 : value is inf error
+        - -29 : null pointer error
+        - -50 : illdefined vector
+        - -51 : illdefined dimensions
+        - -52 : illdefined spacing
+        - -53 : illdefined offset
+        - -100 : computation ongoing
+        - -101 : setup not complete
+        - -102 : criteria not defined
+        - -103 : ref map not defined
+        - -104 : eval map not defined
+        - -105 : computation not done
+
     See Also
     --------
         getGIstat: calculate the gamma index statistics including the gamma index pass rate.
 
+    Examples
+    --------
+    See example jupyter notebook at [2]_
+
     References
     ----------
     .. [1] https://docs.pymedphys.com/
+    .. [2] `Jupyter notebook of Gamma Index Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Gamma%20Index%20analysis%20Tutorial.ipynb>`_
     """
     import sys, os
     import fredtools as ft
@@ -85,15 +116,17 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, f
     if not ft._isSITK_slice(imgEval, raiseError=False) and not ft._isSITK_volume(imgEval, raiseError=False):
         raise TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
 
-    # validate DTA, DD, DDType and DCO
+    # validate DTA, DD, DDType, DCO and globalNorm
     if not np.isscalar(DTA) or DTA <= 0:
-        raise ValueError(f"The value {DTA} is not correct. It must be a positive scalar.")
+        raise ValueError(f"The value od DTA {DTA} is not correct. It must be a positive scalar.")
     if not np.isscalar(DD) or DD <= 0 or DD >= 100:
-        raise ValueError(f"The value {DD} is not correct. It must be a positive scalar between 0 and 100.")
+        raise ValueError(f"The value of DD {DD} is not correct. It must be a positive scalar between 0 and 100.")
     if not isinstance(DDType, str) or DDType.lower() not in ["local", "global", "l", "g"]:
         raise ValueError(f"Dose distance type must be a string and only 'local' or 'global' are supported.")
     if not np.isscalar(DCO) or DCO <= 0 or DCO >= 1:
-        raise ValueError(f"The value {DCO} is not correct. It must be a positive scalar between 0 and 1.")
+        raise ValueError(f"The value of DCO {DCO} is not correct. It must be a positive scalar between 0 and 1.")
+    if not ((np.isscalar(globalNorm) and globalNorm > 0) or globalNorm is None):
+        raise ValueError(f"The value of globalNorm {globalNorm} is not correct. It must be a positive scalar or None.")
 
     # validate stepSize
     if not np.isscalar(stepSize) or stepSize <= 0:
@@ -110,7 +143,7 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, f
     if sys.platform == "linux" or sys.platform == "linux2":
         dlclose = ctypes.cdll.LoadLibrary("").dlclose
         dlclose.argtypes = [ctypes.c_void_p]
-        libFredGI = ctypes.cdll.LoadLibrary("./libFredGI.so")
+        libFredGI = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), "./libFredGI.so"))
         libFredGI_h = libFredGI._handle
     elif sys.platform == "win32":
         raise OSError("Windows version not implemented yet. Only the linux shared library is working now.")
@@ -125,7 +158,11 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, f
         libFredGIVersion = b"\0" * 256
         libFredGI.fredGI_version(ctypes.c_char_p(libFredGIVersion))
         libFredGIVersion = libFredGIVersion.decode("utf-8")
-        # set DTA, DD, DDType and DCO
+
+        # set interpolation dose values using neighboring voxels
+        libFredGI.fredGI_setInterpolation(ctypes.c_int(1))
+
+        # set DTA, DD, DDType, DCO and globalNorm
         libFredGI.fredGI_setDTA(ctypes.c_float(DTA))
         libFredGI.fredGI_setDD(ctypes.c_float(DD))
         if DDType.lower() in ["local", "l"]:
@@ -135,6 +172,8 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, f
             DDType = "global"
             libFredGI.fredGI_setDDCriterium(ctypes.c_int(1))  # 1 = GLOBAL, 2 = LOCAL
         libFredGI.fredGI_setDCO(ctypes.c_float(DCO * 100))
+        if globalNorm:
+            libFredGI.fredGI_setGlobalNormalization(ctypes.c_float(globalNorm))
 
         # set stepSize
         if fractionalStepSize:
@@ -188,18 +227,18 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", stepSize=10, f
 
         # start computation
         computationStatus = libFredGI.fredGI_startComputation()
+        if not computationStatus == 0:
+            raise RuntimeError(f"Gamma Index computation failed with the error code {computationStatus}. Refer to www.fredtools.ifj.edu.pl for more details.")
 
         # read results and convert to SimpleITK image
-        arrGI = np.zeros(imgRef.GetSize(), dtype=np.float32)
-        libFredGI.fredGI_getGammaIndex3DMap.argtypes = [ndpointer(ctypes.c_float, flags="C_CONTIGUOUS")]
+        arrGI = np.zeros(imgRef.GetSize(), dtype=np.float32, order="F")
+        libFredGI.fredGI_getGammaIndex3DMap.argtypes = [ndpointer(ctypes.c_float, flags="F_CONTIGUOUS")]
         libFredGI.fredGI_getGammaIndex3DMap(arrGI)
         arrGI = np.moveaxis(arrGI, range(arrGI.ndim), range(arrGI.ndim)[::-1])
-        # arrGI[arrGI < 0] = np.NaN
         imgGI = sitk.GetImageFromArray(arrGI)
         imgGI.CopyInformation(imgRef)
         if mode == "pass-rate":
             imgGI = sitk.Cast(imgGI, sitk.sitkInt8)
-        arrGI = ft.arr(imgGI)
 
         # get GI pass rate
         GIpassRate = ctypes.c_float()
@@ -258,7 +297,7 @@ def getGIstat(imgGI, displayInfo=False):
 
     See Also
     --------
-    getExtMpl : get extent of a SimpleITK image object describing a slice in matplotlib format.
+    calcGammaIndex : calculate Gamma Index map for two images.
     """
     import fredtools as ft
     import numpy as np
@@ -272,6 +311,10 @@ def getGIstat(imgGI, displayInfo=False):
             )
         mode = "pass-rate"
         GIstat["passRate"] = (arrGI == 1).sum() / (arrGI >= 0).sum() * 100
+        GIstat["mean"] = np.nan
+        GIstat["std"] = np.nan
+        GIstat["min"] = np.nan
+        GIstat["max"] = np.nan
 
     elif np.issubdtype(arrGI.dtype, np.floating):
         mode = "gamma"
