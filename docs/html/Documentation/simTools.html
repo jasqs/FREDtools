@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.39 documentation</title>
+  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.41 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.39
+                0.6.41
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -363,6 +363,78 @@ list of string lines.</p>
 <dt><a class="reference internal" href="#fredtools.checkFREDVersion" title="fredtools.checkFREDVersion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">checkFREDVersion</span></code></a></dt><dd><p>Check if the FRED version is installed.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.getFREDVersions" title="fredtools.getFREDVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFREDVersions</span></code></a></dt><dd><p>List the installed FRED varions.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.readGATE_HITSActor">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readGATE_HITSActor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readGATE_HITSActor" title="Permalink to this definition"></a></dt>
+<dd><p>read GATE hits data for active volume.</p>
+<p>The function reads hits results of GATE active volume saved
+to numpy pickle (.npy) or root (.root) file. All the columns
+are read but some of them are renamed:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>ds</em> is a step length in [cm]</p></li>
+<li><p><em>Edep</em> is deposited energy in [MeV]</p></li>
+<li><p><em>PDGCode</em> is the same as PDG encoding <a class="footnote-reference brackets" href="#id2" id="id1">1</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fileName</strong> (<em>path</em>) – Path string to .npy or .root file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dataframe with the data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas DataFrame</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.readFREDStat" title="fredtools.readFREDStat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readFREDStat</span></code></a></dt><dd><p>Read FRED simulation statistics information from logfile.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf">Monte Carlo Particle Numbering Scheme</a></p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.readGATEStat">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readGATEStat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNameLogOut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readGATEStat" title="Permalink to this definition"></a></dt>
+<dd><p>Read GATE simulation statistics information from Simulation Statistic Actor.</p>
+<p>The function reads some statistics information from the
+GATE Simulation Statistic Actor output <a class="footnote-reference brackets" href="#id4" id="id3">2</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileNameLogOut</strong> (<em>string</em>) – A string path to GATE  Simulation Statistic Actor output.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary with the read data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dd><p><a class="reference external" href="https://opengate.readthedocs.io/en/latest/tools_to_interact_with_the_simulation_actors.html?highlight=%20Simulation%20Statistic%20Actor#id7">GATE manual for Simulation Statistic Actor</a></p>
 </dd>
 </dl>
 </div>

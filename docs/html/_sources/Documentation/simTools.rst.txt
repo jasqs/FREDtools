@@ -20,3 +20,7 @@ A collection of useful functions for Monte Carlo simulations.
 .. autofunction:: fredtools.getFREDVersion
 
 .. autofunction:: fredtools.runFRED
+
+.. autofunction:: fredtools.readGATE_HITSActor
+
+.. autofunction:: fredtools.readGATEStat

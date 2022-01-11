@@ -36,6 +36,7 @@ $ twine upload  dist/*
 $ pip3 install fredtools
 '''
 
+import os
 import setuptools
 import sys
 sys.path.insert(0, './../')
@@ -46,13 +47,10 @@ with open("./../README.md", "r") as fh:
     long_description = fh.read()
 
 
-'''Use generated requirements. To generate requirements run:
-$ pipreqs fredtools/ --force
-in the main folder. Install pipreqs with 'pip install pipreqs'
-'''
+# build requirements
+os.system("pipreqs ./../fredtools/ --force --mode gt")
 with open("./../fredtools/requirements.txt", "r") as req_h:
     requirements = req_h.readlines()
-requirements = [req.strip().replace('==', '>=') for req in requirements]
 # remove some dependencies
 requirements = [req for req in requirements if 'fitz' not in req]
 

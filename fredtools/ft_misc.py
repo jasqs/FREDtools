@@ -113,3 +113,112 @@ def getGIcmap(maxGI, N=256):
     cmapGI = LinearSegmentedColormap(name="GIcmap", segmentdata=cdict, N=N)
 
     return cmapGI
+
+
+def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=True):
+    """Get histogram or differential histogram.
+
+    The function creates a histogram data from given dataX iterable in the defined bins.
+    It is possible to generate a differential histogram where the values of the histogram
+    (usually Y-axis on a plot) are given quantity, instead of frequency of `dataX` values
+    occurrance.
+
+    Parameters
+    ----------
+    dataX : 1D array_like
+        1D array-like iterable with the data to calculate histogram.
+        For instance, it can be: a single-column pandas DataFrame,
+        pandas Series, 1D numpy array, 1D list, 1D tuple etc.
+    dataY : 1D array_like, optional
+        1D array-like iterable with the data to calculate differential histogram.
+        It must be of the same size as `dataX`. For instance, it can be: a single-column
+        pandas DataFrame, pandas Series, 1D numpy array, 1D list, 1D tuple etc. (def. None)
+    bins : 1D array)like, optional
+        1D array-like iterable with the bins' edges to calculate histogram.
+        If none, then the bins will be generated automatically between
+        minimum and maximum value of `dataX` in 100 steps linearly. (def. None)
+    kind : {'mean', 'sum', 'std', 'median', 'min', 'max'}, optional
+        Determine the `dataY` quantity evaluation for a differential histogram.
+        It can be: mean, standard deviation, median, minimum, maximum or sum
+        value. (def. 'mean')
+    returnBinCenters : bool, optional
+        Determine if the first element of returned tuple is going to
+        be the bin centres (True) or bin edges (False). (def. True)
+
+    Returns
+    -------
+    Tuple of two ndarrays
+        Two-element tuple of 1D numpy ndarrays, where the first element
+        is a list of bin centres (or edges) and the second is a list of
+        histogram values.
+    """
+    import numpy as np
+
+    # check if dataX and dataY are iterable
+    from collections.abc import Iterable
+
+    if not isinstance(dataX, Iterable):
+        raise TypeError(f"The variable 'dataX' is not an iterable. It must be a 1D iterable.")
+    if dataY is not None and not isinstance(dataY, Iterable):
+        raise TypeError(f"The variable 'dataY' is not an iterable. It must be a 1D iterable.")
+
+    # convert dataX to ndarray if needed
+    if not isinstance(dataX, np.ndarray):
+        dataX = np.array(dataX).squeeze()
+
+    # check if dataX is 1D array
+    if dataX.ndim != 1:
+        raise ValueError(f"The parameter 'dataX' must be a 1D iterable, e.g. a single column pandas DataFrame, 1D list or tuple, etc.")
+
+    # convert dataY to ndarray if needed
+    if dataY is not None and not isinstance(dataY, np.ndarray):
+        dataY = np.array(dataY).squeeze()
+
+    # check if dataY is 1D array
+    if dataY is not None and dataY.ndim != 1:
+        raise ValueError(f"The parameter 'dataY' must be a 1D iterable, e.g. a single column pandas DataFrame, 1D list or tuple, etc.")
+
+    # check if dataY is of the same length as dataX
+    if dataY is not None and len(dataX) != len(dataY):
+        raise ValueError(f"The length of the 'dataY' iterable must be the same as the length of the 'dataX' iterable but they have {len(dataY)} and {len(dataX)} lengths, respectively.")
+
+    # create bins if not given
+    if bins is None:
+        bins = np.linspace(np.nanmin(dataX), np.nanmax(dataX), 100)
+
+    # validate kind parameter
+    if dataY is not None and kind not in ["sum", "mean", "std", "median", "min", "max"]:
+        raise ValueError(f"The value of 'kind' parameter must be 'sum', 'mean', 'std', 'median', 'min' or 'max' but '{kind}' was given.")
+
+    # creates a histogram for dataX
+    hist = list(np.histogram(dataX, bins=bins))[::-1]
+    hist[0] = hist[0].astype("float")
+
+    # creates a differential histogram if dataY is given
+    if dataY is not None:
+        hist[1] = hist[1].astype("float")
+        for i in range(hist[0].size - 1):
+            histEntry = dataY[(dataX >= hist[0][i]) & (dataX < hist[0][i + 1])]
+
+            if not len(histEntry):
+                histEntry = np.nan
+            else:
+                if kind == "sum":
+                    histEntry = histEntry.sum()
+                elif kind == "mean":
+                    histEntry = histEntry.mean()
+                elif kind == "std":
+                    histEntry = histEntry.std()
+                elif kind == "median":
+                    histEntry = histEntry.median()
+                elif kind == "min":
+                    histEntry = histEntry.min()
+                elif kind == "max":
+                    histEntry = histEntry.max()
+            hist[1][i] = histEntry
+
+    # calculate bin centres instead of bin edges if requested
+    if returnBinCenters:
+        hist[0] = hist[0][:-1] + np.diff(hist[0]) / 2
+
+    return tuple(hist)
