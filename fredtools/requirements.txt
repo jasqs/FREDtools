@@ -1,7 +1,7 @@
 dicompyler_core>=0.5.5
 fitz>=0.0.1.dev2
-fredtools>=0.6.39
-ipython>=7.31.0
+fredtools>=0.6.41
+ipython>=8.0.0
 ipywidgets>=7.6.5
 itk>=5.2.1.post1
 itk_segmentation>=5.2.1.post1

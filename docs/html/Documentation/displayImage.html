@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Display Image &mdash; FRED Tools 0.6.41 documentation</title>
+  <title>Display Image &mdash; FRED Tools 0.6.42 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.41
+                0.6.42
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -92,44 +92,45 @@
 <p>A collection of useful functions and classes for image displaying. The functionalities have been designed to quickly display and analyse 3D images of CT and/or dose (or any other 3D quantity distribution) in jupyter, inlcuding the interactive mode.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.showSlice">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgCmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseVmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showLegend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlice" title="Permalink to this definition"></a></dt>
-<dd><p>Display dose slice on a CT slice including contours.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphaFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaxBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaxFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showLegend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlice" title="Permalink to this definition"></a></dt>
+<dd><p>Display image slice in front of an another image slice including contours.</p>
 <p>The function displays on <cite>ax</cite> a <cite>plane</cite> going through <cite>point</cite>
-of a 3D image describing dose overlapped on an image of a CT.
-Basically, it forms a simple wrapper to matplotlib.pyplot.imshow
-allowing for a quick display of a slice from a 3D image of dose
-and/or CT.</p>
-<p>It does not matter which attribute, <cite>imgA</cite> or <cite>imgB</cite>, will describe
-dose od CT. By default, the image of the integer type is treated as the CT
-and the image of the float type is treated as the dose. The CT image is then
-displayed in ‘bone’ colormap and the dose image in <cite>imgCmap</cite> colormap.
-If only one image (<cite>imgA</cite> or <cite>imgB</cite>) of is given, then it is treated as
-a CT image if it is of the integer type, or as a dose image if it is of
-the float type. Thus, the function allows to display only a single image
-of dose or CT. At least one variable, <cite>imgA</cite> or <cite>imgB</cite> must be given.</p>
+of a 3D image describing front image overlapped on a slice of an another
+image describing the background. Basically, it forms a simple wrapper to
+matplotlib.pyplot.imshow allowing for a quick display of a slice from a
+3D image of singal (e.g. dose) and/or an another image (e.g CT).</p>
+<p>Usually <cite>imgBack</cite> describes the CT and <cite>imgFront</cite> describes the dose or
+other signal. At least one variable, <cite>imgBack</cite> or <cite>imgFront</cite> must be given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ax</strong> (<em>AxesSubplot</em>) – Axis to plot the image on.</p></li>
-<li><p><strong>imgA</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a SimpleITK 3D image. (def. None)</p></li>
-<li><p><strong>imgB</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a SimpleITK 3D image. (def. None)</p></li>
+<li><p><strong>imgBack</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a SimpleITK 3D image describing the background
+image. (def. None)</p></li>
+<li><p><strong>imgFront</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a SimpleITK 3D image describing the foreground
+image. (def. None)</p></li>
 <li><p><strong>plane</strong> (<em>str</em><em>, </em><em>optional</em>) – Plane to generate the 2D slice given as a string.
 See fredtools.getSlice for more details. (def. ‘XY’)</p></li>
 <li><p><strong>point</strong> (<em>array_like</em><em>, </em><em>optional</em>) – 3D point to generate the 2D slice through. If None
-then the centre of mass of the 3D dose image (or CT image if
-dose was not given) will be used (def. None)</p></li>
-<li><p><strong>imgCmap</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display dose image slice. (def. ‘jet’)</p></li>
+then the centre of mass of the 3D foreground image (or background
+image if the foreground image is not given) will be used. (def. None)</p></li>
+<li><p><strong>cmapBack</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display the background image slice. (def. ‘bone’)</p></li>
+<li><p><strong>cmapFront</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display the foreground image slice. (def. ‘jet’)</p></li>
 <li><p><strong>imgROIs</strong> (<em>SimpleITK Image</em><em> or </em><em>list of SimpleITK Images</em><em>, </em><em>optional</em>) – An Instance of a SimpleITK image or list of instances of
 SimpleITK image objects describing a 3D mask. (def. None)</p></li>
-<li><p><strong>doseVmax</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Maximum value on dose map. If None then the
-maximum value of 3D dose image will be used (def. None)</p></li>
+<li><p><strong>vmaxBack</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Maximum value of the background image. If None then the
+maximum value of 3D background image will be used. (def. None)</p></li>
+<li><p><strong>vmaxFront</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Maximum value of the foreground dose map. If None then the
+maximum value of 3D foreground image will be used. (def. None)</p></li>
+<li><p><strong>alphaFront</strong> (<em>float</em><em>, </em><em>optional</em>) – Alpha value pf the transparency of the foreground image. (def. 0.7)</p></li>
 <li><p><strong>showLegend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show legend of the ROI contour names if they exist. (def. True)</p></li>
 <li><p><strong>fontsize</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Basic font size to be used for ticks, labels, legend, etc. (def. 8)</p></li>
 <li><p><strong>raiseWarning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Raise warnings. (def. True)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dose image (or CT image if dose was not given) attached to the axes <cite>ax</cite>.</p>
+<dd class="field-even"><p>Foreground image (or background image if the foreground image
+is not given) attached to the axis <cite>ax</cite>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>matplotlib.image.AxesImage</p>
@@ -138,7 +139,7 @@ maximum value of 3D dose image will be used (def. None)</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.showSlices" title="fredtools.showSlices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showSlices</span></code></a></dt><dd><p>show three projections of an 3D image overlapped on CT, also interactively.</p>
+<dt><a class="reference internal" href="#fredtools.showSlices" title="fredtools.showSlices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showSlices</span></code></a></dt><dd><p>show three projections of a 3D image, also interactively.</p>
 </dd>
 <dt><a class="reference internal" href="GettingSubimage.html#fredtools.getSlice" title="fredtools.getSlice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSlice</span></code></a></dt><dd><p>get 2D image slice from SimpleITK Image.</p>
 </dd>
@@ -152,31 +153,35 @@ maximum value of 3D dose image will be used (def. None)</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="fredtools.showSlices">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgCT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgDose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCO</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[15,</span> <span class="pre">5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgCmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlices" title="Permalink to this definition"></a></dt>
-<dd><p>Class to display three projections of dose slices on CT slices including contours.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCOFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[15,</span> <span class="pre">5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlices" title="Permalink to this definition"></a></dt>
+<dd><p>Class to display three projections of 3D image slices on an another 3D image slices including contours.</p>
 <p>The class creates a figure with three axes and displays
 three projections (planes), ‘XY’, ‘ZY’ and ‘X-Z’ (reversed Z),
-going through <cite>point</cite>, of a 3D image describing dose
-overlapped on an image of a CT. The class can display in
+going through <cite>point</cite>, of a 3D image describing foreground
+overlapped on a background image. The class can display in
 an interactive mode exploiting ipywidgets functionality,
 allowing to move slices with a mouse well or move slices to
 the point when the mouse button is pressed. All those interactive
 features work with Shift pressed.</p>
+<p>Usually <cite>imgBack</cite> describes the CT and <cite>imgFront</cite> describes the dose or
+other signal. At least one variable, <cite>imgBack</cite> or <cite>imgFront</cite> must be given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>imgCT</strong> (<em>SimpleITK Image</em>) – Object of a 3D SimpleITK image describing a CT.</p></li>
-<li><p><strong>imgDose</strong> (<em>SimpleITK Image</em>) – Object of a 3D SimpleITK image describing dose or any
-other quantity distribution.</p></li>
+<li><p><strong>imgBack</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a 3D SimpleITK image describing the background
+image. (e.g. CT). (def. None)</p></li>
+<li><p><strong>imgFront</strong> (<em>SimpleITK Image</em><em>, </em><em>optional</em>) – Object of a 3D SimpleITK image describing the foreground
+image. (e.g. dose or gamma index map). (def. None)</p></li>
 <li><p><strong>imgROIs</strong> (<em>SimpleITK Image</em><em> or </em><em>list of SimpleITK Images</em><em>, </em><em>optional</em>) – An Instance of a SimpleITK image or list of instances of
 SimpleITK image objects describing a 3D mask. (def. None)</p></li>
 <li><p><strong>point</strong> (<em>array_like</em><em>, </em><em>optional</em>) – 3D point to generate the 2D slice through. If None
-then the centre of mass of the 3D dose image will
-be used. (def. None)</p></li>
-<li><p><strong>DCO</strong> (<em>float</em><em>, </em><em>optional</em>) – Dose cut-off. The fraction of the maximum value of the dose
+then the centre of mass of the 3D foreground image (or the background
+image if the foreground is not given) will be used. (def. None)</p></li>
+<li><p><strong>DCOFront</strong> (<em>float</em><em>, </em><em>optional</em>) – Dose cut-off. The fraction of the maximum value of the foreground
 image below which the data will not be displayed. (def. 0.1)</p></li>
-<li><p><strong>figsize</strong> (<em>2-element list</em>) – Width and height of the figure in inches. (def. [15, 5])</p></li>
-<li><p><strong>imgCmap</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display dose image slice. (def. ‘jet’)</p></li>
+<li><p><strong>cmapBack</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display the background image slice. (def. ‘bone’)</p></li>
+<li><p><strong>cmapFront</strong> (<em>string</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – Colormap to display the foreground image slice. (def. ‘jet’)</p></li>
+<li><p><strong>figsize</strong> (<em>2-element list</em><em>, </em><em>optional</em>) – Width and height of the figure in inches. (def. [15, 5])</p></li>
 <li><p><strong>interactive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display in interactive mode using ipwidgets.
 Works only in jupyter. (def. True)</p></li>
 </ul>

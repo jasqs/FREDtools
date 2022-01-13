@@ -1,44 +1,62 @@
-def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", imgROIs=None, doseVmax=None, showLegend=True, fontsize=8, raiseWarning=True):
-    """Display dose slice on a CT slice including contours.
+def showSlice(
+    ax,
+    imgBack=None,
+    imgFront=None,
+    plane="XY",
+    point=None,
+    cmapBack="bone",
+    cmapFront="jet",
+    alphaFront=0.7,
+    imgROIs=None,
+    vmaxBack=None,
+    vmaxFront=None,
+    showLegend=True,
+    fontsize=8,
+    raiseWarning=True,
+):
+    """Display image slice in front of an another image slice including contours.
 
     The function displays on `ax` a `plane` going through `point`
-    of a 3D image describing dose overlapped on an image of a CT.
-    Basically, it forms a simple wrapper to matplotlib.pyplot.imshow
-    allowing for a quick display of a slice from a 3D image of dose
-    and/or CT.
+    of a 3D image describing front image overlapped on a slice of an another
+    image describing the background. Basically, it forms a simple wrapper to
+    matplotlib.pyplot.imshow allowing for a quick display of a slice from a
+    3D image of singal (e.g. dose) and/or an another image (e.g CT).
 
-    It does not matter which attribute, `imgA` or `imgB`, will describe
-    dose od CT. By default, the image of the integer type is treated as the CT
-    and the image of the float type is treated as the dose. The CT image is then
-    displayed in 'bone' colormap and the dose image in `imgCmap` colormap.
-    If only one image (`imgA` or `imgB`) of is given, then it is treated as
-    a CT image if it is of the integer type, or as a dose image if it is of
-    the float type. Thus, the function allows to display only a single image
-    of dose or CT. At least one variable, `imgA` or `imgB` must be given.
+    Usually `imgBack` describes the CT and `imgFront` describes the dose or
+    other signal. At least one variable, `imgBack` or `imgFront` must be given.
 
     Parameters
     ----------
     ax : AxesSubplot
         Axis to plot the image on.
-    imgA : SimpleITK Image, optional
-        Object of a SimpleITK 3D image. (def. None)
-    imgB : SimpleITK Image, optional
-        Object of a SimpleITK 3D image. (def. None)
+    imgBack : SimpleITK Image, optional
+        Object of a SimpleITK 3D image describing the background
+        image. (def. None)
+    imgFront : SimpleITK Image, optional
+        Object of a SimpleITK 3D image describing the foreground
+        image. (def. None)
     plane : str, optional
         Plane to generate the 2D slice given as a string.
         See fredtools.getSlice for more details. (def. 'XY')
     point : array_like, optional
         3D point to generate the 2D slice through. If None
-        then the centre of mass of the 3D dose image (or CT image if
-        dose was not given) will be used (def. None)
-    imgCmap : string or matplotlib.colors.Colormap, optional
-        Colormap to display dose image slice. (def. 'jet')
+        then the centre of mass of the 3D foreground image (or background
+        image if the foreground image is not given) will be used. (def. None)
+    cmapBack : string or matplotlib.colors.Colormap, optional
+        Colormap to display the background image slice. (def. 'bone')
+    cmapFront : string or matplotlib.colors.Colormap, optional
+        Colormap to display the foreground image slice. (def. 'jet')
     imgROIs : SimpleITK Image or list of SimpleITK Images, optional
         An Instance of a SimpleITK image or list of instances of
         SimpleITK image objects describing a 3D mask. (def. None)
-    doseVmax : scalar, optional
-        Maximum value on dose map. If None then the
-        maximum value of 3D dose image will be used (def. None)
+    vmaxBack : scalar, optional
+        Maximum value of the background image. If None then the
+        maximum value of 3D background image will be used. (def. None)
+    vmaxFront : scalar, optional
+        Maximum value of the foreground dose map. If None then the
+        maximum value of 3D foreground image will be used. (def. None)
+    alphaFront : float, optional
+        Alpha value pf the transparency of the foreground image. (def. 0.7)
     showLegend : bool, optional
         Show legend of the ROI contour names if they exist. (def. True)
     fontsize : scalar, optional
@@ -49,11 +67,12 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
     Returns
     -------
     matplotlib.image.AxesImage
-        Dose image (or CT image if dose was not given) attached to the axes `ax`.
+        Foreground image (or background image if the foreground image
+        is not given) attached to the axis `ax`.
 
     See Also
     --------
-        showSlices: show three projections of an 3D image overlapped on CT, also interactively.
+        showSlices: show three projections of a 3D image, also interactively.
         getSlice: get 2D image slice from SimpleITK Image.
 
     Examples
@@ -69,70 +88,51 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
     ax.set_facecolor("black")
 
     # check if any of the image is given
-    if not (imgA or imgB):
-        raise AttributeError(f"At least one image, imgA or imgB, must be given.")
+    if not (imgBack or imgFront):
+        raise AttributeError(f"At least one image, imgBack or imgFront, must be given.")
 
-    # determine which image is a CT and which is a dose
-    if ft._isSITK(imgA) and not ft._isSITK(imgB):
-        if "integer" in imgA.GetPixelIDTypeAsString():
-            imgCT = imgA
-            imgDose = imgB
-        elif "float" in imgA.GetPixelIDTypeAsString():
-            imgCT = imgB
-            imgDose = imgA
-    elif ft._isSITK(imgB) and not ft._isSITK(imgA):
-        if "integer" in imgB.GetPixelIDTypeAsString():
-            imgCT = imgB
-            imgDose = imgA
-        elif "float" in imgB.GetPixelIDTypeAsString():
-            imgCT = imgA
-            imgDose = imgB
-    elif ft._isSITK(imgA) and ft._isSITK(imgB):
-        if "integer" in imgA.GetPixelIDTypeAsString():
-            imgCT = imgA
-            imgDose = imgB
-        elif "integer" in imgB.GetPixelIDTypeAsString():
-            imgCT = imgB
-            imgDose = imgA
+    # determine point (def. mass centre of dose) if not given
+    if point is None:
+        if imgFront:
+            point = ft.getMassCenter(imgFront)
         else:
-            imgCT = imgA
-            imgDose = imgB
-
-    # determine point (def. mass centre of dose)
-    if not point:
-        if imgDose:
-            point = ft.getMassCenter(imgDose)
-        else:
-            point = ft.getMassCenter(imgCT)
+            point = ft.getMassCenter(imgBack)
 
     # determine colormap
-    if isinstance(imgCmap, mpl.colors.LinearSegmentedColormap):
-        imgCmap = imgCmap
-    elif isinstance(imgCmap, str):
-        imgCmap = mpl.cm.get_cmap(imgCmap)
+    if isinstance(cmapBack, mpl.colors.LinearSegmentedColormap):
+        cmapBack = cmapBack
+    elif isinstance(cmapBack, str):
+        cmapBack = mpl.cm.get_cmap(cmapBack)
     else:
-        raise ValueError(f"Cannot recognise colormap {imgCmap}.")
+        raise ValueError(f"Cannot recognise cmapBack colormap {cmapBack}.")
+    if isinstance(cmapFront, mpl.colors.LinearSegmentedColormap):
+        cmapFront = cmapFront
+    elif isinstance(cmapFront, str):
+        cmapFront = mpl.cm.get_cmap(cmapFront)
+    else:
+        raise ValueError(f"Cannot recognise cmapFront colormap {cmapFront}.")
 
-    # show CT slice
-    if imgCT:
-        # check if imgCT is a 3D SimpleITK image
-        ft._isSITK_volume(imgCT)
+    # determine vmax
+    if imgBack and not vmaxBack:
+        vmaxBack = ft.getStatistics(imgBack).GetMaximum()
+    if imgFront and not vmaxFront:
+        vmaxFront = ft.getStatistics(imgFront).GetMaximum()
 
-        slCT = ft.getSlice(imgCT, point=point, plane=plane, raiseWarning=raiseWarning)
-        axesImage = ax.imshow(ft.arr(slCT), cmap="bone", extent=ft.getExtMpl(slCT))
+    # show back slice image
+    if imgBack:
+        # check if imgBack is a 3D SimpleITK image
+        ft._isSITK_volume(imgBack)
 
-    # show Dose slice
-    if imgDose:
-        # check if imgDose is a 3D SimpleITK image
-        ft._isSITK_volume(imgDose)
+        slBack = ft.getSlice(imgBack, point=point, plane=plane, raiseWarning=raiseWarning)
+        axesImage = ax.imshow(ft.arr(slBack), cmap=cmapBack, extent=ft.getExtMpl(slBack), vmax=vmaxBack)
 
-        # use the maximum value of the 3D dose image as vmax id no doseVmax given
-        if not doseVmax:
-            statDose = ft.getStatistics(imgDose)
-            doseVmax = statDose.GetMaximum()
+    # show front slice image
+    if imgFront:
+        # check if imgFront is a 3D SimpleITK image
+        ft._isSITK_volume(imgFront)
 
-        slDose = ft.getSlice(imgDose, point=point, plane=plane, raiseWarning=raiseWarning)
-        axesImage = ax.imshow(ft.arr(slDose), cmap=imgCmap, extent=ft.getExtMpl(slDose), alpha=0.7, vmin=0, vmax=doseVmax)
+        slFront = ft.getSlice(imgFront, point=point, plane=plane, raiseWarning=raiseWarning)
+        axesImage = ax.imshow(ft.arr(slFront), cmap=cmapFront, extent=ft.getExtMpl(slFront), alpha=alphaFront, vmin=0, vmax=vmaxFront)
 
     # show ROIs slice
     if imgROIs:
@@ -144,13 +144,23 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
                 color = np.array([0, 0, 1])
             if ft.getStatistics(slROI).GetMaximum() > 0:
                 plROI = ax.contour(ft.arr(slROI), extent=ft.getExtMpl(slROI), colors=[color], linewidths=1, origin="upper")
-                if "ROIName" in imgROI.GetMetaDataKeys():
-                    name = imgROI.GetMetaData("ROIName")
-                else:
-                    name = "unknown"
-                plROI.collections[0].set_label(name)
+
+                # if "ROIName" in imgROI.GetMetaDataKeys():
+                #     name = imgROI.GetMetaData("ROIName")
+                # else:
+                #     name = "unknown"
+                ax.plot([], color=color, label=imgROI.GetMetaData("ROIName") if "ROIName" in imgROI.GetMetaDataKeys() else "unknown")
+                # plROI.collections[0].set_label(name)
         if len(ax.get_legend_handles_labels()[0]) > 0 and showLegend:
             ax.legend(fontsize=fontsize)
+
+    # set  x/y limits to CT
+    if imgBack:
+        ax.set_xlim(ft.getExtMpl(slBack)[0], ft.getExtMpl(slBack)[1])
+        ax.set_ylim(ft.getExtMpl(slBack)[2], ft.getExtMpl(slBack)[3])
+    else:
+        ax.set_xlim(ft.getExtMpl(slFront)[0], ft.getExtMpl(slFront)[1])
+        ax.set_ylim(ft.getExtMpl(slFront)[2], ft.getExtMpl(slFront)[3])
 
     # set axis labels
     planeSimple = re.sub("[-+]", "", plane)
@@ -164,38 +174,44 @@ def showSlice(ax, imgA=None, imgB=None, plane="XY", point=None, imgCmap="jet", i
 
 
 class showSlices:
-    """Class to display three projections of dose slices on CT slices including contours.
+    """Class to display three projections of 3D image slices on an another 3D image slices including contours.
 
     The class creates a figure with three axes and displays
     three projections (planes), 'XY', 'ZY' and 'X-Z' (reversed Z),
-    going through `point`, of a 3D image describing dose
-    overlapped on an image of a CT. The class can display in
+    going through `point`, of a 3D image describing foreground
+    overlapped on a background image. The class can display in
     an interactive mode exploiting ipywidgets functionality,
     allowing to move slices with a mouse well or move slices to
     the point when the mouse button is pressed. All those interactive
     features work with Shift pressed.
 
+    Usually `imgBack` describes the CT and `imgFront` describes the dose or
+    other signal. At least one variable, `imgBack` or `imgFront` must be given.
+
     Parameters
     ----------
-    imgCT : SimpleITK Image
-        Object of a 3D SimpleITK image describing a CT.
-    imgDose : SimpleITK Image
-        Object of a 3D SimpleITK image describing dose or any
-        other quantity distribution.
+    imgBack : SimpleITK Image, optional
+        Object of a 3D SimpleITK image describing the background
+        image. (e.g. CT). (def. None)
+    imgFront : SimpleITK Image, optional
+        Object of a 3D SimpleITK image describing the foreground
+        image. (e.g. dose or gamma index map). (def. None)
     imgROIs : SimpleITK Image or list of SimpleITK Images, optional
         An Instance of a SimpleITK image or list of instances of
         SimpleITK image objects describing a 3D mask. (def. None)
     point : array_like, optional
         3D point to generate the 2D slice through. If None
-        then the centre of mass of the 3D dose image will
-        be used. (def. None)
-    DCO : float, optional
-        Dose cut-off. The fraction of the maximum value of the dose
+        then the centre of mass of the 3D foreground image (or the background
+        image if the foreground is not given) will be used. (def. None)
+    DCOFront : float, optional
+        Dose cut-off. The fraction of the maximum value of the foreground
         image below which the data will not be displayed. (def. 0.1)
-    figsize : 2-element list
+    cmapBack : string or matplotlib.colors.Colormap, optional
+        Colormap to display the background image slice. (def. 'bone')
+    cmapFront : string or matplotlib.colors.Colormap, optional
+        Colormap to display the foreground image slice. (def. 'jet')
+    figsize : 2-element list, optional
         Width and height of the figure in inches. (def. [15, 5])
-    imgCmap : string or matplotlib.colors.Colormap, optional
-        Colormap to display dose image slice. (def. 'jet')
     interactive : bool, optional
         Display in interactive mode using ipwidgets.
         Works only in jupyter. (def. True)
@@ -205,7 +221,7 @@ class showSlices:
     See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
     """
 
-    def __init__(self, imgCT, imgDose, imgROIs=None, point=None, DCO=0.1, figsize=[15, 5], imgCmap="jet", interactive=True):
+    def __init__(self, imgBack=None, imgFront=None, imgROIs=None, point=None, DCOFront=0.1, cmapBack="bone", cmapFront="jet", figsize=[15, 5], interactive=True):
         import ipywidgets as ipyw
         import matplotlib as mpl
         import matplotlib.pyplot as plt
@@ -214,14 +230,26 @@ class showSlices:
         import numpy as np
         from IPython import get_ipython
 
-        self.imgCT = imgCT
-        self.imgDose = imgDose
-
+        self.imgBack = imgBack
+        self.imgFront = imgFront
         self.imgROIs = imgROIs
 
+        # check if any of the image is given
+        if not (self.imgBack or self.imgFront):
+            raise AttributeError(f"At least one image, imgBack or imgFront, must be given.")
+
+        # determine image slider
+        if self.imgBack:
+            self.imgSlider = self.imgBack
+        else:
+            self.imgSlider = self.imgFront
+
         # determine point
-        if not point:
-            self.point = list(ft.getMassCenter(self.imgDose))
+        if point is None:
+            if imgFront:
+                self.point = list(ft.getMassCenter(self.imgFront))
+            else:
+                self.point = list(ft.getMassCenter(self.imgBack))
         else:
             self.point = list(point)
 
@@ -230,8 +258,11 @@ class showSlices:
             raise ValueError(f"The `point` must be a 3-element vector and is {self.point}.")
 
         # set dose threshold
-        statDose = ft.getStatistics(self.imgDose)
-        self.imgDose = sitk.Threshold(self.imgDose, lower=statDose.GetMaximum() * DCO, upper=1e5, outsideValue=np.nan)
+        if self.imgFront:
+            statFront = ft.getStatistics(self.imgFront)
+            self.imgFront = sitk.Threshold(self.imgFront, lower=statFront.GetMaximum() * DCOFront, upper=statFront.GetMaximum() * 10, outsideValue=np.nan)
+        if self.imgBack:
+            statBack = ft.getStatistics(self.imgBack)
 
         # determine if interactive is possible (only jupyter)
         if interactive and ft._checkJupyterMode():
@@ -250,46 +281,56 @@ class showSlices:
             self.fig.canvas.header_visible = False
 
         # determine colormap
-        if isinstance(imgCmap, mpl.colors.LinearSegmentedColormap):
-            self.imgCmap = imgCmap
-        elif isinstance(imgCmap, str):
-            self.imgCmap = mpl.cm.get_cmap(imgCmap)
+        if isinstance(cmapBack, mpl.colors.LinearSegmentedColormap):
+            self.cmapBack = cmapBack
+        elif isinstance(cmapBack, str):
+            self.cmapBack = mpl.cm.get_cmap(cmapBack)
         else:
-            raise ValueError(f"Cannot recognise colormap {imgCmap}.")
+            raise ValueError(f"Cannot recognise cmapBack colormap {self.cmapBack}.")
+        if isinstance(cmapFront, mpl.colors.LinearSegmentedColormap):
+            self.cmapFront = cmapFront
+        elif isinstance(cmapFront, str):
+            self.cmapFront = mpl.cm.get_cmap(cmapFront)
+        else:
+            raise ValueError(f"Cannot recognise cmapFront colormap {self.cmapFront}.")
 
         # make colorbar
         axCB = self.fig.add_axes(
             [self.axs[2].get_position().x1 + self.axs[2].get_position().width * 0.1, self.axs[2].get_position().y0, self.axs[2].get_position().width * 0.05, self.axs[2].get_position().height]
         )
-        plCB = mpl.colorbar.ColorbarBase(axCB, cmap=self.imgCmap, norm=mpl.colors.Normalize(0, statDose.GetMaximum()))
-        plCB.set_label("Dose [$Gy$ or $Gy(RBE)$]", labelpad=20, rotation=-90, fontsize=9)
+        if self.imgFront:
+            plCB = mpl.colorbar.ColorbarBase(axCB, cmap=self.cmapFront, norm=mpl.colors.Normalize(statFront.GetMinimum(), statFront.GetMaximum()))
+            plCB.set_label("Front signal", labelpad=20, rotation=-90, fontsize=9)
+        elif imgBack:
+            plCB = mpl.colorbar.ColorbarBase(axCB, cmap=self.cmapBack, norm=mpl.colors.Normalize(statBack.GetMinimum(), statBack.GetMaximum()))
+            plCB.set_label("Back signal", labelpad=20, rotation=-90, fontsize=9)
         axCB.tick_params(labelsize=8)
 
         if interactive:
             # Call to select slice plane
             self.sliderX = ipyw.FloatSlider(
                 value=self.point[0],
-                min=self.imgCT.GetOrigin()[0],
-                max=self.imgCT.GetOrigin()[0] + self.imgCT.GetSpacing()[0] * self.imgCT.GetSize()[0],
-                step=self.imgCT.GetSpacing()[0],
+                min=self.imgSlider.GetOrigin()[0],
+                max=self.imgSlider.GetOrigin()[0] + self.imgSlider.GetSpacing()[0] * self.imgSlider.GetSize()[0],
+                step=self.imgSlider.GetSpacing()[0],
                 continuous_update=False,
                 description="X [mm]:",
             )
             ipyw.interact(self.showSliceAX1, X=self.sliderX)
             self.sliderY = ipyw.FloatSlider(
                 value=self.point[1],
-                min=self.imgCT.GetOrigin()[1],
-                max=self.imgCT.GetOrigin()[1] + self.imgCT.GetSpacing()[1] * self.imgCT.GetSize()[1],
-                step=self.imgCT.GetSpacing()[1],
+                min=self.imgSlider.GetOrigin()[1],
+                max=self.imgSlider.GetOrigin()[1] + self.imgSlider.GetSpacing()[1] * self.imgSlider.GetSize()[1],
+                step=self.imgSlider.GetSpacing()[1],
                 continuous_update=False,
                 description="Y [mm]:",
             )
             ipyw.interact(self.showSliceAX2, Y=self.sliderY)
             self.sliderZ = ipyw.FloatSlider(
                 value=self.point[2],
-                min=self.imgCT.GetOrigin()[2],
-                max=self.imgCT.GetOrigin()[2] + self.imgCT.GetSpacing()[2] * self.imgCT.GetSize()[2],
-                step=self.imgCT.GetSpacing()[2],
+                min=self.imgSlider.GetOrigin()[2],
+                max=self.imgSlider.GetOrigin()[2] + self.imgSlider.GetSpacing()[2] * self.imgSlider.GetSize()[2],
+                step=self.imgSlider.GetSpacing()[2],
                 continuous_update=False,
                 description="Z [mm]:",
             )
@@ -331,19 +372,19 @@ class showSlices:
         if self.scrollEventShift:
             if event.inaxes == self.axs[1]:
                 if event.button == "up":
-                    self.sliderX.value = self.point[0] + self.imgCT.GetSpacing()[0]
+                    self.sliderX.value = self.point[0] + self.imgSlider.GetSpacing()[0]
                 elif event.button == "down":
-                    self.sliderX.value = self.point[0] - self.imgCT.GetSpacing()[0]
+                    self.sliderX.value = self.point[0] - self.imgSlider.GetSpacing()[0]
             if event.inaxes == self.axs[2]:
                 if event.button == "up":
-                    self.sliderY.value = self.point[1] + self.imgCT.GetSpacing()[1]
+                    self.sliderY.value = self.point[1] + self.imgSlider.GetSpacing()[1]
                 elif event.button == "down":
-                    self.sliderY.value = self.point[1] - self.imgCT.GetSpacing()[1]
+                    self.sliderY.value = self.point[1] - self.imgSlider.GetSpacing()[1]
             if event.inaxes == self.axs[0]:
                 if event.button == "up":
-                    self.sliderZ.value = self.point[2] + self.imgCT.GetSpacing()[2]
+                    self.sliderZ.value = self.point[2] + self.imgSlider.GetSpacing()[2]
                 elif event.button == "down":
-                    self.sliderZ.value = self.point[2] - self.imgCT.GetSpacing()[2]
+                    self.sliderZ.value = self.point[2] - self.imgSlider.GetSpacing()[2]
 
     def removeArtist(self, ax):
         for artist in ax.lines + ax.collections:
@@ -365,7 +406,20 @@ class showSlices:
 
         self.point[2] = Z
         self.removeArtist(self.axs[0])
-        ft.showSlice(self.axs[0], plane="XY", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarning=False)
+        self.axs[0].clear()
+        ft.showSlice(
+            self.axs[0],
+            plane="XY",
+            point=self.point,
+            imgBack=self.imgBack,
+            imgFront=self.imgFront,
+            imgROIs=self.imgROIs,
+            showLegend=True,
+            cmapFront=self.cmapFront,
+            cmapBack=self.cmapBack,
+            fontsize=8,
+            raiseWarning=False,
+        )
         self.replotPointLines()
 
     def showSliceAX1(self, X):
@@ -373,7 +427,20 @@ class showSlices:
 
         self.point[0] = X
         self.removeArtist(self.axs[1])
-        ft.showSlice(self.axs[1], plane="ZY", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarning=False)
+        self.axs[1].clear()
+        ft.showSlice(
+            self.axs[1],
+            plane="ZY",
+            point=self.point,
+            imgBack=self.imgBack,
+            imgFront=self.imgFront,
+            imgROIs=self.imgROIs,
+            showLegend=True,
+            cmapFront=self.cmapFront,
+            cmapBack=self.cmapBack,
+            fontsize=8,
+            raiseWarning=False,
+        )
         self.replotPointLines()
 
     def showSliceAX2(self, Y):
@@ -381,5 +448,18 @@ class showSlices:
 
         self.point[1] = Y
         self.removeArtist(self.axs[2])
-        ft.showSlice(self.axs[2], plane="X-Z", point=self.point, imgA=self.imgCT, imgB=self.imgDose, imgROIs=self.imgROIs, showLegend=True, imgCmap=self.imgCmap, fontsize=8, raiseWarning=False)
+        self.axs[2].clear()
+        ft.showSlice(
+            self.axs[2],
+            plane="X-Z",
+            point=self.point,
+            imgBack=self.imgBack,
+            imgFront=self.imgFront,
+            imgROIs=self.imgROIs,
+            showLegend=True,
+            cmapFront=self.cmapFront,
+            cmapBack=self.cmapBack,
+            fontsize=8,
+            raiseWarning=False,
+        )
         self.replotPointLines()
