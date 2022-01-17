@@ -126,7 +126,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     if not ft._isSITK3D(img, raiseError=True):
         raise ValueError(f"The image is a SimpleITK image of dimension {img.GetDimension()}. Only mapping ROI to 3D images are supported now.")
 
-    if not ft.getDicomType(RSfileName) == "RS":
+    if not ft.ft_imgIO.dicom_io._isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
     # check if method is correct

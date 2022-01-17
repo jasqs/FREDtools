@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Reading and Writing &mdash; FRED Tools 0.6.42 documentation</title>
+  <title>Image Reading and Writing &mdash; FRED Tools 0.6.43 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.42
+                0.6.43
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -278,19 +278,19 @@ recommended to use *.m3d extension when saving Map3D.</p>
 <section id="dicom-files-dcm-dicom">
 <h2>DICOM files (*.dcm, *.dicom)<a class="headerlink" href="#dicom-files-dcm-dicom" title="Permalink to this headline"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="fredtools.getDicomType">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDicomType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dicomVar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDicomType" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="fredtools.getDicomTypeName">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDicomTypeName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dicomVar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDicomTypeName" title="Permalink to this definition"></a></dt>
 <dd><p>Check the type of the dicom given as a path or tags.</p>
-<p>The function checks if the <cite>dicomVar</cite> is a dicom of a CT slice (CT),
-an 1D/2D/3D image (RD), a treatment plan (RN) or a structure set (RS).
-If the type could not be determined, ‘Unknown’ is returned.</p>
+<p>The function return the name of the SOP Class UID tag of a dicom
+file given as a file name or dicom tags. The description of the
+SOP Class UID names can be found in <a class="footnote-reference brackets" href="#id2" id="id1">1</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>dicomVar</strong> (<em>path</em><em> or </em><em>tags</em>) – A string of path to a dicom file or a dicom tag structure read
 by pydicom.read_file.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A string that can be <cite>CT</cite>, <cite>RD</cite>, <cite>RN</cite>, <cite>RS</cite>, or <cite>Unknown</cite>.</p>
+<dd class="field-even"><p>A string of the SOP Class UID name.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>string</p>
@@ -299,11 +299,15 @@ by pydicom.read_file.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">_getDicomType_tags</span></code></dt><dd><p>check the type of dicom tags.</p>
-</dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">_getDicomType_file</span></code></dt><dd><p>check the type a dicom file.</p>
-</dd>
 <dt><a class="reference internal" href="#fredtools.sortDicoms" title="fredtools.sortDicoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sortDicoms</span></code></a></dt><dd><p>sort dicom files in a folder by type.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://dicom.nema.org/dicom/2013/output/chtml/part04/sect_B.5.html">DICOM standard description - SOP Class UID</a></p>
 </dd>
 </dl>
 </div>
@@ -317,10 +321,10 @@ by pydicom.read_file.</p>
 (and subfolders if requested) for:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>CT - dicom files of CT slices</p></li>
-<li><p>RS - dicom files of structures</p></li>
-<li><p>RN - dicom files of radiotherapy plan (also called RP)</p></li>
-<li><p>RD - dicom files of 1D/2D/3D image (for instance dose distribution)</p></li>
+<li><p>CT - dicom files of CT Image Storage (“CT Image Storage”, “Enhanced CT Image Storage” or “Legacy Converted Enhanced CT Image Storage”)</p></li>
+<li><p>RS - dicom files of RT Structure Set Storage</p></li>
+<li><p>RN - dicom files of RT Plan Storage (“RT Plan Storage” or “RT Ion Plan Storage”)</p></li>
+<li><p>RD - dicom files of 1D/2D/3D RT Dose Storage (for instance dose distribution)</p></li>
 <li><p>Unknown - files with *.dcm extension that were not recognized.</p></li>
 </ul>
 </div></blockquote>

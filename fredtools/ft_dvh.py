@@ -79,7 +79,7 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
     import numpy as np
 
     ft._isSITK3D(img, raiseError=True)
-    if not ft.getDicomType(RSfileName) == "RS":
+    if not ft.ft_imgIO.dicom_io._isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
     # get structure info

@@ -30,7 +30,7 @@ Map3D images (\*.m3d)
 DICOM files (\*.dcm, \*.dicom)
 ------------------------------------------------
 
-.. autofunction:: fredtools.getDicomType
+.. autofunction:: fredtools.getDicomTypeName
 
 .. autofunction:: fredtools.sortDicoms
 

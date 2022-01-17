@@ -1,83 +1,9 @@
-def _getDicomType_tags(dicomTags):
-    """Check the type of the dicom tags.
-
-    The function checks if the `dicomTags` is a dicom of a CT slice (CT),
-    an 1D/2D/3D image (RD), a treatment plan (RN) or a structure set (RS).
-    If the type could not be determined, 'Unknown' is returned.
-
-    Parameters
-    ----------
-    dicomTags : dicom tags
-        A dicom tag structure read by pydicom.read_file.
-
-    Returns
-    -------
-    string
-        A string that can be `CT`, `RD`, `RN`, `RS`, or `Unknown`.
-
-    See Also
-    --------
-    _getDicomType_file : check the type a dicom file.
-    """
-    import pydicom as dicom
-    import warnings
-
-    if "SOPClassUID" in dicomTags:  # check if SOPClassUID exists
-        if dicomTags.SOPClassUID == "1.2.840.10008.5.1.4.1.1.2":  # CT Image Storage
-            return "CT"
-        if dicomTags.SOPClassUID == "1.2.840.10008.5.1.4.1.1.481.3":  # Radiation Therapy Structure Set Storage
-            return "RS"
-        if dicomTags.SOPClassUID == "1.2.840.10008.5.1.4.1.1.481.8":  # Radiation Therapy Ion Plan Storage
-            return "RN"
-        if dicomTags.SOPClassUID == "1.2.840.10008.5.1.4.1.1.481.2":  # Radiation Therapy Dose Storage
-            return "RD"
-        else:
-            warnings.warn("Warning: no 'SOPClassUID' tag. Could not determine the dicom type.")
-            return "Unknown"
-
-
-def _getDicomType_file(dicomFile):
-    """Check the type of the dicom file.
-
-    The function checks if the `dicomFile` is a dicom of a CT slice (CT),
-    an 1D/2D/3D image (RD), a treatment plan (RN) or a structure set (RS).
-    If the type could not be determined, 'Unknown' is returned.
-
-    Parameters
-    ----------
-    dicomFile : path
-        A string of path to a dicom file
-
-    Returns
-    -------
-    string
-        A string that can be `CT`, `RD`, `RN`, `RS`, or `Unknown`.
-
-    See Also
-    --------
-    _getDicomType_tags : check the type of dicom tags.
-    """
-    import pydicom as dicom
-    import warnings
-    import fredtools as ft
-
-    try:
-        SOPClassUID = dicom.read_file(dicomFile, specific_tags=["SOPClassUID"], stop_before_pixels=True)
-    except dicom.errors.InvalidDicomError:
-        warnings.warn("Warning: could not read file {:s}".format(dicomFile))
-        return "Unknown"
-    except ValueError:
-        warnings.warn("Warning: the tag 'SOPClassUID' does not exist in file {:s}".format(dicomFile))
-        return "Unknown"
-    return ft.ft_imgIO.dicom_io._getDicomType_tags(SOPClassUID)
-
-
-def getDicomType(dicomVar):
+def getDicomTypeName(dicomVar):
     r"""Check the type of the dicom given as a path or tags.
 
-    The function checks if the `dicomVar` is a dicom of a CT slice (CT),
-    an 1D/2D/3D image (RD), a treatment plan (RN) or a structure set (RS).
-    If the type could not be determined, 'Unknown' is returned.
+    The function return the name of the SOP Class UID tag of a dicom
+    file given as a file name or dicom tags. The description of the
+    SOP Class UID names can be found in [1]_.
 
     Parameters
     ----------
@@ -88,20 +14,106 @@ def getDicomType(dicomVar):
     Returns
     -------
     string
-        A string that can be `CT`, `RD`, `RN`, `RS`, or `Unknown`.
+        A string of the SOP Class UID name.
 
     See Also
     --------
-    _getDicomType_tags : check the type of dicom tags.
-    _getDicomType_file : check the type a dicom file.
     sortDicoms : sort dicom files in a folder by type.
+
+    References
+    ----------
+    .. [1] `DICOM standard description - SOP Class UID <https://dicom.nema.org/dicom/2013/output/chtml/part04/sect_B.5.html>`_
     """
     import pydicom as dicom
 
+    # if the input is a string then get the dicom tags
     if isinstance(dicomVar, str):
-        return _getDicomType_file(dicomVar)
-    elif isinstance(dicomVar, dicom.dataset.FileDataset):
-        return _getDicomType_tags(dicomVar)
+        dicomVar = dicom.read_file(dicomVar, specific_tags=["SOPClassUID"], stop_before_pixels=True)
+
+    # check if the tags are dicom dataset
+    if not isinstance(dicomVar, dicom.dataset.FileDataset):
+        raise TypeError(f"The tags is not an instance of dicom.dataset.FileDataset.")
+
+    # check if SOPClassUID exists in the tags
+    if not "SOPClassUID" in dicomVar:
+        raise ValueError("Cannot find tag 'SOPClassUID' in the dicom tags.")
+
+    return dicomVar.SOPClassUID.name
+
+
+def _isDicomCT(dicomVar, raiseError=False):
+    r"""Check if the dicom is of CT type and raise error if requested."""
+    import itk
+
+    instanceBool = "CT Image Storage" in getDicomTypeName(dicomVar)
+
+    if raiseError and not instanceBool:
+        raise TypeError(f"The dicom is not a CT type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+    return instanceBool
+
+
+def _isDicomRS(dicomVar, raiseError=False):
+    r"""Check if the dicom is of RS type and raise error if requested."""
+    import itk
+
+    instanceBool = "Structure Set Storage" in getDicomTypeName(dicomVar)
+
+    if raiseError and not instanceBool:
+        raise TypeError(f"The dicom is not a RS type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+    return instanceBool
+
+
+def _isDicomRN(dicomVar, raiseError=False):
+    r"""Check if the dicom is of RN type and raise error if requested."""
+    import itk
+
+    instanceBool = "Plan Storage" in getDicomTypeName(dicomVar)  # ("RT Plan Storage" or "RT Ion Plan Storage")
+
+    if raiseError and not instanceBool:
+        raise TypeError(f"The dicom is not a RN type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+    return instanceBool
+
+
+def _isDicomRD(dicomVar, raiseError=False):
+    r"""Check if the dicom is of RD type and raise error if requested."""
+    import itk
+
+    instanceBool = "Dose Storage" in getDicomTypeName(dicomVar)
+
+    if raiseError and not instanceBool:
+        raise TypeError(f"The dicom is not a RD type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+    return instanceBool
+
+
+def _getRNBeamSequence(dicomVar):
+    r"""Get beam sequence ('IonBeamSequence' or 'BeamSequence') from dicom."""
+    import pydicom as dicom
+
+    # check if it is a RN dicom
+    _isDicomRN(dicomVar)
+
+    # if the input is a string then get the dicom tags
+    if isinstance(dicomVar, str):
+        dicomVar = dicom.read_file(dicomVar, stop_before_pixels=True)
+
+    # check if the tags are dicom dataset
+    if not isinstance(dicomVar, dicom.dataset.FileDataset):
+        raise TypeError(f"The tags is not an instance of dicom.dataset.FileDataset.")
+
+    # get name of the SOP Class UID
+    dicomTypeName = getDicomTypeName(dicomVar)
+    if dicomTypeName == "RT Ion Plan Storage":
+        if not "IonBeamSequence" in dicomVar:
+            raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+        else:
+            return dicomVar["IonBeamSequence"]
+    elif dicomTypeName == "RT Plan Storage":
+        if not "BeamSequence" in dicomVar:
+            raise ValueError(f"Can not find 'BeamSequence' in the dicom.")
+        else:
+            return dicomVar["BeamSequence"]
+    else:
+        raise TypeError(f"Cannot recognise the dicom as 'RT Plan Storage' nor 'RT Ion Plan Storage'.")
 
 
 def sortDicoms(searchFolder, recursive=False, displayInfo=False):
@@ -110,10 +122,10 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
     The function sorts file names found in the `searchFolder`
     (and subfolders if requested) for:
 
-        -  CT - dicom files of CT slices
-        -  RS - dicom files of structures
-        -  RN - dicom files of radiotherapy plan (also called RP)
-        -  RD - dicom files of 1D/2D/3D image (for instance dose distribution)
+        -  CT - dicom files of CT Image Storage ("CT Image Storage", "Enhanced CT Image Storage" or "Legacy Converted Enhanced CT Image Storage")
+        -  RS - dicom files of RT Structure Set Storage
+        -  RN - dicom files of RT Plan Storage ("RT Plan Storage" or "RT Ion Plan Storage")
+        -  RD - dicom files of 1D/2D/3D RT Dose Storage (for instance dose distribution)
         -  Unknown - files with \*.dcm extension that were not recognized.
 
     Parameters
@@ -135,33 +147,37 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
     import fredtools as ft
 
     if recursive:
-        dicomfileNames = glob.glob(os.path.join(searchFolder, "**/*.dcm"), recursive=True)
+        dicomFileNames = glob.glob(os.path.join(searchFolder, "**/*.dcm"), recursive=True)
     else:
-        dicomfileNames = glob.glob(os.path.join(searchFolder, "*.dcm"), recursive=False)
+        dicomFileNames = glob.glob(os.path.join(searchFolder, "*.dcm"), recursive=False)
 
     CTfileNames = []
     RSfileNames = []
     RNfileNames = []
     RDfileNames = []
     UnknownfileNames = []
-    for dicomfileName in dicomfileNames:
-        dicomfileType = getDicomType(dicomfileName)
-        if dicomfileType == "CT":  # CT Image Storage
-            CTfileNames.append(dicomfileName)
-        if dicomfileType == "RS":  # Radiation Therapy Structure Set Storage
-            RSfileNames.append(dicomfileName)
-        if dicomfileType == "RN":  # Radiation Therapy Ion Plan Storage
-            RNfileNames.append(dicomfileName)
-        if dicomfileType == "RD":  # Radiation Therapy Dose Storage
-            RDfileNames.append(dicomfileName)
-        if dicomfileType == "Unknown":
-            UnknownfileNames.append(dicomfileName)  # unrecognized dicoms
+    for dicomFileName in dicomFileNames:
+        if _isDicomCT(dicomFileName):  # CT
+            CTfileNames.append(dicomFileName)
+        elif _isDicomRS(dicomFileName):  # RS
+            RSfileNames.append(dicomFileName)
+        elif _isDicomRN(dicomFileName):  # RN ("RT Plan Storage" or "RT Ion Plan Storage")
+            RNfileNames.append(dicomFileName)
+        elif _isDicomRD(dicomFileName):  # RD
+            RDfileNames.append(dicomFileName)
+        else:
+            UnknownfileNames.append(dicomFileName)  # unrecognized dicoms
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         print("# Found dicoms: {:d} x CT, {:d} x RS, {:d} x RN, {:d} x RD, {:d} x unknown".format(len(CTfileNames), len(RSfileNames), len(RNfileNames), len(RDfileNames), len(UnknownfileNames)))
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
-    return {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "Unknown": UnknownfileNames}
+    dicomTypes = {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "Unknown": UnknownfileNames}
+    for dicomType, dicomName in dicomTypes.items():
+        if isinstance(dicomName, list) and len(dicomName) == 1:
+            dicomTypes[dicomType] = dicomName[0]
+
+    return dicomTypes
 
 
 def _getIonBeamDatasetForFieldNumber(fileName, beamNumber):
@@ -188,8 +204,7 @@ def _getIonBeamDatasetForFieldNumber(fileName, beamNumber):
     import fredtools as ft
 
     # check if dicom is RN
-    if not ft.dicom_io.getDicomType(fileName) == "RN":
-        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+    _isDicomRN(fileName, raiseError=True)
 
     # check if the beamNumber is an integer scalar
     if not np.isscalar(beamNumber) or not isinstance(beamNumber, int):
@@ -198,7 +213,7 @@ def _getIonBeamDatasetForFieldNumber(fileName, beamNumber):
     # read dicom
     dicomTags = dicom.read_file(fileName)
 
-    # check if IonBeamSequence exists
+    # get beam sequence (BeamSequence or IonBeamSequence)
     if not "IonBeamSequence" in dicomTags:
         raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
 
@@ -232,8 +247,7 @@ def _getReferencedBeamDatasetForFieldNumber(fileName, beamNumber):
     import fredtools as ft
 
     # check if dicom is RN
-    if not ft.dicom_io.getDicomType(fileName) == "RN":
-        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+    _isDicomRN(fileName, raiseError=True)
 
     # check if the beamNumber is an integer scalar
     if not np.isscalar(beamNumber) or not isinstance(beamNumber, int):
@@ -283,24 +297,22 @@ def getRNMachineName(fileName, displayInfo=False):
     import pydicom as dicom
 
     # check if dicom is RN
-    if not ft.dicom_io.getDicomType(fileName) == "RN":
-        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+    _isDicomRN(fileName, raiseError=True)
 
     # read dicom
     dicomTags = dicom.read_file(fileName)
 
-    # check if IonBeamSequence exists
-    if not "IonBeamSequence" in dicomTags:
-        raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+    # get beam sequence (BeamSequence or IonBeamSequence)
+    beamSequence = _getRNBeamSequence(dicomTags)
 
     treatmentMachineName = []
-    for IonBeamDataset in dicomTags.IonBeamSequence:
-        # Continue if couldn't find IonBeamDataset for the IonBeamDataset or the Treatment Delivery Type of the IonBeamDataset is not TREATMENT
-        if not IonBeamDataset or not (IonBeamDataset.TreatmentDeliveryType == "TREATMENT"):
+    for beamDataset in beamSequence:
+        # Continue if couldn't find beamDataset for the beamDataset or the Treatment Delivery Type of the beamDataset is not TREATMENT
+        if not beamDataset or not (beamDataset.TreatmentDeliveryType == "TREATMENT"):
             continue
 
-        if "TreatmentMachineName" in IonBeamDataset:
-            treatmentMachineName.append(IonBeamDataset.TreatmentMachineName)
+        if "TreatmentMachineName" in beamDataset:
+            treatmentMachineName.append(beamDataset.TreatmentMachineName)
         else:
             continue
 
@@ -347,8 +359,11 @@ def getRNSpots(fileName):
     import numpy as np
 
     # check if dicom is RN
-    if not ft.dicom_io.getDicomType(fileName) == "RN":
-        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+    _isDicomRN(fileName, raiseError=True)
+
+    # check if dicom is "RT Ion Plan Storage"
+    if not "RT Ion Plan Storage" == getDicomTypeName(fileName):
+        raise TypeError(f"The dicom is not of 'RT Ion Plan Storage' type but SOP class UID name is '{getDicomTypeName(fileName)}'")
 
     # read dicom
     dicomTags = dicom.read_file(fileName)
@@ -476,8 +491,11 @@ def getRNFields(fileName, raiseWarning=True, displayInfo=False):
     import warnings
 
     # check if dicom is RN
-    if not ft.dicom_io.getDicomType(fileName) == "RN":
-        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+    _isDicomRN(fileName, raiseError=True)
+
+    # check if dicom is "RT Ion Plan Storage"
+    if not "RT Ion Plan Storage" == getDicomTypeName(fileName):
+        raise TypeError(f"The dicom is not of 'RT Ion Plan Storage' type but SOP class UID name is '{getDicomTypeName(fileName)}'")
 
     # get spots info
     spotsInfo = getRNSpots(fileName)
@@ -601,8 +619,7 @@ def getRNInfo(fileName, displayInfo=False):
     import os
 
     # check if dicom is RN
-    if not ft.dicom_io.getDicomType(fileName) == "RN":
-        raise TypeError("The file {:s} is not a RN dicom file.".format(fileName))
+    _isDicomRN(fileName, raiseError=True)
 
     # read dicom
     dicomTags = dicom.read_file(fileName)
@@ -643,9 +660,8 @@ def getRNInfo(fileName, displayInfo=False):
     planInfo["stationName"] = dicomTags.StationName if "StationName" in dicomTags else ""
     planInfo["machineName"] = ft.getRNMachineName(fileName)
 
-    # check if IonBeamSequence exists
-    if not "IonBeamSequence" in dicomTags:
-        raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+    # get beam sequence (BeamSequence or IonBeamSequence)
+    beamSequence = _getRNBeamSequence(dicomTags)
 
     # count fields' type and treatment machine name
     planInfo["totalFieldsNumber"] = int(dicomTags.FractionGroupSequence[0].NumberOfBeams)
@@ -653,9 +669,9 @@ def getRNInfo(fileName, displayInfo=False):
     planInfo["setupFieldsNumber"] = 0
     planInfo["otherFieldsNumber"] = 0
     for ifield in range(planInfo["totalFieldsNumber"]):
-        if dicomTags.IonBeamSequence[ifield].TreatmentDeliveryType == "TREATMENT":
+        if beamSequence[ifield].TreatmentDeliveryType == "TREATMENT":
             planInfo["treatmentFieldsNumber"] += 1
-        elif dicomTags.IonBeamSequence[ifield].TreatmentDeliveryType == "SETUP":
+        elif beamSequence[ifield].TreatmentDeliveryType == "SETUP":
             planInfo["setupFieldsNumber"] += 1
         else:
             planInfo["otherFieldsNumber"] += 1
@@ -798,7 +814,7 @@ def getCT(fileNames, displayInfo=False):
 
     # check if all files are CT type
     for fileName in fileNames:
-        if not ft.getDicomType(fileName) == "CT":
+        if not _isDicomCT(fileName):
             raise ValueError(f"File {fileName} is not a CT dicom.")
 
     # read dicoms' tags
@@ -938,7 +954,7 @@ def _getStructureContoursByName(RSfileName, structName):
     import numpy as np
     import fredtools as ft
 
-    if not ft.getDicomType(RSfileName) == "RS":
+    if not _isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
     dicomRS = dicom.read_file(RSfileName)
@@ -1004,7 +1020,7 @@ def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
     import fredtools as ft
 
     for fileName in fileNames:
-        if not ft.getDicomType(fileName) == "RD":
+        if not _isDicomRD(fileName):
             warnings.warn(f"File {fileName} is not a RD dicom.")
             continue
 
