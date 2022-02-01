@@ -305,9 +305,9 @@ def getGIstat(imgGI, displayInfo=False):
     arrGI = ft.arr(imgGI)
     GIstat = {}
     if np.issubdtype(arrGI.dtype, np.integer):
-        if not np.all(np.unique(arrGI) == [-1, 0, 1]) and not np.all(np.unique(arrGI) == [0, 1]):
+        if not set(np.unique(arrGI)).issubset(set([-1, 0, 1])):
             raise ValueError(
-                f"The calculation mode was recognised as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0 , 1] or [0, 1] unique values and in fact the uniques are {np.unique(arrGI)}"
+                f"The calculation mode was recognised as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0 , 1] unique values and the uniques are {np.unique(arrGI)}"
             )
         mode = "pass-rate"
         GIstat["passRate"] = (arrGI == 1).sum() / (arrGI >= 0).sum() * 100

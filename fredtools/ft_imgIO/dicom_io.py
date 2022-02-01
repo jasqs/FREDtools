@@ -709,25 +709,26 @@ def getRSInfo(fileName, displayInfo=False):
     DataFrame
         Pandas DataFrame with structures and properties.
     """
-    from pandas import DataFrame
+    import pandas as pd
     from dicompylercore import dicomparser
     import fredtools as ft
 
     rtss = dicomparser.DicomParser(fileName)
     structs = rtss.GetStructures()
 
-    ROITable = DataFrame()
+    ROITable = pd.DataFrame()
 
     for struct in structs:
-        ROITable = ROITable.append(
+        ROIinstance = pd.DataFrame(
             {
                 "ID": structs[struct]["id"],
                 "ROIType": "unclasified" if not structs[struct]["type"] else structs[struct]["type"],
                 "ROIName": structs[struct]["name"],
-                "ROIColor": structs[struct]["color"],
-            },
-            ignore_index=True,
+                "ROIColor": [structs[struct]["color"]],
+            }
         )
+
+        ROITable = pd.concat([ROITable, ROIinstance], ignore_index=True)
 
     ROITable = ROITable.set_index("ID")
 
@@ -961,13 +962,20 @@ def _getStructureContoursByName(RSfileName, structName):
 
     for StructureSetROISequence in dicomRS.StructureSetROISequence:
         if StructureSetROISequence.ROIName == structName:
+            # get the ROInumber
             ROINumber = StructureSetROISequence.ROINumber
+            # get ROIGenerationAlgorithm if available
+            try:
+                GenerationAlgorithm = StructureSetROISequence.ROIGenerationAlgorithm
+            except:
+                GenerationAlgorithm = ""
             break
         else:
             ROINumber = None
-    ROIinfo = {"Number": int(StructureSetROISequence.ROINumber), "Name": StructureSetROISequence.ROIName, "GenerationAlgorithm": StructureSetROISequence.ROIGenerationAlgorithm}
+    ROIinfo = {"Number": int(ROINumber), "Name": structName, "GenerationAlgorithm": GenerationAlgorithm}
+
     # raise error if no structName found
-    if not ROINumber:
+    if ROINumber is None:
         raise ValueError(f"The structure named '{structName}' is not in the {RSfileName}.")
 
     # get ROI type
