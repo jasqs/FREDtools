@@ -133,6 +133,10 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     if not method.lower() in ["centreinside", "centerinside", "centre", "center", "allinside", "all"]:
         raise ValueError(f"The method '{method}' can not be recognised. Only ('centerinside','allinside') are possible")
 
+    # check if the structName is in the RS dicom
+    if not structName in ft.getRSInfo(RSfileName).ROIName.tolist():
+        raise ValueError(f"The structure '{structName}' can not be found in the dicom RS file {RSfileName}")
+
     # get structure contour and structure info
     StructureContours, StructInfo = ft.dicom_io._getStructureContoursByName(RSfileName, structName)
 

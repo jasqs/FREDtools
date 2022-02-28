@@ -67,8 +67,8 @@ class braggPeak:
         self.__bortfeldFit = []
 
         self.__bortfeldParamConstant = {
-            "p": 1.726,  # [-]
-            "alpha": 0.028,  # [mm*MeV^(-p)]
+            "p": 1.72566928,  # [-] Exponent of range-energy relation
+            "alpha": 0.02750685,  # [mm*MeV^(-p)] Proportionality factor
             "epsilon": 0.2,  # [-] Fraction of primary fluence contributing to the "tail" of the energy spectrum
         }
 
@@ -571,7 +571,7 @@ class braggPeak:
         bortfeldFit = self.bortfeldFit
         bortfeldParam = self.__bortfeldParamConstant
         bortfeldResults = {}
-        bortfeldResults["R0_mm"] = bortfeldFit.params["R0"].value - self.__bp[0].min() + self.__offset
+        bortfeldResults["R0_mm"] = bortfeldFit.params["R0"].value + self.__offset
         bortfeldResults["E0_MeV"] = (bortfeldResults["R0_mm"] / bortfeldParam["alpha"]) ** (1 / bortfeldParam["p"])
         bortfeldResults["sigmaMono_mm"] = 0.012 * bortfeldResults["R0_mm"] ** 0.935
         bortfeldResults["sigmaE0_MeV"] = np.sqrt(
@@ -624,7 +624,7 @@ class braggPeak:
             return D(depth, R0, phi0, epsilon, sigma)
 
         bortfeldParam = self.__bortfeldParamConstant
-        bortfeldParam["R0"] = self.getRInterp(0.9, "distal")  # [mm]
+        bortfeldParam["R0"] = self.getRInterp(0.8, "distal")  # [mm]
         bortfeldParam["phi"] = self.getDInterp(self.__bp[0].min())  # [1/mm^2] initial fluence at the beginning of the profile (normalisation factor)
         bortfeldParam["E0"] = ((bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) / bortfeldParam["alpha"]) ** (1 / bortfeldParam["p"])  # [MeV] initial energy
         bortfeldParam["sigmaMono"] = (0.012 * (bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) ** 0.935) / 10  # [mm] width of Gaussian range straggling

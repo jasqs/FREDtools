@@ -972,11 +972,12 @@ def _getStructureContoursByName(RSfileName, structName):
             break
         else:
             ROINumber = None
-    ROIinfo = {"Number": int(ROINumber), "Name": structName, "GenerationAlgorithm": GenerationAlgorithm}
 
     # raise error if no structName found
     if ROINumber is None:
         raise ValueError(f"The structure named '{structName}' is not in the {RSfileName}.")
+
+    ROIinfo = {"Number": int(ROINumber), "Name": structName, "GenerationAlgorithm": GenerationAlgorithm}
 
     # get ROI type
     for RTROIObservationsSequence in dicomRS.RTROIObservationsSequence:

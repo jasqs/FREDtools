@@ -221,4 +221,7 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
     if returnBinCenters:
         hist[0] = hist[0][:-1] + np.diff(hist[0]) / 2
 
-    return tuple(hist)
+    # convert hist[1] to float (useful for postprocessing normalistion)
+    hist[1] = hist[1].astype("float")
+
+    return hist

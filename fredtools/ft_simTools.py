@@ -217,109 +217,159 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
 
 
 def readBeamModel(fileName):
-    """Read beam model from a beam model CSV.
+    """Read beam model from a YAML file.
 
-    The function reads the beam model parameters from a CSV beam model file.
-    The beam model must be defined with a header and must define at least:
+    The function reads the beam model parameters from a YAML beam model file.
+    The beam model must be defined as a dictionary at least including keys:
 
-        -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
-        -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
-        -  *Optical Parameters*: Alpha, beta and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
+        - "BM Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
+        - "BM Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns:
 
-    Also other parameters can be defined. All the lines starting with '#' will be treated as comments.
+            -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
+            -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
+            -  *Optical Parameters*: Alpha, beta and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
+
+        - "BM RangeShifters": a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.
+        - "BM Materials": a dictionary of the materials and its parameters, like density, composition, etc.
+
+    Also other parameters can be defined.
 
     Parameters
     ----------
     fileName : string
-        A string path to beam model CSV file.
+        A string path to beam model YAML file.
 
     Returns
     -------
-    Pandas DataFrame
-        Pandas DataFrame with 'nomEnergy' as the index.
+    dict
+        A dictionary with the beam model and required kays.
 
     See Also
     --------
-    writeBeamModel : write beam model from DataFrame to a nicely formated CSV.
+    writeBeamModel : write beam model to YAML file.
     interpolateBeamModel : interpolate all beam model parameters for a given nominal energy.
     """
+    import numpy as np
+    import yaml
     import pandas as pd
+    from io import StringIO
 
-    beamModel = pd.read_csv(fileName, delim_whitespace=True, comment="#")
+    # load beam model from file
+    with open(fileName, "r") as yaml_file:
+        beamModel = yaml.load(yaml_file, Loader=yaml.SafeLoader)
 
-    # validate if required columns exist
-    if not {"nomEnergy", "Energy", "dEnergy", "scalingFactor", "alphaX", "betaX", "epsilonX", "alphaY", "betaY", "epsilonY"}.issubset(beamModel.columns):
-        raise ValueError(f"Missing columns or wrong column names when loading beam model from {fileName}")
+    # check if all required sections are present in the beam model
+    if not {"BM Description", "BM Energy", "BM RangeShifters", "BM Materials"}.issubset(beamModel.keys()):
+        raise ValueError(
+            f"Missing sections in the beam model loaded from {fileName}\nThe beam model must include at least 'BM Description', 'BM Energy', 'BM RangeShifters' and 'BM Materials' sections."
+        )
 
-    # set nomEnergy as the index
-    beamModel.set_index("nomEnergy", inplace=True)
+    # convert all dataFrame-like lists of strings to dataFrame
+    for key in beamModel.keys():
+        if isinstance(beamModel[key], list):
+            if ("row" in beamModel[key][-1]) and ("column" in beamModel[key][-1]):  # the key is a pandas DataFrame
+                beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), delim_whitespace=True)
+                if "nomEnergy" in beamModel[key].columns:
+                    beamModel[key].set_index("nomEnergy", inplace=True)
+
+    # validate if required columns exist in BM Energy
+    if not {"Energy", "dEnergy", "scalingFactor", "alphaX", "betaX", "epsilonX", "alphaY", "betaY", "epsilonY"}.issubset(beamModel["BM Energy"].columns):
+        raise ValueError(f"Missing columns or wrong column names of 'BM Energy' when loading beam model from {fileName}.")
+    # validate if there are any missing (None, NaN) values in BM Energy
+    if np.any((beamModel["BM Energy"]).isna()):
+        raise ValueError(f"Missing values for some records in the 'BM Energy' for the beam model loaded from {fileName}.")
 
     return beamModel
 
 
-def writeBeamModel(beamModel, fileName, comments=None):
-    """Write beam model to a nicely formated CSV.
+def writeBeamModel(beamModel, fileName):
+    """Write beam model to YAML.
 
-    The function writes the beam model parameters to a nicely formated CSV beam model file.
-    The beam model must be defined as a pandas DataFrame with at least:
+    The function writes the beam model parameters to a beam model file in YAML format.
+    The beam model must be defined as a dictionary at least including keys:
 
-        -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
-        -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
-        -  *Optical Parameters*: Alpha, beta and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
+        - "BM Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
+        - "BM Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns:
 
-    Also other parameters can be defined and will be saved. The comments will be saved with '#' sign at
-    the beginning of the file. Comments 'name' (def. file name) and 'creation time' will always be saved
-    but can be overwritten by the `comments` parameter.
+            -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
+            -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
+            -  *Optical Parameters*: Alpha, beta and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
+
+        - "BM RangeShifters": a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.
+        - "BM Materials": a dictionary of the materials and its parameters, like density, composition, etc.
+
+    Also other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
+    it will be saved to a nicely formated table.
 
     Parameters
     ----------
-    beamModel : DataFrame
-        Beam model defined in a pandas DataFrame.
+    beamModel : dict
+        Beam model defined as a dictionary with the required keys.
     fileName : string
-        A string path to beam model CSV file.
-    comments : None or dict
-        Comments to be saved in form '# key : value'. (def. None)
+        A string path to beam model YAML file. It is recommended to use .bm file extention.
 
     See Also
     --------
-    readBeamModel : read beam model from CSV beam model file.
+    readBeamModel : read beam model from YAML beam model file.
     interpolateBeamModel : interpolate all beam model parameters for a given nominal energy.
     """
     from datetime import datetime
     import os
+    import numpy as np
+    import yaml
+    import pandas as pd
+    from copy import deepcopy
 
-    beamModelStr = beamModel.copy()
-    beamModelStr.reset_index(inplace=True)
+    beamModelSave = deepcopy(beamModel)
 
-    # validate if required columns exist
-    if not {"nomEnergy", "Energy", "dEnergy", "scalingFactor", "alphaX", "betaX", "epsilonX", "alphaY", "betaY", "epsilonY"}.issubset(beamModelStr.columns):
-        raise ValueError(f"Missing columns or wrong column names in the beam model.")
+    # check if all required sections are present in the beam model
+    if not {"BM Energy", "BM RangeShifters", "BM Materials"}.issubset(beamModelSave.keys()):
+        raise ValueError(f"Missing sections (keys) in the beam model.\nThe beam model must include at least 'BM Description', 'BM Energy', 'BM RangeShifters' and 'BM Materials' sections.")
 
-    # validate comments (must be None or dict)
-    if (not comments is None) and (not isinstance(comments, dict)):
-        raise TypeError(f"Parameter 'comments' must be a dictionary or None.")
+    # add "BM Description" to the beam model and add/modify values and/or keys order
+    if not "BM Description" in beamModelSave.keys():
+        beamModelSave["BM Description"] = {}
+    BMDescription = {}
+    if "name" in beamModelSave["BM Description"].keys():
+        BMDescription["name"] = beamModelSave["BM Description"].pop("name")
+    else:
+        BMDescription["name"] = os.path.splitext(os.path.basename(fileName))[0]
+    if "creationTime" in beamModelSave["BM Description"].keys():
+        BMDescription["creationTime"] = beamModelSave["BM Description"].pop("creationTime")
+    else:
+        BMDescription["creationTime"] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+    BMDescription.update(beamModelSave["BM Description"])
+    beamModelSave["BM Description"] = BMDescription
 
-    # save the beam model in a nicely formated csv
-    beamModelStr["nomEnergy"] = beamModelStr["nomEnergy"].map(lambda x: "{:<17.2f}".format(x))
-    beamModelStr["Energy"] = beamModelStr["Energy"].map(lambda x: "{:<17.3f}".format(x))
-    for columnName in beamModel.columns:
-        if columnName in ("nomEnergy, Energy"):
-            continue
-        beamModelStr[columnName] = beamModelStr[columnName].map(lambda x: "{:<+17.10E}".format(x))
-    header = beamModelStr.columns.map(lambda x: "{:17s}".format(x))
-    beamModelStr.to_csv(fileName, sep="\t", float_format="{:.5E}", index=False, header=header)
+    # validate if required columns exist in BM Energy
+    if not {"Energy", "dEnergy", "scalingFactor", "alphaX", "betaX", "epsilonX", "alphaY", "betaY", "epsilonY"}.issubset(beamModelSave["BM Energy"].columns):
+        raise ValueError(f"Missing columns or wrong column names of 'BM Energy' section in the beam model.")
+    # validate if there are any missing (None, NaN) values in BM Energy
+    if np.any((beamModelSave["BM Energy"]).isna()):
+        raise ValueError(f"Missing values for some records in the 'BM Energy' section of the beam model.")
 
-    # write comments at the beginning of the file
-    with open(fileName, "r+") as fp:
-        lines = fp.readlines()
-        if comments:
-            for key in comments:
-                lines.insert(0, "# " + key + ": " + comments[key] + "\n")
-        if (comments is None) or (not "name" in [key.lower() for key in comments]):
-            lines.insert(0, "# name: " + os.path.splitext(os.path.basename(fileName))[0] + "\n")
-        lines.insert(0, "# creation time: " + datetime.now().strftime("%Y/%m/%d %H:%M:%S\n"))
-        fp.seek(0)
-        fp.writelines(lines)
+    # beamModelSave["BM Energy"] = beamModelSave["BM Energy"].to_dict()
+
+    # convert all dataFrames to a nicely formated list of strings
+    for key in beamModel.keys():
+        if isinstance(beamModelSave[key], pd.DataFrame):
+            beamModelSave[key].reset_index(inplace=True)
+            if "nomEnergy" in beamModelSave[key].columns:
+                beamModelSave[key]["nomEnergy"] = beamModelSave[key]["nomEnergy"].map(lambda x: "{:<17.2f}".format(x))
+            if "Energy" in beamModelSave[key].columns:
+                beamModelSave[key]["Energy"] = beamModelSave[key]["Energy"].map(lambda x: "{:<17.3f}".format(x))
+
+            for columnName in beamModelSave[key].columns:
+                if columnName in ("nomEnergy, Energy"):
+                    continue
+                if np.issubdtype(beamModelSave[key][columnName], np.number):
+                    beamModelSave[key][columnName] = beamModelSave[key][columnName].map(lambda x: "{:<+17.10E}".format(x))
+            beamModelSave[key] = beamModelSave[key].to_string(index=False, col_space=20, header=True, justify="left", show_dimensions=True).split("\n")
+            beamModelSave[key] = [x.rstrip() for x in beamModelSave[key]]
+
+    # write beam model to file
+    with open(fileName, "w") as yaml_file:
+        yaml.dump(beamModelSave, yaml_file, sort_keys=False, width=2000, default_flow_style=False, allow_unicode=True)
 
 
 def interpolateBeamModel(beamModel, nomEnergy, interpolation="linear", splineOrder=3):
@@ -696,6 +746,15 @@ def readGATE_PSActor(fileName):
 
     # rename columns
     psActor.rename(columns={"ekine": "Ekine", "edep": "Edep", "ekpost": "EkinePost", "ekpre": "EkinePre", "pDGCode": "PDGCode"}, inplace=True)
+
+    # sort columns
+    sortOrder = []
+    for columnNameScheme in ["ID", "PDG", "Ekine", "Edep", "DEDX", "Length"]:  # sort by name
+        sortOrder += np.where([columnNameScheme in columnName for columnName in psActor.columns])[0].tolist()
+    for sortIdx in range(psActor.columns.size):  # add missing columns
+        if not sortIdx in sortOrder:
+            sortOrder.append(sortIdx)
+    psActor = psActor[psActor.columns[sortOrder]]
 
     # convert byte string to string
     for keyName, keyType in psActor.dtypes.iteritems():

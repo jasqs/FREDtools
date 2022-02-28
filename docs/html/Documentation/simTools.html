@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.45 documentation</title>
+  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.50 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.45
+                0.6.50
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -152,10 +152,14 @@ If some information os not available, then a NaN or numpy.nan is returned.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.writeBeamModel">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeBeamModel" title="Permalink to this definition"></a></dt>
-<dd><p>Write beam model to a nicely formated CSV.</p>
-<p>The function writes the beam model parameters to a nicely formated CSV beam model file.
-The beam model must be defined as a pandas DataFrame with at least:</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeBeamModel" title="Permalink to this definition"></a></dt>
+<dd><p>Write beam model to YAML.</p>
+<p>The function writes the beam model parameters to a beam model file in YAML format.
+The beam model must be defined as a dictionary at least including keys:</p>
+<blockquote>
+<div><ul>
+<li><p>“BM Description”: a dictionary with the beam model descriptions. At least the keys “name” and “creationDate” are required and will be added automatically if not provided.</p></li>
+<li><p>“BM Energy”: a pandas DataFrame of beam energetic and propagation parameters, with at least columns:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><em>Energy parameters</em>: nominal energy (‘nomEnergy’), energy in Monte Carlo (‘Energy’) and energy spread in Monte Carlo (‘dEnergy’)</p></li>
@@ -163,22 +167,25 @@ The beam model must be defined as a pandas DataFrame with at least:</p>
 <li><p><em>Optical Parameters</em>: Alpha, beta and epsilon describing the beam emittance in X/Y directions (‘alphaX’, ‘betaX’, ‘epsilonX’, ‘alphaY’, ‘betaY’ and ‘epsilonY’)</p></li>
 </ul>
 </div></blockquote>
-<p>Also other parameters can be defined and will be saved. The comments will be saved with ‘#’ sign at
-the beginning of the file. Comments ‘name’ (def. file name) and ‘creation time’ will always be saved
-but can be overwritten by the <cite>comments</cite> parameter.</p>
+</li>
+<li><p>“BM RangeShifters”: a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.</p></li>
+<li><p>“BM Materials”: a dictionary of the materials and its parameters, like density, composition, etc.</p></li>
+</ul>
+</div></blockquote>
+<p>Also other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
+it will be saved to a nicely formated table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>beamModel</strong> (<em>DataFrame</em>) – Beam model defined in a pandas DataFrame.</p></li>
-<li><p><strong>fileName</strong> (<em>string</em>) – A string path to beam model CSV file.</p></li>
-<li><p><strong>comments</strong> (<em>None</em><em> or </em><em>dict</em>) – Comments to be saved in form ‘# key : value’. (def. None)</p></li>
+<li><p><strong>beamModel</strong> (<em>dict</em>) – Beam model defined as a dictionary with the required keys.</p></li>
+<li><p><strong>fileName</strong> (<em>string</em>) – A string path to beam model YAML file. It is recommended to use .bm file extention.</p></li>
 </ul>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.readBeamModel" title="fredtools.readBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readBeamModel</span></code></a></dt><dd><p>read beam model from CSV beam model file.</p>
+<dt><a class="reference internal" href="#fredtools.readBeamModel" title="fredtools.readBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readBeamModel</span></code></a></dt><dd><p>read beam model from YAML beam model file.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.interpolateBeamModel" title="fredtools.interpolateBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolateBeamModel</span></code></a></dt><dd><p>interpolate all beam model parameters for a given nominal energy.</p>
 </dd>
@@ -189,9 +196,13 @@ but can be overwritten by the <cite>comments</cite> parameter.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readBeamModel">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readBeamModel" title="Permalink to this definition"></a></dt>
-<dd><p>Read beam model from a beam model CSV.</p>
-<p>The function reads the beam model parameters from a CSV beam model file.
-The beam model must be defined with a header and must define at least:</p>
+<dd><p>Read beam model from a YAML file.</p>
+<p>The function reads the beam model parameters from a YAML beam model file.
+The beam model must be defined as a dictionary at least including keys:</p>
+<blockquote>
+<div><ul>
+<li><p>“BM Description”: a dictionary with the beam model descriptions. At least the keys “name” and “creationDate” are required and will be added automatically if not provided.</p></li>
+<li><p>“BM Energy”: a pandas DataFrame of beam energetic and propagation parameters, with at least columns:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><em>Energy parameters</em>: nominal energy (‘nomEnergy’), energy in Monte Carlo (‘Energy’) and energy spread in Monte Carlo (‘dEnergy’)</p></li>
@@ -199,22 +210,27 @@ The beam model must be defined with a header and must define at least:</p>
 <li><p><em>Optical Parameters</em>: Alpha, beta and epsilon describing the beam emittance in X/Y directions (‘alphaX’, ‘betaX’, ‘epsilonX’, ‘alphaY’, ‘betaY’ and ‘epsilonY’)</p></li>
 </ul>
 </div></blockquote>
-<p>Also other parameters can be defined. All the lines starting with ‘#’ will be treated as comments.</p>
+</li>
+<li><p>“BM RangeShifters”: a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.</p></li>
+<li><p>“BM Materials”: a dictionary of the materials and its parameters, like density, composition, etc.</p></li>
+</ul>
+</div></blockquote>
+<p>Also other parameters can be defined.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>fileName</strong> (<em>string</em>) – A string path to beam model CSV file.</p>
+<dd class="field-odd"><p><strong>fileName</strong> (<em>string</em>) – A string path to beam model YAML file.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Pandas DataFrame with ‘nomEnergy’ as the index.</p>
+<dd class="field-even"><p>A dictionary with the beam model and required kays.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Pandas DataFrame</p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.writeBeamModel" title="fredtools.writeBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">writeBeamModel</span></code></a></dt><dd><p>write beam model from DataFrame to a nicely formated CSV.</p>
+<dt><a class="reference internal" href="#fredtools.writeBeamModel" title="fredtools.writeBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">writeBeamModel</span></code></a></dt><dd><p>write beam model to YAML file.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.interpolateBeamModel" title="fredtools.interpolateBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolateBeamModel</span></code></a></dt><dd><p>interpolate all beam model parameters for a given nominal energy.</p>
 </dd>
