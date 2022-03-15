@@ -118,9 +118,9 @@ def getGIcmap(maxGI, N=256):
 def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=True):
     """Get histogram or differential histogram.
 
-    The function creates a histogram data from given dataX iterable in the defined bins.
+    The function creates a histogram data from a given dataX iterable in the defined bins.
     It is possible to generate a differential histogram where the values of the histogram
-    (usually Y-axis on a plot) are given quantity, instead of frequency of `dataX` values
+    (usually Y-axis on a plot) are a given quantity, instead of frequency of `dataX` values
     occurrance.
 
     Parameters
@@ -133,7 +133,7 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
         1D array-like iterable with the data to calculate differential histogram.
         It must be of the same size as `dataX`. For instance, it can be: a single-column
         pandas DataFrame, pandas Series, 1D numpy array, 1D list, 1D tuple etc. (def. None)
-    bins : 1D array)like, optional
+    bins : 1D array_like, optional
         1D array-like iterable with the bins' edges to calculate histogram.
         If none, then the bins will be generated automatically between
         minimum and maximum value of `dataX` in 100 steps linearly. (def. None)
@@ -225,3 +225,176 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
     hist[1] = hist[1].astype("float")
 
     return hist
+
+
+def pdfLandau(x, mpv, xi, amp=1):
+    """Landau probability density function (PDF).
+
+    The function generates a Landau probability density with a given most probable
+    value (`mpv`), width (described with `xi`) and amplitude at `mpv`. It was adapted
+    from [1]_ which was implemented based on the ROOT implementation. See [2]_ for more details.
+
+    Parameters
+    ----------
+    x : scalar or array_like
+        Point (or points) where to calculate the PDF.
+    mpv : scalar or array_like
+        Position of the most probable value (MPV) of the Landau distribution.
+    xi : float or array_like
+        Parameter 'xi' of the Landau distribution, it is a measure of its width.
+    amp : scalar or array_like, optional
+        Amplitude of the PDF at MPV. (def. 1)
+
+    Returns
+    -------
+    scalar or array_like
+        Single value or array of values of the Landau PDF.
+
+    See Also
+    --------
+    pdfLandauGauss : generate Landau PDF convoluted with a Gaussian PDF.
+    fitLandau : fit Landau distribution to data.
+    fitLandauGauss : fit Landau distribution convoluted with a Gaussian to data.
+
+    References
+    ----------
+    .. [1] `landaupy python package <https://pypi.org/project/landaupy/>`_
+    .. [2] `landaupy package documentation <https://github.com/SengerM/landaupy>`_
+    """
+    from landaupy import landau
+
+    return amp * landau.pdf(x, x_mpv=mpv, xi=xi) / landau.pdf(mpv, x_mpv=mpv, xi=xi)
+
+
+def pdfLandauGauss(x, mpv, xi, sigma=0, amp=1):
+    """Probability density function (PDF) of Landau convoluted with a Gaussian.
+
+    The function generates a Landau convoluted with a Gaussian probability density with a given
+    most probable value of Landau (`mpv`), width of Landau (described with `xi`), standard deviation of gaussian
+    and amplitude at `mpv`. It was adapted from [3]_ which was implemented based on the ROOT implementation.
+    See [4]_ for more details.
+
+    Parameters
+    ----------
+    x : scalar or array_like
+        Point (or points) where to calculate the PDF.
+    mpv : scalar or array_like
+        Position of the most probable value (MPV) of the Landau distribution.
+    xi : float or array_like
+        Parameter 'xi' of the Landau distribution, it is a measure of its width.
+    sigma : scalar or array_like, optional
+        Standard deviation of the gaussian distribution. (def. 0)
+    amp : scalar or array_like, optional
+        Amplitude of the PDF at MPV. (def. 1)
+
+    Returns
+    -------
+    scalar or array_like
+        Single value or array of values of the Landau convoluted with gaussian PDF.
+
+    See Also
+    --------
+    pdfLandau : generate Landau PDF.
+    fitLandau : fit Landau distribution to data.
+    fitLandauGauss : fit Landau distribution convoluted with a Gaussian to data.
+
+    References
+    ----------
+    .. [3] `landaupy python package <https://pypi.org/project/landaupy/>`_
+    .. [4] `landaupy package documentation <https://github.com/SengerM/landaupy>`_
+    """
+    from landaupy import langauss
+
+    return amp * langauss.pdf(x, landau_x_mpv=mpv, landau_xi=xi, gauss_sigma=sigma) / langauss.pdf(mpv, landau_x_mpv=mpv, landau_xi=xi, gauss_sigma=sigma)
+
+
+def fitLandau(x, y, fixAmplitude=False):
+    """Fit Landau distribution.
+
+    The function fits Landau distribution to the data given as `x` and `y` values,
+    using the least square algorithm.
+
+    Parameters
+    ----------
+    x : array_like
+        `X` values.
+    y : array_like
+        `Y` values.
+    fixAmplitude : bool, optional
+        determine if the `amp` parameter of the PDF should be used in the fiting.
+
+    Returns
+    -------
+    lmfit.model.ModelResult
+        Model results of the LMFit package.
+
+    See Also
+    --------
+    fitLandauGauss : fit Landau distribution convoluted with a Gaussian to data.
+    """
+    import lmfit
+    import numpy as np
+
+    fitModel = lmfit.Model(pdfLandau)
+
+    # calculate starting parameters
+    amp0 = np.nanmax(y)
+    mpv0 = x[np.where(np.array(y) == amp0)[0]][0]
+    xi0 = np.sqrt(np.cov(x, aweights=y)) * 0.3
+
+    # prepare constraints for the parameters
+    fitModel.set_param_hint("mpv", min=0, max=np.inf, value=mpv0, vary=True)
+    fitModel.set_param_hint("amp", min=0, max=np.inf, value=amp0, vary=not fixAmplitude)
+    fitModel.set_param_hint("xi", min=1e-5, max=np.inf, value=xi0, vary=True)
+
+    # perform fit
+    fitResult = fitModel.fit(data=y, x=x)
+
+    return fitResult
+
+
+def fitLandauGauss(x, y, fixAmplitude=False):
+    """Fit Landau convoluted with gaussian distribution.
+
+    The function fits Landau convoluted with gaussian distribution
+    to the data given as `x` and `y` values, using the least square algorithm.
+
+    Parameters
+    ----------
+    x : array_like
+        `X` values.
+    y : array_like
+        `Y` values.
+    fixAmplitude : bool, optional
+        determine if the `amp` parameter of the PDF should be used in the fiting.
+
+    Returns
+    -------
+    lmfit.model.ModelResult
+        Model results of the LMFit package.
+
+    See Also
+    --------
+    fitLandau : fit Landau distribution to data.
+    """
+    import lmfit
+    import numpy as np
+
+    fitModel = lmfit.Model(pdfLandauGauss)
+
+    # calculate starting parameters
+    amp0 = np.nanmax(y)
+    mpv0 = x[np.where(np.array(y) == amp0)[0]][0]
+    xi0 = np.sqrt(np.cov(x, aweights=y)) * 0.3
+    sigma0 = 0.1
+
+    # prepare constraints for the parameters
+    fitModel.set_param_hint("mpv", min=0, max=np.inf, value=mpv0, vary=True)
+    fitModel.set_param_hint("amp", min=0, max=np.inf, value=amp0, vary=not fixAmplitude)
+    fitModel.set_param_hint("xi", min=1e-5, max=np.inf, value=xi0, vary=True)
+    fitModel.set_param_hint("sigma", min=0, max=np.inf, value=sigma0, vary=True)
+
+    # perform fit
+    fitResult = fitModel.fit(data=y, x=x)
+
+    return fitResult

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Miscellaneous &mdash; FRED Tools 0.6.50 documentation</title>
+  <title>Miscellaneous &mdash; FRED Tools 0.6.51 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -33,7 +33,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.50
+                0.6.51
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -112,6 +112,242 @@ removed after merge. (def. False)</p></li>
 <dd class="field-odd"><p>mergedPDFFileName</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getGIcmap">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getGIcmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxGI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getGIcmap" title="Permalink to this definition"></a></dt>
+<dd><p>Get colormap for Gamma Index images.</p>
+<p>The function creates a colormap for Gamma Index (GI) images,
+that can be used by matplotlib.pyplot.imshow function for
+displaying 2D images. The colormap is created from 0 to
+the <cite>maxGI</cite> value, whereas from 0 to 1 (GI test passed) the colour
+is changing from dark blue to white, and from 1 to <cite>maxGI</cite> it is
+changing from light red to red.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maxGI</strong> (<em>scalar</em>) – Maximum value of the colormap.</p></li>
+<li><p><strong>N</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Number of segments of the colormap. (def. 256)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of matplotlib.colors.LinearSegmentedColormap object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>colormap</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="gammaIndexAnalyse.html#fredtools.calcGammaIndex" title="fredtools.calcGammaIndex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcGammaIndex</span></code></a></dt><dd><p>calculate Gamma Index for two images.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>It is assumed that the img is an image describing a slice
+of Gamma Index (GI) values calculate up to maximum value 3.
+To plot the GI map with the GI colormap:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ft</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">getGIcmap</span><span class="p">(</span><span class="n">maxGI</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getHistogram">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getHistogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returnBinCenters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getHistogram" title="Permalink to this definition"></a></dt>
+<dd><p>Get histogram or differential histogram.</p>
+<p>The function creates a histogram data from a given dataX iterable in the defined bins.
+It is possible to generate a differential histogram where the values of the histogram
+(usually Y-axis on a plot) are a given quantity, instead of frequency of <cite>dataX</cite> values
+occurrance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataX</strong> (<em>1D array_like</em>) – 1D array-like iterable with the data to calculate histogram.
+For instance, it can be: a single-column pandas DataFrame,
+pandas Series, 1D numpy array, 1D list, 1D tuple etc.</p></li>
+<li><p><strong>dataY</strong> (<em>1D array_like</em><em>, </em><em>optional</em>) – 1D array-like iterable with the data to calculate differential histogram.
+It must be of the same size as <cite>dataX</cite>. For instance, it can be: a single-column
+pandas DataFrame, pandas Series, 1D numpy array, 1D list, 1D tuple etc. (def. None)</p></li>
+<li><p><strong>bins</strong> (<em>1D array_like</em><em>, </em><em>optional</em>) – 1D array-like iterable with the bins’ edges to calculate histogram.
+If none, then the bins will be generated automatically between
+minimum and maximum value of <cite>dataX</cite> in 100 steps linearly. (def. None)</p></li>
+<li><p><strong>kind</strong> (<em>{'mean'</em><em>, </em><em>'sum'</em><em>, </em><em>'std'</em><em>, </em><em>'median'</em><em>, </em><em>'min'</em><em>, </em><em>'max'}</em><em>, </em><em>optional</em>) – Determine the <cite>dataY</cite> quantity evaluation for a differential histogram.
+It can be: mean, standard deviation, median, minimum, maximum or sum
+value. (def. ‘mean’)</p></li>
+<li><p><strong>returnBinCenters</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the first element of returned tuple is going to
+be the bin centres (True) or bin edges (False). (def. True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two-element tuple of 1D numpy ndarrays, where the first element
+is a list of bin centres (or edges) and the second is a list of
+histogram values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple of two ndarrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.pdfLandau">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfLandau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfLandau" title="Permalink to this definition"></a></dt>
+<dd><p>Landau probability density function (PDF).</p>
+<p>The function generates a Landau probability density with a given most probable
+value (<cite>mpv</cite>), width (described with <cite>xi</cite>) and amplitude at <cite>mpv</cite>. It was adapted
+from <a class="footnote-reference brackets" href="#id3" id="id1">1</a> which was implemented based on the ROOT implementation. See <a class="footnote-reference brackets" href="#id4" id="id2">2</a> for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Point (or points) where to calculate the PDF.</p></li>
+<li><p><strong>mpv</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Position of the most probable value (MPV) of the Landau distribution.</p></li>
+<li><p><strong>xi</strong> (<em>float</em><em> or </em><em>array_like</em>) – Parameter ‘xi’ of the Landau distribution, it is a measure of its width.</p></li>
+<li><p><strong>amp</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Single value or array of values of the Landau PDF.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scalar or array_like</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.pdfLandauGauss" title="fredtools.pdfLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdfLandauGauss</span></code></a></dt><dd><p>generate Landau PDF convoluted with a Gaussian PDF.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://pypi.org/project/landaupy/">landaupy python package</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/SengerM/landaupy">landaupy package documentation</a></p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.pdfLandauGauss">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfLandauGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfLandauGauss" title="Permalink to this definition"></a></dt>
+<dd><p>Probability density function (PDF) of Landau convoluted with a Gaussian.</p>
+<p>The function generates a Landau convoluted with a Gaussian probability density with a given
+most probable value of Landau (<cite>mpv</cite>), width of Landau (described with <cite>xi</cite>), standard deviation of gaussian
+and amplitude at <cite>mpv</cite>. It was adapted from <a class="footnote-reference brackets" href="#id7" id="id5">3</a> which was implemented based on the ROOT implementation.
+See <a class="footnote-reference brackets" href="#id9" id="id6">4</a> for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Point (or points) where to calculate the PDF.</p></li>
+<li><p><strong>mpv</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Position of the most probable value (MPV) of the Landau distribution.</p></li>
+<li><p><strong>xi</strong> (<em>float</em><em> or </em><em>array_like</em>) – Parameter ‘xi’ of the Landau distribution, it is a measure of its width.</p></li>
+<li><p><strong>sigma</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Standard deviation of the gaussian distribution. (def. 0)</p></li>
+<li><p><strong>amp</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Single value or array of values of the Landau convoluted with gaussian PDF.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scalar or array_like</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.pdfLandau" title="fredtools.pdfLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdfLandau</span></code></a></dt><dd><p>generate Landau PDF.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id5">3</a></span></dt>
+<dd><p><a class="reference external" href="https://pypi.org/project/landaupy/">landaupy python package</a></p>
+</dd>
+<dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id6">4</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/SengerM/landaupy">landaupy package documentation</a></p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.fitLandau">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitLandau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitLandau" title="Permalink to this definition"></a></dt>
+<dd><p>Fit Landau distribution.</p>
+<p>The function fits Landau distribution to the data given as <cite>x</cite> and <cite>y</cite> values,
+using the least square algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em>) – <cite>X</cite> values.</p></li>
+<li><p><strong>y</strong> (<em>array_like</em>) – <cite>Y</cite> values.</p></li>
+<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fiting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Model results of the LMFit package.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>lmfit.model.ModelResult</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.fitLandauGauss">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitLandauGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitLandauGauss" title="Permalink to this definition"></a></dt>
+<dd><p>Fit Landau convoluted with gaussian distribution.</p>
+<p>The function fits Landau convoluted with gaussian distribution
+to the data given as <cite>x</cite> and <cite>y</cite> values, using the least square algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em>) – <cite>X</cite> values.</p></li>
+<li><p><strong>y</strong> (<em>array_like</em>) – <cite>Y</cite> values.</p></li>
+<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fiting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Model results of the LMFit package.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>lmfit.model.ModelResult</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 </section>
