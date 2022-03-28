@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Miscellaneous &mdash; FRED Tools 0.6.51 documentation</title>
+  <title>Miscellaneous &mdash; FRED Tools 0.6.54 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -33,7 +33,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.51
+                0.6.54
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -176,10 +176,10 @@ pandas DataFrame, pandas Series, 1D numpy array, 1D list, 1D tuple etc. (def. No
 <li><p><strong>bins</strong> (<em>1D array_like</em><em>, </em><em>optional</em>) – 1D array-like iterable with the bins’ edges to calculate histogram.
 If none, then the bins will be generated automatically between
 minimum and maximum value of <cite>dataX</cite> in 100 steps linearly. (def. None)</p></li>
-<li><p><strong>kind</strong> (<em>{'mean'</em><em>, </em><em>'sum'</em><em>, </em><em>'std'</em><em>, </em><em>'median'</em><em>, </em><em>'min'</em><em>, </em><em>'max'}</em><em>, </em><em>optional</em>) – Determine the <cite>dataY</cite> quantity evaluation for a differential histogram.
-It can be: mean, standard deviation, median, minimum, maximum or sum
-value. (def. ‘mean’)</p></li>
-<li><p><strong>returnBinCenters</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the first element of returned tuple is going to
+<li><p><strong>kind</strong> (<em>{'mean'</em><em>, </em><em>'sum'</em><em>, </em><em>'std'</em><em>, </em><em>'median'</em><em>, </em><em>'min'</em><em>, </em><em>'max'</em><em>, </em><em>'mean-std'</em><em>, </em><em>'mean+std'}</em><em>, </em><em>optional</em>) – Determine the <cite>dataY</cite> quantity evaluation for a differential histogram.
+It can be: mean, standard deviation, median, minimum, maximum, sum
+value or mean +/- standard deviation. (def. ‘mean’)</p></li>
+<li><p><strong>returnBinCenters</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the first element of returned list is going to
 be the bin centres (True) or bin edges (False). (def. True)</p></li>
 </ul>
 </dd>
@@ -189,7 +189,7 @@ is a list of bin centres (or edges) and the second is a list of
 histogram values.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple of two ndarrays</p>
+<dd class="field-odd"><p>List of two ndarrays</p>
 </dd>
 </dl>
 </dd></dl>
@@ -205,26 +205,22 @@ from <a class="footnote-reference brackets" href="#id3" id="id1">1</a> which was
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Point (or points) where to calculate the PDF.</p></li>
-<li><p><strong>mpv</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Position of the most probable value (MPV) of the Landau distribution.</p></li>
-<li><p><strong>xi</strong> (<em>float</em><em> or </em><em>array_like</em>) – Parameter ‘xi’ of the Landau distribution, it is a measure of its width.</p></li>
-<li><p><strong>amp</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
+<li><p><strong>mpv</strong> (<em>scalar</em>) – Position of the most probable value (MPV) of the Landau distribution.</p></li>
+<li><p><strong>xi</strong> (<em>float</em>) – Parameter ‘xi’ of the Landau distribution, it is a measure of its width.</p></li>
+<li><p><strong>amp</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Single value or array of values of the Landau PDF.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>scalar or array_like</p>
+<dd class="field-odd"><p>scalar or numpy array</p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.pdfLandauGauss" title="fredtools.pdfLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdfLandauGauss</span></code></a></dt><dd><p>generate Landau PDF convoluted with a Gaussian PDF.</p>
-</dd>
 <dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
-</dd>
-<dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
 </dd>
 </dl>
 </div>
@@ -246,36 +242,37 @@ from <a class="footnote-reference brackets" href="#id3" id="id1">1</a> which was
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfLandauGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfLandauGauss" title="Permalink to this definition"></a></dt>
 <dd><p>Probability density function (PDF) of Landau convoluted with a Gaussian.</p>
 <p>The function generates a Landau convoluted with a Gaussian probability density with a given
-most probable value of Landau (<cite>mpv</cite>), width of Landau (described with <cite>xi</cite>), standard deviation of gaussian
-and amplitude at <cite>mpv</cite>. It was adapted from <a class="footnote-reference brackets" href="#id7" id="id5">3</a> which was implemented based on the ROOT implementation.
-See <a class="footnote-reference brackets" href="#id9" id="id6">4</a> for more details.</p>
+most probable value of the convoluted function (<cite>mpv</cite>), width of Landau (described with <cite>xi</cite>),
+standard deviation of gaussian and amplitude at <cite>mpv</cite>. It was adapted from <a class="footnote-reference brackets" href="#id7" id="id5">3</a> which was implemented
+based on the ROOT implementation. See <a class="footnote-reference brackets" href="#id9" id="id6">4</a> for more details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Point (or points) where to calculate the PDF.</p></li>
-<li><p><strong>mpv</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Position of the most probable value (MPV) of the Landau distribution.</p></li>
-<li><p><strong>xi</strong> (<em>float</em><em> or </em><em>array_like</em>) – Parameter ‘xi’ of the Landau distribution, it is a measure of its width.</p></li>
-<li><p><strong>sigma</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Standard deviation of the gaussian distribution. (def. 0)</p></li>
-<li><p><strong>amp</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
+<li><p><strong>mpv</strong> (<em>scalar</em>) – Position of the most probable value (MPV) of the convoluted distribution.</p></li>
+<li><p><strong>xi</strong> (<em>float</em>) – Parameter ‘xi’ of the Landau distribution, it is a measure of its width.</p></li>
+<li><p><strong>sigma</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Standard deviation of the gaussian distribution. (def. 0)</p></li>
+<li><p><strong>amp</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Single value or array of values of the Landau convoluted with gaussian PDF.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>scalar or array_like</p>
+<dd class="field-odd"><p>scalar or numpy array</p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.pdfLandau" title="fredtools.pdfLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdfLandau</span></code></a></dt><dd><p>generate Landau PDF.</p>
-</dd>
-<dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
-</dd>
 <dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
 </dd>
 </dl>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The ‘mpv’ parameter dose not describe the MPV of the landau distribution but the MPV,
+i.e the position of the maximum value, of the whole Landau-gauss convoluted PDF.</p>
 </div>
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
@@ -285,6 +282,57 @@ See <a class="footnote-reference brackets" href="#id9" id="id6">4</a> for more d
 </dd>
 <dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id6">4</a></span></dt>
 <dd><p><a class="reference external" href="https://github.com/SengerM/landaupy">landaupy package documentation</a></p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.pdfVavilov">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfVavilov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfVavilov" title="Permalink to this definition"></a></dt>
+<dd><p>Probability density function (PDF) of Vavilov.</p>
+<p>The function generates a Vavilov probability density with a given
+most probable value function (<cite>mpv</cite>), amplitude (<cite>amp</cite>), as well as <cite>kappa</cite>,
+<cite>beta</cite> and <cite>scaling</cite> parameters. It uses the implementation of pyamtrack library <a class="footnote-reference brackets" href="#id13" id="id11">5</a>
+that adopts the ROOT implementation <a class="footnote-reference brackets" href="#id14" id="id12">6</a>. The implemented PDF is not a true Vavilov distribution
+and the <cite>scaling</cite> parameter is not included in the original ROOT implementation. Therefore, the parameters
+<cite>kappa</cite> and <cite>beta</cite> might not describe the the real kappa and beta parameters of the ROOT Vavilov.
+Nevertheless, the PDF can be used for fitting the distribution to the measurement data
+and to retrieve the MPV but the user must be aware that, for instance, the energy calculated based on
+the <cite>beta</cite> parameter might be wrong.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Point (or points) where to calculate the PDF.</p></li>
+<li><p><strong>mpv</strong> (<em>scalar</em>) – Position of the most probable value (MPV) of the distribution.</p></li>
+<li><p><strong>kappa</strong> (<em>float</em>) – Parameter ‘kappa’ of the Vavilov distribution.</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Parameter ‘beta’ of the Vavilov distribution.</p></li>
+<li><p><strong>scaling</strong> (<em>float</em>) – Scaling factor of the distribution.</p></li>
+<li><p><strong>amp</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Single value or array of values of the Vavilov PDF.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scalar or numpy array</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.fitVavilov" title="fredtools.fitVavilov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitVavilov</span></code></a></dt><dd><p>fit Vavilov distribution to data.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id13"><span class="brackets"><a class="fn-backref" href="#id11">5</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/libamtrack/pyamtrack">pyamtrack python package</a></p>
+</dd>
+<dt class="label" id="id14"><span class="brackets"><a class="fn-backref" href="#id12">6</a></span></dt>
+<dd><p><a class="reference external" href="https://root.cern/doc/master/classROOT_1_1Math_1_1Vavilov.html">ROOT Vavilov class reference</a></p>
 </dd>
 </dl>
 </div>
@@ -316,6 +364,8 @@ using the least square algorithm.</p>
 <dl class="simple">
 <dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
 </dd>
+<dt><a class="reference internal" href="#fredtools.fitVavilov" title="fredtools.fitVavilov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitVavilov</span></code></a></dt><dd><p>fit Vavilov distribution to data.</p>
+</dd>
 </dl>
 </div>
 </dd></dl>
@@ -345,6 +395,46 @@ to the data given as <cite>x</cite> and <cite>y</cite> values, using the least s
 <p class="admonition-title">See also</p>
 <dl class="simple">
 <dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.fitVavilov" title="fredtools.fitVavilov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitVavilov</span></code></a></dt><dd><p>fit Vavilov distribution to data.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.fitVavilov">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitVavilov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitVavilov" title="Permalink to this definition"></a></dt>
+<dd><p>Fit Vavilov distribution.</p>
+<p>The function fits Vavilov distribution to the data given as <cite>x</cite> and <cite>y</cite> values,
+using the least square algorithm. The fiting routine is sensitive for the initial
+values of kappa, beta and scaling. Therefore, the results should be always validated
+and different initial values of the parameters can be used if needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em>) – <cite>X</cite> values.</p></li>
+<li><p><strong>y</strong> (<em>array_like</em>) – <cite>Y</cite> values.</p></li>
+<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fiting.</p></li>
+<li><p><strong>beta0</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Initial value of <cite>beta</cite> parameter. (def. 0.5)</p></li>
+<li><p><strong>kappa0</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Initial value of <cite>kappa</cite> parameter. (def. 0.3)</p></li>
+<li><p><strong>scaling0</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Initial value of <cite>scaling</cite> parameter. If it is less than 0 then
+it is calculated based on the standard deviation of the distribution. (def. -1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Model results of the LMFit package.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>lmfit.model.ModelResult</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
 </dd>
 </dl>
 </div>

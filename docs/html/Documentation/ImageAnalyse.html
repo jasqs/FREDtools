@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Analyse &mdash; FRED Tools 0.6.51 documentation</title>
+  <title>Image Analyse &mdash; FRED Tools 0.6.54 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.51
+                0.6.54
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -581,48 +581,6 @@ This can be used for plotting</p>
 </pre></div>
 </div>
 <p>will plot the profile in Z direction of the image.</p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fredtools.getGIcmap">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getGIcmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxGI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getGIcmap" title="Permalink to this definition"></a></dt>
-<dd><p>Get colormap for Gamma Index images.</p>
-<p>The function creates a colormap for Gamma Index (GI) images,
-that can be used by matplotlib.pyplot.imshow function for
-displaying 2D images. The colormap is created from 0 to
-the <cite>maxGI</cite> value, whereas from 0 to 1 (GI test passed) the colour
-is changing from dark blue to white, and from 1 to <cite>maxGI</cite> it is
-changing from light red to red.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>maxGI</strong> (<em>scalar</em>) – Maximum value of the colormap.</p></li>
-<li><p><strong>N</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Number of segments of the colormap. (def. 256)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An instance of matplotlib.colors.LinearSegmentedColormap object.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>colormap</p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="gammaIndexAnalyse.html#fredtools.calcGammaIndex" title="fredtools.calcGammaIndex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcGammaIndex</span></code></a></dt><dd><p>calculate Gamma Index for two images.</p>
-</dd>
-</dl>
-</div>
-<div class="admonition-examples admonition">
-<p class="admonition-title">Examples</p>
-<p>It is assumed that the img is an image describing a slice
-of Gamma Index (GI) values calculate up to maximum value 3.
-To plot the GI map with the GI colormap:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ft</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">getGIcmap</span><span class="p">(</span><span class="n">maxGI</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
-</pre></div>
-</div>
 </div>
 </dd></dl>
 

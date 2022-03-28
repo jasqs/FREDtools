@@ -13,6 +13,10 @@ A collection of useful miscellaneous functions with no category.
 
 .. autofunction:: fredtools.pdfLandauGauss
 
+.. autofunction:: fredtools.pdfVavilov
+
 .. autofunction:: fredtools.fitLandau
 
 .. autofunction:: fredtools.fitLandauGauss
+
+.. autofunction:: fredtools.fitVavilov
