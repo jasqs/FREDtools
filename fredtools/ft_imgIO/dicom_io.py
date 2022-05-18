@@ -578,7 +578,7 @@ def getRNInfo(fileName, displayInfo=False):
     Following information are saved to a dictionary:
 
         -  *RNFileName* : absolute path to the RN file.
-        -  *dosePrescribed* : dose prescribed to the target read from DoseReferenceSequence.
+        -  *dosePrescribed* : dose prescribed to the target (see notes below).
         -  *fractionNo* : number of the fractions planned.
         -  *targetStructName* : name of the structure which the plan was prepared for (dose not work for all RN dicoms).
         -  *planLabel* : name of the treatment plan (can be empty for anonymized DICOM).
@@ -612,6 +612,12 @@ def getRNInfo(fileName, displayInfo=False):
     --------
     getRNFields : get summary of parameters for each field defined in RN plan.
     getRNSpots : get summary of parameters for each spot defined in RN plan.
+
+    Notes
+    -----
+    The prescribed dose, *dosePrescribed*, is read from *TargetPrescriptionDose* in *DoseReferenceSequence*,
+    but if this is not available it is calculated as the sum of *BeamDose* in *FractionGroupSequence[0].ReferencedBeamSequence*
+    multiplied by the number of fractions.
     """
     import numpy as np
     import fredtools as ft
@@ -619,7 +625,7 @@ def getRNInfo(fileName, displayInfo=False):
     import os
 
     # check if dicom is RN
-    _isDicomRN(fileName, raiseError=True)
+    ft.ft_imgIO.dicom_io._isDicomRN(fileName, raiseError=True)
 
     # read dicom
     dicomTags = dicom.read_file(fileName)
@@ -630,17 +636,24 @@ def getRNInfo(fileName, displayInfo=False):
     # get absolute path to RN file
     planInfo["RNFileName"] = os.path.abspath(fileName)
 
-    # get prescribed dose from TargetPrescriptionDose tag of DoseReferenceSequence
-    if "TargetPrescriptionDose" in dicomTags.DoseReferenceSequence[0]:
-        planInfo["dosePrescribed"] = dicomTags.DoseReferenceSequence[0].TargetPrescriptionDose.real
-    else:
-        planInfo["dosePrescribed"] = np.nan
-
     # get number of fractions from NumberOfFractionsPlanned tag of FractionGroupSequence
     if ("FractionGroupSequence" in dicomTags) and ("NumberOfFractionsPlanned" in dicomTags.FractionGroupSequence[0]):
         planInfo["fractionNo"] = dicomTags.FractionGroupSequence[0].NumberOfFractionsPlanned.real
     else:
         planInfo["fractionNo"] = np.nan
+
+    # get prescribed dose from TargetPrescriptionDose tag of DoseReferenceSequence
+    if "TargetPrescriptionDose" in dicomTags.DoseReferenceSequence[0]:
+        planInfo["dosePrescribed"] = dicomTags.DoseReferenceSequence[0].TargetPrescriptionDose.real
+    else:
+        planInfo["dosePrescribed"] = 0
+        for referencedBeam in dicomTags.FractionGroupSequence[0].ReferencedBeamSequence:
+            if "BeamDose" in referencedBeam:
+                planInfo["dosePrescribed"] += referencedBeam.BeamDose
+        if planInfo["dosePrescribed"] == 0:
+            planInfo["dosePrescribed"] = np.nan
+        else:
+            planInfo["dosePrescribed"] *= planInfo["fractionNo"]
 
     # get target struct name from private tag of DoseReferenceSequence
     if ("DoseReferenceSequence" in dicomTags) and ([0x3267, 0x1000] in dicomTags.DoseReferenceSequence[0]):
@@ -661,7 +674,7 @@ def getRNInfo(fileName, displayInfo=False):
     planInfo["machineName"] = ft.getRNMachineName(fileName)
 
     # get beam sequence (BeamSequence or IonBeamSequence)
-    beamSequence = _getRNBeamSequence(dicomTags)
+    beamSequence = ft.ft_imgIO.dicom_io._getRNBeamSequence(dicomTags)
 
     # count fields' type and treatment machine name
     planInfo["totalFieldsNumber"] = int(dicomTags.FractionGroupSequence[0].NumberOfBeams)
