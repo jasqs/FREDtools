@@ -9,6 +9,8 @@ A collection of useful functions to manipulate and change images. The image must
 
 .. autofunction:: fredtools.setValueMask
 
+.. autofunction:: fredtools.overwriteCTPhysicalProperties
+
 .. autofunction:: fredtools.resampleImg
 
 .. autofunction:: fredtools.sumImg

@@ -98,8 +98,6 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     the resampling is applied only to Z direction, because the frame of reference of X and Y
     directions are the same as the input `img`.
 
-    6. It is also described on
-
     References
     ----------
     .. [1] https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python
@@ -839,3 +837,95 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return imgBEV
+
+
+def overwriteCTPhysicalProperties(img, RSfileName, method="centreInside", algorithm="smparallel", CPUNo="auto", relElecDensCalib=[[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]], displayInfo=False):
+    """Overwrite HU values in a CT image based on structures physical properties.
+
+    The function searches in a structure RS dicom file for structures with
+    the physical property defined, maps each structure to the CT image
+    defined as an instance of a SimpleITK 3D image and replaces the Hounsfield Units (HU)
+    values for voxels inside the structure. Only the relative electronic density physical
+    property ('REL_ELEC_DENSITY') is implemented now, and it is converted to a HU value
+    based on relative electronic density to HU calibration, given as `relElecDensCalib`
+    parameter, whereas the missing values are interpolated linearly and rounded to
+    the nearest integer HU value.
+
+    Parameters
+    ----------
+    img : SimpleITK 3D Image
+        Object of a SimpleITK 3D image.
+    RSfileName : string
+        Path String to dicom file with structures (RS file).
+    method: {'centreInside', 'allInside'}, optional
+        Method of calculation. See `mapStructToImg` function for more information. (def. 'centreInside')
+    algorithm: {'smparallel', 'matplotlib'}, optional
+        Algorithm of calculation. See `mapStructToImg` function for more information. (def. 'smparallel')
+    CPUNo : {'auto', 'none'}, scalar or None, optional
+        Define if the multiprocessing should be used and how many cores should
+        be exploited. See `mapStructToImg` function for more information. (def. 'auto')
+    relElecDensCalib: array_like, optional
+        2xN iterable (e.g. 2xN numpy array or list of two equal size lists) describing
+        the calibration between HU values and relative electronic density. The first element (column)
+        is describing the HU values and the second the relative electronic density. The missing values
+        are interpolated linearly and if the user would like to use a different interpolation
+        like spline or polynominal, it is advised to provide it explicitely for each HU value.
+        (def. [[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]] )
+
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK 3D Image
+        Object of a transformed SimpleITK 3D image.
+    """
+    from scipy.interpolate import interp1d
+    import numpy as np
+    import fredtools as ft
+    import warnings
+    import pydicom as dicom
+
+    ft._isSITK3D(img, raiseError=True)
+
+    # check if dicom is RN
+    ft.ft_imgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
+
+    # get structures' info
+    structsInfo = ft.getRSInfo(RSfileName)
+    structsInfo.dropna(inplace=True)
+
+    # prepare calibration from Rel. Electronic Density to HU
+    relElecDensCalib = np.array(relElecDensCalib)
+    relElecDensCalib = interp1d(relElecDensCalib[1], relElecDensCalib[0], bounds_error=False, fill_value="extrapolate")
+
+    # calculate HU from Rel. Electronic Density
+    structsInfo["ROIPhysicalHUValue"] = np.round(relElecDensCalib(structsInfo.ROIPhysicalPropertyValue))
+    structsInfo = structsInfo.astype({"ROIPhysicalHUValue": "int"})
+
+    # check if all ROIPhysicalProperty are ["REL_ELEC_DENSITY"] (only REL_ELEC_DENSITY is supported for now).
+    if not all(structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])):
+        warnings.warn(f"Some of the structure physical property are not in the supported list ['REL_ELEC_DENSITY']. They will be skipped.")
+        structsInfo = structsInfo.loc[structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])]
+
+    # read dicom tags
+    dicomTags = dicom.read_file(RSfileName)
+
+    for _, structInfo in structsInfo.iterrows():
+        # map structure to img
+        roiStruct = ft.mapStructToImg(img, RSfileName=RSfileName, structName=structInfo.ROIName, method=method, algorithm=algorithm, CPUNo=CPUNo)
+
+        # set HU values inside the structure
+        img = ft.setValueMask(img, roiStruct, value=structInfo.ROIPhysicalHUValue, outside=False)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        if len(structsInfo) > 0:
+            print(f"# Overwritten HU values for {len(structsInfo)}", "structure" if len(structsInfo) <= 1 else "structures:")
+            for ID, structInfo in structsInfo.iterrows():
+                print(f"# Structure '{structInfo.ROIName}' (ID: {ID}) with HU={structInfo.ROIPhysicalHUValue} (Rel. Elec. Dens. {structInfo.ROIPhysicalPropertyValue})")
+        else:
+            print(f"# No structures found to overwrite HU values.")
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return img

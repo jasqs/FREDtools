@@ -1,6 +1,6 @@
 dicompyler_core>=0.5.5
 fitz>=0.0.1.dev2
-fredtools>=0.6.54
+fredtools>=0.6.55
 ipython>=8.3.0
 ipywidgets>=7.7.0
 itk>=5.2.1.post1
@@ -16,7 +16,7 @@ pyamtrack>=0.12.0
 pydicom>=2.3.0
 PyMuPDF>=1.19.6
 PyYAML>=6.0
-scipy>=1.8.0
+scipy>=1.8.1
 Shapely>=1.8.2
 SimpleITK>=2.1.1.2
 uproot>=4.2.3

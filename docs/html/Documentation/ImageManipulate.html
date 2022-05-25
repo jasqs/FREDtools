@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Manipulate &mdash; FRED Tools 0.6.55 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.6.59 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.55
+                0.6.59
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -190,9 +190,6 @@ the contour boundings in Z direction, enlarged by 1 px (<code class="docutils li
 image mask, is then resampled to the frame of reference of the input <cite>img</cite>. In fact,
 the resampling is applied only to Z direction, because the frame of reference of X and Y
 directions are the same as the input <cite>img</cite>.</p>
-<ol class="arabic simple" start="6">
-<li><p>It is also described on</p></li>
-</ol>
 </div>
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
@@ -277,6 +274,45 @@ outside the mask)</p></li>
 </dd>
 </dl>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.overwriteCTPhysicalProperties">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">overwriteCTPhysicalProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'centreInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relElecDensCalib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[-</span> <span class="pre">1000,</span> <span class="pre">100,</span> <span class="pre">1000,</span> <span class="pre">6000],</span> <span class="pre">[0,</span> <span class="pre">1.1,</span> <span class="pre">1.532,</span> <span class="pre">3.92]]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.overwriteCTPhysicalProperties" title="Permalink to this definition"></a></dt>
+<dd><p>Overwrite HU values in a CT image based on structures physical properties.</p>
+<p>The function searches in a structure RS dicom file for structures with
+the physical property defined, maps each structure to the CT image
+defined as an instance of a SimpleITK 3D image and replaces the Hounsfield Units (HU)
+values for voxels inside the structure. Only the relative electronic density physical
+property (‘REL_ELEC_DENSITY’) is implemented now, and it is converted to a HU value
+based on relative electronic density to HU calibration, given as <cite>relElecDensCalib</cite>
+parameter, whereas the missing values are interpolated linearly and rounded to
+the nearest integer HU value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK 3D Image</em>) – Object of a SimpleITK 3D image.</p></li>
+<li><p><strong>RSfileName</strong> (<em>string</em>) – Path String to dicom file with structures (RS file).</p></li>
+<li><p><strong>method</strong> (<em>{'centreInside'</em><em>, </em><em>'allInside'}</em><em>, </em><em>optional</em>) – Method of calculation. See <cite>mapStructToImg</cite> function for more information. (def. ‘centreInside’)</p></li>
+<li><p><strong>algorithm</strong> (<em>{'smparallel'</em><em>, </em><em>'matplotlib'}</em><em>, </em><em>optional</em>) – Algorithm of calculation. See <cite>mapStructToImg</cite> function for more information. (def. ‘smparallel’)</p></li>
+<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if the multiprocessing should be used and how many cores should
+be exploited. See <cite>mapStructToImg</cite> function for more information. (def. ‘auto’)</p></li>
+<li><p><strong>relElecDensCalib</strong> (<em>array_like</em><em>, </em><em>optional</em>) – 2xN iterable (e.g. 2xN numpy array or list of two equal size lists) describing
+the calibration between HU values and relative electronic density. The first element (column)
+is describing the HU values and the second the relative electronic density. The missing values
+are interpolated linearly and if the user would like to use a different interpolation
+like spline or polynominal, it is advised to provide it explicitely for each HU value.
+(def. [[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]] )</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of a transformed SimpleITK 3D image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SimpleITK 3D Image</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

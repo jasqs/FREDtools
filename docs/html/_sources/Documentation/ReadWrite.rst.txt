@@ -34,6 +34,10 @@ DICOM files (\*.dcm, \*.dicom)
 
 .. autofunction:: fredtools.sortDicoms
 
+.. autofunction:: fredtools.getRNMachineName
+
+.. autofunction:: fredtools.getRNIsocenter
+
 .. autofunction:: fredtools.getRNInfo
 
 .. autofunction:: fredtools.getRNFields

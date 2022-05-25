@@ -297,7 +297,7 @@ def getRNMachineName(fileName, displayInfo=False):
     import pydicom as dicom
 
     # check if dicom is RN
-    _isDicomRN(fileName, raiseError=True)
+    ft.ft_imgIO.dicom_io._isDicomRN(fileName, raiseError=True)
 
     # read dicom
     dicomTags = dicom.read_file(fileName)
@@ -330,6 +330,77 @@ def getRNMachineName(fileName, displayInfo=False):
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return treatmentMachineName[0]
+
+
+def getRNIsocenter(fileName, displayInfo=False):
+    """Get the isocenter position defined in the RN plan.
+
+    The function retrieves the isocenter position defined in the RN dicom file.
+    The isocenter is defined for each field separately but usually it is the same
+    for all fields. If it is not the same then a warning is raised and a geometrical
+    center is returned.
+
+    Parameters
+    ----------
+    fileName : path
+        Path to RN dicom file.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    list
+        3-elements list of XYZ isocenter coordinates
+
+    See Also
+    --------
+    getRNFields : get summary of parameters for each field defined in RN plan.
+    getRNSpots : get summary of parameters for each spot defined in RN plan.
+    getRNInfo : get some basic information from the RN plan.
+    """
+    import fredtools as ft
+    import pydicom as dicom
+    import warnings
+    import numpy as np
+
+    # check if dicom is RN
+    ft.ft_imgIO.dicom_io._isDicomRN(fileName, raiseError=True)
+
+    # read dicom
+    dicomTags = dicom.read_file(fileName)
+
+    # get beam sequence (BeamSequence or IonBeamSequence)
+    beamSequence = ft.ft_imgIO.dicom_io._getRNBeamSequence(dicomTags)
+
+    isocenterPosition = []
+    for beamDataset in beamSequence:
+        # Continue if couldn't find beamDataset in the beamSequence or the Treatment Delivery Type of the beamDataset is not TREATMENT
+        if not beamDataset or not (beamDataset.TreatmentDeliveryType == "TREATMENT"):
+            continue
+        if ("IonControlPointSequence" in beamDataset) and ("IsocenterPosition" in beamDataset.IonControlPointSequence[0]):
+            isocenterPosition.append(beamDataset.IonControlPointSequence[0].IsocenterPosition)
+
+    isocenterPosition = np.unique(isocenterPosition, axis=0)
+
+    # check if any value was found
+    if isocenterPosition.shape[0] == 0:
+        raise ValueError(
+            f"Could not find any isocenter position. There is no 'IsocenterPosition' tag in 'IonControlPointSequence[0]' of 'beamDataset' or the Treatment Delivery Type is not 'TREATMENT' for any field."
+        )
+
+    # check if all values are the same
+    if not isocenterPosition.shape[0] == 1:
+        warnings.warn(f"Not all isocenter positions are the same. Found isocenter positions:\n {isocenterPosition} \nThe geometrical centre will be returned.")
+        isocenterPosition = np.mean(isocenterPosition, axis=0)
+    else:
+        isocenterPosition = isocenterPosition[0]
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print("# Isocenter position [mm]: ", isocenterPosition)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return isocenterPosition.tolist()
 
 
 def getRNSpots(fileName):
@@ -725,9 +796,12 @@ def getRSInfo(fileName, displayInfo=False):
     import pandas as pd
     from dicompylercore import dicomparser
     import fredtools as ft
+    import pydicom as dicom
+    import numpy as np
 
     rtss = dicomparser.DicomParser(fileName)
     structs = rtss.GetStructures()
+    dicomTags = dicom.read_file(fileName)
 
     ROITable = pd.DataFrame()
 
@@ -742,6 +816,26 @@ def getRSInfo(fileName, displayInfo=False):
         )
 
         ROITable = pd.concat([ROITable, ROIinstance], ignore_index=True)
+
+    # get Physical property for ROI if defined
+    ROITable["ROIPhysicalProperty"] = np.nan
+    ROITable["ROIPhysicalPropertyValue"] = np.nan
+    if "RTROIObservationsSequence" in dicomTags:
+        for index, ROIinstance in ROITable.iterrows():
+            # get RTROIObservationSequence for the ROIInstance
+            for RTROIObservationSequence in dicomTags.RTROIObservationsSequence:
+                if RTROIObservationSequence.ReferencedROINumber == ROIinstance.ID:
+                    break
+
+            if not "ROIPhysicalPropertiesSequence" in RTROIObservationSequence:
+                continue
+            else:
+                ROIPhysicalProperties = RTROIObservationSequence.ROIPhysicalPropertiesSequence[0]
+
+            if "ROIPhysicalProperty" in ROIPhysicalProperties:
+                ROITable.loc[index, "ROIPhysicalProperty"] = ROIPhysicalProperties.ROIPhysicalProperty
+            if "ROIPhysicalPropertyValue" in ROIPhysicalProperties:
+                ROITable.loc[index, "ROIPhysicalPropertyValue"] = ROIPhysicalProperties.ROIPhysicalPropertyValue
 
     ROITable = ROITable.set_index("ID")
 
