@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Reading and Writing &mdash; FRED Tools 0.6.59 documentation</title>
+  <title>Image Reading and Writing &mdash; FRED Tools 0.6.60 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
@@ -34,7 +35,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.59
+                0.6.60
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -93,7 +94,7 @@
            <div itemprop="articleBody">
              
   <section id="image-reading-and-writing">
-<h1>Image Reading and Writing<a class="headerlink" href="#image-reading-and-writing" title="Permalink to this headline"></a></h1>
+<h1>Image Reading and Writing<a class="headerlink" href="#image-reading-and-writing" title="Permalink to this heading"></a></h1>
 <p>A collection of useful functions for reading and writing images are implemented. The supported image type are:</p>
 <ul class="simple">
 <li><p>MetaImage format in double (*.mhd+*.raw) or single files (only *.mhd),</p></li>
@@ -101,7 +102,7 @@
 <li><p>Dicom format (reading only) for 3D/2D images (e.g. dose distribution), Structures (i.e. RS*.dcm), Proton treatment plans (i.e. RN*.dcm or RP*.dcm) and CT images.</p></li>
 </ul>
 <section id="metaimage-files-mhd-mha">
-<h2>MetaImage files (*.mhd, *.mha)<a class="headerlink" href="#metaimage-files-mhd-mha" title="Permalink to this headline"></a></h2>
+<h2>MetaImage files (*.mhd, *.mha)<a class="headerlink" href="#metaimage-files-mhd-mha" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readMHD">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readMHD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readMHD" title="Permalink to this definition"></a></dt>
@@ -210,7 +211,7 @@ a two-file file MetaImage (*.mhd+*.raw) with the same file name.</p>
 
 </section>
 <section id="map3d-images-m3d">
-<h2>Map3D images (*.m3d)<a class="headerlink" href="#map3d-images-m3d" title="Permalink to this headline"></a></h2>
+<h2>Map3D images (*.m3d)<a class="headerlink" href="#map3d-images-m3d" title="Permalink to this heading"></a></h2>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>The Map3D file format is obsolete and it is not recommended to be used to store the image data. Use MetaImage file format instead.</p>
@@ -276,7 +277,7 @@ recommended to use *.m3d extension when saving Map3D.</p>
 
 </section>
 <section id="dicom-files-dcm-dicom">
-<h2>DICOM files (*.dcm, *.dicom)<a class="headerlink" href="#dicom-files-dcm-dicom" title="Permalink to this headline"></a></h2>
+<h2>DICOM files (*.dcm, *.dicom)<a class="headerlink" href="#dicom-files-dcm-dicom" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getDicomTypeName">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDicomTypeName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dicomVar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDicomTypeName" title="Permalink to this definition"></a></dt>

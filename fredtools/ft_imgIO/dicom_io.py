@@ -1061,6 +1061,7 @@ def _getStructureContoursByName(RSfileName, structName):
     import pydicom as dicom
     import numpy as np
     import fredtools as ft
+    import warnings
 
     if not _isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
@@ -1094,7 +1095,11 @@ def _getStructureContoursByName(RSfileName, structName):
     for ROIContourSequence in dicomRS.ROIContourSequence:
         if ROIContourSequence.ReferencedROINumber == ROINumber:
             ROIinfo["Color"] = ROIContourSequence.ROIDisplayColor
-            ContourSequence = ROIContourSequence.ContourSequence
+            if "ContourSequence" in ROIContourSequence:
+                ContourSequence = ROIContourSequence.ContourSequence
+            else:
+                warnings.warn("Warning: No 'ContourSequence' defined in 'ROIContourSequence' for the structure '{:s}'. An empty StructureContours will be returned.".format(ROIinfo["Name"]))
+                ContourSequence=[]
     # get contour as a list of Nx3 numpy array for each contour
     StructureContours = [np.reshape(Contour.ContourData, [len(Contour.ContourData) // 3, 3]) for Contour in ContourSequence]
 

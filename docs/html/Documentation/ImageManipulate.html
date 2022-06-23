@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Manipulate &mdash; FRED Tools 0.6.59 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.6.60 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
@@ -34,7 +35,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.59
+                0.6.60
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -88,7 +89,7 @@
            <div itemprop="articleBody">
              
   <section id="image-manipulate">
-<h1>Image Manipulate<a class="headerlink" href="#image-manipulate" title="Permalink to this headline"></a></h1>
+<h1>Image Manipulate<a class="headerlink" href="#image-manipulate" title="Permalink to this heading"></a></h1>
 <p>A collection of useful functions to manipulate and change images. The image must be an instance of a SimpleITK image and the functions are mostly wrappers for SimpleITK image filters. Check <a class="reference external" href="https://simpleitk.readthedocs.io/en/master/filters.html">SimpleITK filters</a> for available methods of filtering, registration, etc.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.mapStructToImg">
@@ -313,6 +314,15 @@ like spline or polynominal, it is advised to provide it explicitely for each HU 
 <dd class="field-odd"><p>SimpleITK 3D Image</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to image to create a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 <dl class="py function">

@@ -56,6 +56,9 @@ def fitSpotProfile(pos, vec, cutLevel=0, fixAmplitude=False, fixCentreToZero=Fal
         initCentre = np.mean(prof[0][np.where(prof[1] == initAmplitude)])
         initSigma = np.ptp(prof[0][np.where(prof[1] >= (initAmplitude / 2))[0]] / 2.355)
 
+        if fixCentreToZero:
+            initCentre = 0
+
         gmodel = Model(_singleGaussModel)
         gmodel.set_param_hint("amplitude", vary=not fixAmplitude)
         gmodel.set_param_hint("centre", vary=not fixCentreToZero)

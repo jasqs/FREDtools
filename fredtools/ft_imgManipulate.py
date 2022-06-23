@@ -138,6 +138,28 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     # get structure contour and structure info
     StructureContours, StructInfo = ft.dicom_io._getStructureContoursByName(RSfileName, structName)
 
+    # check if the StructureContours is empty and return empty mask (filled with 0) if true
+    if len(StructureContours)==0:
+        # make empty mask (filled with 0)
+        imgMask = sitk.Cast(img, sitk.sitkUInt8)
+        imgMask *= 0
+        # set additional metadata
+        imgMask.SetMetaData("ROIColor", str(StructInfo["Color"]))
+        imgMask.SetMetaData("ROIName", StructInfo["Name"])
+        imgMask.SetMetaData("ROINumber", str(StructInfo["Number"]))
+        imgMask.SetMetaData("ROIGenerationAlgorithm", StructInfo["GenerationAlgorithm"])
+        imgMask.SetMetaData("ROIType", StructInfo["Type"])
+
+        if displayInfo:
+            print(f"### {ft._currentFuncName()} ###")
+            print("# Warrning: no 'StructureContours' was defined for this structure and an empty mask was returned")
+            print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
+            print("# Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3))
+            ft.ft_imgAnalyse._displayImageInfo(imgMask)
+            print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+        return imgMask
+
     # add the first point at the end of the contour for each contour (to make sure that the contour is closed)
     StructureContours = [np.append(StructureContour, np.expand_dims(StructureContour[0], axis=0), axis=0) for StructureContour in StructureContours]
     # check if all Z positions are the same for each contour
@@ -879,6 +901,11 @@ def overwriteCTPhysicalProperties(img, RSfileName, method="centreInside", algori
     -------
     SimpleITK 3D Image
         Object of a transformed SimpleITK 3D image.
+
+    See Also
+    --------
+        mapStructToImg: mapping a structure to image to create a mask.
+        setValueMask : setting values of the image inside/outside a mask.
     """
     from scipy.interpolate import interp1d
     import numpy as np
