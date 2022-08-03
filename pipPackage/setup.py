@@ -53,6 +53,9 @@ with open("./../fredtools/requirements.txt", "r") as req_h:
     requirements = req_h.readlines()
 # remove some dependencies
 requirements = [req for req in requirements if 'fitz' not in req]
+requirements = [req for req in requirements if 'fredtools' not in req]
+requirements = [req for req in requirements if 'itk_io' not in req]
+requirements = [req for req in requirements if 'numpy' not in req]
 
 # configure setuptools
 setuptools.setup(

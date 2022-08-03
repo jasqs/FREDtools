@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FRED tools v. 0.6.60 documentation &mdash; FRED Tools 0.6.60 documentation</title>
+  <title>FRED tools v. 0.6.64 documentation &mdash; FRED Tools 0.6.64 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
@@ -34,7 +34,7 @@
             <img src="_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.60
+                0.6.64
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -77,7 +77,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>FRED tools v. 0.6.60 documentation</li>
+      <li>FRED tools v. 0.6.64 documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -88,7 +88,7 @@
            <div itemprop="articleBody">
              
   <section id="fred-tools-v-fredtoolsversion-documentation">
-<h1>FRED tools v. 0.6.60 documentation<a class="headerlink" href="#fred-tools-v-fredtoolsversion-documentation" title="Permalink to this heading"></a></h1>
+<h1>FRED tools v. 0.6.64 documentation<a class="headerlink" href="#fred-tools-v-fredtoolsversion-documentation" title="Permalink to this heading"></a></h1>
 <p>FRED tools is a collection of python functions for image manipulation and analysis. The basic methods have been developed for analysis of the images produced by the <a class="reference external" href="http://www.fred-mc.org">Monte Carlo FRED</a> in MetaImage format (*.mha, *.mhd), but they can be applied for images in other formats, e.g. dicom.</p>
 <section id="basic-concept">
 <h2>Basic Concept<a class="headerlink" href="#basic-concept" title="Permalink to this heading"></a></h2>
@@ -114,12 +114,22 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ git clone jasqs/FREDtools
 </pre></div>
 </div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>There is an installation issue for python 3.10.4 (natively installed in Ubuntu 22.04 LTS). FREDtools requires ITK in 5.2.1 version which cannot be built for python 3.10. But the prerelease ITK 5.3rc4 can be built. It is recommended to install this prerelease prior to FREDtools installation by:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install scikit-build
+
+$ pip install --pre itk
+</pre></div>
+</div>
+<p>FREDtools should be installed normally when the prerelease ITK becomes normal release.</p>
+</div>
 </section>
 <section id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this heading"></a></h2>
 <p>Everyone is invited to support the development of the FRED tools and to add functionalities needed for a specific application.
 All the new functions or classes should be documented according to numpydoc style. Check <a class="reference external" href="https://numpydoc.readthedocs.io">numpydoc</a> and <a class="reference external" href="https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html#example-numpy">napoleon</a> websites for the style guide and examples.</p>
-<p>The FRED tools documentation is written in reStructuredText format and build with sphinx in version 5.0.2 using sphinx_rtd_theme template in version 1.0.0.</p>
+<p>The FRED tools documentation is written in reStructuredText format and build with sphinx in version 5.1.1 using sphinx_rtd_theme template in version 1.0.0.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/Collaboration.html">Collaboration</a></li>

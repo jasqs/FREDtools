@@ -267,10 +267,12 @@ class showSlices:
         # determine if interactive is possible (only jupyter)
         if interactive and ft._checkJupyterMode():
             ipython = get_ipython()
-            ipython.magic("matplotlib widget")
+            # ipython.run_line_magic("matplotlib widget")
+            ipython.run_line_magic("matplotlib", "widget")
         elif not interactive and ft._checkJupyterMode():
             ipython = get_ipython()
-            ipython.magic("matplotlib inline")
+            # ipython.run_line_magic("matplotlib inline")
+            ipython.run_line_magic("matplotlib", "inline")
         else:
             interactive = False
 
@@ -347,6 +349,7 @@ class showSlices:
             self.showSliceAX1(X=self.point[0])
             self.showSliceAX2(Y=self.point[1])
             self.showSliceAX0(Z=self.point[2])
+            
 
     def scrollEventShiftPress(self, event):
         if event.key == "shift":
@@ -421,6 +424,7 @@ class showSlices:
             raiseWarning=False,
         )
         self.replotPointLines()
+        self.fig.canvas.draw()
 
     def showSliceAX1(self, X):
         import fredtools as ft
@@ -442,6 +446,7 @@ class showSlices:
             raiseWarning=False,
         )
         self.replotPointLines()
+        self.fig.canvas.draw()
 
     def showSliceAX2(self, Y):
         import fredtools as ft
@@ -463,3 +468,4 @@ class showSlices:
             raiseWarning=False,
         )
         self.replotPointLines()
+        self.fig.canvas.draw()
