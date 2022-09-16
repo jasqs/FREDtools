@@ -60,22 +60,24 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, displayInfo=False):
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
 
-def readMHD(filePath, displayInfo=False):
+def readMHD(fileNames, displayInfo=False):
     """Read MetaImage image to SimpleITK image object.
 
-    The function reads a MetaImage file to a SimpleITK image object.
+    The function reads a single MetaImage file or an iterable of MetaImage files
+    and creates an instance or tuple of instances of a SimpleITK object.
 
     Parameters
     ----------
-    filePath : path
-        Path to MetaImage file to read.
+    fileNames : string or array_like
+        A path or an iterable (list, tuple, etc.) of paths to MetaImage file.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
-    SimpleITK Image
-        Object of a SimpleITK image.
+    SimpleITK Image or tuple
+        Object or tuple of objects of a SimpleITK image.
+
 
     See Also
     --------
@@ -84,12 +86,20 @@ def readMHD(filePath, displayInfo=False):
     import fredtools as ft
     import SimpleITK as sitk
 
-    img = sitk.ReadImage(filePath, imageIO="MetaImageIO")
+    # if fileName is a single string then make it a single element list
+    if isinstance(fileNames, str):
+        fileNames = [fileNames]
+
+    img = []
+    for fileName in fileNames:
+        img.append(sitk.ReadImage(fileName, imageIO="MetaImageIO"))
+
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
+        ft.ft_imgAnalyse._displayImageInfo(img[0])
         print("#" * len(f"### {ft._currentFuncName()} ###"))
-    return img
+
+    return img[0] if len(img) == 1 else tuple(img)
 
 
 def convertMHDtoSingleFile(filePath, displayInfo=False):

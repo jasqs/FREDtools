@@ -1099,7 +1099,7 @@ def _getStructureContoursByName(RSfileName, structName):
                 ContourSequence = ROIContourSequence.ContourSequence
             else:
                 warnings.warn("Warning: No 'ContourSequence' defined in 'ROIContourSequence' for the structure '{:s}'. An empty StructureContours will be returned.".format(ROIinfo["Name"]))
-                ContourSequence=[]
+                ContourSequence = []
     # get contour as a list of Nx3 numpy array for each contour
     StructureContours = [np.reshape(Contour.ContourData, [len(Contour.ContourData) // 3, 3]) for Contour in ContourSequence]
 

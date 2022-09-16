@@ -139,7 +139,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     StructureContours, StructInfo = ft.dicom_io._getStructureContoursByName(RSfileName, structName)
 
     # check if the StructureContours is empty and return empty mask (filled with 0) if true
-    if len(StructureContours)==0:
+    if len(StructureContours) == 0:
         # make empty mask (filled with 0)
         imgMask = sitk.Cast(img, sitk.sitkUInt8)
         imgMask *= 0
@@ -640,7 +640,7 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
 
     dxyz = cross(heightVector, u)
 
-    d = (sitk.Sqrt(sum([dxyzS ** 2 for dxyzS in dxyz])) / height) <= radius
+    d = (sitk.Sqrt(sum([dxyzS**2 for dxyzS in dxyz])) / height) <= radius
     side1 = dot(heightVector.tolist(), (x - float(startPoint[0]), y - float(startPoint[1]), z - float(startPoint[2]))) <= 0
     side2 = dot(heightVector.tolist(), (x - float(endPoint[0]), y - float(endPoint[1]), z - float(endPoint[2]))) >= 0
 
@@ -649,7 +649,7 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         print(f"# Cylinder height/dimension [mm]: {height:.2f} / {dimension:.2f}")
-        print("# Cylinder volume theoretical/real [cm3]: {:.2f} / {:.2f}".format(height * np.pi * radius ** 2 / 1e3, np.prod(imgMask.GetSpacing()) * sitk.GetArrayFromImage(imgMask).sum() / 1e3))
+        print("# Cylinder volume theoretical/real [cm3]: {:.2f} / {:.2f}".format(height * np.pi * radius**2 / 1e3, np.prod(imgMask.GetSpacing()) * sitk.GetArrayFromImage(imgMask).sum() / 1e3))
         ft.ft_imgAnalyse._displayImageInfo(imgMask)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
     return imgMask
@@ -893,7 +893,6 @@ def overwriteCTPhysicalProperties(img, RSfileName, method="centreInside", algori
         are interpolated linearly and if the user would like to use a different interpolation
         like spline or polynominal, it is advised to provide it explicitely for each HU value.
         (def. [[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]] )
-
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -953,6 +952,39 @@ def overwriteCTPhysicalProperties(img, RSfileName, method="centreInside", algori
                 print(f"# Structure '{structInfo.ROIName}' (ID: {ID}) with HU={structInfo.ROIPhysicalHUValue} (Rel. Elec. Dens. {structInfo.ROIPhysicalPropertyValue})")
         else:
             print(f"# No structures found to overwrite HU values.")
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return img
+
+
+def setIdentityDirection(img, displayInfo=False):
+    """Set an identity direction for image.
+
+    The function sets an identity direction of an image defined as an instance of a
+    SimpleITK image.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        Object of a SimpleITK image.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        Object SimpleITK image with identity direction.
+    """
+    import numpy as np
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+
+    img.SetDirection(np.identity(img.GetDimension()).flatten())
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(img)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return img

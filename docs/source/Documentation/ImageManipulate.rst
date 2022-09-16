@@ -18,3 +18,5 @@ A collection of useful functions to manipulate and change images. The image must
 .. autofunction:: fredtools.createCylindricalMask
 
 .. autofunction:: fredtools.getImgBEV
+
+.. autofunction:: fredtools.setIdentityDirection
