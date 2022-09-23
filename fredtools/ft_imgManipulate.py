@@ -83,7 +83,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     The 'smparallel' has been adapted from the above mentioned conversations and no significant
     changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
     (Varian Eclipse 15.6) and the standard 'matplotlib' method, showing no significant difference.
-    Because, the 'smparallel' method utilizes numba module to speed and parallelise the computation,
+    Because, the 'smparallel' method utilizes numba module to speed and parallelize the computation,
     it might happen that it will not work on all platforms. Basically, the numba and tbb packages
     should be installed, but no testing on other platforms has been done.
 
@@ -152,7 +152,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
 
         if displayInfo:
             print(f"### {ft._currentFuncName()} ###")
-            print("# Warrning: no 'StructureContours' was defined for this structure and an empty mask was returned")
+            print("# Warning: no 'StructureContours' was defined for this structure and an empty mask was returned")
             print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
             print("# Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3))
             ft.ft_imgAnalyse._displayImageInfo(imgMask)
@@ -168,7 +168,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
             raise ValueError(f"Not all Z (depth) position in controur are the same.")
     # get depth for each contour
     StructureContoursDepth = np.array([StructureContour[0, 2] for StructureContour in StructureContours])
-    # get controur spacing in Z direction as the minimum spacing between individual contours excluding 0.
+    # get contour spacing in Z direction as the minimum spacing between individual contours excluding 0.
     """
     note: spacing 0 means that holes or detached contours exist in the structure
     note: more than single spacing (excluding 0) means that a gap exists in the structure
@@ -493,7 +493,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     """comment: in principle this value is assigned when useNearestNeighborExtrapolator=False and a value is to be 
     interpolated outside the 'img' extent. Such case should not happen because it is assured in the line above that
     the centres of the most external voxels to be interpolated are inside the original image extent. However, the value
-    of defaultPixelValue is set to img minimum value, in order to avoind situation that the border voxels have strange values.
+    of defaultPixelValue is set to img minimum value, in order to avoid situation that the border voxels have strange values.
     In principle, when a CT image is rescaled, the defaultPixelValue will be -1000 (or -1024) and in case of dose interpolation, 
     the defaultPixelValue will be 0 or any other minimum value in the image."""
     valueOutside = ft.getStatistics(img).GetMinimum()
@@ -747,7 +747,7 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     the Beam's Eye View (BEV) based on the given isocentre position,
     gantry angle and couch rotation, using defined interpolation method.
     The BEV Field of Reference (FOR) means that the Z+ direction is along the field
-    (along the beam of relative position [0,0]) and X/Y positions are consistend with
+    (along the beam of relative position [0,0]) and X/Y positions are consistent with
     the DICOM and FRED Monte Carlo definitions.
 
     Parameters
@@ -806,7 +806,7 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     if len(isocentrePosition) != img.GetDimension():
         raise ValueError(f"Dimension of 'isocentrePosition' {isocentrePosition} does not match 'img' dimension {img.GetDimension()}.")
 
-    # determine default pixelvalue
+    # determine default pixel value
     if isinstance(defaultPixelValue, str) and defaultPixelValue.lower() == "auto":
         defaultPixelValue = ft.getStatistics(img).GetMinimum()
     elif not np.isscalar(defaultPixelValue):
@@ -861,7 +861,9 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     return imgBEV
 
 
-def overwriteCTPhysicalProperties(img, RSfileName, method="centreInside", algorithm="smparallel", CPUNo="auto", relElecDensCalib=[[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]], displayInfo=False):
+def overwriteCTPhysicalProperties(
+    img, RSfileName, method="centreInside", algorithm="smparallel", CPUNo="auto", relElecDensCalib=[[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]], HUrange=[-2000, 50000], displayInfo=False
+):
     """Overwrite HU values in a CT image based on structures physical properties.
 
     The function searches in a structure RS dicom file for structures with
@@ -891,8 +893,13 @@ def overwriteCTPhysicalProperties(img, RSfileName, method="centreInside", algori
         the calibration between HU values and relative electronic density. The first element (column)
         is describing the HU values and the second the relative electronic density. The missing values
         are interpolated linearly and if the user would like to use a different interpolation
-        like spline or polynominal, it is advised to provide it explicitely for each HU value.
-        (def. [[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]] )
+        like spline or polynomial, it is advised to provide it explicitly for each HU value.
+        The structures with the relative electronic density outside the calibration range will be skipped
+        and a warning will be displayed. (def. [[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]])
+    HUrange: 2-element array_like, optional
+        2-element iterable of HU range to overwrite the physical properties. Only the structures that
+        the HU values, derived from the calibration, are within the range (including the boundaries)
+        will be overwritten. No warning will be displayed. (def. [-2000, 50000])
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -917,25 +924,33 @@ def overwriteCTPhysicalProperties(img, RSfileName, method="centreInside", algori
     # check if dicom is RN
     ft.ft_imgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
 
+    # check HURange
+    if not len(HUrange) == 2 or not HUrange[0] <= HUrange[1]:
+        raise ValueError(f"The 'HUrange' parameter must be a 2-element iterable were the first element is less or equal to the second.")
     # get structures' info
     structsInfo = ft.getRSInfo(RSfileName)
     structsInfo.dropna(inplace=True)
 
     # prepare calibration from Rel. Electronic Density to HU
     relElecDensCalib = np.array(relElecDensCalib)
-    relElecDensCalib = interp1d(relElecDensCalib[1], relElecDensCalib[0], bounds_error=False, fill_value="extrapolate")
+    relElecDensCalib = interp1d(relElecDensCalib[1], relElecDensCalib[0], bounds_error=True)
+
+    # check if all Rel. Electronic Density are withing the calibration
+    if not structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalib.x.min(), relElecDensCalib.x.max()).all():
+        warnings.warn(f"Warning: some of the structure physical property values are not within the calibration range [{relElecDensCalib.x.min()}, {relElecDensCalib.x.max()}]. They will be skipped.")
+        structsInfo = structsInfo[structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalib.x.min(), relElecDensCalib.x.max())]
+
+    # check if all ROIPhysicalProperty are ["REL_ELEC_DENSITY"] (only REL_ELEC_DENSITY is supported for now).
+    if not all(structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])):
+        warnings.warn(f"Warning: some of the structure physical property are not in the supported list ['REL_ELEC_DENSITY']. They will be skipped.")
+        structsInfo = structsInfo.loc[structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])]
 
     # calculate HU from Rel. Electronic Density
     structsInfo["ROIPhysicalHUValue"] = np.round(relElecDensCalib(structsInfo.ROIPhysicalPropertyValue))
     structsInfo = structsInfo.astype({"ROIPhysicalHUValue": "int"})
 
-    # check if all ROIPhysicalProperty are ["REL_ELEC_DENSITY"] (only REL_ELEC_DENSITY is supported for now).
-    if not all(structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])):
-        warnings.warn(f"Some of the structure physical property are not in the supported list ['REL_ELEC_DENSITY']. They will be skipped.")
-        structsInfo = structsInfo.loc[structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])]
-
-    # read dicom tags
-    dicomTags = dicom.read_file(RSfileName)
+    # remove mapped structures outside the HU range
+    structsInfo = structsInfo[structsInfo.ROIPhysicalHUValue.between(HUrange[0], HUrange[1])]
 
     for _, structInfo in structsInfo.iterrows():
         # map structure to img

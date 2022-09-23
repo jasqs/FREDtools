@@ -645,7 +645,7 @@ def getRNFields(fileName, raiseWarning=True, displayInfo=False):
 def getRNInfo(fileName, displayInfo=False):
     """Get some information from the RN plan.
 
-    The function retrieves some usefull information from a RN dicom of a treatment plan.
+    The function retrieves some useful information from a RN dicom of a treatment plan.
     Following information are saved to a dictionary:
 
         -  *RNFileName* : absolute path to the RN file.
@@ -1041,7 +1041,7 @@ def _getStructureContoursByName(RSfileName, structName):
 
     The function reads a dicom with RS structures and returns the contours
     as a list of numpy.array, as well as the contour info, such as: name,
-    index, type and colour
+    index, type and color
 
     Parameters
     ----------
@@ -1111,7 +1111,7 @@ def _checkContourCWDirection(contour):
 
     """Check if the contour has CW (True) or CCW (False) direction. 
     The CW (True) contour direction usually means that it is a filled polygon
-    and the CCW (False) cuntour direction that it is a hole in the filled polygon."""
+    and the CCW (False) contour direction that it is a hole in the filled polygon."""
     result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
     return result < 0
 

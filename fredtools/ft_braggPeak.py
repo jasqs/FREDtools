@@ -614,7 +614,7 @@ class braggPeak:
 
                     D565, grad565 = sp.pbdv(-0.565, -((R0 - depth) / sigma))
                     D1565, grad1565 = sp.pbdv(-1.565, -((R0 - depth) / sigma))
-                    frontfac = ((np.exp((-((R0 - depth) ** 2)) / (4.0 * (sigma ** 2))) * (sigma ** 0.565)) / (1.0 + 0.012 * R0)) * phi0
+                    frontfac = ((np.exp((-((R0 - depth) ** 2)) / (4.0 * (sigma**2))) * (sigma**0.565)) / (1.0 + 0.012 * R0)) * phi0
                     bracfac = 11.26 * D565 / sigma + ((0.157 + 11.26 * epsilon) / R0) * D1565
                     return frontfac * bracfac
                 else:
@@ -625,7 +625,7 @@ class braggPeak:
 
         bortfeldParam = self.__bortfeldParamConstant
         bortfeldParam["R0"] = self.getRInterp(0.8, "distal")  # [mm]
-        bortfeldParam["phi"] = self.getDInterp(self.__bp[0].min())  # [1/mm^2] initial fluence at the beginning of the profile (normalisation factor)
+        bortfeldParam["phi"] = self.getDInterp(self.__bp[0].min())  # [1/mm^2] initial fluence at the beginning of the profile (normalization factor)
         bortfeldParam["E0"] = ((bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) / bortfeldParam["alpha"]) ** (1 / bortfeldParam["p"])  # [MeV] initial energy
         bortfeldParam["sigmaMono"] = (0.012 * (bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) ** 0.935) / 10  # [mm] width of Gaussian range straggling
         bortfeldParam["sigmaE0"] = 0.01 * bortfeldParam["E0"]  # [MeV] width of Gaussian energy spectrum
