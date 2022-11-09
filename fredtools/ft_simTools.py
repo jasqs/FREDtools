@@ -677,7 +677,7 @@ def readGATE_HITSActor(fileName):
     hitsActor.rename(columns={"edep": "Edep", "pDGEncoding": "PDGCode"}, inplace=True)
 
     # convert byte string to string
-    for keyName, keyType in hitsActor.dtypes.iteritems():
+    for keyName, keyType in hitsActor.dtypes.items():
         if keyType == "object":
             hitsActor[keyName] = hitsActor[keyName].where(hitsActor[keyName].apply(type) != bytes, hitsActor[keyName].str.decode("utf-8"))
 
@@ -757,7 +757,7 @@ def readGATE_PSActor(fileName):
     psActor = psActor[psActor.columns[sortOrder]]
 
     # convert byte string to string
-    for keyName, keyType in psActor.dtypes.iteritems():
+    for keyName, keyType in psActor.dtypes.items():
         if keyType == "object":
             psActor[keyName] = psActor[keyName].where(psActor[keyName].apply(type) != bytes, psActor[keyName].str.decode("utf-8"))
 
