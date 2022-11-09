@@ -26,13 +26,13 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
         Path String to dicom file with structures (RS file).
     structName : string
         Name of the structure to be mapped.
-    method: {'centreInside', 'allInside'}, optional
+    method : {'centreInside', 'allInside'}, optional
         Method of calculation (def. 'centreInside'):
 
             -  'centreInside' : map the voxels which are all inside the contour.
             -  'allInside' : map only the centre of the voxels.
 
-    algorithm: {'smparallel', 'matplotlib'}, optional
+    algorithm : {'smparallel', 'matplotlib'}, optional
         Algorithm of calculation (def. 'smparallel'):
 
             -  'smparallel' : use matplotlib to calculate the voxels inside contours.
@@ -53,8 +53,8 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
 
     See Also
     --------
-        cropImgToMask: Crop image to mask boundary.
-        getDVH: calculate DVH for structure
+        cropImgToMask : Crop image to mask boundary.
+        getDVH : calculate DVH for structure
 
     Notes
     -----
@@ -339,7 +339,7 @@ def cropImgToMask(img, imgMask, displayInfo=False):
 
     See Also
     --------
-        mapStructToImg: mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to image to create a mask.
     """
     import numpy as np
     import SimpleITK as sitk
@@ -397,7 +397,7 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
 
     See Also
     --------
-        mapStructToImg: mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to image to create a mask.
     """
     import SimpleITK as sitk
     import fredtools as ft
@@ -585,7 +585,7 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
 
     See Also
     --------
-        mapStructToImg: mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
     """
@@ -758,9 +758,9 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
         Position of the isocentre with respect to the `img` FOR.
     gantryAngle : scalar
         Rotation of the gantry around the isocentre position in [deg].
-    couchAngle: scalar
+    couchAngle : scalar
         Rotation of the couch around the isocentre position in [deg].
-    defaultPixelValue: 'auto' or scalar, optional
+    defaultPixelValue : 'auto' or scalar, optional
         The value to fill the voxels with, outside the original `img`.
         If 'auto', then the value will be calculated automatically as the
         minimum value of the `img`. (def. 'auto')
@@ -881,14 +881,14 @@ def overwriteCTPhysicalProperties(
         Object of a SimpleITK 3D image.
     RSfileName : string
         Path String to dicom file with structures (RS file).
-    method: {'centreInside', 'allInside'}, optional
+    method : {'centreInside', 'allInside'}, optional
         Method of calculation. See `mapStructToImg` function for more information. (def. 'centreInside')
-    algorithm: {'smparallel', 'matplotlib'}, optional
+    algorithm : {'smparallel', 'matplotlib'}, optional
         Algorithm of calculation. See `mapStructToImg` function for more information. (def. 'smparallel')
     CPUNo : {'auto', 'none'}, scalar or None, optional
         Define if the multiprocessing should be used and how many cores should
         be exploited. See `mapStructToImg` function for more information. (def. 'auto')
-    relElecDensCalib: array_like, optional
+    relElecDensCalib : array_like, optional
         2xN iterable (e.g. 2xN numpy array or list of two equal size lists) describing
         the calibration between HU values and relative electronic density. The first element (column)
         is describing the HU values and the second the relative electronic density. The missing values
@@ -896,7 +896,7 @@ def overwriteCTPhysicalProperties(
         like spline or polynomial, it is advised to provide it explicitly for each HU value.
         The structures with the relative electronic density outside the calibration range will be skipped
         and a warning will be displayed. (def. [[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]])
-    HUrange: 2-element array_like, optional
+    HUrange : 2-element array_like, optional
         2-element iterable of HU range to overwrite the physical properties. Only the structures that
         the HU values, derived from the calibration, are within the range (including the boundaries)
         will be overwritten. No warning will be displayed. (def. [-2000, 50000])
@@ -910,7 +910,7 @@ def overwriteCTPhysicalProperties(
 
     See Also
     --------
-        mapStructToImg: mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
     """
     from scipy.interpolate import interp1d

@@ -1,4 +1,4 @@
-def writeMHD(img, filePath, singleFile=True, overwrite=True, displayInfo=False):
+def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=False, compressionLevel=5, displayInfo=False):
     """Write image to MetaImage format.
 
     The function writes a SimpleITK image object to MetaImage file. The function
@@ -16,6 +16,11 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, displayInfo=False):
         Determine if the MHD is a single file of two files MHD+RAW. (def. True)
     overwrite : bool, optional
         Overwrite the file if it exists. Otherwise raise an error. (def. True)
+    useCompression : bool, optional
+        Determine if a compression will be used when saving the file. (def. False)
+    compressionLevel : unsigned int, optional
+        Determine the compression level. For MHD files, the compression level
+        above 10 does not make any effect. (def. 5)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -34,22 +39,22 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, displayInfo=False):
     if os.path.exists(filePath) and not overwrite:
         raise ValueError("Warning: {:s} file already exists.".format(filePath))
 
-    sitk.WriteImage(img, filePath)
+    sitk.WriteImage(img, filePath, useCompression=useCompression, compressionLevel=compressionLevel)
 
     if singleFile:
-        # get the original raw file name and change ElementDataFile to LOCAL
+        # get the original raw/zraw file name and change ElementDataFile to LOCAL
         with fileinput.FileInput(filePath, inplace=True) as file:
             for line in file:
                 rawFileName = re.findall(r"ElementDataFile\W+=\W+(.+)", line)
                 print(re.sub("ElementDataFile.+", "ElementDataFile = LOCAL", line), end="")
         rawFileName = os.path.join(os.path.dirname(os.path.abspath(filePath)), rawFileName[0])
-        # save binary data to mhd file
+        # read binary raw/zraw file and attach to the mhd file
         try:
-            fout = open(filePath, "ab")
-            voxels = sitk.GetArrayFromImage(img)
-            fout.write(voxels.tobytes())
-            fout.close()
-            # remove raw file
+            with open(rawFileName, mode="rb") as file:
+                rawFileContent = file.read()
+            with open(filePath, "ab") as fout:
+                fout.write(rawFileContent)
+            # remove raw/zraw file
             os.remove(rawFileName)
         except:
             print("IO error: cannot save voxel map to file:", voxels)

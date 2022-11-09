@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Reading and Writing &mdash; FRED Tools 0.6.66 documentation</title>
+  <title>Image Reading and Writing &mdash; FRED Tools 0.6.67 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -35,7 +36,7 @@
             <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.66
+                0.6.67
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -52,9 +53,31 @@
 <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Image Reading and Writing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#metaimage-files-mhd-mha">MetaImage files (*.mhd, *.mha)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#map3d-images-m3d">Map3D images (*.m3d)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dicom-files-dcm-dicom">DICOM files (*.dcm, *.dicom)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metaimage-files-mhd-mha">MetaImage files (*.mhd, *.mha)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.readMHD"><code class="docutils literal notranslate"><span class="pre">readMHD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.writeMHD"><code class="docutils literal notranslate"><span class="pre">writeMHD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.convertMHDtoSingleFile"><code class="docutils literal notranslate"><span class="pre">convertMHDtoSingleFile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.convertMHDtoDoubleFiles"><code class="docutils literal notranslate"><span class="pre">convertMHDtoDoubleFiles()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#map3d-images-m3d">Map3D images (*.m3d)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.readMap3D"><code class="docutils literal notranslate"><span class="pre">readMap3D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.writeMap3D"><code class="docutils literal notranslate"><span class="pre">writeMap3D()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dicom-files-dcm-dicom">DICOM files (*.dcm, *.dicom)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getDicomTypeName"><code class="docutils literal notranslate"><span class="pre">getDicomTypeName()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.sortDicoms"><code class="docutils literal notranslate"><span class="pre">sortDicoms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRNMachineName"><code class="docutils literal notranslate"><span class="pre">getRNMachineName()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRNIsocenter"><code class="docutils literal notranslate"><span class="pre">getRNIsocenter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRNInfo"><code class="docutils literal notranslate"><span class="pre">getRNInfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRNFields"><code class="docutils literal notranslate"><span class="pre">getRNFields()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRNSpots"><code class="docutils literal notranslate"><span class="pre">getRNSpots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRSInfo"><code class="docutils literal notranslate"><span class="pre">getRSInfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getExternalName"><code class="docutils literal notranslate"><span class="pre">getExternalName()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getCT"><code class="docutils literal notranslate"><span class="pre">getCT()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
@@ -82,8 +105,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Image Reading and Writing</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Image Reading and Writing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/Documentation/ReadWrite.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -134,7 +157,7 @@ and creates an instance or tuple of instances of a SimpleITK object.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.writeMHD">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeMHD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">singleFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeMHD" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeMHD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">singleFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">useCompression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressionLevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeMHD" title="Permalink to this definition"></a></dt>
 <dd><p>Write image to MetaImage format.</p>
 <p>The function writes a SimpleITK image object to MetaImage file. The function
 extends the functionality of SimpleITK.WriteImage() to write also a single file
@@ -147,6 +170,9 @@ extension when saving MetaImage.</p>
 <li><p><strong>filePath</strong> (<em>path</em>) – Path to file to be saved.</p></li>
 <li><p><strong>singleFile</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the MHD is a single file of two files MHD+RAW. (def. True)</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Overwrite the file if it exists. Otherwise raise an error. (def. True)</p></li>
+<li><p><strong>useCompression</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if a compression will be used when saving the file. (def. False)</p></li>
+<li><p><strong>compressionLevel</strong> (<em>unsigned int</em><em>, </em><em>optional</em>) – Determine the compression level. For MHD files, the compression level
+above 10 does not make any effect. (def. 5)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
