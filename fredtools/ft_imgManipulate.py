@@ -827,7 +827,7 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     # define rotation and flipping to get BEV (Z+ along the field) and to be consistent with FRED coordinate system of PB
     rotateBEVTransform = sitk.Euler3DTransform()
     rotateBEVTransform.SetRotation(angleX=np.deg2rad(-90), angleY=0, angleZ=0)
-    flipXYTransform = sitk.ScaleTransform(img.GetDimension(), (-1, -1, 1))
+    flipXYTransform = sitk.ScaleTransform(img.GetDimension(), (1, -1, 1))
     compositTransformBEV = sitk.CompositeTransform(img.GetDimension())
     compositTransformBEV.AddTransform(rotateBEVTransform)
     compositTransformBEV.AddTransform(flipXYTransform)
