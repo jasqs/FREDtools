@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Miscellaneous &mdash; FRED Tools 0.6.69 documentation</title>
+  <title>Miscellaneous &mdash; FRED Tools 0.6.70 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.6.69
+                0.6.70
               </div>
             
           
@@ -119,6 +119,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.fitLandau"><code class="docutils literal notranslate"><span class="pre">fitLandau()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.fitLandauGauss"><code class="docutils literal notranslate"><span class="pre">fitLandauGauss()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.fitVavilov"><code class="docutils literal notranslate"><span class="pre">fitVavilov()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.sigma2fwhm"><code class="docutils literal notranslate"><span class="pre">sigma2fwhm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.fwhm2sigma"><code class="docutils literal notranslate"><span class="pre">fwhm2sigma()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -543,6 +545,58 @@ it is calculated based on the standard deviation of the distribution. (def. -1)<
 <dt><a class="reference internal" href="#fredtools.fitLandau" title="fredtools.fitLandau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandau</span></code></a></dt><dd><p>fit Landau distribution to data.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.fitLandauGauss" title="fredtools.fitLandauGauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitLandauGauss</span></code></a></dt><dd><p>fit Landau distribution convoluted with a Gaussian to data.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.sigma2fwhm">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sigma2fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sigma2fwhm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert sigma to FWHM.</p>
+<p>The function recalculates sigma parameter of a Gaussian distribution
+to full width at half maximum (FWHM).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sigma</strong> (<em>scalar</em>) – Sigma value.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FWHM value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scalar</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.fwhm2sigma" title="fredtools.fwhm2sigma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fwhm2sigma</span></code></a></dt><dd><p>convert FWHM to sigma.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.fwhm2sigma">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fwhm2sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwhm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fwhm2sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert FWHM to sigma.</p>
+<p>The function recalculates full width at half maximum (FWHM)
+of a Gaussian distribution to sigma.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fwhm</strong> (<em>scalar</em>) – FWHM value.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sigma value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scalar</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.sigma2fwhm" title="fredtools.sigma2fwhm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sigma2fwhm</span></code></a></dt><dd><p>convert sigma to FWHM.</p>
 </dd>
 </dl>
 </div>

@@ -624,3 +624,53 @@ def fitVavilov(x, y, beta0=0.5, kappa0=0.3, scaling0=-1, fixAmplitude=False):
     fitResult = fitModel.fit(data=y, x=x)
 
     return fitResult
+
+
+def sigma2fwhm(sigma):
+    """Convert sigma to FWHM.
+
+    The function recalculates sigma parameter of a Gaussian distribution
+    to full width at half maximum (FWHM).
+
+    Parameters
+    ----------
+    sigma : scalar
+        Sigma value.
+
+    Returns
+    -------
+    scalar
+        FWHM value.
+
+    See Also
+    --------
+    fwhm2sigma : convert FWHM to sigma.
+    """
+    from numpy import log, sqrt
+
+    return 2 * sqrt(2 * log(2)) * sigma
+
+
+def fwhm2sigma(fwhm):
+    """Convert FWHM to sigma.
+
+    The function recalculates full width at half maximum (FWHM)
+    of a Gaussian distribution to sigma.
+
+    Parameters
+    ----------
+    fwhm : scalar
+        FWHM value.
+
+    Returns
+    -------
+    scalar
+        Sigma value.
+
+    See Also
+    --------
+    sigma2fwhm : convert sigma to FWHM.
+    """
+    from numpy import log, sqrt
+
+    return fwhm / (2 * sqrt(2 * log(2)))

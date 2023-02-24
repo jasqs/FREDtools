@@ -20,3 +20,7 @@ A collection of useful miscellaneous functions with no category.
 .. autofunction:: fredtools.fitLandauGauss
 
 .. autofunction:: fredtools.fitVavilov
+
+.. autofunction:: fredtools.sigma2fwhm
+
+.. autofunction:: fredtools.fwhm2sigma

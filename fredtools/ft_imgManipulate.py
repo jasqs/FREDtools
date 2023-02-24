@@ -1003,3 +1003,104 @@ def setIdentityDirection(img, displayInfo=False):
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return img
+
+
+def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, lateralKernelType="circular", displayInfo=False):
+    """Add lateral, proximal and distal margins to mask.
+
+    The function adds lateral, proximal and/or distal margins to a mask defined as an
+    instance of a SimpleITK 3D image describing a mask. The lateral directions are defined
+    in X and Y axes, whereas the distal and proximal along the Z axis. It is the user's
+    responsibility to transform the image into the correct view. Usually the 'getImgBEV'
+    routine can be used to get the beam's eye view.
+
+    Parameters
+    ----------
+    imgMask : SimpleITK 3D Image
+        Object of a SimpleITK 3D image describing a mask.
+    marginLateral : scalar
+        Lateral margin in the mask unit, usually in [mm]
+    marginProximal : scalar
+        Proximal margin in the mask unit, usually in [mm]
+    marginDistal : scalar
+        Distal margin in the mask unit, usually in [mm]
+    lateralKernelType : {'circular', 'box', 'cross'}, optional
+        Kernel type for the lateral dilatation. (def. 'circular')
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK 3D Image
+        Object of a SimpleITK 3D image describing the diluted mask.
+
+    See Also
+    --------
+        mapStructToImg : mapping a structure to image to create a mask.
+        getImgBEV : transform an image to Beam's Eye View (BEV).
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    ft._isSITK3D(imgMask, raiseError=True)
+    ft._isSITK_mask(imgMask, raiseError=True)
+
+    # set kernel type
+    if lateralKernelType.lower() == "circular":
+        lateralKernelTypeEnum = sitk.sitkBall
+    elif lateralKernelType.lower() == "box":
+        lateralKernelTypeEnum = sitk.sitkBox
+    elif lateralKernelType.lower() == "cross":
+        lateralKernelTypeEnum = sitk.sitkCross
+    else:
+        raise ValueError(f"Lateral Kernel Type type '{lateralKernelType}' cannot be recognized. Only 'circular', 'box' and 'cross' are supported.")
+
+    # get an interpolator suitable for mask interpolation
+    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation="linear")
+
+    # get pixel spacing
+    pixelSpacing = imgMask.GetSpacing()
+
+    # get lateral margin
+    if marginLateral > 0:
+        marginLateralXPixel = int(np.round(marginLateral / pixelSpacing[0]))
+        marginLateralYPixel = int(np.round(marginLateral / pixelSpacing[1]))
+        imgExtLateral = sitk.BinaryDilate(imgMask, kernelRadius=[marginLateralXPixel, marginLateralYPixel, 0], kernelType=lateralKernelTypeEnum)
+    else:
+        imgExtLateral = imgMask
+
+    # get distal margin
+    marginDistalPixel = int(np.round(marginDistal / pixelSpacing[2]))
+    imgExtProximalDistal = sitk.BinaryDilate(imgExtLateral, kernelRadius=[0, 0, marginDistalPixel], kernelType=sitk.sitkBox)
+    translationTransform = sitk.TranslationTransform(imgExtProximalDistal.GetDimension(), [0, 0, -marginDistal])
+    imgExtDistal = sitk.Resample(imgExtProximalDistal, transform=translationTransform, interpolator=interpolator)
+    imgExtDistal = sitk.BinaryFillhole(imgExtDistal)
+    imgExtDistal = sitk.And(imgExtProximalDistal, imgExtDistal)
+
+    # get proximal margin
+    marginProximalPixel = int(np.round(marginProximal / pixelSpacing[2]))
+    imgExtProximalDistal = sitk.BinaryDilate(imgExtLateral, kernelRadius=[0, 0, marginProximalPixel], kernelType=sitk.sitkBox)
+    translationTransform = sitk.TranslationTransform(imgExtProximalDistal.GetDimension(), [0, 0, marginProximal])
+    imgExtProximal = sitk.Resample(imgExtProximalDistal, transform=translationTransform, interpolator=interpolator)
+    imgExtProximal = sitk.BinaryFillhole(imgExtProximal)
+    imgExtProximal = sitk.And(imgExtProximalDistal, imgExtProximal)
+
+    # merge all margins to a single structure mask
+    imgExtProximalDistal = sitk.Or(imgExtDistal, imgExtProximal)
+    imgExt = sitk.Or(imgExtLateral, imgExtProximalDistal)
+
+    # copy and modify information about the mask
+    ft._copyImgMetaData(imgMask, imgExt)
+    if "ROIName" in imgExt.GetMetaDataKeys():
+        imgExt.SetMetaData("ROIName", imgExt.GetMetaData("ROIName") + " Margin")
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print(f"# Added lateral (X/Y) margins: {marginLateral} mm of {lateralKernelType.lower()} type")
+        print(f"# Added distal (+Z) margin: {marginDistal} mm")
+        print(f"# Added proximal (-Z) margin: {marginProximal} mm")
+        ft.ft_imgAnalyse._displayImageInfo(imgExt)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgExt
