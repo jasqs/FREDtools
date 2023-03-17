@@ -43,7 +43,7 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
     fractionalStepSize : bool, optional
         Determine if the `stepSize` should be treated as the absolute value (false)
         or the fraction of the distance-to-agreement (true). (def. True).
-    mode : {'gamma', 'pass=-rate'}, optional
+    mode : {'gamma', 'pass-rate'}, optional
         Mode of calculation. (def. 'gamma'):
 
             -  'gamma': each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.

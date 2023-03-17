@@ -1,8 +1,8 @@
 def getExtent(img, displayInfo=False):
-    """Get extent of an image.
+    """Get the extent of an image.
 
-    The function gets extent of an image defined as a SimpleITK image object.
-    Extent mean the coordinates of the most side voxels' borders
+    The function gets the extent of an image defined as a SimpleITK image object.
+    Extent means the coordinates of most side voxels' borders
     in each direction. It is assumed that the coordinate system is in [mm].
 
     Parameters
@@ -19,7 +19,7 @@ def getExtent(img, displayInfo=False):
 
     See Also
     --------
-    getExtMpl : get extent of a SimpleITK image object describing a slice in matplotlib format.
+    getExtMpl : get the extent of a SimpleITK image object describing a slice in matplotlib format.
     """
     import numpy as np
     import fredtools as ft
@@ -45,9 +45,9 @@ def getExtent(img, displayInfo=False):
 
 
 def getSize(img, displayInfo=False):
-    """Get size of an image.
+    """Get the size of an image.
 
-    The function gets size of an image defined as a SimpleITK image object
+    The function gets the size of an image defined as a SimpleITK image object
     in each direction. The size is defined as the absolute difference of
     the image extent. It is assumed that the coordinate system is in [mm].
 
@@ -65,7 +65,7 @@ def getSize(img, displayInfo=False):
 
     See Also
     --------
-    getExtent : Get extent of an image.
+    getExtent : Get the extent of an image.
     """
     import numpy as np
     import fredtools as ft
@@ -85,7 +85,7 @@ def getSize(img, displayInfo=False):
 
 
 def getImageCenter(img, displayInfo=False):
-    """Get centre of an image.
+    """Get center of an image.
 
     The function calculates the centre of an image defined as a SimpleITK image object
     in each direction. It is assumed that the coordinate system is in [mm].
@@ -100,11 +100,13 @@ def getImageCenter(img, displayInfo=False):
     Returns
     -------
     tuple
-        Tuple of image centre coordinates as in form (xCenter,yCenter,...)
+        Tuple of image centre coordinates in form (xCenter,yCenter,...)
 
     See Also
     --------
-    getMassCenter : get centre of mass of an image.
+    getMassCenter : get center of mass of an image.
+    getMaxPosition : get position of an image maximum.
+    getMinPosition : get position of an image minimum.
     """
     import numpy as np
     import fredtools as ft
@@ -123,7 +125,7 @@ def getImageCenter(img, displayInfo=False):
 
 
 def getMassCenter(img, displayInfo=False):
-    """Get centre of mass of an image.
+    """Get center of mass of an image.
 
     The function calculates the centre of mass of an image defined as
     a SimpleITK image object in each direction. It is assumed that
@@ -139,11 +141,13 @@ def getMassCenter(img, displayInfo=False):
     Returns
     -------
     tuple
-        Tuple of image centre of mass coordinates as in form (xMassCenter,yMassCenter,...)
+        Tuple of image centre of mass coordinates in form (xMassCenter,yMassCenter,...)
 
     See Also
     --------
-    getImageCenter : get centre of an image.
+    getImageCenter : get center of an image.
+    getMaxPosition : get position of an image maximum.
+    getMinPosition : get position of an image minimum.
     """
     import numpy as np
     import itk
@@ -173,6 +177,111 @@ def getMassCenter(img, displayInfo=False):
             print("# {:s}-spatial mass centre [mm] = ".format(axisName), cent)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
     return massCentre
+
+
+def getMaxPosition(img, displayInfo=False):
+    """Get maximum position of an image.
+
+    The function calculates the position of the maximum voxel of
+    an image defined as a SimpleITK image object.
+    It is assumed that the coordinate system is in [mm].
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        Object of a SimpleITK image.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    tuple
+        Tuple of image maximum voxel coordinates in form (xPosition,yPosition,...).
+
+    See Also
+    --------
+    getImageCenter : get centre of an image.
+    getMassCenter : get centre of mass of an image.
+    getMinPosition : get position of an image minimum.
+    """
+    import numpy as np
+    import fredtools as ft
+    import warnings
+
+    ft._isSITK(img, raiseError=True)
+
+    # convert image to array
+    arr = ft.arr(img)
+
+    # check if only one maximum value exists and raise warning
+    if (arr == np.nanmax(arr)).sum() > 1:
+        warnings.warn("Warning: more than one maximum value was found. The first one was returned.")
+
+    # get maximum position
+    maxPosition = np.unravel_index(np.nanargmax(arr), arr.shape[::-1], order="F")
+    maxPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in maxPosition])
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        axesNames = ["x", "y", "z", "t"]
+        for cent, axisName in zip(maxPosition, axesNames):
+            print("# {:s}-spatial max position [mm] = ".format(axisName), cent)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return maxPosition
+
+
+def getMinPosition(img, displayInfo=False):
+    """Get minimum position of an image.
+
+    The function calculates the position of the minimum voxel of
+    an image defined as a SimpleITK image object.
+    It is assumed that the coordinate system is in [mm].
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        Object of a SimpleITK image.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    tuple
+        Tuple of image minimum voxel coordinates in form (xPosition,yPosition,...).
+
+    See Also
+    --------
+    getImageCenter : get centre of an image.
+    getMassCenter : get centre of mass of an image.
+    getMaxPosition : get position of an image maximum.
+    """
+    import numpy as np
+    import itk
+    import SimpleITK as sitk
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+
+    # convert image to array
+    arr = ft.arr(img)
+
+    # check if only one minimum value exists and raise warning
+    if (arr == np.nanmin(arr)).sum() > 1:
+        warnings.warn("Warning: more than one minimum value was found. The first one was returned.")
+
+    # get minimum position
+    minPosition = np.unravel_index(np.nanargmin(arr), arr.shape[::-1], order="F")
+    minPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in minPosition])
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        axesNames = ["x", "y", "z", "t"]
+        for cent, axisName in zip(minPosition, axesNames):
+            print("# {:s}-spatial min position [mm] = ".format(axisName), cent)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return minPosition
 
 
 def getVoxelCentres(img, displayInfo=False):
@@ -228,7 +337,7 @@ def _generateSpatialCentresString(pixelCentres):
     Parameters
     ----------
     pixelCentres : array_like
-        One-dimensional, array-like object of centres to be converted to string
+        One-dimensional, array-like object of centres to be converted to string.
 
     Returns
     -------
@@ -257,7 +366,7 @@ def _generateExtentString(axisExtent):
     Parameters
     ----------
     axisExtent : array_like
-        One-dimensional, two-element, array-like object be converted to string
+        One-dimensional, two-element, array-like object be converted to string.
 
     Returns
     -------
@@ -273,10 +382,10 @@ def _generateExtentString(axisExtent):
 
 
 def _displayImageInfo(img):
-    """Display some information about image without the name of the function.
+    """Display some information about the image without the name of the function.
 
     The function displays information about an image given as a SimpleITK image object.
-    The information are displayed without the function name.
+    The information is displayed without the function name.
 
     Parameters
     ----------
@@ -392,7 +501,7 @@ def _displayImageInfo(img):
 
 
 def displayImageInfo(img):
-    """Display some information about image.
+    """Display some image information.
 
     The function displays information about an image given as a SimpleITK image object.
 
@@ -460,10 +569,10 @@ def displayImageInfo(img):
 
 
 def _getAxesVectorNotUnity(img):
-    """Get boolean vector of axes size unitary.
+    """Get a boolean vector of axes size unitary.
 
     The function calculates a boolean vector of size equal to the image dimension,
-    in which the True values represent those axes which size is more than one.
+    in which the True values represent those axes whose size is more than one.
 
     Parameters
     ----------
@@ -473,7 +582,7 @@ def _getAxesVectorNotUnity(img):
     Returns
     -------
     tuple
-        Tuple of length of the `img` dimension with 1/0 (True/False) values.
+        Tuple of the length of the `img` dimension with 1/0 (True/False) values.
 
     Examples
     --------
@@ -526,10 +635,8 @@ def _getDirectionArray(img):
     """Get direction in form of 2D array.
 
     The function converts direction from an image defined as a SimpleITK image
-    object to 2D numpy array. It bacically reshapes img.GetDirection() result
+    object to 2D numpy array. It basically reshapes img.GetDirection() results
     in tuple to 2D numpy array.
-
-     instance of  calculates the indexes of the axes for which the size is more than one.
 
     Parameters
     ----------
@@ -552,7 +659,7 @@ def getExtMpl(img):
     """Get extent of a slice in format consistent with imshow of matplotlib module.
 
     The function gets extent of an image defined as a SimpleITK image object
-    describing a slice. Extent mean the coordinates of the most side pixels' borders
+    describing a slice. Extent means the coordinates of the most side pixels' borders
     in each direction and are returned in format (left, right, bottom, top), which is
     consistent with the ``extent`` optional parameter of ``imshow`` of
     ``matplotlib.pyplot`` module.
@@ -570,8 +677,8 @@ def getExtMpl(img):
     See Also
     --------
         matplotlib.pyplot.imshow: displaying 2D images.
-        getExtent: get extent of the image in each direction.
-        getSize: get size of the image in each direction.
+        getExtent: get the extent of the image in each direction.
+        getSize: get the size of the image in each direction.
         arr: get squeezed array from image.
 
     Examples
@@ -580,7 +687,7 @@ def getExtMpl(img):
 
     >>> matplotlib.pyplot.imshow(fredtools.arr(img), extent=fredtools.getExtMpl(img))
 
-    will display a 2D image of shape 100x300 px in real coordinates.
+    will display a 2D image of the shape 100x300 px in real coordinates.
     """
     import fredtools as ft
 
@@ -596,8 +703,8 @@ def pos(img):
     """Get voxels' centres for axes of size different than one.
 
     The function calculates the voxels' centres of an image defined
-    as SimpleITK image object in each direction, only for those axes for
-    which the size is more than one. The function us useful for plotting profiles.
+    as a SimpleITK image object in each direction, only for those axes for
+    which the size is more than one. The function is useful for plotting profiles.
 
     Parameters
     ----------
@@ -607,19 +714,19 @@ def pos(img):
     Returns
     -------
     tuple or list of tuples
-        A tuple with voxels' centres for image describing a profile
+        A tuple with voxels' centres for the image describing a profile
         (the size in only one direction is greater than one) or list of tuples
-        for all directions for which the size is greated than one.
+        for all directions for which the size is greater than one.
 
     See Also
     --------
         getVoxelCentres: get voxels' centres of the image in each direction.
-        vec: get vector with values for the img describing a profile.
+        vec: get a vector with values for the image describing a profile.
 
     Examples
     --------
     Let's assume that the `img` is a 3D image describing a profile, so is of size [1,200,1].
-    It is possible to get the voxels' centres only in Y direction:
+    It is possible to get the voxels' centres only in the Y direction:
 
     >>> fredtools.pos(img)
     (-174.658203125,
@@ -631,7 +738,7 @@ def pos(img):
 
     >>> matplotlib.pyplot.plot(fredtools.pos(img), fredtools.vec(img))
 
-    will plot the profile in Y direction of the image.
+    will plot the profile in the Y direction of the image.
     """
     import fredtools as ft
 
@@ -665,8 +772,8 @@ def arr(img):
     See Also
     --------
         pos: get voxels' centres for axes of size different than one.
-        getExtMpl: Get extent of a slice in format consistent with imshow of matplotlib module.
-        vec: get vector with values for the img describing a profile.
+        getExtMpl: Get the extent of a slice in a format consistent with imshow of matplotlib module.
+        vec: get a vector with values for the image describing a profile.
 
     Examples
     --------
@@ -674,7 +781,7 @@ def arr(img):
 
     >>> matplotlib.pyplot.imshow(fredtools.arr(img), extent=fredtools.getExtMpl(img))
 
-    will display a 2D image of shape 100x300 px in real coordinates.
+    will display a 2D image of the shape 100x300 px in real coordinates.
     """
     import SimpleITK as sitk
     import fredtools as ft
@@ -688,7 +795,7 @@ def vec(img):
     """Get 1D array from image describing a profile.
 
     The function gets a squeezed (with no unitary dimensions), 1D array from
-    an image defined as SimpleITK image object describing a profile.
+    an image defined as a SimpleITK image object describing a profile.
     This can be used for plotting
 
     Parameters
@@ -703,7 +810,7 @@ def vec(img):
 
     See Also
     --------
-        pos: get voxels' centres for axes of size different than one.
+        pos: get voxels' centres for axes of the size different than one.
         arr: Get squeezed array from image.
 
     Examples
@@ -712,7 +819,7 @@ def vec(img):
 
     >>> matplotlib.pyplot.plot(fredtools.pos(img), fredtools.vec(img))
 
-    will plot the profile in Z direction of the image.
+    will plot the profile in the Z direction of the image.
     """
     import SimpleITK as sitk
     import fredtools as ft
@@ -723,7 +830,7 @@ def vec(img):
 
 
 def isPointInside(img, point, displayInfo=False):
-    """Check if point is inside the image extent.
+    """Check if a point is inside the image extent.
 
     The function checks if a point or list of points are inside
     the extent of an image defined as a SimpleITK image object
@@ -745,7 +852,7 @@ def isPointInside(img, point, displayInfo=False):
 
     See Also
     --------
-        getExtent: get extent of the image in each direction.
+        getExtent: get the extent of the image in each direction.
 
     Examples
     --------
@@ -824,7 +931,7 @@ def getStatistics(img, displayInfo=False):
 
     Examples
     --------
-    It is assumed that the img is a 3D dose distribution.
+    It is assumed that the image is a 3D dose distribution.
     Some statistics of the image, like the mean, standard deviation
     or sum can be calculated.
 
@@ -874,14 +981,14 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
     img2 : SimpleITK Image
         Object of a SimpleITK image.
     decimals: int, optional
-        Use rounding to given number of decimals when comparing origin and spacing. (def. 3)
+        Use rounding to a given number of decimals when comparing origin and spacing. (def. 3)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     bool
-        A true pr false value describing if the images are the same
+        A true/false value describing if the images are the same
         in the sense of the field of reference.
     """
     import fredtools as ft

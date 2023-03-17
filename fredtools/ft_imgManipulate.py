@@ -54,7 +54,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     See Also
     --------
         cropImgToMask : Crop image to mask boundary.
-        getDVH : calculate DVH for structure
+        getDVH : Calculate DVH for structure
 
     Notes
     -----

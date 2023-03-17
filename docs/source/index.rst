@@ -35,15 +35,15 @@ The development version is available on GitHub.
 
    $ git clone jasqs/FREDtools
 
-.. caution:: There is an installation issue for python 3.10.4 (natively installed in Ubuntu 22.04 LTS). FREDtools requires ITK in 5.2.1 version which cannot be built for python 3.10. But the prerelease ITK 5.3rc4 can be built. It is recommended to install this prerelease prior to FREDtools installation by:
+.. .. caution:: There is an installation issue for python 3.10.4 (natively installed in Ubuntu 22.04 LTS). FREDtools requires ITK in 5.2.1 version which cannot be built for python 3.10. But the prerelease ITK 5.3rc4 can be built. It is recommended to install this prerelease prior to FREDtools installation by:
 
-   .. code:: bash
+..    .. code:: bash
 
-      $ pip install scikit-build
+..       $ pip install scikit-build
 
-      $ pip install --pre itk
+..       $ pip install --pre itk
 
-   FREDtools should be installed normally when the prerelease ITK becomes normal release.
+..    FREDtools should be installed normally when the prerelease ITK becomes normal release.
 
 
 Development
@@ -69,6 +69,7 @@ The FRED tools documentation is written in reStructuredText format and build wit
    Documentation/dvhAnalyse
    Documentation/gammaIndexAnalyse
    Documentation/braggPeakAnalyse
+   Documentation/DijAnalyse
    Documentation/GettingSubimage
    Documentation/ImageManipulate
    Documentation/displayImage

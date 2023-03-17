@@ -11,6 +11,10 @@ A collection of useful functions for image analysis. The image must be an instan
 
 .. autofunction:: fredtools.getMassCenter
 
+.. autofunction:: fredtools.getMaxPosition
+
+.. autofunction:: fredtools.getMinPosition
+
 .. autofunction:: fredtools.getVoxelCentres
 
 .. autofunction:: fredtools.displayImageInfo
