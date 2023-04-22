@@ -134,7 +134,6 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
 
     with open(fileNameLogOut) as f:
         for num, line in enumerate(f, 1):
-
             # FRED Version and release date
             Version_re = re.search("Version\W+([\S+.]+)", line)
             VersionDate_re = re.search("Version.*([0-9]{4}\/[0-9]{2}\/[0-9]{2})", line)
@@ -517,7 +516,7 @@ def getFREDVersion(version=""):
     import fredtools as ft
 
     if version and not ft.checkFREDVersion(version):
-        raise ValueError(f"No FRED v. {version} installed on the machine.\nAvailable FRED versions:\n" + "\n".join(ft.getFREDVerions()))
+        raise ValueError(f"No FRED v. {version} installed on the machine.\nAvailable FRED versions:\n" + "\n".join(ft.getFREDVersions()))
 
     if version:
         FREDrunCommand = ["fred", f"-useVers {version}", "-v"]
@@ -569,7 +568,7 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo=False):
 
     # check if the version is available
     if version and not ft.checkFREDVersion(version):
-        raise ValueError(f"No FRED v. {version} installed on the machine.\nAvailable FRED versions:\n" + "\n".join(ft.getFREDVerions()))
+        raise ValueError(f"No FRED v. {version} installed on the machine.\nAvailable FRED versions:\n" + "\n".join(ft.getFREDVersions()))
 
     # get full fred version name
     fredVersName = ft.getFREDVersion(version).replace("fred", "FRED")

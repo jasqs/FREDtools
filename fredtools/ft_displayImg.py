@@ -102,13 +102,13 @@ def showSlice(
     if isinstance(cmapBack, mpl.colors.LinearSegmentedColormap):
         cmapBack = cmapBack
     elif isinstance(cmapBack, str):
-        cmapBack = mpl.cm.get_cmap(cmapBack)
+        cmapBack = mpl.colormaps[cmapBack]
     else:
         raise ValueError(f"Cannot recognise cmapBack colormap {cmapBack}.")
     if isinstance(cmapFront, mpl.colors.LinearSegmentedColormap):
         cmapFront = cmapFront
     elif isinstance(cmapFront, str):
-        cmapFront = mpl.cm.get_cmap(cmapFront)
+        cmapFront = mpl.colormaps[cmapFront]
     else:
         raise ValueError(f"Cannot recognise cmapFront colormap {cmapFront}.")
 
@@ -137,20 +137,15 @@ def showSlice(
     # show ROIs slice
     if imgROIs:
         for imgROI in imgROIs if isinstance(imgROIs, list) else [imgROIs]:
+            ft._isSITK_mask(imgROI, raiseError=True)
             slROI = ft.getSlice(imgROI, point=point, plane=plane, raiseWarning=raiseWarning)
             if "ROIColor" in imgROI.GetMetaDataKeys():
                 color = np.array(re.findall("\d+", imgROI.GetMetaData("ROIColor")), dtype="int") / 255
             else:
                 color = np.array([0, 0, 1])
             if ft.getStatistics(slROI).GetMaximum() > 0:
-                plROI = ax.contour(ft.arr(slROI), extent=ft.getExtMpl(slROI), colors=[color], linewidths=1, origin="upper")
-
-                # if "ROIName" in imgROI.GetMetaDataKeys():
-                #     name = imgROI.GetMetaData("ROIName")
-                # else:
-                #     name = "unknown"
+                ax.contour(ft.arr(slROI), extent=ft.getExtMpl(slROI), levels=[0.5], colors=[color], linewidths=2, origin="upper")
                 ax.plot([], color=color, label=imgROI.GetMetaData("ROIName") if "ROIName" in imgROI.GetMetaDataKeys() else "unknown")
-                # plROI.collections[0].set_label(name)
         if len(ax.get_legend_handles_labels()[0]) > 0 and showLegend:
             ax.legend(fontsize=fontsize)
 
@@ -286,13 +281,13 @@ class showSlices:
         if isinstance(cmapBack, mpl.colors.LinearSegmentedColormap):
             self.cmapBack = cmapBack
         elif isinstance(cmapBack, str):
-            self.cmapBack = mpl.cm.get_cmap(cmapBack)
+            self.cmapBack = mpl.colormaps[cmapBack]
         else:
             raise ValueError(f"Cannot recognise cmapBack colormap {self.cmapBack}.")
         if isinstance(cmapFront, mpl.colors.LinearSegmentedColormap):
             self.cmapFront = cmapFront
         elif isinstance(cmapFront, str):
-            self.cmapFront = mpl.cm.get_cmap(cmapFront)
+            self.cmapFront = mpl.colormaps[cmapFront]
         else:
             raise ValueError(f"Cannot recognise cmapFront colormap {self.cmapFront}.")
 
@@ -349,7 +344,6 @@ class showSlices:
             self.showSliceAX1(X=self.point[0])
             self.showSliceAX2(Y=self.point[1])
             self.showSliceAX0(Z=self.point[2])
-            
 
     def scrollEventShiftPress(self, event):
         if event.key == "shift":

@@ -260,6 +260,7 @@ def getMinPosition(img, displayInfo=False):
     import itk
     import SimpleITK as sitk
     import fredtools as ft
+    import warnings
 
     ft._isSITK(img, raiseError=True)
 

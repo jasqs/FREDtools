@@ -1036,7 +1036,7 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
 
     See Also
     --------
-        mapStructToImg : mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to an image to create a mask.
         getImgBEV : transform an image to Beam's Eye View (BEV).
     """
     import fredtools as ft
@@ -1062,16 +1062,22 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     # get pixel spacing
     pixelSpacing = imgMask.GetSpacing()
 
+    # calculate margins in pixel
+    marginLateralXPixel = int(np.round(marginLateral / pixelSpacing[0]))
+    marginLateralYPixel = int(np.round(marginLateral / pixelSpacing[1]))
+    marginDistalPixel = int(np.round(marginDistal / pixelSpacing[2]))
+    marginProximalPixel = int(np.round(marginProximal / pixelSpacing[2]))
+
+    # pad image with 0 values in proximal and distal directions
+    imgMask = sitk.ConstantPad(imgMask, [0, 0, marginDistalPixel], [0, 0, marginProximalPixel], 0)
+
     # get lateral margin
     if marginLateral > 0:
-        marginLateralXPixel = int(np.round(marginLateral / pixelSpacing[0]))
-        marginLateralYPixel = int(np.round(marginLateral / pixelSpacing[1]))
         imgExtLateral = sitk.BinaryDilate(imgMask, kernelRadius=[marginLateralXPixel, marginLateralYPixel, 0], kernelType=lateralKernelTypeEnum)
     else:
         imgExtLateral = imgMask
 
     # get distal margin
-    marginDistalPixel = int(np.round(marginDistal / pixelSpacing[2]))
     imgExtProximalDistal = sitk.BinaryDilate(imgExtLateral, kernelRadius=[0, 0, marginDistalPixel], kernelType=sitk.sitkBox)
     translationTransform = sitk.TranslationTransform(imgExtProximalDistal.GetDimension(), [0, 0, -marginDistal])
     imgExtDistal = sitk.Resample(imgExtProximalDistal, transform=translationTransform, interpolator=interpolator)
@@ -1079,7 +1085,6 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     imgExtDistal = sitk.And(imgExtProximalDistal, imgExtDistal)
 
     # get proximal margin
-    marginProximalPixel = int(np.round(marginProximal / pixelSpacing[2]))
     imgExtProximalDistal = sitk.BinaryDilate(imgExtLateral, kernelRadius=[0, 0, marginProximalPixel], kernelType=sitk.sitkBox)
     translationTransform = sitk.TranslationTransform(imgExtProximalDistal.GetDimension(), [0, 0, marginProximal])
     imgExtProximal = sitk.Resample(imgExtProximalDistal, transform=translationTransform, interpolator=interpolator)
@@ -1089,6 +1094,9 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     # merge all margins to a single structure mask
     imgExtProximalDistal = sitk.Or(imgExtDistal, imgExtProximal)
     imgExt = sitk.Or(imgExtLateral, imgExtProximalDistal)
+
+    # crop image in proximal and distal directions to the original size
+    imgExt = sitk.Crop(imgExt, [0, 0, marginDistalPixel], [0, 0, marginProximalPixel])
 
     # copy and modify information about the mask
     ft._copyImgMetaData(imgMask, imgExt)

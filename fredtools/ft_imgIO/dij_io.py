@@ -224,6 +224,7 @@ def getDijFREDSumImage(dijFileName, FNo=None, PBNo=None, weight=None, displayInf
     import numpy as np
     import fredtools as ft
     from collections.abc import Iterable
+    import pandas as pd
 
     # get number of PBs and FoR saved to Dij
     with open(dijFileName, "rb") as dijFile_h:
