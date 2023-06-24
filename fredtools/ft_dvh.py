@@ -5,13 +5,13 @@ def _DVH_DoseLevelVolume(doseLevelArr):
     return doseLevelArr[0], np.sum(doseLevelArr[1] >= doseLevelArr[0])
 
 
-def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, method="centreInside", algorithm="smparallel", CPUNo="auto", displayInfo=False):
+def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, method="allInside", algorithm="smparallel", CPUNo="auto", displayInfo=False):
     """Calculate DVH for structure.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
-    a structure named `structName` and defined in structure dicom file.
+    a structure named `structName` and defined in the structure dicom file.
     The image can be resampled before mapping to increase the resolution and
-    the routine supports multiple CPU computation. The routine exploits and returns
+    the routine supports multiple CPU computations. The routine exploits and returns
     dicompylercore.dvh.DVH class to hold the DVH. Read more about the dicompyler-core
     DVH module on https://dicompyler-core.readthedocs.io/en/latest/index.html.
 
@@ -32,11 +32,11 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
         Can be a scalar, then the same number will be used for each axis,
         3-element iterable defining the voxel size for each axis, or `None` meaning
         no interpolation. (def. None)
-    method: {'centreInside', 'allInside'}, optional
-        Method of calculation (def. 'centreInside'):
+    method: {'allInside', 'centreInside'}, optional
+        Method of calculation (def. 'allInside'):
 
-            -  'centreInside' : map the voxels which are all inside the contour.
             -  'allInside' : map only the centre of the voxels.
+            -  'centreInside' : map the voxels which are all inside the contour.
 
     algorithm: {'smparallel', 'matplotlib'}, optional
         Algorithm of calculation (def. 'smparallel'):
@@ -48,7 +48,7 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
         Define if the multiprocessing should be used and how many cores should
         be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
         a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cored to be used (def. 'auto').
+        or a scalar defining the number of CPU cores to be used (def. 'auto').
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 

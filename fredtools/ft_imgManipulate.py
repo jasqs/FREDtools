@@ -1,18 +1,18 @@
-def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm="smparallel", CPUNo="auto", displayInfo=False):
+def mapStructToImg(img, RSfileName, structName, method="allInside", algorithm="smparallel", CPUNo="auto", displayInfo=False):
     """Map structure to image and create a mask.
 
     The function reads a `structName` structure from RS dicom file and maps it to
-    the frame of reference of `img` defined a SimpleITK image object. The created
+    the frame of reference of `img` defined as a SimpleITK image object. The created
     mask is an image with the same frame of reference (origin. spacing, direction
     and size) as the `img` with voxels inside the contour and 0 outside. It is
-    assumed that the image is 3D and  has an unitary direction, which means that
-    the axes describe X,Y and Z directions, respectively. The frame of reference
+    assumed that the image is 3D and has a unitary direction, which means that
+    the axes describe X, Y and Z directions, respectively. The frame of reference
     of the `img` is not specified, in particular, the Z-spacing does not have to
     be the same as the structure Z-spacing.
 
     Two methods of mapping voxels are available of are available: 'allinside', which
     maps the voxels which are all inside the contour (including voxel size and edges),
-    and 'centreInside' (default method), which maps only the centre of the voxels.
+    and 'centreInside' (default method), which maps only the center of the voxels.
 
     Two algorithms of mapping are available: 'matplotlib', which utilizes the
     matplotlib.path.Path.contains_points functionality, and 'smparallel', which exploits
@@ -26,11 +26,11 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
         Path String to dicom file with structures (RS file).
     structName : string
         Name of the structure to be mapped.
-    method : {'centreInside', 'allInside'}, optional
-        Method of calculation (def. 'centreInside'):
+    method : {'allInside', 'centreInside'}, optional
+        Method of calculation (def. 'allInside'):
 
-            -  'centreInside' : map the voxels which are all inside the contour.
             -  'allInside' : map only the centre of the voxels.
+            -  'centreInside' : map the voxels which are all inside the contour.
 
     algorithm : {'smparallel', 'matplotlib'}, optional
         Algorithm of calculation (def. 'smparallel'):
@@ -42,7 +42,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
         Define if the multiprocessing should be used and how many cores should
         be exploited. Can be None, then no multiprocessing will be used,
         a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cored to be used. (def. 'auto')
+        or a scalar defining the number of CPU cores to be used. (def. 'auto')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -62,40 +62,40 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
     out that it does not consider holes and detached structures. Therefore a new
     approach has been implemented
 
-    2. Although the implementation exploits multiple CPU computation using numba
+    2. Although the implementation exploits multiple CPU computations using numba
     functionality, it would be recommended to move this functionality to GPU. Such implementation
     is described in [1]_ but has not been tested yet.
 
     3. Two methods of mapping voxels are available of are available: 'allinside', which
     maps the voxels which are all inside the contour (including voxel size and edges),
-    and 'centreInside' (default method), which maps only the centre of the voxels.
-    Obviously, the 'centreInside' method is faster. On the other hand it usually calculates
+    and 'centreInside' (default method), which maps only the center of the voxels.
+    Obviously, the 'centreInside' method is faster. On the other hand, it usually calculates
     the volume of the structure slightly larger than the real volume. Contrary, the 'allinside'
-    method should always calculate smaller volume and should converge to the real volume while
+    method should always calculate a smaller volume and should converge to the real volume while
     the `img` resolution increases.
 
     4. Two algorithms of mapping are available: 'matplotlib', which utilizes the
     matplotlib.path.Path.contains_points functionality, and 'smparallel', which exploits
     the algorithm described in [1]_ (search for 'Comparison of different methods') along with numba functionality of
     multiprocessing [2]_ (default algorithm). The 'matplotlib'
-    algorithm calculates on a single CPU thread and is the slowest but it does not require
+    the algorithm calculates on a single CPU thread and is the slowest but it does not require
     any specific modules to be installed (basically the matplotlib) and should work on any platform.
-    The 'smparallel' has been adapted from the above mentioned conversations and no significant
+    The 'smparallel' has been adapted from the above-mentioned conversations and no significant
     changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
     (Varian Eclipse 15.6) and the standard 'matplotlib' method, showing no significant difference.
-    Because, the 'smparallel' method utilizes numba module to speed and parallelize the computation,
+    Because the 'smparallel' method utilizes numba module to speed and parallelizes the computation,
     it might happen that it will not work on all platforms. Basically, the numba and tbb packages
     should be installed, but no testing on other platforms has been done.
 
     5. The mapping is done for each contour separately and based on the direction (CW or CCW)
-    of the contour it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
+    of the contour, it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
     The mapping of each contour is done in 2D, meaning slice by slice. The resulting image has
     the voxel size and shape the same as the input `img` in X and Y directions. The voxel size
-    in Z direction is calculated based on the contour slice distances, taking into account
-    gaps, holes and detached contours. The shape of the image in Z direction is equal to
-    the contour boundings in Z direction, enlarged by 1 px (``sliceAddNo`` parameter). Such
-    image mask, is then resampled to the frame of reference of the input `img`. In fact,
-    the resampling is applied only to Z direction, because the frame of reference of X and Y
+    in the Z direction is calculated based on the contour slice distances, taking into account
+    gaps, holes and detached contours. The shape of the image in the Z direction is equal to
+    the contour boundings in the Z direction, enlarged by 1 px (``sliceAddNo`` parameter). Such
+    image mask is then resampled to the frame of reference of the input `img`. In fact,
+    the resampling is applied only to the Z direction, because the frame of reference of X and Y
     directions are the same as the input `img`.
 
     References
@@ -210,7 +210,7 @@ def mapStructToImg(img, RSfileName, structName, method="centreInside", algorithm
         StructureContoursIdx = np.where(StructureContoursDepth == MaskDepth)[0]
 
         # skip calculation of the mask if no structure exists for MaskDepth
-        if not np.any(StructureContoursIdx):
+        if StructureContoursIdx.size == 0:
             continue
 
         for StructureContourIdx in StructureContoursIdx:
@@ -339,7 +339,7 @@ def cropImgToMask(img, imgMask, displayInfo=False):
 
     See Also
     --------
-        mapStructToImg : mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to an image to create a mask.
     """
     import numpy as np
     import SimpleITK as sitk
@@ -369,8 +369,8 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
     """Set value inside/outside mask.
 
     The function sets those the values of the `img` defined as an instance of
-    a SimpleITK object which are inside or outside a mask described by the
-    `imgMask` defined as an instance of a SimpleITK object describing a mask
+    a SimpleITK object which is inside or outside a mask described by the
+    `imgMask`, defined as an instance of a SimpleITK object describing a mask
     (i.e. type uint8 and only 0/1 values). The function is a simple wrapper for
     SimpleITK.Mask routine.
 
@@ -397,7 +397,7 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
 
     See Also
     --------
-        mapStructToImg : mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to an image to create a mask.
     """
     import SimpleITK as sitk
     import fredtools as ft
@@ -429,8 +429,8 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     SimpleITK image object to different voxel spacing using
     a specified interpolation method. The assumption is that
     the 'low extent' is not changed, i.e. the coordinates of
-    the corner of the first voxel preserved. The size of
-    the interpolated image is calculated to fit all the voxels' centres
+    the corner of the first voxel are preserved. The size of
+    the interpolated image is calculated to fit all the voxels' centers
     in the original image extent. The function exploits the
     SimpleITK.Resample routine.
 
@@ -443,7 +443,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
+        Order of spline interpolation. Must be in the range 0-5. (def. 3)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -460,7 +460,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
 
     if ft._isSITK_point(img):
         raise ValueError(
-            f"The 'img' is an insntance of SimleITK image but describes single point (size of 'img' is {img.GetSize()}). Interpolation cannot be performed on images describing a single point."
+            f"The 'img' is an instance of SimleITK image but describes a single point (size of 'img' is {img.GetSize()}). Interpolation cannot be performed on images describing a single point."
         )
 
     # convert spacing to numpy
@@ -490,10 +490,10 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     newOrigin = np.array(ft.getExtent(img))[:, 0] + np.array(spacingCorr) / 2
 
     # calculate default pixel value as min value of the input image
-    """comment: in principle this value is assigned when useNearestNeighborExtrapolator=False and a value is to be 
-    interpolated outside the 'img' extent. Such case should not happen because it is assured in the line above that
-    the centres of the most external voxels to be interpolated are inside the original image extent. However, the value
-    of defaultPixelValue is set to img minimum value, in order to avoid situation that the border voxels have strange values.
+    """comment: in principle, this value is assigned when useNearestNeighborExtrapolator=False and a value is to be 
+    interpolated outside the 'img' extent. Such a case should not happen because it is assured in the line above that
+    the centers of the most external voxels to be interpolated are inside the original image extent. However, the value
+    of defaultPixelValue is set to the img minimum value, to avoid the situation that the border voxels have strange values.
     In principle, when a CT image is rescaled, the defaultPixelValue will be -1000 (or -1024) and in case of dose interpolation, 
     the defaultPixelValue will be 0 or any other minimum value in the image."""
     valueOutside = ft.getStatistics(img).GetMinimum()
@@ -560,7 +560,7 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
 
     The function creates a cylindrical mask with a given `dimension` and height
     calculated from the starting and ending points of the cylinder in the frame of
-    references of an image defined as SimpleITK image object describing a 3D image.
+    references of an image defined as a SimpleITK image object describing a 3D image.
     Only 3D images are supported. The routine might be helpful for instance for making
     a geometrical acceptance correction of a chamber used for Bragg peak measurements.
     The routine was adapted from a GitHub repository: https://github.com/heydude1337/SimplePhantomToolkit/.
@@ -570,9 +570,9 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
     img : SimpleITK Image
         Object of a SimpleITK 3D image.
     startPoint : array_like
-        3-element point describing the position of the centre of the first cylinder base.
+        3-element point describing the position of the center of the first cylinder base.
     endPoint : array_like
-        3-element point describing the position of the centre of the second cylinder base.
+        3-element point describing the position of the center of the second cylinder base.
     dimension : scalar
         Dimension of the cylinder.
     displayInfo : bool, optional
@@ -585,7 +585,7 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
 
     See Also
     --------
-        mapStructToImg : mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
     """
@@ -658,9 +658,9 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
 def sumVectorImg(img, displayInfo=False):
     """Sum vector image.
 
-    The function sums all elements of vector in a vector image
+    The function sums all elements of a vector in a vector image
     defined as instances of a SimpleITK vector image object.
-    The resulting image have the same frame of reference but
+    The resulting image has the same frame of reference but
     is a scalar image.
 
     Parameters
@@ -697,9 +697,9 @@ def _getFORTransformed(img, transform):
     """Calculate image FOR after transformation.
 
     The function is calculating a new Field of Reference (FOR) for an image defined
-    as an instance od a SimpleITK image object. The purpose of this calculation is
+    as an instance of a SimpleITK image object. The purpose of this calculation is
     that transformed images can be 'cropped'. This function is calculating new FOR based
-    of the positions of the transformed image corners.
+    on the positions of the transformed image corners.
 
     Parameters
     ----------
@@ -745,7 +745,7 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
 
     The function transforms a 3D image defined as a SimpleITK 3D image object to
     the Beam's Eye View (BEV) based on the given isocentre position,
-    gantry angle and couch rotation, using defined interpolation method.
+    gantry angle and couch rotation, using a defined interpolation method.
     The BEV Field of Reference (FOR) means that the Z+ direction is along the field
     (along the beam of relative position [0,0]) and X/Y positions are consistent with
     the DICOM and FRED Monte Carlo definitions.
@@ -767,7 +767,7 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
+        Order of spline interpolation. Must be in the range 0-5. (def. 3)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -780,7 +780,7 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     -----
     The basic workflow follows:
 
-        1. translate the image to the isocentre so to have the isocentre at zero position,
+        1. translate the image to the isocentre as to have the isocentre at zero position,
         2. rotate the couch around the isocentre,
         3. rotate the gantry around the isocentre,
         4. rotate and flip image to get BEV.
@@ -864,11 +864,11 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
 def overwriteCTPhysicalProperties(
     img, RSfileName, method="centreInside", algorithm="smparallel", CPUNo="auto", relElecDensCalib=[[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]], HUrange=[-2000, 50000], displayInfo=False
 ):
-    """Overwrite HU values in a CT image based on structures physical properties.
+    """Overwrite HU values in a CT image based on structures' physical properties.
 
     The function searches in a structure RS dicom file for structures with
     the physical property defined, maps each structure to the CT image
-    defined as an instance of a SimpleITK 3D image and replaces the Hounsfield Units (HU)
+    defined as an instance of a SimpleITK 3D image, and replaces the Hounsfield Units (HU)
     values for voxels inside the structure. Only the relative electronic density physical
     property ('REL_ELEC_DENSITY') is implemented now, and it is converted to a HU value
     based on relative electronic density to HU calibration, given as `relElecDensCalib`
@@ -910,7 +910,7 @@ def overwriteCTPhysicalProperties(
 
     See Also
     --------
-        mapStructToImg : mapping a structure to image to create a mask.
+        mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
     """
     from scipy.interpolate import interp1d
@@ -973,7 +973,7 @@ def overwriteCTPhysicalProperties(
 
 
 def setIdentityDirection(img, displayInfo=False):
-    """Set an identity direction for image.
+    """Set an identity direction for the image.
 
     The function sets an identity direction of an image defined as an instance of a
     SimpleITK image.
@@ -1010,7 +1010,7 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
 
     The function adds lateral, proximal and/or distal margins to a mask defined as an
     instance of a SimpleITK 3D image describing a mask. The lateral directions are defined
-    in X and Y axes, whereas the distal and proximal along the Z axis. It is the user's
+    in X and Y axes, whereas the distal and proximal are along the Z axis. It is the user's
     responsibility to transform the image into the correct view. Usually the 'getImgBEV'
     routine can be used to get the beam's eye view.
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Manipulate &mdash; FRED Tools 0.6.72 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.6.77 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,7 +12,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -38,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.72
+                0.6.77
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -76,6 +77,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="displayImage.html">Display Image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simTools.html">Monte Carlo simulation tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimisationTools.html">Optimisation Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous</a></li>
 </ul>
 
@@ -108,19 +110,19 @@
 <p>A collection of useful functions to manipulate and change images. The image must be an instance of a SimpleITK image and the functions are mostly wrappers for SimpleITK image filters. Check <a class="reference external" href="https://simpleitk.readthedocs.io/en/master/filters.html">SimpleITK filters</a> for available methods of filtering, registration, etc.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.mapStructToImg">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mapStructToImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'centreInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mapStructToImg" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mapStructToImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'allInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mapStructToImg" title="Permalink to this definition"></a></dt>
 <dd><p>Map structure to image and create a mask.</p>
 <p>The function reads a <cite>structName</cite> structure from RS dicom file and maps it to
-the frame of reference of <cite>img</cite> defined a SimpleITK image object. The created
+the frame of reference of <cite>img</cite> defined as a SimpleITK image object. The created
 mask is an image with the same frame of reference (origin. spacing, direction
 and size) as the <cite>img</cite> with voxels inside the contour and 0 outside. It is
-assumed that the image is 3D and  has an unitary direction, which means that
-the axes describe X,Y and Z directions, respectively. The frame of reference
+assumed that the image is 3D and has a unitary direction, which means that
+the axes describe X, Y and Z directions, respectively. The frame of reference
 of the <cite>img</cite> is not specified, in particular, the Z-spacing does not have to
 be the same as the structure Z-spacing.</p>
 <p>Two methods of mapping voxels are available of are available: ‘allinside’, which
 maps the voxels which are all inside the contour (including voxel size and edges),
-and ‘centreInside’ (default method), which maps only the centre of the voxels.</p>
+and ‘centreInside’ (default method), which maps only the center of the voxels.</p>
 <p>Two algorithms of mapping are available: ‘matplotlib’, which utilizes the
 matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
 the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
@@ -130,11 +132,11 @@ the algorithm described in <a class="footnote-reference brackets" href="#id5" id
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
 <li><p><strong>RSfileName</strong> (<em>string</em>) – Path String to dicom file with structures (RS file).</p></li>
 <li><p><strong>structName</strong> (<em>string</em>) – Name of the structure to be mapped.</p></li>
-<li><p><strong>method</strong> (<em>{'centreInside'</em><em>, </em><em>'allInside'}</em><em>, </em><em>optional</em>) – <p>Method of calculation (def. ‘centreInside’):</p>
+<li><p><strong>method</strong> (<em>{'allInside'</em><em>, </em><em>'centreInside'}</em><em>, </em><em>optional</em>) – <p>Method of calculation (def. ‘allInside’):</p>
 <blockquote>
 <div><ul>
-<li><p>’centreInside’ : map the voxels which are all inside the contour.</p></li>
 <li><p>’allInside’ : map only the centre of the voxels.</p></li>
+<li><p>’centreInside’ : map the voxels which are all inside the contour.</p></li>
 </ul>
 </div></blockquote>
 </p></li>
@@ -149,7 +151,7 @@ the algorithm described in <a class="footnote-reference brackets" href="#id5" id
 <li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if the multiprocessing should be used and how many cores should
 be exploited. Can be None, then no multiprocessing will be used,
 a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
-or a scalar defining the number of CPU cored to be used. (def. ‘auto’)</p></li>
+or a scalar defining the number of CPU cores to be used. (def. ‘auto’)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -174,37 +176,37 @@ or a scalar defining the number of CPU cored to be used. (def. ‘auto’)</p></
 <p>1. the functionality of <code class="docutils literal notranslate"><span class="pre">gatetools</span></code> package has been tested but it turned
 out that it does not consider holes and detached structures. Therefore a new
 approach has been implemented</p>
-<p>2. Although the implementation exploits multiple CPU computation using numba
+<p>2. Although the implementation exploits multiple CPU computations using numba
 functionality, it would be recommended to move this functionality to GPU. Such implementation
 is described in <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> but has not been tested yet.</p>
 <p>3. Two methods of mapping voxels are available of are available: ‘allinside’, which
 maps the voxels which are all inside the contour (including voxel size and edges),
-and ‘centreInside’ (default method), which maps only the centre of the voxels.
-Obviously, the ‘centreInside’ method is faster. On the other hand it usually calculates
+and ‘centreInside’ (default method), which maps only the center of the voxels.
+Obviously, the ‘centreInside’ method is faster. On the other hand, it usually calculates
 the volume of the structure slightly larger than the real volume. Contrary, the ‘allinside’
-method should always calculate smaller volume and should converge to the real volume while
+method should always calculate a smaller volume and should converge to the real volume while
 the <cite>img</cite> resolution increases.</p>
 <p>4. Two algorithms of mapping are available: ‘matplotlib’, which utilizes the
 matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
 the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> (search for ‘Comparison of different methods’) along with numba functionality of
 multiprocessing <a class="footnote-reference brackets" href="#id6" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> (default algorithm). The ‘matplotlib’
-algorithm calculates on a single CPU thread and is the slowest but it does not require
+the algorithm calculates on a single CPU thread and is the slowest but it does not require
 any specific modules to be installed (basically the matplotlib) and should work on any platform.
-The ‘smparallel’ has been adapted from the above mentioned conversations and no significant
+The ‘smparallel’ has been adapted from the above-mentioned conversations and no significant
 changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
 (Varian Eclipse 15.6) and the standard ‘matplotlib’ method, showing no significant difference.
-Because, the ‘smparallel’ method utilizes numba module to speed and parallelize the computation,
+Because the ‘smparallel’ method utilizes numba module to speed and parallelizes the computation,
 it might happen that it will not work on all platforms. Basically, the numba and tbb packages
 should be installed, but no testing on other platforms has been done.</p>
 <p>5. The mapping is done for each contour separately and based on the direction (CW or CCW)
-of the contour it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
+of the contour, it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
 The mapping of each contour is done in 2D, meaning slice by slice. The resulting image has
 the voxel size and shape the same as the input <cite>img</cite> in X and Y directions. The voxel size
-in Z direction is calculated based on the contour slice distances, taking into account
-gaps, holes and detached contours. The shape of the image in Z direction is equal to
-the contour boundings in Z direction, enlarged by 1 px (<code class="docutils literal notranslate"><span class="pre">sliceAddNo</span></code> parameter). Such
-image mask, is then resampled to the frame of reference of the input <cite>img</cite>. In fact,
-the resampling is applied only to Z direction, because the frame of reference of X and Y
+in the Z direction is calculated based on the contour slice distances, taking into account
+gaps, holes and detached contours. The shape of the image in the Z direction is equal to
+the contour boundings in the Z direction, enlarged by 1 px (<code class="docutils literal notranslate"><span class="pre">sliceAddNo</span></code> parameter). Such
+image mask is then resampled to the frame of reference of the input <cite>img</cite>. In fact,
+the resampling is applied only to the Z direction, because the frame of reference of X and Y
 directions are the same as the input <cite>img</cite>.</p>
 </div>
 <div class="admonition-references admonition">
@@ -251,7 +253,7 @@ each direction. The function exploits SimpleITK.Crop routine.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to image to create a mask.</p>
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
 </dd>
 </dl>
 </div>
@@ -262,8 +264,8 @@ each direction. The function exploits SimpleITK.Crop routine.</p>
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setValueMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setValueMask" title="Permalink to this definition"></a></dt>
 <dd><p>Set value inside/outside mask.</p>
 <p>The function sets those the values of the <cite>img</cite> defined as an instance of
-a SimpleITK object which are inside or outside a mask described by the
-<cite>imgMask</cite> defined as an instance of a SimpleITK object describing a mask
+a SimpleITK object which is inside or outside a mask described by the
+<cite>imgMask</cite>, defined as an instance of a SimpleITK object describing a mask
 (i.e. type uint8 and only 0/1 values). The function is a simple wrapper for
 SimpleITK.Mask routine.</p>
 <dl class="field-list simple">
@@ -289,7 +291,7 @@ outside the mask)</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to image to create a mask.</p>
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
 </dd>
 </dl>
 </div>
@@ -298,10 +300,10 @@ outside the mask)</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.overwriteCTPhysicalProperties">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">overwriteCTPhysicalProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'centreInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relElecDensCalib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[-1000,</span> <span class="pre">100,</span> <span class="pre">1000,</span> <span class="pre">6000],</span> <span class="pre">[0,</span> <span class="pre">1.1,</span> <span class="pre">1.532,</span> <span class="pre">3.92]]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HUrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-2000,</span> <span class="pre">50000]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.overwriteCTPhysicalProperties" title="Permalink to this definition"></a></dt>
-<dd><p>Overwrite HU values in a CT image based on structures physical properties.</p>
+<dd><p>Overwrite HU values in a CT image based on structures’ physical properties.</p>
 <p>The function searches in a structure RS dicom file for structures with
 the physical property defined, maps each structure to the CT image
-defined as an instance of a SimpleITK 3D image and replaces the Hounsfield Units (HU)
+defined as an instance of a SimpleITK 3D image, and replaces the Hounsfield Units (HU)
 values for voxels inside the structure. Only the relative electronic density physical
 property (‘REL_ELEC_DENSITY’) is implemented now, and it is converted to a HU value
 based on relative electronic density to HU calibration, given as <cite>relElecDensCalib</cite>
@@ -339,7 +341,7 @@ will be overwritten. No warning will be displayed. (def. [-2000, 50000])</p></li
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to image to create a mask.</p>
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
 </dd>
@@ -355,8 +357,8 @@ will be overwritten. No warning will be displayed. (def. [-2000, 50000])</p></li
 SimpleITK image object to different voxel spacing using
 a specified interpolation method. The assumption is that
 the ‘low extent’ is not changed, i.e. the coordinates of
-the corner of the first voxel preserved. The size of
-the interpolated image is calculated to fit all the voxels’ centres
+the corner of the first voxel are preserved. The size of
+the interpolated image is calculated to fit all the voxels’ centers
 in the original image extent. The function exploits the
 SimpleITK.Resample routine.</p>
 <dl class="field-list simple">
@@ -365,7 +367,7 @@ SimpleITK.Resample routine.</p>
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
 <li><p><strong>spacing</strong> (<em>array_like</em>) – New spacing in each direction. The length should be the same as the <cite>img</cite> dimension.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
-<li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
+<li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in the range 0-5. (def. 3)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -407,7 +409,7 @@ of references of all images must be the same.</p>
 <dd><p>Create a cylindrical Mask in image field of reference</p>
 <p>The function creates a cylindrical mask with a given <cite>dimension</cite> and height
 calculated from the starting and ending points of the cylinder in the frame of
-references of an image defined as SimpleITK image object describing a 3D image.
+references of an image defined as a SimpleITK image object describing a 3D image.
 Only 3D images are supported. The routine might be helpful for instance for making
 a geometrical acceptance correction of a chamber used for Bragg peak measurements.
 The routine was adapted from a GitHub repository: <a class="reference external" href="https://github.com/heydude1337/SimplePhantomToolkit/">https://github.com/heydude1337/SimplePhantomToolkit/</a>.</p>
@@ -415,8 +417,8 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
-<li><p><strong>startPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the centre of the first cylinder base.</p></li>
-<li><p><strong>endPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the centre of the second cylinder base.</p></li>
+<li><p><strong>startPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the center of the first cylinder base.</p></li>
+<li><p><strong>endPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the center of the second cylinder base.</p></li>
 <li><p><strong>dimension</strong> (<em>scalar</em>) – Dimension of the cylinder.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
@@ -431,7 +433,7 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to image to create a mask.</p>
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
 </dd>
@@ -447,7 +449,7 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 <dd><p>Transform an image to Beam’s Eye View (BEV).</p>
 <p>The function transforms a 3D image defined as a SimpleITK 3D image object to
 the Beam’s Eye View (BEV) based on the given isocentre position,
-gantry angle and couch rotation, using defined interpolation method.
+gantry angle and couch rotation, using a defined interpolation method.
 The BEV Field of Reference (FOR) means that the Z+ direction is along the field
 (along the beam of relative position [0,0]) and X/Y positions are consistent with
 the DICOM and FRED Monte Carlo definitions.</p>
@@ -462,7 +464,7 @@ the DICOM and FRED Monte Carlo definitions.</p>
 If ‘auto’, then the value will be calculated automatically as the
 minimum value of the <cite>img</cite>. (def. ‘auto’)</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
-<li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in range 0-5. (def. 3)</p></li>
+<li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in the range 0-5. (def. 3)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -478,7 +480,7 @@ minimum value of the <cite>img</cite>. (def. ‘auto’)</p></li>
 <p>The basic workflow follows:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li><p>translate the image to the isocentre so to have the isocentre at zero position,</p></li>
+<li><p>translate the image to the isocentre as to have the isocentre at zero position,</p></li>
 <li><p>rotate the couch around the isocentre,</p></li>
 <li><p>rotate the gantry around the isocentre,</p></li>
 <li><p>rotate and flip image to get BEV.</p></li>
@@ -496,7 +498,7 @@ of the FRED rtplan is equal to the gantry rotation the DICOM RN plan.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.setIdentityDirection">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setIdentityDirection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setIdentityDirection" title="Permalink to this definition"></a></dt>
-<dd><p>Set an identity direction for image.</p>
+<dd><p>Set an identity direction for the image.</p>
 <p>The function sets an identity direction of an image defined as an instance of a
 SimpleITK image.</p>
 <dl class="field-list simple">

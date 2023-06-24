@@ -74,4 +74,5 @@ The FRED tools documentation is written in reStructuredText format and build wit
    Documentation/ImageManipulate
    Documentation/displayImage
    Documentation/simTools
+   Documentation/optimisationTools
    Documentation/misc
