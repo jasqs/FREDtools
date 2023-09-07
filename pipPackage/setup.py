@@ -57,6 +57,9 @@ requirements = [req for req in requirements if 'fredtools' not in req]
 requirements = [req for req in requirements if 'itk_io' not in req]
 requirements = [req for req in requirements if 'numpy' not in req]
 requirements = [req for req in requirements if 'pyamtrack' not in req]
+requirements = [req for req in requirements if 'ipython' not in req]
+requirements = [req for req in requirements if 'scipy' not in req]
+
 
 # configure setuptools
 setuptools.setup(

@@ -1,5 +1,8 @@
 from matplotlib.pyplot import sca
 
+# constant values
+re_number = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
+
 
 def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo=False):
     """Merge multiple PDF files to a single PDF.
@@ -674,3 +677,75 @@ def fwhm2sigma(fwhm):
     from numpy import log, sqrt
 
     return fwhm / (2 * sqrt(2 * log(2)))
+
+
+def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, comment="#"):
+    """Read the line and line number from an ASCI file.
+
+    The function searches an ASCI file for lines matching a pattern and returns
+    the line or lines number and the line strings. The pattern follows the Python
+    regular expression [1]_.
+
+    Parameters
+    ----------
+    pattern : string
+        A string describing the regular expression. It is recommended
+        the string be a row string, starting with r'...'.
+    fileName : string
+        Path String to ASCI file.
+    kind : {'all', 'first', 'last'}, optional
+        Determine which line is to be returned: the first only, the last or all the lines. (def. 'all')
+    startLine : int, optional
+        The line number to start the search (def. 1)
+    removeEoL : bool, optional
+        Determine if the end-of-line ('\n') should be removed from each returned line. (def. True)
+    comment : strung, optional
+        If not None or an empty string, then no lines starting with this
+        string (leading white spaces are removed) will be returned. (def. '#')
+
+    Returns
+    -------
+    line index, line string
+        If kind='all': a tuple of two tuples where the first one is the matched line numbers and the second is the line strings.
+        If kind='first' or kind='last': a tuple with the first or last matched line number and the line string.
+
+    References
+    ----------
+    .. [1] `Regular expression operations <https://docs.python.org/3/library/re.html>`_
+    """
+    import re
+
+    with open(fileName, "r") as f:
+        fileLines = f.readlines()
+
+    lineIdx = []
+    lineString = []
+    for i, line in enumerate(fileLines, start=1):
+        # start saving from startLine
+        if i < startLine:
+            continue
+        # if 'comment' is not empty, do not save lines starting with comment sign
+        if comment:
+            if re.findall(rf"^\s*{comment}", line):
+                continue
+
+        if re.findall(pattern, line):
+            lineIdx.append(i)
+            # remove end-of-line sign '\n' if reqiested
+            if removeEoL:
+                line = line.replace("\n", "")
+            lineString.append(line)
+
+    if kind.lower() == "first":
+        lineIdx = lineIdx[0]
+        lineString = lineString[0]
+    elif kind.lower() == "last":
+        lineIdx = lineIdx[-1]
+        lineString = lineString[-1]
+    elif kind.lower() == "all":
+        lineIdx = tuple(lineIdx)
+        lineString = tuple(lineString)
+    else:
+        raise AttributeError(f"Unrecognized kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
+
+    return lineIdx, lineString
