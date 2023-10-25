@@ -42,7 +42,7 @@ def getDicomTypeName(dicomVar):
 
 
 def _isDicomCT(dicomVar, raiseError=False):
-    r"""Check if the dicom is of CT type and raise error if requested."""
+    r"""Check if the dicom is of CT type and raise an error if requested."""
     import itk
 
     instanceBool = "CT Image Storage" in getDicomTypeName(dicomVar)
@@ -53,7 +53,7 @@ def _isDicomCT(dicomVar, raiseError=False):
 
 
 def _isDicomRS(dicomVar, raiseError=False):
-    r"""Check if the dicom is of RS type and raise error if requested."""
+    r"""Check if the dicom is of RS type and raise an error if requested."""
     import itk
 
     instanceBool = "Structure Set Storage" in getDicomTypeName(dicomVar)
@@ -64,7 +64,7 @@ def _isDicomRS(dicomVar, raiseError=False):
 
 
 def _isDicomRN(dicomVar, raiseError=False):
-    r"""Check if the dicom is of RN type and raise error if requested."""
+    r"""Check if the dicom is of RN type and raise an error if requested."""
     import itk
 
     instanceBool = "Plan Storage" in getDicomTypeName(dicomVar)  # ("RT Plan Storage" or "RT Ion Plan Storage")
@@ -75,13 +75,24 @@ def _isDicomRN(dicomVar, raiseError=False):
 
 
 def _isDicomRD(dicomVar, raiseError=False):
-    r"""Check if the dicom is of RD type and raise error if requested."""
+    r"""Check if the dicom is of RD type and raise an error if requested."""
     import itk
 
     instanceBool = "Dose Storage" in getDicomTypeName(dicomVar)
 
     if raiseError and not instanceBool:
         raise TypeError(f"The dicom is not a RD type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+    return instanceBool
+
+
+def _isDicomPET(dicomVar, raiseError=False):
+    r"""Check if the dicom is of PET type and raise an error if requested."""
+    import itk
+
+    instanceBool = "Positron Emission Tomography Image Storage" in getDicomTypeName(dicomVar)
+
+    if raiseError and not instanceBool:
+        raise TypeError(f"The dicom is not a PET type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
     return instanceBool
 
 
@@ -126,6 +137,7 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
         -  RS - dicom files of RT Structure Set Storage
         -  RN - dicom files of RT Plan Storage ("RT Plan Storage" or "RT Ion Plan Storage")
         -  RD - dicom files of 1D/2D/3D RT Dose Storage (for instance dose distribution)
+        -  PET - dicom files of PET Image Storage ("Positron Emission Tomography Image Storage")
         -  Unknown - files with \*.dcm extension that were not recognized.
 
     Parameters
@@ -155,6 +167,7 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
     RSfileNames = []
     RNfileNames = []
     RDfileNames = []
+    PETfileNames = []
     UnknownfileNames = []
     for dicomFileName in dicomFileNames:
         if _isDicomCT(dicomFileName):  # CT
@@ -165,14 +178,20 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
             RNfileNames.append(dicomFileName)
         elif _isDicomRD(dicomFileName):  # RD
             RDfileNames.append(dicomFileName)
+        elif _isDicomPET(dicomFileName):  # PET
+            PETfileNames.append(dicomFileName)
         else:
             UnknownfileNames.append(dicomFileName)  # unrecognized dicoms
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
-        print("# Found dicoms: {:d} x CT, {:d} x RS, {:d} x RN, {:d} x RD, {:d} x unknown".format(len(CTfileNames), len(RSfileNames), len(RNfileNames), len(RDfileNames), len(UnknownfileNames)))
+        print(
+            "# Found dicoms: {:d} x CT, {:d} x RS, {:d} x RN, {:d} x RD, {:d} x PET, {:d} x unknown".format(
+                len(CTfileNames), len(RSfileNames), len(RNfileNames), len(RDfileNames), len(PETfileNames), len(UnknownfileNames)
+            )
+        )
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
-    dicomTypes = {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "Unknown": UnknownfileNames}
+    dicomTypes = {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "PETfileNames": PETfileNames, "Unknown": UnknownfileNames}
     for dicomType, dicomName in dicomTypes.items():
         if isinstance(dicomName, list) and len(dicomName) == 1:
             dicomTypes[dicomType] = dicomName[0]
@@ -289,8 +308,8 @@ def getRNMachineName(fileName, displayInfo=False):
 
     See Also
     --------
-    getRNFields : get summary of parameters for each field defined in RN plan.
-    getRNSpots : get summary of parameters for each spot defined in RN plan.
+    getRNFields : get a summary of parameters for each field defined in the RN plan.
+    getRNSpots : get a summary of parameters for each spot defined in the RN plan.
     getRNInfo : get some basic information from the RN plan.
     """
     import fredtools as ft
@@ -336,7 +355,7 @@ def getRNIsocenter(fileName, displayInfo=False):
     """Get the isocenter position defined in the RN plan.
 
     The function retrieves the isocenter position defined in the RN dicom file.
-    The isocenter is defined for each field separately but usually it is the same
+    The isocenter is defined for each field separately but usually, it is the same
     for all fields. If it is not the same then a warning is raised and a geometrical
     center is returned.
 
@@ -354,8 +373,8 @@ def getRNIsocenter(fileName, displayInfo=False):
 
     See Also
     --------
-    getRNFields : get summary of parameters for each field defined in RN plan.
-    getRNSpots : get summary of parameters for each spot defined in RN plan.
+    getRNFields : get a summary of parameters for each field defined in the RN plan.
+    getRNSpots : get a summary of parameters for each spot defined in the RN plan.
     getRNInfo : get some basic information from the RN plan.
     """
     import fredtools as ft
@@ -403,8 +422,8 @@ def getRNIsocenter(fileName, displayInfo=False):
     return isocenterPosition.tolist()
 
 
-def getRNSpots(fileName):
-    """Get parameters of each spot defined in the RN file.
+def getRNSpots(fileName, displayInfo=False):
+    """Get the parameters of each spot defined in the RN file.
 
     The function retrieves information for each spot defined in the RN dicom file.
     All spots are listed in the results, including the spots with zero meterset weights.
@@ -413,6 +432,8 @@ def getRNSpots(fileName):
     ----------
     fileName : path
         Path to RN dicom file.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -421,7 +442,7 @@ def getRNSpots(fileName):
 
     See Also
     --------
-    getRNFields : get summary of parameters for each field defined in RN plan.
+    getRNFields : get a summary of parameters for each field defined in the RN plan.
     getRNInfo : get some basic information from the RN plan.
     """
     import pandas as pd
@@ -475,7 +496,6 @@ def getRNSpots(fileName):
         # get spots parameters from IonControlPointSequence
         slicesInfo = []
         for sliceIdx, IonControlPointDataset in enumerate(IonBeamDataset.IonControlPointSequence):
-
             # number of spots for slice
             spotsNo = int(IonControlPointDataset.NumberOfScanSpotPositions)
 
@@ -521,19 +541,26 @@ def getRNSpots(fileName):
     spotsInfo.dropna(axis="columns", how="all", inplace=True)
 
     # fill nan values with the lat valid value
-    spotsInfo.fillna(method="ffill", inplace=True)
+    spotsInfo.ffill(inplace=True)
 
     # reset index
     spotsInfo.index = range(1, len(spotsInfo) + 1)
 
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print(f"# Fields No:  {spotsInfo.FNo.nunique()}")
+        print(f"# Rows No:    {len(spotsInfo)}")
+        print(f"# Spots No:   {len(spotsInfo.loc[spotsInfo.PBMU!=0])}")
+        print(f"# Total MU:   {spotsInfo.PBMU.sum():.2f}")
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
     return spotsInfo
 
 
 def getRNFields(fileName, raiseWarning=True, displayInfo=False):
-    """Get parameters of each field defined in the RN file.
+    """Get the parameters of each field defined in the RN file.
 
     The function retrieves information for each field defined in the RN dicom file.
-    A consistency check is performed to check correctness of the parameters written
+    A consistency check is performed to check the correctness of the parameters written
     in the RN dicom file.
 
     Parameters
@@ -552,7 +579,7 @@ def getRNFields(fileName, raiseWarning=True, displayInfo=False):
 
     See Also
     --------
-    getRNSpots : get summary of parameters for each spot defined in RN plan.
+    getRNSpots : get a summary of parameters for each spot defined in the RN plan.
     getRNInfo : get some basic information from the RN plan.
     """
     import pandas as pd
@@ -611,13 +638,14 @@ def getRNFields(fileName, raiseWarning=True, displayInfo=False):
 
     fieldsInfo["FMagDist"] = np.nan
     fieldsInfo["FMagDist"] = fieldsInfo["FMagDist"].astype("object")
+    fieldsInfo["FsupportID"] = "unknown"
     for FDeliveryNo, fieldInfo in fieldsInfo.iterrows():
         IonBeamDataset = ft.ft_imgIO.dicom_io._getIonBeamDatasetForFieldNumber(fileName, fieldInfo.FNo)
 
         fieldsInfo.loc[FDeliveryNo, "FCumMsW"] = IonBeamDataset.FinalCumulativeMetersetWeight.real if "FinalCumulativeMetersetWeight" in IonBeamDataset else np.NaN  # Final Cumulative Meterset Weight
         fieldsInfo.loc[FDeliveryNo, "FnomRange"] = IonBeamDataset[(0x300B, 0x1004)].value if (0x300B, 0x1004) in IonBeamDataset else np.NaN
         fieldsInfo.loc[FDeliveryNo, "FnomSOBPWidth"] = IonBeamDataset[(0x300B, 0x100E)].value if (0x300B, 0x100E) in IonBeamDataset else np.NaN
-        fieldsInfo.loc[FDeliveryNo, "FsupportID"] = IonBeamDataset.PatientSupportID if "PatientSupportID" in IonBeamDataset else np.NaN
+        fieldsInfo.loc[FDeliveryNo, "FsupportID"] = IonBeamDataset.PatientSupportID if "PatientSupportID" in IonBeamDataset else "unknown"
         fieldsInfo.at[FDeliveryNo, "FMagDist"] = IonBeamDataset.VirtualSourceAxisDistances if "VirtualSourceAxisDistances" in IonBeamDataset else np.NaN  #  Virtual Source-Axis Distances
 
     # make consistency check and raise warning if raiseWarning==True
@@ -681,8 +709,8 @@ def getRNInfo(fileName, displayInfo=False):
 
     See Also
     --------
-    getRNFields : get summary of parameters for each field defined in RN plan.
-    getRNSpots : get summary of parameters for each spot defined in RN plan.
+    getRNFields : get a summary of parameters for each field defined in the RN plan.
+    getRNSpots : get a summary of parameters for each spot defined in the RN plan.
 
     Notes
     -----
@@ -777,9 +805,9 @@ def getRNInfo(fileName, displayInfo=False):
 
 
 def getRSInfo(fileName, displayInfo=False):
-    """Get some information from the RS structures from RS dicom file.
+    """Get some information from the RS structures from the RS dicom file.
 
-    The function retrieves some basic information about structures from a RS dicom file.
+    The function retrieves some basic information about structures from an RS dicom file.
 
     Parameters
     ----------
@@ -818,7 +846,7 @@ def getRSInfo(fileName, displayInfo=False):
         ROITable = pd.concat([ROITable, ROIinstance], ignore_index=True)
 
     # get Physical property for ROI if defined
-    ROITable["ROIPhysicalProperty"] = np.nan
+    ROITable["ROIPhysicalProperty"] = None
     ROITable["ROIPhysicalPropertyValue"] = np.nan
     if "RTROIObservationsSequence" in dicomTags:
         for index, ROIinstance in ROITable.iterrows():
@@ -849,9 +877,9 @@ def getRSInfo(fileName, displayInfo=False):
 
 
 def getExternalName(fileName, displayInfo=False):
-    """Get name of the EXTERNAL structure from RS dicom file.
+    """Get the name of the EXTERNAL structure from RS dicom file.
 
-    The function retrieves the name of the structure of type EXTERNAL from a RS dicom file.
+    The function retrieves the name of the structure of type EXTERNAL from an RS dicom file.
     If more than one structure of type EXTERNAL exists in the RS dicom file, then the first one is returned.
 
     Parameters
@@ -868,7 +896,7 @@ def getExternalName(fileName, displayInfo=False):
 
     See Also
     --------
-    getRSInfo : getting information about all structures on a RS dicom file.
+    getRSInfo : getting information about all structures on the RS dicom file.
     """
     import warnings
     import fredtools as ft
@@ -892,11 +920,11 @@ def getExternalName(fileName, displayInfo=False):
 
 
 def getCT(fileNames, displayInfo=False):
-    """Get image from dicom series.
+    """Get a CT image from dicom series.
 
-    The function reads a series of dicom files and creates an instance
-    of a SimpleITK object. The dicom files should come from the same Series
-    and have the same frame of reference.
+    The function reads a series of dicom files containing a CT scan
+    and creates an instance of a SimpleITK object. The dicom files
+    should come from the same Series and have the same frame of reference.
 
     Parameters
     ----------
@@ -908,7 +936,7 @@ def getCT(fileNames, displayInfo=False):
     Returns
     -------
     SimpleITK Image
-        Object of a SimpleITK image of sitk.sitkInt16 (int16) type.
+        An object of a SimpleITK image of sitk.sitkInt16 (int16) type.
 
     See Also
     --------
@@ -973,6 +1001,111 @@ def getCT(fileNames, displayInfo=False):
 
     # read dicom series
     img = sitk.ReadImage(fileNamesSorted, outputPixelType=sitk.sitkInt16)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(img)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return img
+
+
+def getPET(fileNames, SUV=True, displayInfo=False):
+    """Get a PET image from dicom series.
+
+    The function reads a series of dicom files containing a PET scan
+    and creates an instance of a SimpleITK object. The dicom files
+    should come from the same Series and have the same frame of reference.
+
+    Parameters
+    ----------
+    fileNames : array_like
+        An iterable (list, tuple, etc.) of paths to dicoms.
+    SUV : bool, optional
+        Determine if the image should be recalculated with
+        the Standardized Uptake Value (SUV). (def. True)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An object of a SimpleITK image of 16-bit integer type.
+
+    See Also
+    --------
+    sortDicoms : get names of dicoms in a folder sorted by the dicom type.
+    """
+    import numpy as np
+    import fredtools as ft
+    import pydicom as dicom
+    import warnings
+    import SimpleITK as sitk
+    import math
+
+    # check if all files are PT type
+    for fileName in fileNames:
+        if not _isDicomPET(fileName):
+            raise ValueError(f"File {fileName} is not a PT dicom.")
+
+    # read dicoms' tags
+    dicomSeries = []
+    for fileName in fileNames:
+        dicomSeries.append(dicom.read_file(fileName))
+
+    # check if all dicoms have Frame of Reference UID tag
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if "FrameOfReferenceUID" not in dicomSimple:
+            raise TypeError(f"No 'FrameOfReferenceUID' tag in {fileName}.")
+
+    # check if Frame of Reference UID is the same for all dicoms
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if dicomSimple.FrameOfReferenceUID != dicomSeries[0].FrameOfReferenceUID:
+            raise TypeError(f"Frame of Reference UID for dicom {fileName} is different than for {fileNames[0]}.")
+
+    # check if all dicoms have Series Instance UID tag
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if "SeriesInstanceUID" not in dicomSimple:
+            raise TypeError(f"No 'SeriesInstanceUID' tag in {fileName}.")
+
+    # check if Series Instance UID is the same for all dicoms
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        if dicomSimple.SeriesInstanceUID != dicomSeries[0].SeriesInstanceUID:
+            raise TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
+
+    # check if all dicoms have Slice Location tag
+    sliceLosationPresent = []
+    for fileName, dicomSimple in zip(fileNames, dicomSeries):
+        sliceLosationPresent.append("SliceLocation" in dicomSimple)
+    if not all(sliceLosationPresent):
+        warnings.warn("Warning: All dicom files are of PT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
+
+    # get slice location
+    if not all(sliceLosationPresent):
+        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.ImagePositionPatient[2]), dicomSeries))
+    else:
+        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomSeries))
+
+    # sort fileNames according to the Slice Location tag
+    slicesLocationSorted, fileNamesSorted = zip(*sorted(zip(slicesLocation, fileNames)))
+
+    # check if slice location spacing is constant
+    slicesLocationSpacingTolerance = 1  # decimal points (4 means 0.0001 tolerance)
+    if np.unique(np.round(np.diff(np.array(slicesLocationSorted)), decimals=slicesLocationSpacingTolerance)).size != 1:
+        raise ValueError(f"Slice location spacing is not constant with tolerance {10**-slicesLocationSpacingTolerance:.0E}")
+
+    # read dicom series
+    img = sitk.ReadImage(fileNamesSorted, outputPixelType=sitk.sitkFloat32)
+
+    # Recalculate image to SUV if requested
+    if SUV:
+        delta_time = (float(dicomSimple.AcquisitionTime) - float(dicomSimple.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)) / 100  # [min]
+        half_life = dicomSimple.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife / 60  # [min]
+        corrected_dose = dicomSimple.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose * math.exp(-delta_time * math.log(2) / half_life)  # [Bq]
+        SUV_factor = (dicomSimple.RescaleSlope * float(dicomSimple.PatientWeight) * 1000) / (corrected_dose)  # [g/Bq] = [] * [Kg]* 1000[g/kg] / [Bq]
+        # Create SUV image
+        img = img * float(SUV_factor)  # [g/ml] = [Bq/ml] * [g/Bq]
+
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
@@ -982,7 +1115,7 @@ def getCT(fileNames, displayInfo=False):
 
 
 def getRD(fileNames, displayInfo=False):
-    """Get image from dicom.
+    """Get an image from dicom.
 
     The function reads a single dicom file or an iterable of dicom files
     and creates an instance or tuple of instances of a SimpleITK object.
@@ -997,7 +1130,7 @@ def getRD(fileNames, displayInfo=False):
     Returns
     -------
     SimpleITK Image or tuple
-        Object or tuple of objects of a SimpleITK image.
+        An Object or tuple of objects of a SimpleITK image.
 
     See Also
     --------
@@ -1081,7 +1214,7 @@ def _getStructureContoursByName(RSfileName, structName):
         else:
             ROINumber = None
 
-    # raise error if no structName found
+    # raise an error if no structName is found
     if ROINumber is None:
         raise ValueError(f"The structure named '{structName}' is not in the {RSfileName}.")
 
@@ -1117,7 +1250,7 @@ def _checkContourCWDirection(contour):
 
 
 def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
-    """Get file name of the RD dose dicom of for given field number.
+    """Get the file name of the RD dose dicom of for the given field number.
 
     The function searches for the RD dose dicom file for a given
     field number (beam number) and returns its file name.

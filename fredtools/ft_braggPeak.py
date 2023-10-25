@@ -5,10 +5,10 @@ class braggPeak:
     properties of the analysis results. The analysis of a Bragg curve is made
     based on two methods: a simple interpolation with a given method (linear,
     nearest or spline) and/or a fit of the Bortfeld equation taken from [1]_ (eq. 27).
-    For each method, it is possible to obtain such parameters as: range of the BP
-    at given percent of the maximum of the distal fall-off, value of signal
-    (for instance dose) at given depth, distal fall-off and width of the BP
-    at given percent of the maximum.
+    For each method, it is possible to obtain such parameters as a range of the BP
+    at a given percent of the maximum of the distal fall-off, the value of the signal
+    (for instance dose) at a given depth, distal fall-off and width of the BP
+    at a given percent of the maximum.
 
     Parameters
     ----------
@@ -26,9 +26,9 @@ class braggPeak:
         Order of spline interpolation. Must be in range 0-5. (def. 3)
     bortCut : float, optional
         The range of the data that the Bortfeld fit will be performed on.
-        It is defined as the range of the BP in proximal region at the percent
+        It is defined as the range of the BP in the proximal region at the percent
         of the maximum of the spline interpolation. The Bortfeld fit will be
-        performed for the input data in distal of this range. (def. 0.6)
+        performed for the input data in the distal of this range. (def. 0.6)
 
     Examples
     --------
@@ -195,7 +195,7 @@ class braggPeak:
     def getDInterp(self, R):
         """Get signal value at given range/depth based on profile interpolation.
 
-        The function is calculating the signal value (for instance dose) at given
+        The function calculates the signal value (for instance dose) at a given
         range (for instance depth) using the profile interpolation defined with
         interpolation and splineOrder.
 
@@ -207,20 +207,20 @@ class braggPeak:
         Returns
         -------
         float
-            Signal value at given range.
+            Signal value at a given range.
 
         Examples
         --------
-        Get maximum value of the interpolation method.
+        Get the maximum value of the interpolation method.
 
         >>> braggPeak.getDInterp(R=braggPeak.getRInterp(D=1))
         """
         return self.__getD(self.__bp, R)
 
     def getDBort(self, R):
-        """Get signal value at given range/depth based on Bortfeld fit.
+        """Get the signal value at a given range/depth based on Bortfeld fit.
 
-        The function is calculating the signal value (for instance dose) at given
+        The function calculates the signal value (for instance dose) at a given
         range (for instance depth) using the Bortfeld fit.
 
         Parameters
@@ -231,30 +231,30 @@ class braggPeak:
         Returns
         -------
         float
-            Signal value at given range.
+            Signal value at a given range.
 
         Examples
         --------
-        Get maximum value of the Bortfeld fit.
+        Get the maximum value of the Bortfeld fit.
 
         >>> braggPeak.getDBort(R=braggPeak.getRBort(D=1))
         """
         return self.__getD(self.bpBort, R)
 
     def __getD(self, bp, R):
-        """Calculate value for given range/depth for image.
+        """Calculate the value for a given range/depth for the image.
 
         Parameters
         ----------
         img : SimpleITK Image
-            Object of a SimpleITK image describing a profile.
+            An object of a SimpleITK image describing a profile.
         R : float
             Range/depth at which the signal value will be calculated.
 
         Returns
         -------
         float
-            Signal value at given range.
+            Signal value at a given range.
         """
         from scipy.interpolate import interp1d
         import numpy as np
@@ -262,9 +262,9 @@ class braggPeak:
         return interp1d(bp[0], bp[1], kind=self.__setInterpolationScipy(), fill_value=np.NaN)(R)
 
     def getRInterp(self, D, side="distal", percentD=True):
-        """Calculate range/depth at given signal level based on profile interpolation.
+        """Calculate the range/depth at a given signal level based on profile interpolation.
 
-        The function is calculating range (depth) at distal or proximal part, at the absolute
+        The function calculates range (depth) at the distal or proximal part, at the absolute
         or relative signal value using the profile interpolation defined with `interpolation`
         and `splineOrder`. The relative value is calculated to the maximum value of the profile
         interpolation.
@@ -285,20 +285,20 @@ class braggPeak:
 
         Examples
         --------
-        Get range at 80 percent of the maximum value of the interpolation at distal fall-off of the BP.
+        Get range at 80 percent of the maximum value of the interpolation at the distal fall-off of the BP.
 
         >>> braggPeak.getRInterp(D=0.8)
 
-        Get range at 50 percent of the maximum value of the interpolation in proximal region.
+        Get range at 50 percent of the maximum value of the interpolation in the proximal region.
 
         >>> braggPeak.getRInterp(D=0.5, side='P')
         """
         return self.__getR(self.bpInterp, D=D, side=side, percentD=percentD)
 
     def getRBort(self, D, side="distal", percentD=True):
-        """Calculate range/depth at given signal level based on Bortfeld fit.
+        """Calculate the range/depth at a given signal level based on Bortfeld fit.
 
-        The function is calculating range (depth) at distal or proximal part, at the absolute
+        The function calculates the range (depth) at the distal or proximal part, at the absolute
         or relative signal value using the Bortfeld fit. The relative value is calculated
         to the maximum value of the Bortfeld fit.
 
@@ -318,23 +318,23 @@ class braggPeak:
 
         Examples
         --------
-        Get range at 80 percent of the maximum value of the Bortfeld fit at distal fall-off of the BP.
+        Get a range at 80 percent of the maximum value of the Bortfeld fit at the distal fall-off of the BP.
 
         >>> braggPeak.getRBort(D=0.8)
 
-        Get range at 50 percent of the maximum value of the Bortfeld fit in proximal region.
+        Get a range at 50 percent of the maximum value of the Bortfeld fit in the proximal region.
 
         >>> braggPeak.getRBort(D=0.5, side='P')
         """
         return self.__getR(self.bpBort, D=D, side=side, percentD=percentD)
 
     def __getR(self, bp, D, side, percentD):
-        """Calculate range/depth at given signal level.
+        """Calculate the range/depth at a given signal level.
 
         Parameters
         ----------
         img : SimpleITK Image
-            Object of a SimpleITK image describing a profile.
+            An object of a SimpleITK image describing a profile.
         D : float
             Absolute or relative signal level.
         side : {'proximal', 'distal'}
@@ -381,9 +381,9 @@ class braggPeak:
             return pos[np.where(val >= level)].max() if (any(val >= level) and any(val <= level)) else np.nan
 
     def getWInterp(self, D, percentD=True):
-        """Calculate width of the BP at given signal level based on profile interpolation.
+        """Calculate the width of the BP at a given signal level based on profile interpolation.
 
-        The function is calculating width of the BP at the absolute or relative signal value
+        The function calculates the width of the BP at the absolute or relative signal value
         using the profile interpolation defined with `interpolation` and `splineOrder`.
         The relative value is calculated to the maximum value of the profile interpolation.
 
@@ -412,9 +412,9 @@ class braggPeak:
         return self.__getW(self.bpInterp, D=D, percentD=percentD)
 
     def getWBort(self, D, percentD=True):
-        """Calculate width of the BP at given signal level based on Bortfeld fit.
+        """Calculate the width of the BP at a given signal level based on Bortfeld fit.
 
-        The function is calculating width of the BP at the absolute or relative signal value
+        The function calculates the width of the BP at the absolute or relative signal value
         using the Bortfeld fit.  The relative value is calculated to the maximum value of
         the Bortfeld fit.
 
@@ -443,12 +443,12 @@ class braggPeak:
         return self.__getW(self.bpBort, D=D, percentD=percentD)
 
     def __getW(self, bp, D, percentD):
-        """Calculate width of the BP at given signal level for image.
+        """Calculate the width of the BP at a given signal level for the image.
 
         Parameters
         ----------
         bp : SimpleITK Image
-            Object of a SimpleITK image describing a profile.
+            An object of a SimpleITK image describing a profile.
         D : float
             Absolute or relative signal level.
         percentD : bool, optional
@@ -464,9 +464,9 @@ class braggPeak:
         return Rdist - Rprox
 
     def getDFOInterp(self, Dup, Dlow, percentD=True):
-        """Calculate width of the distal fall-off of the BP at given signal level based on profile interpolation.
+        """Calculate the width of the distal fall-off of the BP at a given signal level based on profile interpolation.
 
-        The function is calculating width of the distal fall-off of the BP at the absolute or
+        The function calculates the width of the distal fall-off of the BP at the absolute or
         relative signal values using the profile interpolation defined with `interpolation`
         and `splineOrder`. The relative value is calculated to the maximum value of the profile interpolation.
 
@@ -497,9 +497,9 @@ class braggPeak:
         return self.__getDFO(self.bpInterp, Dup=Dup, Dlow=Dlow, percentD=percentD)
 
     def getDFOBort(self, Dup, Dlow, percentD=True):
-        """Calculate width of the distal fall-off of the BP at given signal level based on Bortfeld fit.
+        """Calculate the width of the distal fall-off of the BP at a given signal level based on Bortfeld fit.
 
-        The function is calculating width of the distal fall-off of the BP at the absolute or
+        The function calculates the width of the distal fall-off of the BP at the absolute or
         relative signal values using the Bortfeld fit. The relative value is calculated to the maximum
         value of the Bortfeld fit.
 
@@ -530,12 +530,12 @@ class braggPeak:
         return self.__getDFO(self.bpBort, Dup=Dup, Dlow=Dlow, percentD=percentD)
 
     def __getDFO(self, bp, Dup, Dlow, percentD):
-        """Calculate width of the distal fall-off of the BP at given signal level for image.
+        """Calculate the width of the distal fall-off of the BP at a given signal level for the image.
 
         Parameters
         ----------
         img : SimpleITK Image
-            Object of a SimpleITK image describing a profile.
+            An object of a SimpleITK image describing a profile.
         Dup : float
             Absolute or relative upper signal level.
         Dlow : float

@@ -16,11 +16,12 @@ import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 6, 79]
+version_info = [0, 7, 1]
 __version__ = ".".join(map(str, version_info))
 
 
 def _checkJupyterMode():
+    """Check if the FREDtools was loaded from jupyter"""
     try:
         if get_ipython().config["IPKernelApp"]:
             return True
@@ -133,7 +134,7 @@ def _isSITK_volume(img, raiseError=False):
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 3)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but not describing a volume. Size of 'img' is {img.GetSize()}")
+        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but does not describe a volume. Size of 'img' is {img.GetSize()}")
     return instanceBool
 
 
@@ -144,7 +145,7 @@ def _isSITK_timevolume(img, raiseError=False):
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 4)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but not describing a time volume. Size of 'img' is {img.GetSize()}")
+        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but does not describe a time volume. Size of 'img' is {img.GetSize()}")
     return instanceBool
 
 
@@ -155,7 +156,7 @@ def _isSITK_slice(img, raiseError=False):
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 2)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but not describing a slice. Size of 'img' is {img.GetSize()}")
+        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but does not describe a slice. Size of 'img' is {img.GetSize()}")
     return instanceBool
 
 
@@ -166,7 +167,7 @@ def _isSITK_profile(img, raiseError=False):
     instanceBool = img.GetSize().count(1) == (img.GetDimension() - 1)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but not describing a profile. Size of 'img' is {img.GetSize()}")
+        raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK image but does not describe a profile. Size of 'img' is {img.GetSize()}")
     return instanceBool
 
 
@@ -177,20 +178,66 @@ def _isSITK_point(img, raiseError=False):
     instanceBool = img.GetSize().count(1) == (img.GetDimension())
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK image but not describing a point. Size of 'img' is {img.GetSize()}")
+        raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK image but does not describe a point. Size of 'img' is {img.GetSize()}")
+    return instanceBool
+
+
+def _isSITK_maskBinary(img, raiseError=False):
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    ft._isSITK(img, raiseError=True)
+    stat = getStatistics(img)
+    instanceBool = (stat.GetMaximum() in [0, 1]) and (stat.GetMinimum() in [0, 1]) and (img.GetPixelID() == sitk.sitkUInt8)
+
+    if raiseError and not instanceBool:
+        raise TypeError(
+            f"The object '{type(img)}' is an instance of SimspleITK image but does not describe a binary mask. Binary mask image must be of type '8-bit unsigned integer' and contain only voxels with values 0 or 1."
+        )
+    return instanceBool
+
+
+def _isSITK_maskFloating(img, raiseError=False):
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    ft._isSITK(img, raiseError=True)
+    stat = getStatistics(img)
+    instanceBool = (stat.GetMaximum() <= 1) and (stat.GetMinimum() >= 0) and ((img.GetPixelID() == sitk.sitkFloat64) or (img.GetPixelID() == sitk.sitkFloat32))
+
+    if raiseError and not instanceBool:
+        raise TypeError(
+            f"The object '{type(img)}' is an instance of SimspleITK image but does not describe a floating mask. Floating mask image must be of type '32-bit float' or '64-bit float' and contain only voxels with values in range 0-1."
+        )
     return instanceBool
 
 
 def _isSITK_mask(img, raiseError=False):
     import fredtools as ft
+    import SimpleITK as sitk
 
     ft._isSITK(img, raiseError=True)
-    stat = getStatistics(img)
-    instanceBool = (stat.GetMaximum() in [0, 1]) and (stat.GetMinimum() in [0, 1]) and (img.GetPixelIDTypeAsString() == "8-bit unsigned integer")
+
+    instanceBool = _isSITK_maskBinary(img) or _isSITK_maskFloating(img)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK image but not describing a simple mask. Mask image should contain only voxels with values 0 and 1.")
+        raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK image but does not describe floating nor binary mask.")
     return instanceBool
+
+
+def _getMaskType(img):
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    ft._isSITK(img, raiseError=True)
+    ft._isSITK_mask(img, raiseError=True)
+
+    if _isSITK_maskBinary(img):
+        return "binary"
+    elif _isSITK_maskFloating(img):
+        return "floating"
+    else:
+        return "unknown"
 
 
 def _isSITK_vector(img, raiseError=False):
@@ -247,23 +294,3 @@ def ITK2SITK(imgITK):
     imgSITK.SetSpacing(list(imgITK.GetSpacing()))
     imgSITK.SetDirection(itk.GetArrayFromMatrix(imgITK.GetDirection()).flatten())
     return imgSITK
-
-
-def _getCPUNo(CPUNo="auto"):
-    r"""Determine number of CPU cores to be used for functions exploiting multiprocessing"""
-    from os import cpu_count
-    from numpy import isscalar
-
-    if not CPUNo:
-        return 1
-    elif isinstance(CPUNo, str):
-        if CPUNo.lower() in ["none", "non", "single", "one"]:
-            return 1
-        elif CPUNo.lower() in ["auto"]:
-            return cpu_count()
-        else:
-            raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognised. Only a scalar number or 'auto' or 'none' are possible.")
-    elif isscalar(CPUNo):
-        return CPUNo
-    else:
-        raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognised. Only a scalar number or 'auto' or 'none' are possible.")

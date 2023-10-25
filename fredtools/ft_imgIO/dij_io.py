@@ -5,7 +5,7 @@ def getDijFREDVectorImage(dijFileName, FNo=None, PBNo=None, returnOrder=False, r
     the FRED Monte Carlo to an instance of a SimpleITK vector image object.
     The default type of the SimpleITK vector image object is "float32". Each
     element of the vectors in voxels is a single pencil beam signal. By default,
-    all the pencil beams saved to Dij influence matrix are read, but the user can
+    all the pencil beams saved to the Dij influence matrix are read, but the user can
     ask for selected pencil beams (the field will be read automatically) or for
     all pencil beams for a given field or list of fields. See the Notes for more details.
     The order of the vectors is the order of the pencil beam's signal saved in
@@ -33,14 +33,14 @@ def getDijFREDVectorImage(dijFileName, FNo=None, PBNo=None, returnOrder=False, r
     Returns
     -------
     SimpleITK Vector Image (optionally with pandas DataFrame)
-        Object of a SimpleITK vector image, or SimpleITK Vector Image along with the pandas DataFtame
+        An object of a SimpleITK vector image, or SimpleITK Vector Image along with the pandas DataFtame
         describing the order of the pencil beams and fields.
 
     See Also
     --------
-        getDijFREDInfo : Get information from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDPoint : Get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDSumImage : Get FRED Dij image to a sum SimpleITK image object.
+        getDijFREDInfo : get information from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDPoint : get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDSumImage : get FRED Dij image to a sum SimpleITK image object.
 
     Notes
     -----
@@ -173,7 +173,7 @@ def getDijFREDSumImage(dijFileName, FNo=None, PBNo=None, weight=None, displayInf
     The function reads a Dij (influence matrix) file produced by
     the FRED Monte Carlo to an instance of a SimpleITK image object by summing
     the requested pencil beams with weights if requested. By default,
-    all the pencil beams saved to Dij influence matrix are read with the unitary weights
+    all the pencil beams saved to the Dij influence matrix are read with the unitary weights
     for all pencil beams, but the user can ask for selected pencil beams (the field will
     be read automatically) or for all pencil beams for a given field or list of fields.
     The weights can be provided as a single value for all pencil beams, for each pencil
@@ -199,9 +199,9 @@ def getDijFREDSumImage(dijFileName, FNo=None, PBNo=None, weight=None, displayInf
 
     See Also
     --------
-        getDijFREDInfo : Get information from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDPoint : Get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDVectorImage : Get a vector image from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDInfo : get information from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDPoint : get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDVectorImage : get a vector image from a Dij influence matrix produced by FRED Monte Carlo.
 
     Notes
     -----
@@ -377,13 +377,13 @@ def getDijFREDPoint(dijFileName, point, interpolation="linear", raiseMemError=Tr
     Returns
     -------
     NxP numpy array
-        Numpy array of shape NxP where N is the number of points and P is the number of pencil beams.
+        A Numpy array of shape NxP where N is the number of points and P is the number of pencil beams.
 
     See Also
     --------
-        getDijFREDInfo : Get information from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDVectorImage : Get a vector image from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDSumImage : Get FRED Dij image to a sum SimpleITK image object.
+        getDijFREDInfo : get information from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDVectorImage : get a vector image from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDSumImage : get FRED Dij image to a sum SimpleITK image object.
 
     Notes
     -----
@@ -494,9 +494,9 @@ def getDijFREDInfo(dijFileName, displayInfo=False):
 
     See Also
     --------
-        getDijFREDPoint : Get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDVectorImage : Get a vector image from a Dij influence matrix produced by FRED Monte Carlo.
-        getDijFREDSumImage : Get FRED Dij image to a sum SimpleITK image object.
+        getDijFREDPoint : get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDVectorImage : get a vector image from a Dij influence matrix produced by FRED Monte Carlo.
+        getDijFREDSumImage : get FRED Dij image to a sum SimpleITK image object.
     """
     import fredtools as ft
     import numpy as np

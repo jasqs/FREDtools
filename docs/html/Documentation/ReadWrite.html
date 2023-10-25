@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Reading and Writing &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>Image Reading and Writing &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -79,6 +79,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#fredtools.getRSInfo"><code class="docutils literal notranslate"><span class="pre">getRSInfo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fredtools.getExternalName"><code class="docutils literal notranslate"><span class="pre">getExternalName()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fredtools.getCT"><code class="docutils literal notranslate"><span class="pre">getCT()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getPET"><code class="docutils literal notranslate"><span class="pre">getPET()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRD"><code class="docutils literal notranslate"><span class="pre">getRD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.getRDFileNameForFieldNumber"><code class="docutils literal notranslate"><span class="pre">getRDFileNameForFieldNumber()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#other-formats">Other formats</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fredtools.readOPG"><code class="docutils literal notranslate"><span class="pre">readOPG()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -122,7 +129,7 @@
            <div itemprop="articleBody">
              
   <section id="image-reading-and-writing">
-<h1>Image Reading and Writing<a class="headerlink" href="#image-reading-and-writing" title="Permalink to this heading"></a></h1>
+<h1>Image Reading and Writing<a class="headerlink" href="#image-reading-and-writing" title="Link to this heading"></a></h1>
 <p>A collection of useful functions for reading and writing images are implemented. The supported image type are:</p>
 <ul class="simple">
 <li><p>MetaImage format in double (*.mhd+*.raw) or single files (only *.mhd),</p></li>
@@ -130,10 +137,10 @@
 <li><p>Dicom format (reading only) for 3D/2D images (e.g. dose distribution), Structures (i.e. RS*.dcm), Proton treatment plans (i.e. RN*.dcm or RP*.dcm) and CT images.</p></li>
 </ul>
 <section id="metaimage-files-mhd-mha">
-<h2>MetaImage files (*.mhd, *.mha)<a class="headerlink" href="#metaimage-files-mhd-mha" title="Permalink to this heading"></a></h2>
+<h2>MetaImage files (*.mhd, *.mha)<a class="headerlink" href="#metaimage-files-mhd-mha" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readMHD">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readMHD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readMHD" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readMHD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readMHD" title="Link to this definition"></a></dt>
 <dd><p>Read MetaImage image to SimpleITK image object.</p>
 <p>The function reads a single MetaImage file or an iterable of MetaImage files
 and creates an instance or tuple of instances of a SimpleITK object.</p>
@@ -162,10 +169,10 @@ and creates an instance or tuple of instances of a SimpleITK object.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.writeMHD">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeMHD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">singleFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">useCompression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressionLevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeMHD" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeMHD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">singleFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">useCompression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressionLevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeMHD" title="Link to this definition"></a></dt>
 <dd><p>Write image to MetaImage format.</p>
-<p>The function writes a SimpleITK image object to MetaImage file. The function
-extends the functionality of SimpleITK.WriteImage() to write also a single file
+<p>The function writes a SimpleITK image object to the MetaImage file. The function
+extends the functionality of SimpleITK.WriteImage() to write a single file
 MetaImage instead of standard two-files MHD+RAW. It is recommended to use *.mhd
 extension when saving MetaImage.</p>
 <dl class="field-list simple">
@@ -174,10 +181,10 @@ extension when saving MetaImage.</p>
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
 <li><p><strong>filePath</strong> (<em>path</em>) – Path to file to be saved.</p></li>
 <li><p><strong>singleFile</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the MHD is a single file of two files MHD+RAW. (def. True)</p></li>
-<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Overwrite the file if it exists. Otherwise raise an error. (def. True)</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Overwrite the file if it exists, otherwise, raise an error. (def. True)</p></li>
 <li><p><strong>useCompression</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if a compression will be used when saving the file. (def. False)</p></li>
 <li><p><strong>compressionLevel</strong> (<em>unsigned int</em><em>, </em><em>optional</em>) – Determine the compression level. For MHD files, the compression level
-above 10 does not make any effect. (def. 5)</p></li>
+above 10 does not have any effect. (def. 5)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -193,7 +200,7 @@ above 10 does not make any effect. (def. 5)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.convertMHDtoSingleFile">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">convertMHDtoSingleFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.convertMHDtoSingleFile" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">convertMHDtoSingleFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.convertMHDtoSingleFile" title="Link to this definition"></a></dt>
 <dd><p>Convert two-files MetaImage to two-files.</p>
 <p>The function reads a MetaImage file (two- or single-file) and saves it as
 a single file MetaImage (only *.mhd) with the same file name.</p>
@@ -218,7 +225,7 @@ a single file MetaImage (only *.mhd) with the same file name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.convertMHDtoDoubleFiles">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">convertMHDtoDoubleFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.convertMHDtoDoubleFiles" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">convertMHDtoDoubleFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.convertMHDtoDoubleFiles" title="Link to this definition"></a></dt>
 <dd><p>Convert single file MetaImage to double- file.</p>
 <p>The function reads a MetaImage file (two- or single-file) and saves it as
 a two-file file MetaImage (*.mhd+*.raw) with the same file name.</p>
@@ -243,14 +250,14 @@ a two-file file MetaImage (*.mhd+*.raw) with the same file name.</p>
 
 </section>
 <section id="map3d-images-m3d">
-<h2>Map3D images (*.m3d)<a class="headerlink" href="#map3d-images-m3d" title="Permalink to this heading"></a></h2>
+<h2>Map3D images (*.m3d)<a class="headerlink" href="#map3d-images-m3d" title="Link to this heading"></a></h2>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>The Map3D file format is obsolete and it is not recommended to be used to store the image data. Use MetaImage file format instead.</p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readMap3D">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readMap3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readMap3D" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readMap3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readMap3D" title="Link to this definition"></a></dt>
 <dd><p>Read image from Map3D file format.</p>
 <p>The function reads a Map3D file to a SimpleITK image object. The Map3D file
 format is an obsolete format used by the FRED Monte Carlo engine and the implementation
@@ -282,7 +289,7 @@ of reading images from files in this format was maintained here for compatibilit
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.writeMap3D">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeMap3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeMap3D" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeMap3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeMap3D" title="Link to this definition"></a></dt>
 <dd><p>Write image to Map3D file format.</p>
 <p>The function writes a SimpleITK image object to Map3D file. This format is
 an obsolete format used by the FRED Monte Carlo engine and the implementation
@@ -309,10 +316,10 @@ recommended to use *.m3d extension when saving Map3D.</p>
 
 </section>
 <section id="dicom-files-dcm-dicom">
-<h2>DICOM files (*.dcm, *.dicom)<a class="headerlink" href="#dicom-files-dcm-dicom" title="Permalink to this heading"></a></h2>
+<h2>DICOM files (*.dcm, *.dicom)<a class="headerlink" href="#dicom-files-dcm-dicom" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getDicomTypeName">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDicomTypeName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dicomVar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDicomTypeName" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDicomTypeName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dicomVar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDicomTypeName" title="Link to this definition"></a></dt>
 <dd><p>Check the type of the dicom given as a path or tags.</p>
 <p>The function return the name of the SOP Class UID tag of a dicom
 file given as a file name or dicom tags. The description of the
@@ -349,7 +356,7 @@ by pydicom.read_file.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.sortDicoms">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sortDicoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searchFolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sortDicoms" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sortDicoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searchFolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sortDicoms" title="Link to this definition"></a></dt>
 <dd><p>Sort dicom file names found in the search folder for CT, RS, RN, RD and Unknown.</p>
 <p>The function sorts file names found in the <cite>searchFolder</cite>
 (and subfolders if requested) for:</p>
@@ -359,6 +366,7 @@ by pydicom.read_file.</p>
 <li><p>RS - dicom files of RT Structure Set Storage</p></li>
 <li><p>RN - dicom files of RT Plan Storage (“RT Plan Storage” or “RT Ion Plan Storage”)</p></li>
 <li><p>RD - dicom files of 1D/2D/3D RT Dose Storage (for instance dose distribution)</p></li>
+<li><p>PET - dicom files of PET Image Storage (“Positron Emission Tomography Image Storage”)</p></li>
 <li><p>Unknown - files with *.dcm extension that were not recognized.</p></li>
 </ul>
 </div></blockquote>
@@ -381,7 +389,7 @@ by pydicom.read_file.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getRNMachineName">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNMachineName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNMachineName" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNMachineName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNMachineName" title="Link to this definition"></a></dt>
 <dd><p>Get the machine name defined in the RN plan.</p>
 <p>The function retrieves the machine name defined in the RN dicom file.</p>
 <dl class="field-list simple">
@@ -401,9 +409,9 @@ by pydicom.read_file.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get summary of parameters for each field defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get a summary of parameters for each field defined in the RN plan.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get summary of parameters for each spot defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get a summary of parameters for each spot defined in the RN plan.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.getRNInfo" title="fredtools.getRNInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNInfo</span></code></a></dt><dd><p>get some basic information from the RN plan.</p>
 </dd>
@@ -413,10 +421,10 @@ by pydicom.read_file.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getRNIsocenter">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNIsocenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNIsocenter" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNIsocenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNIsocenter" title="Link to this definition"></a></dt>
 <dd><p>Get the isocenter position defined in the RN plan.</p>
 <p>The function retrieves the isocenter position defined in the RN dicom file.
-The isocenter is defined for each field separately but usually it is the same
+The isocenter is defined for each field separately but usually, it is the same
 for all fields. If it is not the same then a warning is raised and a geometrical
 center is returned.</p>
 <dl class="field-list simple">
@@ -436,9 +444,9 @@ center is returned.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get summary of parameters for each field defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get a summary of parameters for each field defined in the RN plan.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get summary of parameters for each spot defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get a summary of parameters for each spot defined in the RN plan.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.getRNInfo" title="fredtools.getRNInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNInfo</span></code></a></dt><dd><p>get some basic information from the RN plan.</p>
 </dd>
@@ -448,7 +456,7 @@ center is returned.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getRNInfo">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNInfo" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNInfo" title="Link to this definition"></a></dt>
 <dd><p>Get some information from the RN plan.</p>
 <p>The function retrieves some useful information from a RN dicom of a treatment plan.
 Following information are saved to a dictionary:</p>
@@ -491,9 +499,9 @@ Following information are saved to a dictionary:</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get summary of parameters for each field defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get a summary of parameters for each field defined in the RN plan.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get summary of parameters for each spot defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get a summary of parameters for each spot defined in the RN plan.</p>
 </dd>
 </dl>
 </div>
@@ -507,10 +515,10 @@ multiplied by the number of fractions.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getRNFields">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNFields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNFields" title="Permalink to this definition"></a></dt>
-<dd><p>Get parameters of each field defined in the RN file.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNFields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNFields" title="Link to this definition"></a></dt>
+<dd><p>Get the parameters of each field defined in the RN file.</p>
 <p>The function retrieves information for each field defined in the RN dicom file.
-A consistency check is performed to check correctness of the parameters written
+A consistency check is performed to check the correctness of the parameters written
 in the RN dicom file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -530,7 +538,7 @@ in the RN dicom file.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get summary of parameters for each spot defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNSpots" title="fredtools.getRNSpots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNSpots</span></code></a></dt><dd><p>get a summary of parameters for each spot defined in the RN plan.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.getRNInfo" title="fredtools.getRNInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNInfo</span></code></a></dt><dd><p>get some basic information from the RN plan.</p>
 </dd>
@@ -540,13 +548,16 @@ in the RN dicom file.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getRNSpots">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNSpots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNSpots" title="Permalink to this definition"></a></dt>
-<dd><p>Get parameters of each spot defined in the RN file.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRNSpots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRNSpots" title="Link to this definition"></a></dt>
+<dd><p>Get the parameters of each spot defined in the RN file.</p>
 <p>The function retrieves information for each spot defined in the RN dicom file.
 All spots are listed in the results, including the spots with zero meterset weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>fileName</strong> (<em>path</em>) – Path to RN dicom file.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileName</strong> (<em>path</em>) – Path to RN dicom file.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>DataFrame with the spots’ parameters.</p>
@@ -558,7 +569,7 @@ All spots are listed in the results, including the spots with zero meterset weig
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get summary of parameters for each field defined in RN plan.</p>
+<dt><a class="reference internal" href="#fredtools.getRNFields" title="fredtools.getRNFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNFields</span></code></a></dt><dd><p>get a summary of parameters for each field defined in the RN plan.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.getRNInfo" title="fredtools.getRNInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRNInfo</span></code></a></dt><dd><p>get some basic information from the RN plan.</p>
 </dd>
@@ -568,9 +579,9 @@ All spots are listed in the results, including the spots with zero meterset weig
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getRSInfo">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRSInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRSInfo" title="Permalink to this definition"></a></dt>
-<dd><p>Get some information from the RS structures from RS dicom file.</p>
-<p>The function retrieves some basic information about structures from a RS dicom file.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRSInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRSInfo" title="Link to this definition"></a></dt>
+<dd><p>Get some information from the RS structures from the RS dicom file.</p>
+<p>The function retrieves some basic information about structures from an RS dicom file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -589,9 +600,9 @@ All spots are listed in the results, including the spots with zero meterset weig
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getExternalName">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getExternalName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getExternalName" title="Permalink to this definition"></a></dt>
-<dd><p>Get name of the EXTERNAL structure from RS dicom file.</p>
-<p>The function retrieves the name of the structure of type EXTERNAL from a RS dicom file.
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getExternalName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getExternalName" title="Link to this definition"></a></dt>
+<dd><p>Get the name of the EXTERNAL structure from RS dicom file.</p>
+<p>The function retrieves the name of the structure of type EXTERNAL from an RS dicom file.
 If more than one structure of type EXTERNAL exists in the RS dicom file, then the first one is returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -610,7 +621,7 @@ If more than one structure of type EXTERNAL exists in the RS dicom file, then th
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getRSInfo" title="fredtools.getRSInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRSInfo</span></code></a></dt><dd><p>getting information about all structures on a RS dicom file.</p>
+<dt><a class="reference internal" href="#fredtools.getRSInfo" title="fredtools.getRSInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRSInfo</span></code></a></dt><dd><p>getting information about all structures on the RS dicom file.</p>
 </dd>
 </dl>
 </div>
@@ -618,11 +629,11 @@ If more than one structure of type EXTERNAL exists in the RS dicom file, then th
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getCT">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getCT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getCT" title="Permalink to this definition"></a></dt>
-<dd><p>Get image from dicom series.</p>
-<p>The function reads a series of dicom files and creates an instance
-of a SimpleITK object. The dicom files should come from the same Series
-and have the same frame of reference.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getCT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getCT" title="Link to this definition"></a></dt>
+<dd><p>Get a CT image from dicom series.</p>
+<p>The function reads a series of dicom files containing a CT scan
+and creates an instance of a SimpleITK object. The dicom files
+should come from the same Series and have the same frame of reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -631,7 +642,7 @@ and have the same frame of reference.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a SimpleITK image of sitk.sitkInt16 (int16) type.</p>
+<dd class="field-even"><p>An object of a SimpleITK image of sitk.sitkInt16 (int16) type.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -644,6 +655,116 @@ and have the same frame of reference.</p>
 </dd>
 </dl>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getPET">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getPET</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SUV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getPET" title="Link to this definition"></a></dt>
+<dd><p>Get a PET image from dicom series.</p>
+<p>The function reads a series of dicom files containing a PET scan
+and creates an instance of a SimpleITK object. The dicom files
+should come from the same Series and have the same frame of reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileNames</strong> (<em>array_like</em>) – An iterable (list, tuple, etc.) of paths to dicoms.</p></li>
+<li><p><strong>SUV</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the image should be recalculated with
+the Standardized Uptake Value (SUV). (def. True)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An object of a SimpleITK image of 16-bit integer type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.sortDicoms" title="fredtools.sortDicoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sortDicoms</span></code></a></dt><dd><p>get names of dicoms in a folder sorted by the dicom type.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getRD">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRD" title="Link to this definition"></a></dt>
+<dd><p>Get an image from dicom.</p>
+<p>The function reads a single dicom file or an iterable of dicom files
+and creates an instance or tuple of instances of a SimpleITK object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileNames</strong> (<em>string</em><em> or </em><em>array_like</em>) – A path or an iterable (list, tuple, etc.) of paths to dicoms.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An Object or tuple of objects of a SimpleITK image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image or tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.sortDicoms" title="fredtools.sortDicoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sortDicoms</span></code></a></dt><dd><p>get names of dicoms in a folder sorted by the dicom type.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getRDFileNameForFieldNumber">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getRDFileNameForFieldNumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fieldNumber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getRDFileNameForFieldNumber" title="Link to this definition"></a></dt>
+<dd><p>Get the file name of the RD dose dicom of for the given field number.</p>
+<p>The function searches for the RD dose dicom file for a given
+field number (beam number) and returns its file name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileNames</strong> (<em>array_like</em>) – An iterable (list, tuple, etc.) of paths to RD dicoms.</p></li>
+<li><p><strong>fieldNumber</strong> (<em>scalar</em><em>, </em><em>int</em>) – Field number to find the dicom for.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the RD dose file for the given beam number.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="other-formats">
+<h2>Other formats<a class="headerlink" href="#other-formats" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.readOPG">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readOPG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readOPG" title="Link to this definition"></a></dt>
+<dd><p>Read OPG files from OmniPro software.</p>
+<p>The function reads a single OPG file exported from OmniPro software (IBA)
+and creates an instance of a SimpleITK object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileName</strong> (<em>string</em>) – A path to OPG file.</p></li>
+<li><p><strong>depth</strong> (<em>scalar</em><em>, </em><em>optional</em>) – A scalar defining the depth of 3D image. Usually, it is the depth of the measurement. (def. 0)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An object a SimpleITK image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

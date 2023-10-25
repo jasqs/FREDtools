@@ -1,6 +1,3 @@
-from matplotlib.pyplot import sca
-
-# constant values
 re_number = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
 
 
@@ -18,14 +15,14 @@ def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo=Fa
         Path string where the merged PDF will be saved.
     removeSource : bool, optional
         Determine if the source PDF files should be
-        removed after merge. (def. False)
+        removed after the merge. (def. False)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     mergedPDFFileName
-        Absolute path string where the merged PDF was be saved.
+        Absolute path string where the merged PDF will be saved.
     """
     import fitz  # from pymupdf
     import os
@@ -69,14 +66,14 @@ def getGIcmap(maxGI, N=256):
     The function creates a colormap for Gamma Index (GI) images,
     that can be used by matplotlib.pyplot.imshow function for
     displaying 2D images. The colormap is created from 0 to
-    the `maxGI` value, whereas from 0 to 1 (GI test passed) the colour
-    is changing from dark blue to white, and from 1 to `maxGI` it is
-    changing from light red to red.
+    the `maxGI` value, whereas from 0 to 1 (GI test passed) the color
+    changes from dark blue to white, and from 1 to `maxGI` it changes
+    from light red to red.
 
     Parameters
     ----------
     maxGI : scalar
-        Maximum value of the colormap.
+        The maximum value of the colormap.
     N : scalar, optional
         Number of segments of the colormap. (def. 256)
 
@@ -87,12 +84,12 @@ def getGIcmap(maxGI, N=256):
 
     See Also
     --------
-        calcGammaIndex: calculate Gamma Index for two images.
+        calcGammaIndex: calculate the Gamma Index for two images.
 
     Examples
     --------
     It is assumed that the img is an image describing a slice
-    of Gamma Index (GI) values calculate up to maximum value 3.
+    of Gamma Index (GI) values calculated up to maximum value 3.
     To plot the GI map with the GI colormap:
 
     >>> plt.imshow(ft.arr(img), cmap=getGIcmap(maxGI=3))
@@ -142,19 +139,19 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
     bins : 1D array_like, optional
         1D array-like iterable with the bins' edges to calculate histogram.
         If none, then the bins will be generated automatically between
-        minimum and maximum value of `dataX` in 100 steps linearly. (def. None)
+        the minimum and maximum value of `dataX` in 100 steps linearly. (def. None)
     kind : {'mean', 'sum', 'std', 'median', 'min', 'max', 'mean-std', 'mean+std'}, optional
         Determine the `dataY` quantity evaluation for a differential histogram.
         It can be: mean, standard deviation, median, minimum, maximum, sum
         value or mean +/- standard deviation. (def. 'mean')
     returnBinCenters : bool, optional
-        Determine if the first element of returned list is going to
-        be the bin centres (True) or bin edges (False). (def. True)
+        Determine if the first element of the returned list is going to
+        be the bin centers (True) or bin edges (False). (def. True)
 
     Returns
     -------
     List of two ndarrays
-        Two-element tuple of 1D numpy ndarrays, where the first element
+        A two-element tuple of 1D numpy ndarrays, where the first element
         is a list of bin centres (or edges) and the second is a list of
         histogram values.
     """
@@ -301,8 +298,8 @@ def pdfLandauGauss(x, mpv, xi, sigma=0, amp=1):
     """Probability density function (PDF) of Landau convoluted with a Gaussian.
 
     The function generates a Landau convoluted with a Gaussian probability density with a given
-    most probable value of the convoluted function (`mpv`), width of Landau (described with `xi`),
-    standard deviation of gaussian and amplitude at `mpv`. It was adapted from [3]_ which was implemented
+    most probable value of the convoluted function (`mpv`), the width of Landau (described with `xi`),
+    the standard deviation of Gaussian and amplitude at `mpv`. It was adapted from [3]_ which was implemented
     based on the ROOT implementation. See [4]_ for more details.
 
     Parameters
@@ -314,14 +311,14 @@ def pdfLandauGauss(x, mpv, xi, sigma=0, amp=1):
     xi : float
         Parameter 'xi' of the Landau distribution, it is a measure of its width.
     sigma : scalar, optional
-        Standard deviation of the gaussian distribution. (def. 0)
+        Standard deviation of the Gaussian distribution. (def. 0)
     amp : scalar, optional
         Amplitude of the PDF at MPV. (def. 1)
 
     Returns
     -------
     scalar or numpy array
-        Single value or array of values of the Landau convoluted with gaussian PDF.
+        Single value or array of values of the Landau convoluted with Gaussian PDF.
 
     See Also
     --------
@@ -329,8 +326,8 @@ def pdfLandauGauss(x, mpv, xi, sigma=0, amp=1):
 
     Notes
     -----
-    The 'mpv' parameter dose not describe the MPV of the landau distribution but the MPV,
-    i.e the position of the maximum value, of the whole Landau-gauss convoluted PDF.
+    The 'mpv' parameter does not describe the MPV of the landau distribution but the MPV,
+    i.e. the position of the maximum value, of the whole Landau-gauss convoluted PDF.
 
     References
     ----------
@@ -394,7 +391,7 @@ def fitLandau(x, y, fixAmplitude=False):
     y : array_like
         `Y` values.
     fixAmplitude : bool, optional
-        determine if the `amp` parameter of the PDF should be used in the fiting.
+        determine if the `amp` parameter of the PDF should be used in the fitting.
 
     Returns
     -------
@@ -428,9 +425,9 @@ def fitLandau(x, y, fixAmplitude=False):
 
 
 def fitLandauGauss(x, y, fixAmplitude=False):
-    """Fit Landau convoluted with gaussian distribution.
+    """Fit Landau convoluted with Gaussian distribution.
 
-    The function fits Landau convoluted with gaussian distribution
+    The function fits Landau convoluted with Gaussian distribution
     to the data given as `x` and `y` values, using the least square algorithm.
 
     Parameters
@@ -440,7 +437,7 @@ def fitLandauGauss(x, y, fixAmplitude=False):
     y : array_like
         `Y` values.
     fixAmplitude : bool, optional
-        determine if the `amp` parameter of the PDF should be used in the fiting.
+        determine if the `amp` parameter of the PDF should be used in the fitting.
 
     Returns
     -------
@@ -483,7 +480,7 @@ def pdfVavilov(x, mpv, kappa, beta, scaling, amp=1):
     `beta` and `scaling` parameters. It uses the implementation of pyamtrack library [5]_
     that adopts the ROOT implementation [6]_. The implemented PDF is not a true Vavilov distribution
     and the `scaling` parameter is not included in the original ROOT implementation. Therefore, the parameters
-    `kappa` and `beta` might not describe the the real kappa and beta parameters of the ROOT Vavilov.
+    `kappa` and `beta` might not describe the real kappa and beta parameters of the ROOT Vavilov.
     Nevertheless, the PDF can be used for fitting the distribution to the measurement data
     and to retrieve the MPV but the user must be aware that, for instance, the energy calculated based on
     the `beta` parameter might be wrong.
@@ -574,8 +571,8 @@ def pdfVavilov(x, mpv, kappa, beta, scaling, amp=1):
 def fitVavilov(x, y, beta0=0.5, kappa0=0.3, scaling0=-1, fixAmplitude=False):
     """Fit Vavilov distribution.
 
-    The function fits Vavilov distribution to the data given as `x` and `y` values,
-    using the least square algorithm. The fiting routine is sensitive for the initial
+    The function fits the Vavilov distribution to the data given as `x` and `y` values,
+    using the least square algorithm. The fitting routine is sensitive to the initial
     values of kappa, beta and scaling. Therefore, the results should be always validated
     and different initial values of the parameters can be used if needed.
 
@@ -586,7 +583,7 @@ def fitVavilov(x, y, beta0=0.5, kappa0=0.3, scaling0=-1, fixAmplitude=False):
     y : array_like
         `Y` values.
     fixAmplitude : bool, optional
-        determine if the `amp` parameter of the PDF should be used in the fiting.
+        determine if the `amp` parameter of the PDF should be used in the fitting.
     beta0 : scalar, optional
         Initial value of `beta` parameter. (def. 0.5)
     kappa0 : scalar, optional
@@ -632,7 +629,7 @@ def fitVavilov(x, y, beta0=0.5, kappa0=0.3, scaling0=-1, fixAmplitude=False):
 def sigma2fwhm(sigma):
     """Convert sigma to FWHM.
 
-    The function recalculates sigma parameter of a Gaussian distribution
+    The function recalculates the sigma parameter of a Gaussian distribution
     to full width at half maximum (FWHM).
 
     Parameters
@@ -749,3 +746,38 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
         raise AttributeError(f"Unrecognized kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
 
     return lineIdx, lineString
+
+
+def getCPUNo(CPUNo="auto"):
+    """Get a number of CPU cores.
+
+    The function returns the number of CPU cores. Usually, it is used in functions utilizing
+    multiprocessing.
+
+    Parameters
+    ----------
+    CPUNo : {'auto', 'one'} or integer, optional
+        A string of 'auto' or "one" for all the available CPU cores or a single one, respectively,
+        or a positive integer showing the number of CPU cores. (def. 'auto')
+
+    Returns
+    -------
+    integer
+        Number of CPU cores.
+    """
+    from os import cpu_count
+    from numpy import isscalar
+
+    if not CPUNo:
+        return 1
+    elif isinstance(CPUNo, str):
+        if CPUNo.lower() in ["none", "non", "single", "one"]:
+            return 1
+        elif CPUNo.lower() in ["auto"]:
+            return cpu_count()
+        else:
+            raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognized. Only a scalar number or 'auto' or 'none' are possible.")
+    elif isscalar(CPUNo):
+        return CPUNo
+    else:
+        raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognized. Only a scalar number or 'auto' or 'none' are possible.")

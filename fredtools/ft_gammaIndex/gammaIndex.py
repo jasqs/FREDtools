@@ -3,24 +3,24 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
     defined SimpleITK image objects, as the reference and evaluation images, respectively.
-    The gamma index test is performed with defined dose distance (DD) given in [%],
+    The gamma index test is performed with a defined dose distance (DD) given in [%],
     distance to agreement (DTA) given in the same length unit as the reference image
     (in [mm] by default) and is calculated for the dose values greater or equal than
     a fraction of the maximum dose in the reference image, given by the DCO parameter.
-    The gamma index can be calculated for `local` or `global` dose difference in tho modes:
+    The gamma index can be calculated for `local` or `global` dose difference in two modes:
 
         -  *gamma*: each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.
         -  *pass-rate*: each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
-    The gamma index calculation is performed by an external C++ library complied as a linux shared library.
+    The gamma index calculation is performed by an external C++ library complied as a Linux shared library.
     The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys [1]_ python library.
 
     Parameters
     ----------
     imgRef : SimpleITK Image
-        Object of a SimpleITK 2D or 3D image describing the reference.
+        An object of a SimpleITK 2D or 3D image describing the reference.
     imgEval : SimpleITK Image
-        Object of a SimpleITK 2D or 3D image describing the evaluation.
+        An object of a SimpleITK 2D or 3D image describing the evaluation.
     DD : float
         Dose distance in [%].
     DTA : float
@@ -53,14 +53,14 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
         Define if the multiprocessing should be used and how many cores should
         be exploited. Can be None, then no multiprocessing will be used,
         a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cored to be used. (def. 'auto')
+        or a scalar defining the number of CPU cores to be used. (def. 'auto')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     SimpleITK Image
-        Object of a SimpleITK image describing the gamma index. It is of float or integer
+        An object of a SimpleITK image describing the gamma index. It is of float or integer
         type when the calculation mode is 'gamma' or 'pass-rate', respectively.
 
     Raises
@@ -137,7 +137,7 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
         raise ValueError(f"Calculation mode must be a string and only 'gamma' or 'pass-rate' are supported.")
 
     # validate CPUNo or get it automatically if requested
-    CPUNo = ft._getCPUNo(CPUNo)
+    CPUNo = ft.getCPUNo(CPUNo)
 
     # load, init and reset shared library
     if sys.platform == "linux" or sys.platform == "linux2":
@@ -277,7 +277,7 @@ def getGIstat(imgGI, displayInfo=False):
     """Get statistics of Gamma Index.
 
     The function calculates Gamma Index statistics from an image defined
-    as a SimpleITK image object. Tho modes of the gamma index calculation
+    as a SimpleITK image object. Two modes of the gamma index calculation
     are recognized automatically based on the image type:
 
         -  *gamma* (float): each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1 or numpy.nan.
@@ -286,7 +286,7 @@ def getGIstat(imgGI, displayInfo=False):
     Parameters
     ----------
     imgGI : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -297,7 +297,7 @@ def getGIstat(imgGI, displayInfo=False):
 
     See Also
     --------
-    calcGammaIndex : calculate Gamma Index map for two images.
+    calcGammaIndex : calculate the Gamma Index map for two images.
     """
     import fredtools as ft
     import numpy as np
@@ -307,7 +307,7 @@ def getGIstat(imgGI, displayInfo=False):
     if np.issubdtype(arrGI.dtype, np.integer):
         if not set(np.unique(arrGI)).issubset(set([-1, 0, 1])):
             raise ValueError(
-                f"The calculation mode was recognised as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0 , 1] unique values and the uniques are {np.unique(arrGI)}"
+                f"The calculation mode was recognized as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0, 1] unique values and the uniques are {np.unique(arrGI)}"
             )
         mode = "pass-rate"
         GIstat["passRate"] = (arrGI == 1).sum() / (arrGI >= 0).sum() * 100

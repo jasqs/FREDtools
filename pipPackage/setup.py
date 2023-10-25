@@ -52,13 +52,13 @@ os.system("pipreqs ./../fredtools/ --force --mode gt")
 with open("./../fredtools/requirements.txt", "r") as req_h:
     requirements = req_h.readlines()
 # remove some dependencies
-requirements = [req for req in requirements if 'fitz' not in req]
-requirements = [req for req in requirements if 'fredtools' not in req]
-requirements = [req for req in requirements if 'itk_io' not in req]
-requirements = [req for req in requirements if 'numpy' not in req]
-requirements = [req for req in requirements if 'pyamtrack' not in req]
-requirements = [req for req in requirements if 'ipython' not in req]
-requirements = [req for req in requirements if 'scipy' not in req]
+# requirements = [req for req in requirements if 'fitz' not in req]
+# requirements = [req for req in requirements if 'fredtools' not in req]
+# requirements = [req for req in requirements if 'itk_io' not in req]
+# requirements = [req for req in requirements if 'numpy' not in req]
+# requirements = [req for req in requirements if 'pyamtrack' not in req]
+# requirements = [req for req in requirements if 'ipython' not in req]
+# requirements = [req for req in requirements if 'scipy' not in req]
 
 
 # configure setuptools
@@ -79,7 +79,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8,<4.0',
+    python_requires='>=3.10,<4.0',
     package_data={'fredtools.ft_gammaIndex': ['libFredGI.so']},
     install_requires=requirements,
     scripts=[]

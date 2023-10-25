@@ -23,4 +23,6 @@ A collection of useful functions for Monte Carlo simulations.
 
 .. autofunction:: fredtools.readGATE_HITSActor
 
+.. autofunction:: fredtools.readGATE_PSActor
+
 .. autofunction:: fredtools.readGATEStat

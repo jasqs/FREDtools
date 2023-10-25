@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>Monte Carlo simulation tools &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -76,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getFREDVersion"><code class="docutils literal notranslate"><span class="pre">getFREDVersion()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.runFRED"><code class="docutils literal notranslate"><span class="pre">runFRED()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.readGATE_HITSActor"><code class="docutils literal notranslate"><span class="pre">readGATE_HITSActor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.readGATE_PSActor"><code class="docutils literal notranslate"><span class="pre">readGATE_PSActor()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.readGATEStat"><code class="docutils literal notranslate"><span class="pre">readGATEStat()</span></code></a></li>
 </ul>
 </li>
@@ -108,14 +109,14 @@
            <div itemprop="articleBody">
              
   <section id="monte-carlo-simulation-tools">
-<h1>Monte Carlo simulation tools<a class="headerlink" href="#monte-carlo-simulation-tools" title="Permalink to this heading"></a></h1>
+<h1>Monte Carlo simulation tools<a class="headerlink" href="#monte-carlo-simulation-tools" title="Link to this heading"></a></h1>
 <p>A collection of useful functions for Monte Carlo simulations.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.setFieldsFolderStruct">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setFieldsFolderStruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folderPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RNfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folderName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FRED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setFieldsFolderStruct" title="Permalink to this definition"></a></dt>
-<dd><p>Create folder structure for each field in treatment plan.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setFieldsFolderStruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folderPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RNfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folderName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FRED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setFieldsFolderStruct" title="Link to this definition"></a></dt>
+<dd><p>Create a folder structure for each field in the treatment plan.</p>
 <p>The function creates a folder structure in a given <cite>folderPath</cite> for each field separately.
-The folder structure is in form:</p>
+The folder structure is in the form:</p>
 <blockquote>
 <div><p>folderPath/folderName:</p>
 <blockquote>
@@ -130,7 +131,7 @@ and the number after <cite>Field</cite> is the ID of the field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>folderPath</strong> (<em>path</em>) – Path to folder to create the structure.</p></li>
+<li><p><strong>folderPath</strong> (<em>path</em>) – Path to a folder to create the structure.</p></li>
 <li><p><strong>RNfileName</strong> (<em>path</em>) – Path to RN dicom file of a treatment plan.</p></li>
 <li><p><strong>folderName</strong> (<em>string</em><em>, </em><em>optional</em>) – Name of the folder to create. (def. ‘FRED’)</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the folder should be overwritten.
@@ -150,10 +151,10 @@ removed. (def. False)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readFREDStat">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readFREDStat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNameLogOut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readFREDStat" title="Permalink to this definition"></a></dt>
-<dd><p>Read FRED simulation statistics information from logfile.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readFREDStat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNameLogOut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readFREDStat" title="Link to this definition"></a></dt>
+<dd><p>Read FRED simulation statistics information from the log file.</p>
 <p>The function reads some statistics information from a FRED run.out logfile.
-If some information os not available, then a NaN or numpy.nan is returned.</p>
+If some information is not available, then a NaN or numpy.nan is returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -172,7 +173,7 @@ If some information os not available, then a NaN or numpy.nan is returned.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.writeBeamModel">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeBeamModel" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">writeBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.writeBeamModel" title="Link to this definition"></a></dt>
 <dd><p>Write beam model to YAML.</p>
 <p>The function writes the beam model parameters to a beam model file in YAML format.
 The beam model must be defined as a dictionary at least including keys:</p>
@@ -192,13 +193,13 @@ The beam model must be defined as a dictionary at least including keys:</p>
 <li><p>“BM Materials”: a dictionary of the materials and its parameters, like density, composition, etc.</p></li>
 </ul>
 </div></blockquote>
-<p>Also other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
-it will be saved to a nicely formated table.</p>
+<p>Additionally, other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
+it will be saved to a nicely formatted table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>beamModel</strong> (<em>dict</em>) – Beam model defined as a dictionary with the required keys.</p></li>
-<li><p><strong>fileName</strong> (<em>string</em>) – A string path to beam model YAML file. It is recommended to use .bm file extention.</p></li>
+<li><p><strong>fileName</strong> (<em>string</em>) – A string path to beam model YAML file. It is recommended to use .bm file extension.</p></li>
 </ul>
 </dd>
 </dl>
@@ -215,7 +216,7 @@ it will be saved to a nicely formated table.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readBeamModel">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readBeamModel" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readBeamModel" title="Link to this definition"></a></dt>
 <dd><p>Read beam model from a YAML file.</p>
 <p>The function reads the beam model parameters from a YAML beam model file.
 The beam model must be defined as a dictionary at least including keys:</p>
@@ -235,7 +236,7 @@ The beam model must be defined as a dictionary at least including keys:</p>
 <li><p>“BM Materials”: a dictionary of the materials and its parameters, like density, composition, etc.</p></li>
 </ul>
 </div></blockquote>
-<p>Also other parameters can be defined.</p>
+<p>Additionally, other parameters can be defined.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>fileName</strong> (<em>string</em>) – A string path to beam model YAML file.</p>
@@ -260,7 +261,7 @@ The beam model must be defined as a dictionary at least including keys:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.interpolateBeamModel">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">interpolateBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nomEnergy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.interpolateBeamModel" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">interpolateBeamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nomEnergy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.interpolateBeamModel" title="Link to this definition"></a></dt>
 <dd><p>Interpolate beam model for a given nominal energy.</p>
 <p>The function interpolates all the beam model parameters for a given nominal energies
 which must be in range of the defined nominal energies in the beam model. The possible
@@ -286,7 +287,7 @@ interpolation methods are ‘nearest’, ‘linear’ or ‘spline’ with order
 <dl class="simple">
 <dt><a class="reference internal" href="#fredtools.readBeamModel" title="fredtools.readBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readBeamModel</span></code></a></dt><dd><p>read beam model from CSV beam model file.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.writeBeamModel" title="fredtools.writeBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">writeBeamModel</span></code></a></dt><dd><p>write beam model from DataFrame to a nicely formated CSV.</p>
+<dt><a class="reference internal" href="#fredtools.writeBeamModel" title="fredtools.writeBeamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">writeBeamModel</span></code></a></dt><dd><p>write beam model from DataFrame to a nicely formatted CSV.</p>
 </dd>
 </dl>
 </div>
@@ -294,7 +295,7 @@ interpolation methods are ‘nearest’, ‘linear’ or ‘spline’ with order
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getFREDVersions">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getFREDVersions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getFREDVersions" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getFREDVersions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getFREDVersions" title="Link to this definition"></a></dt>
 <dd><p>List the installed FRED varions.</p>
 <p>The function lists the FRED versions installed on the machine.</p>
 <dl class="field-list simple">
@@ -308,7 +309,7 @@ interpolation methods are ‘nearest’, ‘linear’ or ‘spline’ with order
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.checkFREDVersion" title="fredtools.checkFREDVersion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">checkFREDVersion</span></code></a></dt><dd><p>Check if the FRED version is installed.</p>
+<dt><a class="reference internal" href="#fredtools.checkFREDVersion" title="fredtools.checkFREDVersion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">checkFREDVersion</span></code></a></dt><dd><p>check if the FRED version is installed.</p>
 </dd>
 </dl>
 </div>
@@ -316,7 +317,7 @@ interpolation methods are ‘nearest’, ‘linear’ or ‘spline’ with order
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.checkFREDVersion">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">checkFREDVersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.checkFREDVersion" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">checkFREDVersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.checkFREDVersion" title="Link to this definition"></a></dt>
 <dd><p>Check if the FRED version is installed.</p>
 <p>The function validates if the version of FRED, given by the parameter
 is installed on the machine.</p>
@@ -334,7 +335,7 @@ is installed on the machine.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getFREDVersions" title="fredtools.getFREDVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFREDVersions</span></code></a></dt><dd><p>List the installed FRED varions.</p>
+<dt><a class="reference internal" href="#fredtools.getFREDVersions" title="fredtools.getFREDVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFREDVersions</span></code></a></dt><dd><p>list the installed FRED varions.</p>
 </dd>
 </dl>
 </div>
@@ -342,8 +343,8 @@ is installed on the machine.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getFREDVersion">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getFREDVersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getFREDVersion" title="Permalink to this definition"></a></dt>
-<dd><p>Get full FRED version name.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getFREDVersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getFREDVersion" title="Link to this definition"></a></dt>
+<dd><p>Get the full FRED version name.</p>
 <p>The function checks if the <cite>version</cite> of FRED is installed
 and returns its full version name.</p>
 <dl class="field-list simple">
@@ -360,7 +361,7 @@ and returns its full version name.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getFREDVersions" title="fredtools.getFREDVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFREDVersions</span></code></a></dt><dd><p>List the installed FRED varions.</p>
+<dt><a class="reference internal" href="#fredtools.getFREDVersions" title="fredtools.getFREDVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFREDVersions</span></code></a></dt><dd><p>list the installed FRED varions.</p>
 </dd>
 </dl>
 </div>
@@ -368,15 +369,15 @@ and returns its full version name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.runFRED">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">runFRED</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fredInpFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.runFRED" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">runFRED</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fredInpFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.runFRED" title="Link to this definition"></a></dt>
 <dd><p>Run FRED simulation.</p>
 <p>The function runs FRED simulation defined by
 the FRED input file name in the given FRED version.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fredInpFileName</strong> (<em>path</em>) – Path string to FRED input file. Usually it is called <cite>fred.inp</cite>.</p></li>
-<li><p><strong>version</strong> (<em>str</em><em>, </em><em>optional</em>) – Version of FRED in format #.#.#. If no version given
+<li><p><strong>fredInpFileName</strong> (<em>path</em>) – Path string to FRED input file. Usually, it is called <cite>fred.inp</cite>.</p></li>
+<li><p><strong>version</strong> (<em>str</em><em>, </em><em>optional</em>) – Version of FRED in format #.#.#. If no version is given
 then the current version installed is used. (def. “”)</p></li>
 <li><p><strong>params</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>strings</em><em>, </em><em>optional</em>) – Additional parameters to FRED engine, for instance
 [“-C”, “-V5”, “-nogpu”] etc. (def. [])</p></li>
@@ -384,7 +385,7 @@ then the current version installed is used. (def. “”)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Standard output of the subprocess method in form of
+<dd class="field-even"><p>Standard output of the subprocess method in the form of
 list of string lines.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -394,11 +395,11 @@ list of string lines.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.readFREDStat" title="fredtools.readFREDStat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readFREDStat</span></code></a></dt><dd><p>Read FRED simulation statistics information from logfile.</p>
+<dt><a class="reference internal" href="#fredtools.readFREDStat" title="fredtools.readFREDStat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readFREDStat</span></code></a></dt><dd><p>read FRED simulation statistics information from logfile.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.checkFREDVersion" title="fredtools.checkFREDVersion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">checkFREDVersion</span></code></a></dt><dd><p>Check if the FRED version is installed.</p>
+<dt><a class="reference internal" href="#fredtools.checkFREDVersion" title="fredtools.checkFREDVersion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">checkFREDVersion</span></code></a></dt><dd><p>check if the FRED version is installed.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getFREDVersions" title="fredtools.getFREDVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFREDVersions</span></code></a></dt><dd><p>List the installed FRED varions.</p>
+<dt><a class="reference internal" href="#fredtools.getFREDVersions" title="fredtools.getFREDVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFREDVersions</span></code></a></dt><dd><p>list the installed FRED varions.</p>
 </dd>
 </dl>
 </div>
@@ -406,7 +407,7 @@ list of string lines.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readGATE_HITSActor">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readGATE_HITSActor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readGATE_HITSActor" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readGATE_HITSActor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readGATE_HITSActor" title="Link to this definition"></a></dt>
 <dd><p>read GATE hits data for active volume.</p>
 <p>The function reads hits results of GATE active volume saved
 to numpy pickle (.npy) or root (.root) file. All the columns
@@ -432,7 +433,7 @@ are read but some of them are renamed:</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.readFREDStat" title="fredtools.readFREDStat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readFREDStat</span></code></a></dt><dd><p>Read FRED simulation statistics information from logfile.</p>
+<dt><a class="reference internal" href="#fredtools.readFREDStat" title="fredtools.readFREDStat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readFREDStat</span></code></a></dt><dd><p>read FRED simulation statistics information from logfile.</p>
 </dd>
 </dl>
 </div>
@@ -448,11 +449,54 @@ are read but some of them are renamed:</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="fredtools.readGATE_PSActor">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readGATE_PSActor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readGATE_PSActor" title="Link to this definition"></a></dt>
+<dd><p>read GATE hits data for active volume.</p>
+<p>The function reads hits results of GATE active volume saved
+to numpy pickle (.npy) or root (.root) file. All the columns
+are read but some of them are renamed:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>ds</em> is a step length in [cm]</p></li>
+<li><p><em>Edep</em> is deposited energy in [MeV]</p></li>
+<li><p><em>PDGCode</em> is the same as PDG encoding <a class="footnote-reference brackets" href="#id4" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fileName</strong> (<em>path</em>) – Path string to .npy or .root file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe with the data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas DataFrame</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.readFREDStat" title="fredtools.readFREDStat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readFREDStat</span></code></a></dt><dd><p>read FRED simulation statistics information from logfile.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf">Monte Carlo Particle Numbering Scheme</a></p>
+</aside>
+</aside>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readGATEStat">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readGATEStat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNameLogOut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readGATEStat" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readGATEStat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileNameLogOut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readGATEStat" title="Link to this definition"></a></dt>
 <dd><p>Read GATE simulation statistics information from Simulation Statistic Actor.</p>
 <p>The function reads some statistics information from the
-GATE Simulation Statistic Actor output <a class="footnote-reference brackets" href="#id4" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
+GATE Simulation Statistic Actor output <a class="footnote-reference brackets" href="#id7" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -470,8 +514,8 @@ GATE Simulation Statistic Actor output <a class="footnote-reference brackets" hr
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id4" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id7" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">3</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://opengate.readthedocs.io/en/latest/tools_to_interact_with_the_simulation_actors.html?highlight=%20Simulation%20Statistic%20Actor#id7">GATE manual for Simulation Statistic Actor</a></p>
 </aside>
 </aside>

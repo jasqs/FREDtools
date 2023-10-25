@@ -3,4 +3,6 @@ DVH Analyse
 
 A collection of useful functions for Dose-Volume Histograms (DVH) analysis.
 
-.. autofunction:: fredtools.getDVH
+.. autofunction:: fredtools.getDVHMask
+
+.. autofunction:: fredtools.getDVHStruct

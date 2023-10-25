@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Display Image &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>Display Image &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -99,17 +99,17 @@
            <div itemprop="articleBody">
              
   <section id="display-image">
-<h1>Display Image<a class="headerlink" href="#display-image" title="Permalink to this heading"></a></h1>
+<h1>Display Image<a class="headerlink" href="#display-image" title="Link to this heading"></a></h1>
 <p>A collection of useful functions and classes for image displaying. The functionalities have been designed to quickly display and analyse 3D images of CT and/or dose (or any other 3D quantity distribution) in jupyter, inlcuding the interactive mode.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.showSlice">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphaFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaxBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaxFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showLegend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlice" title="Permalink to this definition"></a></dt>
-<dd><p>Display image slice in front of an another image slice including contours.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphaFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaxBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmaxFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showLegend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlice" title="Link to this definition"></a></dt>
+<dd><p>Display image slice in front of another image slice including contours.</p>
 <p>The function displays on <cite>ax</cite> a <cite>plane</cite> going through <cite>point</cite>
-of a 3D image describing front image overlapped on a slice of an another
-image describing the background. Basically, it forms a simple wrapper to
+of a 3D image describing the front image overlapped on a slice of another
+image describing the background. It forms a simple wrapper to
 matplotlib.pyplot.imshow allowing for a quick display of a slice from a
-3D image of singal (e.g. dose) and/or an another image (e.g CT).</p>
+3D image of signal (e.g. dose) and/or another image (e.g. CT).</p>
 <p>Usually <cite>imgBack</cite> describes the CT and <cite>imgFront</cite> describes the dose or
 other signal. At least one variable, <cite>imgBack</cite> or <cite>imgFront</cite> must be given.</p>
 <dl class="field-list simple">
@@ -130,9 +130,9 @@ image if the foreground image is not given) will be used. (def. None)</p></li>
 <li><p><strong>imgROIs</strong> (<em>SimpleITK Image</em><em> or </em><em>list</em><em> of </em><em>SimpleITK Images</em><em>, </em><em>optional</em>) – An Instance of a SimpleITK image or list of instances of
 SimpleITK image objects describing a 3D mask. (def. None)</p></li>
 <li><p><strong>vmaxBack</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Maximum value of the background image. If None then the
-maximum value of 3D background image will be used. (def. None)</p></li>
+maximum value of the 3D background image will be used. (def. None)</p></li>
 <li><p><strong>vmaxFront</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Maximum value of the foreground dose map. If None then the
-maximum value of 3D foreground image will be used. (def. None)</p></li>
+maximum value of the 3D foreground image will be used. (def. None)</p></li>
 <li><p><strong>alphaFront</strong> (<em>float</em><em>, </em><em>optional</em>) – Alpha value pf the transparency of the foreground image. (def. 0.7)</p></li>
 <li><p><strong>showLegend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show legend of the ROI contour names if they exist. (def. True)</p></li>
 <li><p><strong>fontsize</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Basic font size to be used for ticks, labels, legend, etc. (def. 8)</p></li>
@@ -152,7 +152,7 @@ is not given) attached to the axis <cite>ax</cite>.</p>
 <dl class="simple">
 <dt><a class="reference internal" href="#fredtools.showSlices" title="fredtools.showSlices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showSlices</span></code></a></dt><dd><p>show three projections of a 3D image, also interactively.</p>
 </dd>
-<dt><a class="reference internal" href="GettingSubimage.html#fredtools.getSlice" title="fredtools.getSlice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSlice</span></code></a></dt><dd><p>get 2D image slice from SimpleITK Image.</p>
+<dt><a class="reference internal" href="GettingSubimage.html#fredtools.getSlice" title="fredtools.getSlice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSlice</span></code></a></dt><dd><p>get a 2D image slice from SimpleITK Image.</p>
 </dd>
 </dl>
 </div>
@@ -164,7 +164,7 @@ is not given) attached to the axis <cite>ax</cite>.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="fredtools.showSlices">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCOFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[15,</span> <span class="pre">5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlices" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">showSlices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgROIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DCOFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapBack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmapFront</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[15,</span> <span class="pre">5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.showSlices" title="Link to this definition"></a></dt>
 <dd><p>Class to display three projections of 3D image slices on an another 3D image slices including contours.</p>
 <p>The class creates a figure with three axes and displays
 three projections (planes), ‘XY’, ‘ZY’ and ‘X-Z’ (reversed Z),

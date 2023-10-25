@@ -1,8 +1,8 @@
 def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=False, compressionLevel=5, displayInfo=False):
     """Write image to MetaImage format.
 
-    The function writes a SimpleITK image object to MetaImage file. The function
-    extends the functionality of SimpleITK.WriteImage() to write also a single file
+    The function writes a SimpleITK image object to the MetaImage file. The function
+    extends the functionality of SimpleITK.WriteImage() to write a single file
     MetaImage instead of standard two-files MHD+RAW. It is recommended to use \*.mhd
     extension when saving MetaImage.
 
@@ -15,12 +15,12 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=Fals
     singleFile : bool, optional
         Determine if the MHD is a single file of two files MHD+RAW. (def. True)
     overwrite : bool, optional
-        Overwrite the file if it exists. Otherwise raise an error. (def. True)
+        Overwrite the file if it exists, otherwise, raise an error. (def. True)
     useCompression : bool, optional
         Determine if a compression will be used when saving the file. (def. False)
     compressionLevel : unsigned int, optional
         Determine the compression level. For MHD files, the compression level
-        above 10 does not make any effect. (def. 5)
+        above 10 does not have any effect. (def. 5)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -38,6 +38,11 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=Fals
 
     if os.path.exists(filePath) and not overwrite:
         raise ValueError("Warning: {:s} file already exists.".format(filePath))
+
+    # remove empty metadata keys (empty metadata keys raise a warning of SimpleITK)
+    for MetaDataKey in img.GetMetaDataKeys():
+        if not img.GetMetaData(MetaDataKey):
+            img.EraseMetaData(MetaDataKey)
 
     sitk.WriteImage(img, filePath, useCompression=useCompression, compressionLevel=compressionLevel)
 

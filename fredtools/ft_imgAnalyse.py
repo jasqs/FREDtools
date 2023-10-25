@@ -8,14 +8,14 @@ def getExtent(img, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     tuple
-        Tuple of extent values in form ((xmin,xmax),(ymin,ymax),...)
+        A tuple of extent values in form ((xmin,xmax),(ymin,ymax),...)
 
     See Also
     --------
@@ -54,18 +54,18 @@ def getSize(img, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     tuple
-        Tuple of sizes in each direction in form (xSize,ySize,...)
+        A Tuple of sizes in each direction in form (xSize,ySize,...)
 
     See Also
     --------
-    getExtent : Get the extent of an image.
+    getExtent : get the extent of an image.
     """
     import numpy as np
     import fredtools as ft
@@ -85,7 +85,7 @@ def getSize(img, displayInfo=False):
 
 
 def getImageCenter(img, displayInfo=False):
-    """Get center of an image.
+    """Get the centre of an image.
 
     The function calculates the centre of an image defined as a SimpleITK image object
     in each direction. It is assumed that the coordinate system is in [mm].
@@ -93,20 +93,20 @@ def getImageCenter(img, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     tuple
-        Tuple of image centre coordinates in form (xCenter,yCenter,...)
+        A Tuple of image centre coordinates in form (xCenter,yCenter,...)
 
     See Also
     --------
-    getMassCenter : get center of mass of an image.
-    getMaxPosition : get position of an image maximum.
-    getMinPosition : get position of an image minimum.
+    getMassCenter : get the centre of mass of an image.
+    getMaxPosition : get the position of an image maximum.
+    getMinPosition : get the position of an image minimum.
     """
     import numpy as np
     import fredtools as ft
@@ -125,7 +125,7 @@ def getImageCenter(img, displayInfo=False):
 
 
 def getMassCenter(img, displayInfo=False):
-    """Get center of mass of an image.
+    """Get the centre of mass of an image.
 
     The function calculates the centre of mass of an image defined as
     a SimpleITK image object in each direction. It is assumed that
@@ -134,20 +134,20 @@ def getMassCenter(img, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     tuple
-        Tuple of image centre of mass coordinates in form (xMassCenter,yMassCenter,...)
+        A tuple of image centre of mass coordinates in form (xMassCenter,yMassCenter,...)
 
     See Also
     --------
-    getImageCenter : get center of an image.
-    getMaxPosition : get position of an image maximum.
-    getMinPosition : get position of an image minimum.
+    getImageCenter : get the centre of an image.
+    getMaxPosition : get the position of an image maximum.
+    getMinPosition : get the position of an image minimum.
     """
     import numpy as np
     import itk
@@ -180,7 +180,7 @@ def getMassCenter(img, displayInfo=False):
 
 
 def getMaxPosition(img, displayInfo=False):
-    """Get maximum position of an image.
+    """Get the maximum position of an image.
 
     The function calculates the position of the maximum voxel of
     an image defined as a SimpleITK image object.
@@ -189,20 +189,20 @@ def getMaxPosition(img, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        The object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     tuple
-        Tuple of image maximum voxel coordinates in form (xPosition,yPosition,...).
+        A Tuple of image maximum voxel coordinates in form (xPosition,yPosition,...).
 
     See Also
     --------
-    getImageCenter : get centre of an image.
-    getMassCenter : get centre of mass of an image.
-    getMinPosition : get position of an image minimum.
+    getImageCenter : get the centre of an image.
+    getMassCenter : get the centre of mass of an image.
+    getMinPosition : get the position of an image minimum.
     """
     import numpy as np
     import fredtools as ft
@@ -232,7 +232,7 @@ def getMaxPosition(img, displayInfo=False):
 
 
 def getMinPosition(img, displayInfo=False):
-    """Get minimum position of an image.
+    """Get the minimum position of an image.
 
     The function calculates the position of the minimum voxel of
     an image defined as a SimpleITK image object.
@@ -241,20 +241,20 @@ def getMinPosition(img, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     tuple
-        Tuple of image minimum voxel coordinates in form (xPosition,yPosition,...).
+        A Tuple of image minimum voxel coordinates in form (xPosition,yPosition,...).
 
     See Also
     --------
-    getImageCenter : get centre of an image.
-    getMassCenter : get centre of mass of an image.
-    getMaxPosition : get position of an image maximum.
+    getImageCenter : get the centre of an image.
+    getMassCenter : get the centre of mass of an image.
+    getMaxPosition : get the position of an image maximum.
     """
     import numpy as np
     import itk
@@ -295,7 +295,7 @@ def getVoxelCentres(img, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -338,7 +338,7 @@ def _generateSpatialCentresString(pixelCentres):
     Parameters
     ----------
     pixelCentres : array_like
-        One-dimensional, array-like object of centres to be converted to string.
+        A one-dimensional, array-like object of centres to be converted to a string.
 
     Returns
     -------
@@ -361,13 +361,13 @@ def _generateSpatialCentresString(pixelCentres):
 def _generateExtentString(axisExtent):
     """Generate image extent string
 
-    The function generates a formatted string with extent in one direction.
+    The function generates a formatted string with the extent in one direction.
     This routine is useful for displaying image information.
 
     Parameters
     ----------
     axisExtent : array_like
-        One-dimensional, two-element, array-like object be converted to string.
+        A One-dimensional, two-element, array-like object to be converted to a string.
 
     Returns
     -------
@@ -391,7 +391,7 @@ def _displayImageInfo(img):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     """
     import SimpleITK as sitk
     import numpy as np
@@ -404,18 +404,24 @@ def _displayImageInfo(img):
     axesNames = ["x", "y", "z", "t"]
     arr = sitk.GetArrayFromImage(img)
     voxelCentres = ft.getVoxelCentres(img)
-    isMask = ft._isSITK_mask(img)
     isVector = ft._isSITK_vector(img)
+    isMask = ft._isSITK_mask(img)
+    maskType = f"({ft._getMaskType(img)} mask)" if isMask else ""
+    isIdentity = ft.ft_imgAnalyse._checkIdentity(img)
+
     if ft._isSITK_point(img):
-        print("# {:d}D{:s} image describing{:s} point (0D)".format(img.GetDimension(), " vector" if isVector else "", " mask" if isMask else ""))
+        print("# {:d}D{:s} image describing a point (0D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._isSITK_profile(img):
-        print("# {:d}D{:s} image describing{:s} profile (1D)".format(img.GetDimension(), " vector" if isVector else "", " mask" if isMask else ""))
+        print("# {:d}D{:s} image describing a profile (1D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._isSITK_slice(img):
-        print("# {:d}D{:s} image describing{:s} slice (2D)".format(img.GetDimension(), " vector" if isVector else "", " mask" if isMask else ""))
+        print("# {:d}D{:s} image describing a slice (2D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._isSITK_volume(img):
-        print("# {:d}D{:s} image describing{:s} volume (3D)".format(img.GetDimension(), " vector" if isVector else "", " mask" if isMask else ""))
+        print("# {:d}D{:s} image describing a volume (3D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._isSITK_timevolume(img):
-        print("# {:d}D{:s} image describing{:s} time volume (4D)".format(img.GetDimension()))
+        print("# {:d}D{:s} image describing a time volume (4D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+
+    if not isIdentity:
+        print("# The image direction is not identity")
 
     print("# dims ({:s}) = ".format("".join(axesNames[: img.GetDimension()])), np.array(img.GetSize()))
     print("# voxel size [mm] = ", np.array(img.GetSpacing()))
@@ -429,21 +435,21 @@ def _displayImageInfo(img):
     if ft._isSITK_profile(img):
         print("# length = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realSize), np.prod(realSize) / 1e1))
     elif ft._isSITK_slice(img):
-        print("# area = {:.2f} mm2  =>  {:.2f} cm2".format(np.prod(realSize), np.prod(realSize) / 1e2))
+        print("# area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realSize), np.prod(realSize) / 1e2))
     elif ft._isSITK_volume(img):
-        print("# volume = {:.2f} mm3  =>  {:.2f} l".format(np.prod(realSize), np.prod(realSize) / 1e6))
+        print("# volume = {:.2f} mm³  =>  {:.2f} l".format(np.prod(realSize), np.prod(realSize) / 1e6))
     elif ft._isSITK_timevolume(img):
-        print("# time volume = {:.2f} mm3*s  =>  {:.2f} l*s".format(np.prod(realSize), np.prod(realSize) / 1e6))
+        print("# time volume = {:.2f} mm³*s  =>  {:.2f} l*s".format(np.prod(realSize), np.prod(realSize) / 1e6))
 
     realVoxelSize = [size for idx, size in enumerate(img.GetSpacing()) if img.GetSize()[idx] > 1]
     if ft._isSITK_profile(img):
         print("# step size = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e1))
     elif ft._isSITK_slice(img):
-        print("# pixel area = {:.2f} mm2  =>  {:.2f} cm2".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2))
+        print("# pixel area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2))
     elif ft._isSITK_volume(img):
-        print("# voxel volume = {:.2f} mm3  =>  {:.2f} ul".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+        print("# voxel volume = {:.2f} mm³  =>  {:.2f} ul".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
     elif ft._isSITK_timevolume(img):
-        print("# voxel time volume = {:.2f} mm3*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+        print("# voxel time volume = {:.2f} mm³*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
 
     print("# data type: ", img.GetPixelIDTypeAsString(), "with NaN values" if np.any(np.isnan(arr)) else "")
     print("# range: from ", np.nanmin(arr), " to ", np.nanmax(arr), "(sum of vectors)" if isVector else "")
@@ -463,11 +469,11 @@ def _displayImageInfo(img):
         )
     elif ft._isSITK_slice(img):
         print(
-            "# non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm2".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2),
+            "# non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2),
             "(sum of vectors)" if isVector else "",
         )
         print(
-            "# non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm2".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2),
+            "# non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2),
             "(sum of vectors)" if isVector else "",
         )
     elif ft._isSITK_volume(img):
@@ -509,7 +515,7 @@ def displayImageInfo(img):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
 
     Examples
     --------
@@ -528,13 +534,14 @@ def displayImageInfo(img):
     # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
     # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
     # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 l
-    # voxel volume = 0.56 mm3  =>  0.56 ul
+    # volume = 25924053.15 mm³  =>  25.92 l
+    # voxel volume = 0.56 mm³  =>  0.56 ul
     # data type:  16-bit signed integer
     # range: from  -1024  to  3071
     # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
     # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 l
     # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
+    # Additional metadata:
     ########################
 
     The same can be displayed when reading the image.
@@ -551,13 +558,14 @@ def displayImageInfo(img):
     # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
     # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
     # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 l
-    # voxel volume = 0.56 mm3  =>  0.56 ul
+    # volume = 25924053.15 mm³  =>  25.92 l
+    # voxel volume = 0.56 mm³  =>  0.56 ul
     # data type:  16-bit signed integer
     # range: from  -1024  to  3071
     # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
     # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 l
     # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
+    # Additional metadata:
     ###############
     """
     import fredtools as ft
@@ -578,7 +586,7 @@ def _getAxesVectorNotUnity(img):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
 
     Returns
     -------
@@ -609,7 +617,7 @@ def _getAxesNumberNotUnity(img):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
 
     Returns
     -------
@@ -633,21 +641,21 @@ def _getAxesNumberNotUnity(img):
 
 
 def _getDirectionArray(img):
-    """Get direction in form of 2D array.
+    """Get direction in the form of a 2D array.
 
     The function converts direction from an image defined as a SimpleITK image
-    object to 2D numpy array. It basically reshapes img.GetDirection() results
-    in tuple to 2D numpy array.
+    object to a 2D numpy array. It reshapes img.GetDirection() results
+    in a tuple to a 2D numpy array.
 
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
 
     Returns
     -------
-    numpy.
-        2D numpy array with direction.
+    numpy
+        A 2D numpy array with direction.
     """
     import numpy as np
     import fredtools as ft
@@ -656,10 +664,34 @@ def _getDirectionArray(img):
     return np.array(img.GetDirection()).reshape(img.GetDimension(), img.GetDimension())
 
 
-def getExtMpl(img):
-    """Get extent of a slice in format consistent with imshow of matplotlib module.
+def _checkIdentity(img):
+    """Check image identity.
 
-    The function gets extent of an image defined as a SimpleITK image object
+    The function checks if the image direction represents the identity matrix
+    (1 in diagonal).
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+
+    Returns
+    -------
+    bool
+        Is it an identity or not.
+    """
+    import fredtools as ft
+    import numpy as np
+
+    ft._isSITK(img, raiseError=True)
+
+    return np.all(np.identity(img.GetDimension(), dtype="int").flatten() == img.GetDirection())
+
+
+def getExtMpl(img):
+    """Get the extent of a slice in a format consistent with imshow of matplotlib module.
+
+    The function gets the extent of an image defined as a SimpleITK image object
     describing a slice. Extent means the coordinates of the most side pixels' borders
     in each direction and are returned in format (left, right, bottom, top), which is
     consistent with the ``extent`` optional parameter of ``imshow`` of
@@ -668,19 +700,19 @@ def getExtMpl(img):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image describing a slice.
+        An object of a SimpleITK image describing a slice.
 
     Returns
     -------
     tuple
-        Tuple of extent values in form (left, right, bottom, top).
+        A tuple of extent values in the form (left, right, bottom, top).
 
     See Also
     --------
-        matplotlib.pyplot.imshow: displaying 2D images.
-        getExtent: get the extent of the image in each direction.
-        getSize: get the size of the image in each direction.
-        arr: get squeezed array from image.
+        matplotlib.pyplot.imshow : displaying 2D images.
+        getExtent : get the extent of the image in each direction.
+        getSize : get the size of the image in each direction.
+        arr : get squeezed array from image.
 
     Examples
     --------
@@ -701,7 +733,7 @@ def getExtMpl(img):
 
 
 def pos(img):
-    """Get voxels' centres for axes of size different than one.
+    """Get voxels' centres for axes of the size different than one.
 
     The function calculates the voxels' centres of an image defined
     as a SimpleITK image object in each direction, only for those axes for
@@ -710,7 +742,7 @@ def pos(img):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
 
     Returns
     -------
@@ -721,8 +753,8 @@ def pos(img):
 
     See Also
     --------
-        getVoxelCentres: get voxels' centres of the image in each direction.
-        vec: get a vector with values for the image describing a profile.
+        getVoxelCentres : get voxels' centres of the image in each direction.
+        vec : get a vector with values for the image describing a profile.
 
     Examples
     --------
@@ -758,12 +790,12 @@ def arr(img):
     """Get squeezed array from image.
 
     The function gets a squeezed array (with no unitary dimensions) from
-    an image defined as SimpleITK image object. This can be used for plotting
+    an image defined as a SimpleITK image object. This can be used for plotting
 
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
 
     Returns
     -------
@@ -772,9 +804,9 @@ def arr(img):
 
     See Also
     --------
-        pos: get voxels' centres for axes of size different than one.
-        getExtMpl: Get the extent of a slice in a format consistent with imshow of matplotlib module.
-        vec: get a vector with values for the image describing a profile.
+        pos : get voxels' centres for axes of size different than one.
+        getExtMpl : Get the extent of a slice in a format consistent with imshow of matplotlib module.
+        vec : get a vector with values for the image describing a profile.
 
     Examples
     --------
@@ -802,7 +834,7 @@ def vec(img):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image describing a profile.
+        An object of a SimpleITK image describing a profile.
 
     Returns
     -------
@@ -811,8 +843,8 @@ def vec(img):
 
     See Also
     --------
-        pos: get voxels' centres for axes of the size different than one.
-        arr: Get squeezed array from image.
+        pos : get voxels' centres for axes of the size different than one.
+        arr : Get squeezed array from image.
 
     Examples
     --------
@@ -842,7 +874,7 @@ def isPointInside(img, point, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -853,7 +885,7 @@ def isPointInside(img, point, displayInfo=False):
 
     See Also
     --------
-        getExtent: get the extent of the image in each direction.
+        getExtent : get the extent of the image in each direction.
 
     Examples
     --------
@@ -911,13 +943,13 @@ def getStatistics(img, displayInfo=False):
     """Get statistics of image
 
     The function gets basic statistics of an image defined as
-    a SimpleITK image object. It is basically a wrapper for
+    a SimpleITK image object. It is a wrapper for
     SimpleITK.StatisticsImageFilter routine executed on the image.
 
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -928,7 +960,7 @@ def getStatistics(img, displayInfo=False):
 
     See Also
     --------
-        SimpleITK.StatisticsImageFilter: more about possible statistics.
+        SimpleITK.StatisticsImageFilter : more about possible statistics.
 
     Examples
     --------
@@ -969,18 +1001,18 @@ def getStatistics(img, displayInfo=False):
 
 
 def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
-    """compare two images frame of reference
+    """Compare two images frame of reference
 
     The function gets two images defined as instances of a SimpleITK image
-    object and compares the frame of reference, i.e. dimension, size, origin
-    and spacing.
+    object and compares the frame of reference, i.e. dimension, size, origin,
+    spacing and direction.
 
     Parameters
     ----------
     img1 : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     img2 : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     decimals: int, optional
         Use rounding to a given number of decimals when comparing origin and spacing. (def. 3)
     displayInfo : bool, optional
@@ -1010,10 +1042,13 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
     # compare spacing
     spacingMatch = np.all(np.round(np.array(img1.GetSpacing()), decimals=decimals) == np.round(np.array(img2.GetSpacing()), decimals=decimals))
 
-    match = dimensionMatch and sizeMatch and originMatch and spacingMatch
+    # compare direction
+    directionMatch = np.all(np.array(img1.GetDirection()) == np.array(img2.GetDirection()))
 
-    # compare values
-    if match:
+    match = dimensionMatch and sizeMatch and originMatch and spacingMatch and directionMatch
+
+    # compare values if displayInfo
+    if match and displayInfo:
         valuesMatch = np.all(np.round(ft.arr(img1), decimals=decimals) == np.round(ft.arr(img2), decimals=decimals))
     else:
         valuesMatch = False
@@ -1022,8 +1057,9 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
         print(f"### {ft._currentFuncName()} ###")
         print("# Dimension matching:      ", dimensionMatch)
         print("# Size matching:           ", sizeMatch)
-        print("# Origin matching:         ", originMatch, f"({decimals} decimals tolarance)")
-        print("# Spacing matching:        ", spacingMatch, f"({decimals} decimals tolarance)")
+        print("# Origin matching:         ", originMatch, f"({decimals} decimals tolerance)")
+        print("# Spacing matching:        ", spacingMatch, f"({decimals} decimals tolerance)")
+        print("# Direction matching:      ", directionMatch)
         print("# Pixel-to-pixel matching: ", valuesMatch)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 

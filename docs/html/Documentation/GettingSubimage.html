@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting Subimage &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>Getting Subimage &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -101,16 +101,16 @@
            <div itemprop="articleBody">
              
   <section id="getting-subimage">
-<h1>Getting Subimage<a class="headerlink" href="#getting-subimage" title="Permalink to this heading"></a></h1>
+<h1>Getting Subimage<a class="headerlink" href="#getting-subimage" title="Link to this heading"></a></h1>
 <p>A collection of useful functions for getting subimages of lower dimension, e.g. a slice or a profile from a 3D image.
 The image must be an instance of a SimpleITK image and the same image, with the same dimension is returned. The subimages are
 calculated user defined interpolation. The interpolation of ‘nearest’, ‘linear’ and ‘spline’ with order from 0 to 5 are available.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getSlice">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getSlice" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getSlice" title="Link to this definition"></a></dt>
 <dd><p>Get 2D slice from image.</p>
 <p>The function calculates a 2D slice image through a specified
-<cite>point</cite> in a specified <cite>plane</cite> from an image defined as SimpleITK
+<cite>point</cite> in a specified <cite>plane</cite> from an image defined as a SimpleITK
 image object. The slice is returned as an instance of a SimpleITK image
 object of the same dimension but describing a slice (the dimension
 of only two axes are different than one). The slice through a specified
@@ -119,16 +119,16 @@ point is calculated with a specified <cite>interpolation</cite> type.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>point</strong> (<em>array_like</em>) – Point to generate the 2D slice through. It should have length
+<li><p><strong>point</strong> (<em>array_like</em>) – Point to generate the 2D slice through. It should have the length
 of the image dimension. A warning will be generated if the point is
 not inside the image extent.</p></li>
 <li><p><strong>plane</strong> (<em>str</em><em>, </em><em>optional</em>) – Plane to generate the 2D slice given as a string. The string
-should have form of two letters from [XYZT] set with +/- signs
-(if no sign provided, then + is assumed). For instance it can be:
+should have the form of two letters from [XYZT] set with +/- signs
+(if no sign is provided, then + is assumed). For instance, it can be:
 <cite>XY</cite>,`ZY`,`-YX`, <cite>Y-T</cite>, etc. If the minus sign is found, then the
-image is flipped in the following direction. The order of axis is
+image is flipped in the following direction. The order of the axis is
 important and the output will be generated in this way to be consistent
-with the axes displayed with matplotlib.pyplot.imshow. For instance
+with the axes displayed with matplotlib.pyplot.imshow. For instance,
 plane <cite>Z-X</cite> will display Z-axis on X-axis in imshow and Y-axis of
 of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
@@ -138,7 +138,7 @@ of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Instance of a SimpleITK image object describing a slice.</p>
+<dd class="field-even"><p>An instance of a SimpleITK image object describing a slice.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -207,10 +207,10 @@ of imshow will be a reversed X-axis of the image. (def. ‘XY’)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getProfile">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getProfile" title="Permalink to this definition"></a></dt>
-<dd><p>Get 1D profile from image along axis.</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getProfile" title="Link to this definition"></a></dt>
+<dd><p>Get 1D profile from image along an axis.</p>
 <p>The function calculates a 1D profile image through a specified
-<cite>point</cite> in a specified <cite>axis</cite> from an image defined as SimpleITK
+<cite>point</cite> in a specified <cite>axis</cite> from an image defined as a SimpleITK
 image object. The profile is returned as an instance of a SimpleITK image
 object of the same dimension but describing a profile (the dimension
 of only one axes is different than one). The profile through a specified
@@ -218,13 +218,13 @@ point is calculated with a specified <cite>interpolation</cite> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>point</strong> (<em>array_like</em>) – Point to generate the 2D slice through. It should have length
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
+<li><p><strong>point</strong> (<em>array_like</em>) – Point to generate the 2D slice through. It should have the length
 of the image dimension. A warning will be generated if the point is
 not inside the image extent.</p></li>
 <li><p><strong>axis</strong> (<em>str</em><em>, </em><em>optional</em>) – Axis to generate the 1D profile given as a string. The string
-should have form of one letter from [XYZT] set with +/- signs
-(if no sign provided, then + is assumed). For instance it can be:
+should have the form of one letter from [XYZT] set with +/- signs
+(if no sign is provided, then + is assumed). For instance, it can be:
 <cite>X</cite>,`Y`,`-Z`, etc. If the minus sign is found, then the
 image is flipped in the following direction.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
@@ -245,9 +245,9 @@ image is flipped in the following direction.</p></li>
 <dl class="simple">
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.plot</span></code></dt><dd><p>displaying profiles.</p>
 </dd>
-<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.pos" title="fredtools.pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code></a></dt><dd><p>get voxels’ centres for axes of size different than one.</p>
+<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.pos" title="fredtools.pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code></a></dt><dd><p>get voxels’ centers for axes of size different than one.</p>
 </dd>
-<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.vec" title="fredtools.vec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vec</span></code></a></dt><dd><p>get vector with values for the img describing a profile.</p>
+<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.vec" title="fredtools.vec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vec</span></code></a></dt><dd><p>get a vector with values for the img describing a profile.</p>
 </dd>
 </dl>
 </div>
@@ -303,18 +303,18 @@ image is flipped in the following direction.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getPoint">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getPoint" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseWarning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getPoint" title="Link to this definition"></a></dt>
 <dd><p>Get point value from image.</p>
 <p>The function calculates a point value in a specified <cite>point</cite> from an
-image defined as SimpleITK image object. The point is returned as an
+image defined as a SimpleITK image object. The point is returned as an
 instance of a SimpleITK image object of the same dimension but describing
 a point (the dimension of all axes is equal to one). The point value in
 a specified point is calculated with a specified <cite>interpolation</cite> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>point</strong> (<em>array_like</em>) – Point to generate the value. It should have length of the image
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
+<li><p><strong>point</strong> (<em>array_like</em>) – Point to generate the value. It should have the length of the image
 dimension. A warning will be generated if the point is not inside
 the image extent.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
@@ -324,7 +324,7 @@ the image extent.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Instance of a SimpleITK image object describing a point.</p>
+<dd class="field-even"><p>An instance of a SimpleITK image object describing a point.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -387,21 +387,21 @@ types from a 3D image in a specified point of the 3D image.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getInteg">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getInteg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getInteg" title="Permalink to this definition"></a></dt>
-<dd><p>Get 1D integral profile from image.</p>
-<p>The function calculates a 1D integral profile image along specified <cite>axis</cite>
-from an image defined as SimpleITK image object. The integral profile is
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getInteg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getInteg" title="Link to this definition"></a></dt>
+<dd><p>Get 1D integral profile from an image.</p>
+<p>The function calculates a 1D integral profile image along the specified <cite>axis</cite>
+from an image defined as a SimpleITK image object. The integral profile is
 returned as an instance of a SimpleITK image object of the same dimension
 but describing a profile (the dimension of only one axes is different than one).
 The integral means the sum of the voxel values multiplied by the voxel volume.
-The routine is usefull to calculate an integral depth dose (IDD) distributions.</p>
+The routine is useful to calculate integral depth dose (IDD) distributions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
 <li><p><strong>axis</strong> (<em>str</em><em>, </em><em>optional</em>) – Axis to generate the 1D integral profile given as a string. The string
 should have form of one letter from [XYZT] set with +/- signs
-(if no sign provided, then + is assumed). For instance it can be:
+(if no sign is provided, then + is assumed). For instance, it can be:
 <cite>X</cite>,`Y`,`-Z`, etc. If the minus sign is found, then the
 image is flipped in the following direction.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
@@ -419,9 +419,9 @@ image is flipped in the following direction.</p></li>
 <dl class="simple">
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.plot</span></code></dt><dd><p>displaying profiles.</p>
 </dd>
-<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.pos" title="fredtools.pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code></a></dt><dd><p>get voxels’ centres for axes of size different than one.</p>
+<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.pos" title="fredtools.pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code></a></dt><dd><p>get voxels’ centers for axes of size different than one.</p>
 </dd>
-<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.vec" title="fredtools.vec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vec</span></code></a></dt><dd><p>get vector with values for the img describing a profile.</p>
+<dt><a class="reference internal" href="ImageAnalyse.html#fredtools.vec" title="fredtools.vec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vec</span></code></a></dt><dd><p>get a vector with values for the img describing a profile.</p>
 </dd>
 </dl>
 </div>

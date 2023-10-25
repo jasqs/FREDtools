@@ -14,13 +14,13 @@ def showSlice(
     fontsize=8,
     raiseWarning=True,
 ):
-    """Display image slice in front of an another image slice including contours.
+    """Display image slice in front of another image slice including contours.
 
     The function displays on `ax` a `plane` going through `point`
-    of a 3D image describing front image overlapped on a slice of an another
-    image describing the background. Basically, it forms a simple wrapper to
+    of a 3D image describing the front image overlapped on a slice of another
+    image describing the background. It forms a simple wrapper to
     matplotlib.pyplot.imshow allowing for a quick display of a slice from a
-    3D image of singal (e.g. dose) and/or an another image (e.g CT).
+    3D image of signal (e.g. dose) and/or another image (e.g. CT).
 
     Usually `imgBack` describes the CT and `imgFront` describes the dose or
     other signal. At least one variable, `imgBack` or `imgFront` must be given.
@@ -51,10 +51,10 @@ def showSlice(
         SimpleITK image objects describing a 3D mask. (def. None)
     vmaxBack : scalar, optional
         Maximum value of the background image. If None then the
-        maximum value of 3D background image will be used. (def. None)
+        maximum value of the 3D background image will be used. (def. None)
     vmaxFront : scalar, optional
         Maximum value of the foreground dose map. If None then the
-        maximum value of 3D foreground image will be used. (def. None)
+        maximum value of the 3D foreground image will be used. (def. None)
     alphaFront : float, optional
         Alpha value pf the transparency of the foreground image. (def. 0.7)
     showLegend : bool, optional
@@ -73,7 +73,7 @@ def showSlice(
     See Also
     --------
         showSlices: show three projections of a 3D image, also interactively.
-        getSlice: get 2D image slice from SimpleITK Image.
+        getSlice: get a 2D image slice from SimpleITK Image.
 
     Examples
     --------
@@ -83,6 +83,8 @@ def showSlice(
     import numpy as np
     import matplotlib as mpl
     import re
+    import warnings
+    import SimpleITK as sitk
 
     # set background of the axis to black
     ax.set_facecolor("black")
@@ -124,7 +126,7 @@ def showSlice(
         ft._isSITK_volume(imgBack)
 
         slBack = ft.getSlice(imgBack, point=point, plane=plane, raiseWarning=raiseWarning)
-        axesImage = ax.imshow(ft.arr(slBack), cmap=cmapBack, extent=ft.getExtMpl(slBack), vmax=vmaxBack)
+        axesImage = ax.imshow(sitk.GetArrayViewFromImage(slBack).squeeze(), cmap=cmapBack, extent=ft.getExtMpl(slBack), vmax=vmaxBack)
 
     # show front slice image
     if imgFront:
@@ -132,19 +134,26 @@ def showSlice(
         ft._isSITK_volume(imgFront)
 
         slFront = ft.getSlice(imgFront, point=point, plane=plane, raiseWarning=raiseWarning)
-        axesImage = ax.imshow(ft.arr(slFront), cmap=cmapFront, extent=ft.getExtMpl(slFront), alpha=alphaFront, vmin=0, vmax=vmaxFront)
+        axesImage = ax.imshow(sitk.GetArrayViewFromImage(slFront).squeeze(), cmap=cmapFront, extent=ft.getExtMpl(slFront), alpha=alphaFront, vmin=0, vmax=vmaxFront)
 
     # show ROIs slice
     if imgROIs:
         for imgROI in imgROIs if isinstance(imgROIs, list) else [imgROIs]:
             ft._isSITK_mask(imgROI, raiseError=True)
+
+            # convert the floating mask to binary if needed
+            if ft._isSITK_maskFloating(imgROI):
+                imgROI = ft.floatingToBinaryMask(imgROI, threshold=0.5)
+                if raiseWarning:
+                    warnings.warn(f"Warning: The floating mask was converted to binary mask with threshold=0.5.")
+
             slROI = ft.getSlice(imgROI, point=point, plane=plane, raiseWarning=raiseWarning)
             if "ROIColor" in imgROI.GetMetaDataKeys():
                 color = np.array(re.findall("\d+", imgROI.GetMetaData("ROIColor")), dtype="int") / 255
             else:
                 color = np.array([0, 0, 1])
             if ft.getStatistics(slROI).GetMaximum() > 0:
-                ax.contour(ft.arr(slROI), extent=ft.getExtMpl(slROI), levels=[0.5], colors=[color], linewidths=2, origin="upper")
+                ax.contour(sitk.GetArrayViewFromImage(slROI).squeeze(), extent=ft.getExtMpl(slROI), levels=[0.5], colors=[color], linewidths=2, origin="upper")
                 ax.plot([], color=color, label=imgROI.GetMetaData("ROIName") if "ROIName" in imgROI.GetMetaDataKeys() else "unknown")
         if len(ax.get_legend_handles_labels()[0]) > 0 and showLegend:
             ax.legend(fontsize=fontsize)

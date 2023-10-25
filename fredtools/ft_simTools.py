@@ -1,8 +1,8 @@
 def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=False, displayInfo=False):
-    """Create folder structure for each field in treatment plan.
+    """Create a folder structure for each field in the treatment plan.
 
     The function creates a folder structure in a given `folderPath` for each field separately.
-    The folder structure is in form:
+    The folder structure is in the form:
 
         folderPath/folderName:
 
@@ -20,7 +20,7 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=F
     Parameters
     ----------
     folderPath : path
-        Path to folder to create the structure.
+        Path to a folder to create the structure.
     RNfileName : path
         Path to RN dicom file of a treatment plan.
     folderName : string, optional
@@ -74,10 +74,10 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=F
 
 
 def readFREDStat(fileNameLogOut, displayInfo=False):
-    """Read FRED simulation statistics information from logfile.
+    """Read FRED simulation statistics information from the log file.
 
     The function reads some statistics information from a FRED run.out logfile.
-    If some information os not available, then a NaN or numpy.nan is returned.
+    If some information is not available, then a NaN or numpy.nan is returned.
 
     Parameters
     ----------
@@ -135,15 +135,15 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     with open(fileNameLogOut) as f:
         for num, line in enumerate(f, 1):
             # FRED Version and release date
-            Version_re = re.search("Version\W+([\S+.]+)", line)
-            VersionDate_re = re.search("Version.*([0-9]{4}\/[0-9]{2}\/[0-9]{2})", line)
+            Version_re = re.search(r"Version\W+([\S+.]+)", line)
+            VersionDate_re = re.search(r"Version.*([0-9]{4}\/[0-9]{2}\/[0-9]{2})", line)
             if Version_re:
                 simInfo["fredVersion"] = Version_re.group(1)
             if VersionDate_re:
                 simInfo["fredVersionDate"] = VersionDate_re.group(1)
 
             # configuration fo the run
-            RunningConfig_re = re.search("Running config.*([0-9]+)\,([0-9]+)\,([0-9]+)", line)
+            RunningConfig_re = re.search(r"Running config.*([0-9]+)\,([0-9]+)\,([0-9]+)", line)
             if RunningConfig_re:
                 simInfo["runConfigMPI"] = int(RunningConfig_re.group(1))
                 simInfo["runConfigTHREADS"] = int(RunningConfig_re.group(2))
@@ -154,51 +154,51 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
                     simInfo["runConfig"] = "GPUx{:d}".format(simInfo["runConfigGPU"])
 
             # total run time
-            RunWallclockTime_re = re.findall("Run wallclock time:\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
+            RunWallclockTime_re = re.findall(r"Run wallclock time:\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
             if RunWallclockTime_re:
                 simInfo["runWallclockTime_s"] = float(RunWallclockTime_re[0])
 
             # total number of primaries simulated
-            PrimarySimulated_re = re.findall("Number of primary particles\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
+            PrimarySimulated_re = re.findall(r"Number of primary particles\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
             if PrimarySimulated_re:
                 simInfo["primarySimulated"] = int(float(PrimarySimulated_re[0]))
 
             # Average Tracking Rate (prim/s)
-            TrackingRate_re = re.findall("Tracking rate\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
+            TrackingRate_re = re.findall(r"Tracking rate\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
             if TrackingRate_re:
                 simInfo["trackingRate_prim_s"] = float(TrackingRate_re[0])
 
             # Average Track time per prim
-            TrackTimePerPrimary_re = re.findall("Track time per primary\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+(.+)", line)
+            TrackTimePerPrimary_re = re.findall(r"Track time per primary\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+(.+)", line)
             if TrackTimePerPrimary_re:
                 simInfo["trackTimePerPrimary_us"] = float(TrackTimePerPrimary_re[0][0]) / scaleUnit(TrackTimePerPrimary_re[0][1]) * 1e6
 
             # Timing: initialization
-            TimingInitialization_re = re.findall("\W+initialization\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
+            TimingInitialization_re = re.findall(r"\W+initialization\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
             if TimingInitialization_re:
                 simInfo["timingInitialization_s"] = float(TimingInitialization_re[0][0]) / scaleUnit(TimingInitialization_re[0][1])
             # Timing: PB skimming
-            TimingPBSkimming_re = re.findall("\W+PB skimming\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
+            TimingPBSkimming_re = re.findall(r"\W+PB skimming\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
             if TimingPBSkimming_re:
                 simInfo["timingPBSkimming_s"] = float(TimingPBSkimming_re[0][0]) / scaleUnit(TimingPBSkimming_re[0][1])
             # Timing: primary list
-            TimingPrimaryList_re = re.findall("\W+primary list\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
+            TimingPrimaryList_re = re.findall(r"\W+primary list\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
             if TimingPrimaryList_re:
                 simInfo["timingPrimaryList_s"] = float(TimingPrimaryList_re[0][0]) / scaleUnit(TimingPrimaryList_re[0][1])
             # Timing: geometry checking
-            TimingGeometryChecking_re = re.findall("\W+geometry checking\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
+            TimingGeometryChecking_re = re.findall(r"\W+geometry checking\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
             if TimingGeometryChecking_re:
                 simInfo["timingGeometryChecking_s"] = float(TimingGeometryChecking_re[0][0]) / scaleUnit(TimingGeometryChecking_re[0][1])
             # Timing: tracking
-            TimingTracking_re = re.findall("\W+tracking\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
+            TimingTracking_re = re.findall(r"\W+tracking\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
             if TimingTracking_re:
                 simInfo["timingTracking_s"] = float(TimingTracking_re[0][0]) / scaleUnit(TimingTracking_re[0][1])
             # Timing: writing output
-            TimingWritingOutput_re = re.findall("\W+writing output\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
+            TimingWritingOutput_re = re.findall(r"\W+writing output\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
             if TimingWritingOutput_re:
                 simInfo["timingWritingOutput_s"] = float(TimingWritingOutput_re[0][0]) / scaleUnit(TimingWritingOutput_re[0][1])
             # Timing: other
-            TimingOther_re = re.findall("\W+other\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
+            TimingOther_re = re.findall(r"\W+other\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
             if TimingOther_re:
                 simInfo["timingOther_s"] = float(TimingOther_re[0][0]) / scaleUnit(TimingOther_re[0][1])
 
@@ -231,7 +231,7 @@ def readBeamModel(fileName):
         - "BM RangeShifters": a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.
         - "BM Materials": a dictionary of the materials and its parameters, like density, composition, etc.
 
-    Also other parameters can be defined.
+    Additionally, other parameters can be defined.
 
     Parameters
     ----------
@@ -297,15 +297,15 @@ def writeBeamModel(beamModel, fileName):
         - "BM RangeShifters": a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.
         - "BM Materials": a dictionary of the materials and its parameters, like density, composition, etc.
 
-    Also other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
-    it will be saved to a nicely formated table.
+    Additionally, other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
+    it will be saved to a nicely formatted table.
 
     Parameters
     ----------
     beamModel : dict
         Beam model defined as a dictionary with the required keys.
     fileName : string
-        A string path to beam model YAML file. It is recommended to use .bm file extention.
+        A string path to beam model YAML file. It is recommended to use .bm file extension.
 
     See Also
     --------
@@ -397,7 +397,7 @@ def interpolateBeamModel(beamModel, nomEnergy, interpolation="linear", splineOrd
     See Also
     --------
     readBeamModel : read beam model from CSV beam model file.
-    writeBeamModel : write beam model from DataFrame to a nicely formated CSV.
+    writeBeamModel : write beam model from DataFrame to a nicely formatted CSV.
     """
     from scipy.interpolate import interp1d
     import pandas as pd
@@ -448,7 +448,7 @@ def getFREDVersions():
 
     See Also
     --------
-    checkFREDVersion : Check if the FRED version is installed.
+    checkFREDVersion : check if the FRED version is installed.
     """
     import subprocess
     import re
@@ -480,7 +480,7 @@ def checkFREDVersion(version):
 
     See Also
     --------
-    getFREDVersions : List the installed FRED varions.
+    getFREDVersions : list the installed FRED varions.
     """
     import re
     import fredtools as ft
@@ -493,7 +493,7 @@ def checkFREDVersion(version):
 
 
 def getFREDVersion(version=""):
-    """Get full FRED version name.
+    """Get the full FRED version name.
 
     The function checks if the `version` of FRED is installed
     and returns its full version name.
@@ -510,7 +510,7 @@ def getFREDVersion(version=""):
 
     See Also
     --------
-    getFREDVersions : List the installed FRED varions.
+    getFREDVersions : list the installed FRED varions.
     """
     import subprocess
     import fredtools as ft
@@ -540,9 +540,9 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo=False):
     Parameters
     ----------
     fredInpFileName : path
-        Path string to FRED input file. Usually it is called `fred.inp`.
+        Path string to FRED input file. Usually, it is called `fred.inp`.
     version : str, optional
-        Version of FRED in format #.#.#. If no version given
+        Version of FRED in format #.#.#. If no version is given
         then the current version installed is used. (def. "")
     params : str or list of strings, optional
         Additional parameters to FRED engine, for instance
@@ -553,14 +553,14 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo=False):
     Returns
     -------
     subprocess stdout
-        Standard output of the subprocess method in form of
+        Standard output of the subprocess method in the form of
         list of string lines.
 
     See Also
     --------
-    readFREDStat : Read FRED simulation statistics information from logfile.
-    checkFREDVersion : Check if the FRED version is installed.
-    getFREDVersions : List the installed FRED varions.
+    readFREDStat : read FRED simulation statistics information from logfile.
+    checkFREDVersion : check if the FRED version is installed.
+    getFREDVersions : list the installed FRED varions.
     """
     import os
     import subprocess
@@ -635,7 +635,7 @@ def readGATE_HITSActor(fileName):
 
     See Also
     --------
-    readFREDStat : Read FRED simulation statistics information from logfile.
+    readFREDStat : read FRED simulation statistics information from logfile.
 
     References
     ----------
@@ -692,7 +692,7 @@ def readGATE_PSActor(fileName):
 
         -  *ds* is a step length in [cm]
         -  *Edep* is deposited energy in [MeV]
-        -  *PDGCode* is the same as PDG encoding [1]_
+        -  *PDGCode* is the same as PDG encoding [2]_
 
     Parameters
     ----------
@@ -706,11 +706,11 @@ def readGATE_PSActor(fileName):
 
     See Also
     --------
-    readFREDStat : Read FRED simulation statistics information from logfile.
+    readFREDStat : read FRED simulation statistics information from logfile.
 
     References
     ----------
-    .. [1] `Monte Carlo Particle Numbering Scheme <https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf>`_
+    .. [2] `Monte Carlo Particle Numbering Scheme <https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf>`_
     """
     import pandas as pd
     import numpy as np
@@ -767,7 +767,7 @@ def readGATEStat(fileNameLogOut, displayInfo=False):
     """Read GATE simulation statistics information from Simulation Statistic Actor.
 
     The function reads some statistics information from the
-    GATE Simulation Statistic Actor output [2]_.
+    GATE Simulation Statistic Actor output [3]_.
 
     Parameters
     ----------
@@ -783,7 +783,7 @@ def readGATEStat(fileNameLogOut, displayInfo=False):
 
     References
     ----------
-    .. [2] `GATE manual for Simulation Statistic Actor <https://opengate.readthedocs.io/en/latest/tools_to_interact_with_the_simulation_actors.html?highlight=%20Simulation%20Statistic%20Actor#id7>`_
+    .. [3] `GATE manual for Simulation Statistic Actor <https://opengate.readthedocs.io/en/latest/tools_to_interact_with_the_simulation_actors.html?highlight=%20Simulation%20Statistic%20Actor#id7>`_
     """
     import re
     import fredtools as ft

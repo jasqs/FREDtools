@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Manipulate &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -65,14 +65,17 @@
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Image Manipulate</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.mapStructToImg"><code class="docutils literal notranslate"><span class="pre">mapStructToImg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.floatingToBinaryMask"><code class="docutils literal notranslate"><span class="pre">floatingToBinaryMask()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.cropImgToMask"><code class="docutils literal notranslate"><span class="pre">cropImgToMask()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.setValueMask"><code class="docutils literal notranslate"><span class="pre">setValueMask()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fredtools.overwriteCTPhysicalProperties"><code class="docutils literal notranslate"><span class="pre">overwriteCTPhysicalProperties()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.resampleImg"><code class="docutils literal notranslate"><span class="pre">resampleImg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.sumImg"><code class="docutils literal notranslate"><span class="pre">sumImg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.sumVectorImg"><code class="docutils literal notranslate"><span class="pre">sumVectorImg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.createCylindricalMask"><code class="docutils literal notranslate"><span class="pre">createCylindricalMask()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getImgBEV"><code class="docutils literal notranslate"><span class="pre">getImgBEV()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.setIdentityDirection"><code class="docutils literal notranslate"><span class="pre">setIdentityDirection()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.overwriteCTPhysicalProperties"><code class="docutils literal notranslate"><span class="pre">overwriteCTPhysicalProperties()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.addMarginToMask"><code class="docutils literal notranslate"><span class="pre">addMarginToMask()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="displayImage.html">Display Image</a></li>
@@ -106,48 +109,31 @@
            <div itemprop="articleBody">
              
   <section id="image-manipulate">
-<h1>Image Manipulate<a class="headerlink" href="#image-manipulate" title="Permalink to this heading"></a></h1>
+<h1>Image Manipulate<a class="headerlink" href="#image-manipulate" title="Link to this heading"></a></h1>
 <p>A collection of useful functions to manipulate and change images. The image must be an instance of a SimpleITK image and the functions are mostly wrappers for SimpleITK image filters. Check <a class="reference external" href="https://simpleitk.readthedocs.io/en/master/filters.html">SimpleITK filters</a> for available methods of filtering, registration, etc.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.mapStructToImg">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mapStructToImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'allInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mapStructToImg" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mapStructToImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binaryMask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areaFraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mapStructToImg" title="Link to this definition"></a></dt>
 <dd><p>Map structure to image and create a mask.</p>
-<p>The function reads a <cite>structName</cite> structure from RS dicom file and maps it to
+<p>The function reads a <cite>structName</cite> structure from the RS dicom file and maps it to
 the frame of reference of <cite>img</cite> defined as a SimpleITK image object. The created
 mask is an image with the same frame of reference (origin. spacing, direction
-and size) as the <cite>img</cite> with voxels inside the contour and 0 outside. It is
-assumed that the image is 3D and has a unitary direction, which means that
-the axes describe X, Y and Z directions, respectively. The frame of reference
-of the <cite>img</cite> is not specified, in particular, the Z-spacing does not have to
-be the same as the structure Z-spacing.</p>
-<p>Two methods of mapping voxels are available of are available: ‘allinside’, which
-maps the voxels which are all inside the contour (including voxel size and edges),
-and ‘centreInside’ (default method), which maps only the center of the voxels.</p>
-<p>Two algorithms of mapping are available: ‘matplotlib’, which utilizes the
-matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
-the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+and size) as the <cite>img</cite> with values larger than 0 for voxels inside the contour
+and values 0 outside. In primary usage, the function produces floating masks, i.e., the value
+of each voxel describes its fractional occupancy by the structure.
+It is assumed that the image is 3D and has a unitary direction, which means that
+the axes describe X, Y and Z directions, respectively. The frame of reference of
+the <cite>img</cite> is not specified, in particular, the Z-spacing does not have to be
+the same as the structure Z-spacing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
 <li><p><strong>RSfileName</strong> (<em>string</em>) – Path String to dicom file with structures (RS file).</p></li>
 <li><p><strong>structName</strong> (<em>string</em>) – Name of the structure to be mapped.</p></li>
-<li><p><strong>method</strong> (<em>{'allInside'</em><em>, </em><em>'centreInside'}</em><em>, </em><em>optional</em>) – <p>Method of calculation (def. ‘allInside’):</p>
-<blockquote>
-<div><ul>
-<li><p>’allInside’ : map only the centre of the voxels.</p></li>
-<li><p>’centreInside’ : map the voxels which are all inside the contour.</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>algorithm</strong> (<em>{'smparallel'</em><em>, </em><em>'matplotlib'}</em><em>, </em><em>optional</em>) – <p>Algorithm of calculation (def. ‘smparallel’):</p>
-<blockquote>
-<div><ul>
-<li><p>’smparallel’ : use matplotlib to calculate the voxels inside contours.</p></li>
-<li><p>’matplotlib’ : use multiprocessing sm algorithm to calculate the voxels inside contours.</p></li>
-</ul>
-</div></blockquote>
-</p></li>
+<li><p><strong>binaryMask</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine binary mask production using <cite>areaFraction</cite> parameter. (def. False)</p></li>
+<li><p><strong>areaFraction</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Fraction of pixel area occupancy to calculate binary mask.
+Used only if binaryMask==True. (def. 0.5)</p></li>
 <li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if the multiprocessing should be used and how many cores should
 be exploited. Can be None, then no multiprocessing will be used,
 a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
@@ -156,7 +142,7 @@ or a scalar defining the number of CPU cores to be used. (def. ‘auto’)</p></
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a SimpleITK image describing a mask (i.e. type ‘uint8’ with 0/1 values).</p>
+<dd class="field-even"><p>An object of a SimpleITK image describing a floating or binary mask.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -165,9 +151,9 @@ or a scalar defining the number of CPU cores to be used. (def. ‘auto’)</p></
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>Crop image to mask boundary.</p>
+<dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>crop image to mask boundary.</p>
 </dd>
-<dt><a class="reference internal" href="dvhAnalyse.html#fredtools.getDVH" title="fredtools.getDVH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDVH</span></code></a></dt><dd><p>Calculate DVH for structure</p>
+<dt><a class="reference internal" href="dvhAnalyse.html#fredtools.getDVHMask" title="fredtools.getDVHMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDVHMask</span></code></a></dt><dd><p>calculate DVH for the mask.</p>
 </dd>
 </dl>
 </div>
@@ -176,29 +162,7 @@ or a scalar defining the number of CPU cores to be used. (def. ‘auto’)</p></
 <p>1. the functionality of <code class="docutils literal notranslate"><span class="pre">gatetools</span></code> package has been tested but it turned
 out that it does not consider holes and detached structures. Therefore a new
 approach has been implemented</p>
-<p>2. Although the implementation exploits multiple CPU computations using numba
-functionality, it would be recommended to move this functionality to GPU. Such implementation
-is described in <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> but has not been tested yet.</p>
-<p>3. Two methods of mapping voxels are available of are available: ‘allinside’, which
-maps the voxels which are all inside the contour (including voxel size and edges),
-and ‘centreInside’ (default method), which maps only the center of the voxels.
-Obviously, the ‘centreInside’ method is faster. On the other hand, it usually calculates
-the volume of the structure slightly larger than the real volume. Contrary, the ‘allinside’
-method should always calculate a smaller volume and should converge to the real volume while
-the <cite>img</cite> resolution increases.</p>
-<p>4. Two algorithms of mapping are available: ‘matplotlib’, which utilizes the
-matplotlib.path.Path.contains_points functionality, and ‘smparallel’, which exploits
-the algorithm described in <a class="footnote-reference brackets" href="#id5" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> (search for ‘Comparison of different methods’) along with numba functionality of
-multiprocessing <a class="footnote-reference brackets" href="#id6" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> (default algorithm). The ‘matplotlib’
-the algorithm calculates on a single CPU thread and is the slowest but it does not require
-any specific modules to be installed (basically the matplotlib) and should work on any platform.
-The ‘smparallel’ has been adapted from the above-mentioned conversations and no significant
-changes have been made. Nevertheless, it has been tested against clinical Treatment Planning System
-(Varian Eclipse 15.6) and the standard ‘matplotlib’ method, showing no significant difference.
-Because the ‘smparallel’ method utilizes numba module to speed and parallelizes the computation,
-it might happen that it will not work on all platforms. Basically, the numba and tbb packages
-should be installed, but no testing on other platforms has been done.</p>
-<p>5. The mapping is done for each contour separately and based on the direction (CW or CCW)
+<p>2. The mapping is done for each contour separately and based on the direction (CW or CCW)
 of the contour, it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
 The mapping of each contour is done in 2D, meaning slice by slice. The resulting image has
 the voxel size and shape the same as the input <cite>img</cite> in X and Y directions. The voxel size
@@ -209,42 +173,59 @@ image mask is then resampled to the frame of reference of the input <cite>img</c
 the resampling is applied only to the Z direction, because the frame of reference of X and Y
 directions are the same as the input <cite>img</cite>.</p>
 </div>
-<div class="admonition-references admonition">
-<p class="admonition-title">References</p>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id5" role="note">
-<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id3">3</a>)</span>
-<p><a class="reference external" href="https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python">https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python</a></p>
-</aside>
-<aside class="footnote brackets" id="id6" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="http://numba.pydata.org/">http://numba.pydata.org/</a></p>
-</aside>
-</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.floatingToBinaryMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">floatingToBinaryMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.floatingToBinaryMask" title="Link to this definition"></a></dt>
+<dd><p>Convert floating mask to binary mask.</p>
+<p>The function converts an image defined as an instance of a SimpleITK
+image object describing a floating mask to a binary mask image, based on
+a given threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image describing a binary mask.</p></li>
+<li><p><strong>threshold</strong> (<em>scalar</em><em>, </em><em>optional</em>) – The threshold to calculate the binary mask. (def. 0.5)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An object of a SimpleITK image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.cropImgToMask">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">cropImgToMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.cropImgToMask" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">cropImgToMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.cropImgToMask" title="Link to this definition"></a></dt>
 <dd><p>Crop image to mask boundary.</p>
 <p>The function calculates the boundaries of the <cite>imgMask</cite> defined
-as an instance of a SimpleITK image object describing a mask
-(i.e. type uint8 and only 0/1 values) and crops the <cite>img</cite> defined
-as an instance of a SimpleITK image object to these boundaries. The boundaries
-mean here the most extreme positions of positive values of the mask in
-each direction. The function exploits SimpleITK.Crop routine.</p>
+as an instance of a SimpleITK image object describing a binary or floating mask
+and crops the <cite>img</cite> defined as an instance of a SimpleITK image object to
+these boundaries. The boundaries mean here the most extreme positions of
+positive values (1 for binary mask and above 0 for floating mask) of
+the mask in each direction. The function exploits the SimpleITK.Crop routine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image describing a mask.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
+<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image describing a mask.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a SimpleITK image.</p>
+<dd class="field-even"><p>An object of a SimpleITK image.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -261,28 +242,28 @@ each direction. The function exploits SimpleITK.Crop routine.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.setValueMask">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setValueMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setValueMask" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setValueMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setValueMask" title="Link to this definition"></a></dt>
 <dd><p>Set value inside/outside mask.</p>
-<p>The function sets those the values of the <cite>img</cite> defined as an instance of
-a SimpleITK object which is inside or outside a mask described by the
-<cite>imgMask</cite>, defined as an instance of a SimpleITK object describing a mask
-(i.e. type uint8 and only 0/1 values). The function is a simple wrapper for
-SimpleITK.Mask routine.</p>
+<p>The function sets the values of the <cite>img</cite> defined as an instance of
+a SimpleITK object that are inside or outside a binary or floating mask
+described by the <cite>imgMask</cite>, defined as an instance of a SimpleITK object
+describing a mask. The inside of the mask is defined for voxels with 1 for the binary mask
+and above 0 for the floating mask. The function is a simple wrapper for the SimpleITK.Mask routine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
-<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image describing a mask.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
+<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image describing a mask.</p></li>
 <li><p><strong>value</strong> (<em>scalar</em>) – value to be set (the type will be mapped to the type of <cite>img</cite>).</p></li>
 <li><p><strong>outside</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the values should be set outside the mask
 (where mask values are equal to 0) or inside the mask
-(where mask values are equal to 1) (def. True meaning
+(where mask values are above 0) (def. True meaning
 outside the mask)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a SimpleITK image.</p>
+<dd class="field-even"><p>An object of a SimpleITK image.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -298,60 +279,8 @@ outside the mask)</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="fredtools.overwriteCTPhysicalProperties">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">overwriteCTPhysicalProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'centreInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relElecDensCalib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[-1000,</span> <span class="pre">100,</span> <span class="pre">1000,</span> <span class="pre">6000],</span> <span class="pre">[0,</span> <span class="pre">1.1,</span> <span class="pre">1.532,</span> <span class="pre">3.92]]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HUrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-2000,</span> <span class="pre">50000]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.overwriteCTPhysicalProperties" title="Permalink to this definition"></a></dt>
-<dd><p>Overwrite HU values in a CT image based on structures’ physical properties.</p>
-<p>The function searches in a structure RS dicom file for structures with
-the physical property defined, maps each structure to the CT image
-defined as an instance of a SimpleITK 3D image, and replaces the Hounsfield Units (HU)
-values for voxels inside the structure. Only the relative electronic density physical
-property (‘REL_ELEC_DENSITY’) is implemented now, and it is converted to a HU value
-based on relative electronic density to HU calibration, given as <cite>relElecDensCalib</cite>
-parameter, whereas the missing values are interpolated linearly and rounded to
-the nearest integer HU value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK 3D Image</em>) – Object of a SimpleITK 3D image.</p></li>
-<li><p><strong>RSfileName</strong> (<em>string</em>) – Path String to dicom file with structures (RS file).</p></li>
-<li><p><strong>method</strong> (<em>{'centreInside'</em><em>, </em><em>'allInside'}</em><em>, </em><em>optional</em>) – Method of calculation. See <cite>mapStructToImg</cite> function for more information. (def. ‘centreInside’)</p></li>
-<li><p><strong>algorithm</strong> (<em>{'smparallel'</em><em>, </em><em>'matplotlib'}</em><em>, </em><em>optional</em>) – Algorithm of calculation. See <cite>mapStructToImg</cite> function for more information. (def. ‘smparallel’)</p></li>
-<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if the multiprocessing should be used and how many cores should
-be exploited. See <cite>mapStructToImg</cite> function for more information. (def. ‘auto’)</p></li>
-<li><p><strong>relElecDensCalib</strong> (<em>array_like</em><em>, </em><em>optional</em>) – 2xN iterable (e.g. 2xN numpy array or list of two equal size lists) describing
-the calibration between HU values and relative electronic density. The first element (column)
-is describing the HU values and the second the relative electronic density. The missing values
-are interpolated linearly and if the user would like to use a different interpolation
-like spline or polynomial, it is advised to provide it explicitly for each HU value.
-The structures with the relative electronic density outside the calibration range will be skipped
-and a warning will be displayed. (def. [[-1000, 100, 1000, 6000], [0, 1.1, 1.532, 3.920]])</p></li>
-<li><p><strong>HUrange</strong> (<em>2-element array_like</em><em>, </em><em>optional</em>) – 2-element iterable of HU range to overwrite the physical properties. Only the structures that
-the HU values, derived from the calibration, are within the range (including the boundaries)
-will be overwritten. No warning will be displayed. (def. [-2000, 50000])</p></li>
-<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a transformed SimpleITK 3D image.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>SimpleITK 3D Image</p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
-</dd>
-<dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
-</dd>
-</dl>
-</div>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="fredtools.resampleImg">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">resampleImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.resampleImg" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">resampleImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.resampleImg" title="Link to this definition"></a></dt>
 <dd><p>Resample image to other voxel spacing.</p>
 <p>The function resamples an image defined as an instance of a
 SimpleITK image object to different voxel spacing using
@@ -364,7 +293,7 @@ SimpleITK.Resample routine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
 <li><p><strong>spacing</strong> (<em>array_like</em>) – New spacing in each direction. The length should be the same as the <cite>img</cite> dimension.</p></li>
 <li><p><strong>interpolation</strong> (<em>{'linear'</em><em>, </em><em>'nearest'</em><em>, </em><em>'spline'}</em><em>, </em><em>optional</em>) – Determine the interpolation method. (def. ‘linear’)</p></li>
 <li><p><strong>splineOrder</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of spline interpolation. Must be in the range 0-5. (def. 3)</p></li>
@@ -372,7 +301,7 @@ SimpleITK.Resample routine.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a SimpleITK image.</p>
+<dd class="field-even"><p>An object of a SimpleITK image.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -382,7 +311,7 @@ SimpleITK.Resample routine.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.sumImg">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sumImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sumImg" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sumImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sumImg" title="Link to this definition"></a></dt>
 <dd><p>Sum list of images</p>
 <p>The function sums an iterable (list, tuple, etc.) of images
 defined as instances of a SimpleITK image object. The frame
@@ -391,6 +320,30 @@ of references of all images must be the same.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>imgs</strong> (<em>iterable</em>) – An iterable (list, tuple, etc.) of SimpleITK image objects.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An object of a SimpleITK image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.sumVectorImg">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sumVectorImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sumVectorImg" title="Link to this definition"></a></dt>
+<dd><p>Sum vector image.</p>
+<p>The function sums all elements of a vector in a vector image
+defined as instances of a SimpleITK vector image object.
+The resulting image has the same frame of reference but
+is a scalar image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Vector Image</em>) – An object of a SimpleITK vector image.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -405,8 +358,8 @@ of references of all images must be the same.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.createCylindricalMask">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createCylindricalMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createCylindricalMask" title="Permalink to this definition"></a></dt>
-<dd><p>Create a cylindrical Mask in image field of reference</p>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createCylindricalMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createCylindricalMask" title="Link to this definition"></a></dt>
+<dd><p>Create a cylindrical Mask in the image field of reference</p>
 <p>The function creates a cylindrical mask with a given <cite>dimension</cite> and height
 calculated from the starting and ending points of the cylinder in the frame of
 references of an image defined as a SimpleITK image object describing a 3D image.
@@ -424,7 +377,7 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Instance of a SimpleITK image object describing a mask (i.e. type ‘uint8’ with 0/1 values).</p>
+<dd class="field-even"><p>An instance of a SimpleITK image object describing a mask (i.e. type ‘uint8’ with 0/1 values).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK Image</p>
@@ -445,7 +398,7 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getImgBEV">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getImgBEV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isocentrePosition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gantryAngle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">couchAngle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultPixelValue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getImgBEV" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getImgBEV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isocentrePosition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gantryAngle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">couchAngle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultPixelValue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splineOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getImgBEV" title="Link to this definition"></a></dt>
 <dd><p>Transform an image to Beam’s Eye View (BEV).</p>
 <p>The function transforms a 3D image defined as a SimpleITK 3D image object to
 the Beam’s Eye View (BEV) based on the given isocentre position,
@@ -469,7 +422,7 @@ minimum value of the <cite>img</cite>. (def. ‘auto’)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a transformed SimpleITK 3D image.</p>
+<dd class="field-even"><p>An object of a transformed SimpleITK 3D image.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SimpleITK 3D Image</p>
@@ -483,7 +436,7 @@ minimum value of the <cite>img</cite>. (def. ‘auto’)</p></li>
 <li><p>translate the image to the isocentre as to have the isocentre at zero position,</p></li>
 <li><p>rotate the couch around the isocentre,</p></li>
 <li><p>rotate the gantry around the isocentre,</p></li>
-<li><p>rotate and flip image to get BEV.</p></li>
+<li><p>rotate and flip the image to get BEV.</p></li>
 </ol>
 </div></blockquote>
 <p>Note that the isocentre of the transformed image is at the zero point.</p>
@@ -491,20 +444,20 @@ minimum value of the <cite>img</cite>. (def. ‘auto’)</p></li>
 a negative isocentre defined in the DICOM RN plan, the couch rotation defined
 in the delivery sequence of the FRED rtplan is a negative couch rotation defined
 in the DICOM RN plan, but the gantry rotation defined in the delivery sequence
-of the FRED rtplan is equal to the gantry rotation the DICOM RN plan.</p>
+of the FRED rtplan is equal to the gantry rotation of the DICOM RN plan.</p>
 </div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.setIdentityDirection">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setIdentityDirection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setIdentityDirection" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">setIdentityDirection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.setIdentityDirection" title="Link to this definition"></a></dt>
 <dd><p>Set an identity direction for the image.</p>
 <p>The function sets an identity direction of an image defined as an instance of a
 SimpleITK image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -515,6 +468,96 @@ SimpleITK image.</p>
 <dd class="field-odd"><p>SimpleITK Image</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.overwriteCTPhysicalProperties">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">overwriteCTPhysicalProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areaFraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relElecDensCalib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[-1024,</span> <span class="pre">-1000,</span> <span class="pre">-777.82,</span> <span class="pre">-495.34,</span> <span class="pre">-64.96,</span> <span class="pre">-34.39,</span> <span class="pre">-3.87,</span> <span class="pre">51.92,</span> <span class="pre">56.99,</span> <span class="pre">226.05,</span> <span class="pre">857.65,</span> <span class="pre">1313,</span> <span class="pre">8513,</span> <span class="pre">12668,</span> <span class="pre">25332],</span> <span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0.19,</span> <span class="pre">0.489,</span> <span class="pre">0.949,</span> <span class="pre">0.976,</span> <span class="pre">1,</span> <span class="pre">1.043,</span> <span class="pre">1.053,</span> <span class="pre">1.117,</span> <span class="pre">1.456,</span> <span class="pre">1.696,</span> <span class="pre">3.76,</span> <span class="pre">6.58,</span> <span class="pre">9.09]]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HUrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-2000,</span> <span class="pre">50000]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.overwriteCTPhysicalProperties" title="Link to this definition"></a></dt>
+<dd><p>Overwrite HU values in a CT image based on structures’ physical properties.</p>
+<p>The function searches in a structure RS dicom file for structures with
+the physical property defined, maps each structure to the CT image
+defined as an instance of a SimpleITK 3D image, and replaces the Hounsfield Units (HU)
+values for voxels inside the structure. Only the relative electronic density physical
+property (‘REL_ELEC_DENSITY’) is implemented now, and it is converted to a HU value
+based on relative electronic density to HU calibration, given as <cite>relElecDensCalib</cite>
+parameter, whereas the missing values are interpolated linearly and rounded to
+the nearest integer HU value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK 3D Image</em>) – Object of a SimpleITK 3D image.</p></li>
+<li><p><strong>RSfileName</strong> (<em>string</em>) – Path String to dicom file with structures (RS file).</p></li>
+<li><p><strong>areaFraction</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Fraction of pixel area occupancy to calculate binary mask. See <cite>mapStructToImg</cite> function for more information. (def. 0.5)</p></li>
+<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if the multiprocessing should be used and how many cores should
+be exploited. See <cite>mapStructToImg</cite> function for more information. (def. ‘auto’)</p></li>
+<li><p><strong>relElecDensCalib</strong> (<em>array_like</em><em>, </em><em>optional</em>) – 2xN iterable (e.g. 2xN numpy array or list of two equal size lists) describing
+the calibration between HU values and relative electronic density. The first element (column)
+is describing the HU values and the second the relative electronic density. The missing values
+are interpolated linearly and if the user would like to use a different interpolation
+like spline or polynomial, it is advised to provide it explicitly for each HU value.
+The structures with the relative electronic density outside the calibration range will be skipped
+and a warning will be displayed. (def. [[-1024, -1000, -777.82, -495.34, -64.96, -34.39, -3.87, 51.92, 56.99, 226.05, 857.65, 1313, 8513, 12668, 25332]
+, [0, 0, 0.190, 0.489, 0.949, 0.976, 1, 1.043, 1.053, 1.117, 1.456, 1.696, 3.76, 6.58, 9.09]])</p></li>
+<li><p><strong>HUrange</strong> (<em>2-element array_like</em><em>, </em><em>optional</em>) – 2-element iterable of HU range to overwrite the physical properties. Only the structures that
+the HU values, derived from the calibration, are within the range (including the boundaries)
+will be overwritten. No warning will be displayed. (def. [-2000, 50000])</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An object of a transformed SimpleITK 3D image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK 3D Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.addMarginToMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">addMarginToMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginLateral</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginProximal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginDistal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lateralKernelType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'circular'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.addMarginToMask" title="Link to this definition"></a></dt>
+<dd><p>Add lateral, proximal and distal margins to mask.</p>
+<p>The function adds lateral, proximal and/or distal margins to a binary mask defined as an
+instance of a SimpleITK 3D image describing a binary mask. The lateral directions are defined
+in the X and Y axes, whereas the distal and proximal are along the Z axis. It is the user’s
+responsibility to transform the image into the correct view. Usually the ‘getImgBEV’
+routine can be used to get the beam’s eye view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgMask</strong> (<em>SimpleITK 3D Image</em>) – An object of a SimpleITK 3D image describing a binary mask.</p></li>
+<li><p><strong>marginLateral</strong> (<em>scalar</em>) – Lateral margin in the mask unit, usually in [mm]</p></li>
+<li><p><strong>marginProximal</strong> (<em>scalar</em>) – Proximal margin in the mask unit, usually in [mm]</p></li>
+<li><p><strong>marginDistal</strong> (<em>scalar</em>) – Distal margin in the mask unit, usually in [mm]</p></li>
+<li><p><strong>lateralKernelType</strong> (<em>{'circular'</em><em>, </em><em>'box'</em><em>, </em><em>'cross'}</em><em>, </em><em>optional</em>) – Kernel type for the lateral dilatation. (def. ‘circular’)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Object of a SimpleITK 3D image describing the diluted mask.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK 3D Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getImgBEV" title="fredtools.getImgBEV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getImgBEV</span></code></a></dt><dd><p>transform an image to Beam’s Eye View (BEV).</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 </section>

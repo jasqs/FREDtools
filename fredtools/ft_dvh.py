@@ -1,19 +1,100 @@
-def _DVH_DoseLevelVolume(doseLevelArr):
-    """Calculate number of voxels greater or equal to doseLevel"""
-    import numpy as np
-
-    return doseLevelArr[0], np.sum(doseLevelArr[1] >= doseLevelArr[0])
-
-
-def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, method="allInside", algorithm="smparallel", CPUNo="auto", displayInfo=False):
-    """Calculate DVH for structure.
+def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=False):
+    """Calculate DVH for the mask.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
-    a structure named `structName` and defined in the structure dicom file.
-    The image can be resampled before mapping to increase the resolution and
-    the routine supports multiple CPU computations. The routine exploits and returns
-    dicompylercore.dvh.DVH class to hold the DVH. Read more about the dicompyler-core
-    DVH module on https://dicompyler-core.readthedocs.io/en/latest/index.html.
+    a mask with the same field of reference (FoR). The mask must defined as
+    a SimpleITK image object describing a binary or floating mask.
+    The routine exploits and returns dicompylercore.dvh.DVH class to hold the DVH.
+    Read more about the dicompyler-core DVH module
+    on https://dicompyler-core.readthedocs.io/en/latest/index.html.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        Object of a SimpleITK 3D image.
+    imgMask : SimpleITK Image
+        Object of a SimpleITK 3D image describing the binary of floating mask.
+    dosePrescribed : scalar
+        Target prescription dose.
+    doseLevelStep : scalar, optional
+        Size of dose bins. (def. 0.01)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    dicompylercore DVH
+        An instance of a dicompylercore.dvh.DVH class holding the DVH.
+
+    See Also
+    --------
+        dicompylercore : more information about the dicompylercore.dvh.DVH.
+        resampleImg : resample image.
+        mapStructToImg : map structure to image (refer for more information about mapping algorithms).
+        getDVHStruct : calculate DVH for structure.
+    """
+    from dicompylercore import dvh
+    from multiprocessing import Pool
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    ft._isSITK3D(img, raiseError=True)
+    ft._isSITK3D(imgMask, raiseError=True)
+    ft._isSITK_mask(imgMask, raiseError=True)
+
+    # check FoR matching of img and mask
+    if not ft.compareImgFoR(img, imgMask, displayInfo=False):
+        raise AttributeError("Both input images, 'img' and 'imgMask' must have the same FoR.")
+
+    # convert images to vectors
+    arrImg = sitk.GetArrayViewFromImage(img)
+    arrMask = sitk.GetArrayViewFromImage(imgMask)
+
+    # remove all voxels not within mask
+    arrMaskValid = arrMask > 0
+    arrImg = arrImg[arrMaskValid]
+    arrMask = arrMask[arrMaskValid]
+
+    # calculate DVH
+    doseBins = np.arange(0, arrImg.max() + doseLevelStep, doseLevelStep)
+    volume, doseBins = np.histogram(arrImg, doseBins, weights=arrMask.astype("float"))
+
+    # calculate volume in real units [mm3]
+    volume *= np.prod(img.GetSpacing())
+
+    # get color and name
+    maskColor = imgMask.GetMetaData("ROIColor") if "ROIColor" in imgMask.GetMetaDataKeys() else [0, 0, 255]
+    maskName = imgMask.GetMetaData("ROIName") if "ROIName" in imgMask.GetMetaDataKeys() else "unknown"
+
+    # generate DVH
+    dvhMask = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=maskName, color=maskColor, dvh_type="differential").cumulative
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print(f"# Structure name: '{dvhMask.name}'")
+        print(f"# Prescribed dose: {dosePrescribed:.3f} Gy")
+        print(f"# Volume: {dvhMask.volume:.3f} {dvhMask.volume_units}")
+        print(f"# Dose max/min: {dvhMask.max:.3f}/{dvhMask.min:.3f} {dvhMask.dose_units}")
+        print(f"# Dose mean: {dvhMask.mean:.3f} {dvhMask.dose_units}")
+        print(f"# Absolute HI (D02-D98): {dvhMask.statistic('D02').value-dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}")
+        print(f"# D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}")
+        print(f"# D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}")
+        print(f"# D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}")
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return dvhMask
+
+
+def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, CPUNo="auto", displayInfo=False):
+    """Calculate DVH for the structure.
+
+    The function calculates a dose-volume histogram (DVH) for voxels inside
+    a structure named `structName` and is defined in the structure dicom file.
+    The image can be resampled before mapping to increase the resolution. The routine
+    exploits and returns dicompylercore.dvh.DVH class to hold the DVH.
+    Read more about the dicompyler-core DVH module
+    on https://dicompyler-core.readthedocs.io/en/latest/index.html.
 
     Parameters
     ----------
@@ -32,18 +113,6 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
         Can be a scalar, then the same number will be used for each axis,
         3-element iterable defining the voxel size for each axis, or `None` meaning
         no interpolation. (def. None)
-    method: {'allInside', 'centreInside'}, optional
-        Method of calculation (def. 'allInside'):
-
-            -  'allInside' : map only the centre of the voxels.
-            -  'centreInside' : map the voxels which are all inside the contour.
-
-    algorithm: {'smparallel', 'matplotlib'}, optional
-        Algorithm of calculation (def. 'smparallel'):
-
-            -  'smparallel' : use matplotlib to calculate the voxels inside contours.
-            -  'matplotlib' : use multiprocessing sm algorithm to calculate the voxels inside contours.
-
     CPUNo : {'auto', 'none'}, scalar or None
         Define if the multiprocessing should be used and how many cores should
         be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
@@ -55,26 +124,21 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
     Returns
     -------
     dicompylercore DVH
-        Instance of a dicompylercore.dvh.DVH class holding the DVH.
+        An instance of a dicompylercore.dvh.DVH class holding the DVH.
 
     See Also
     --------
-        dicompylercore: more information about the dicompylercore.dvh.DVH.
-        resampleImg: resample image.
-        mapStructToImg: map structure to image (refer for more information about mapping algorithms).
+        dicompylercore : more information about the dicompylercore.dvh.DVH.
+        resampleImg : resample image.
+        mapStructToImg : map structure to image (refer for more information about mapping algorithms).
+        getDVHMask : calculate DVH for a mask.
 
     Notes
     -----
-    Although, the 'allInside' method seems have more sense, the method 'centreInside' shows
-    more consistent results to clinical Treatment Planning System Varian Eclipse 15.6. Nevertheless,
-    both methods should, in theory, converge to the same results while the voxel size of the input 'img'
-    decreasses. The comparison has been made for different structures of small/large volumes, with holes
-    and with detached contours, with the image voxels size down to [0.2, 0.2, 0.2] mm. Consider, that
-    decreasing the input image voxel size (for instance by the resampleImg function), its shape
-    increases and the memory footprint increases.
+    The structure mapping is performed in 'floating' mode meaning that the fractional structure
+    occupancy is assigned to each voxel of the image. Use `getDVHMask` to use a specially prepared
+    mask for the DVH calculation.
     """
-    from dicompylercore import dvh
-    from multiprocessing import Pool
     import fredtools as ft
     import numpy as np
 
@@ -89,11 +153,12 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
     else:
         struct = structList.loc[structList.ROIName == structName]
 
-    # get number of CPUs to be used for computation
-    CPUNo = ft._getCPUNo(CPUNo)
+    # get the number of CPUs to be used for computation
+    CPUNo = ft.getCPUNo(CPUNo)
 
+    # resample image if requested
     if resampleImg:
-        # check if rescaleImg is in proper format
+        # check if rescaleImg is in the proper format
         if np.isscalar(resampleImg):
             resampleImg = [resampleImg] * img.GetDimension()
         else:
@@ -102,41 +167,13 @@ def getDVH(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resa
         if not len(resampleImg) == img.GetDimension():
             raise ValueError(f"Shape of 'spacing' is {resampleImg} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
 
-        # resample croped image
+        # resample image
         img = ft.resampleImg(img=img, spacing=resampleImg)
 
-    # map structure to resampled img
-    imgROI = ft.mapStructToImg(img=img, RSfileName=RSfileName, structName=structName, CPUNo=CPUNo, method=method, algorithm=algorithm)
-    # print(ft.arr(imgROI).sum() * np.prod(np.array(imgROI.GetSpacing())) / 1e3)
+    # map structure to resampled img generating a floating mask
+    imgROI = ft.mapStructToImg(img=img, RSfileName=RSfileName, structName=structName, binaryMask=False, CPUNo=CPUNo, displayInfo=False)
 
-    # remove values outside ROI
-    img = ft.setValueMask(img, imgROI, value=np.nan)
-    # crop img to ROI
-    img = ft.cropImgToMask(img, imgROI, displayInfo=False)
-    # get numpy array from image
-    arr = ft.arr(img)
-
-    doseBinsStart = np.arange(0, np.nanmax(arr) + doseLevelStep, doseLevelStep)
-    doseLevelArr = list(zip(doseBinsStart, [arr] * len(doseBinsStart)))
-    if not CPUNo:
-        dvhData = [_DVH_DoseLevelVolume(doseLevelArrSingle) for doseLevelArrSingle in doseLevelArr]
-    else:
-        with Pool(CPUNo) as p:
-            dvhData = p.map(_DVH_DoseLevelVolume, doseLevelArr)
-
-    dvhData = np.array(dvhData, dtype="float")
-    # sort by doseLevel
-    dvhData = dvhData[np.argsort(dvhData[:, 0])]
-    # get doseBins and volumes
-    doseBins = dvhData[:, 0]
-    volume = dvhData[:, 1]
-    # recalculate number of voxels to volume
-    volume *= np.prod(np.array(img.GetSpacing()))
-    # add ending dose level
-    doseBins = np.append(doseBins, doseBins[-1] + doseLevelStep)
-
-    # generate DVH
-    dvhROI = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=structName, color=struct.ROIColor.values[0])
+    dvhROI = getDVHMask(img, imgROI, dosePrescribed=dosePrescribed, doseLevelStep=doseLevelStep)
 
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")

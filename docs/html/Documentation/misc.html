@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Miscellaneous &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>Miscellaneous &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -38,7 +38,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -78,6 +78,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.fitVavilov"><code class="docutils literal notranslate"><span class="pre">fitVavilov()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.sigma2fwhm"><code class="docutils literal notranslate"><span class="pre">sigma2fwhm()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.fwhm2sigma"><code class="docutils literal notranslate"><span class="pre">fwhm2sigma()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.getCPUNo"><code class="docutils literal notranslate"><span class="pre">getCPUNo()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -107,11 +108,11 @@
            <div itemprop="articleBody">
              
   <section id="miscellaneous">
-<h1>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this heading"></a></h1>
+<h1>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Link to this heading"></a></h1>
 <p>A collection of useful miscellaneous functions with no category.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.mergePDF">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mergePDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PDFFileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mergedPDFFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removeSource</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mergePDF" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">mergePDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PDFFileNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mergedPDFFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removeSource</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.mergePDF" title="Link to this definition"></a></dt>
 <dd><p>Merge multiple PDF files to a single PDF.</p>
 <p>The function merges multiple PDF files given as a list of
 path strings to a single PDF.</p>
@@ -121,12 +122,12 @@ path strings to a single PDF.</p>
 <li><p><strong>PDFFileNames</strong> (<em>list</em><em> of </em><em>strings</em>) – List of path strings to PDF files to be merged.</p></li>
 <li><p><strong>mergedPDFFileName</strong> (<em>string</em>) – Path string where the merged PDF will be saved.</p></li>
 <li><p><strong>removeSource</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the source PDF files should be
-removed after merge. (def. False)</p></li>
+removed after the merge. (def. False)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Absolute path string where the merged PDF was be saved.</p>
+<dd class="field-even"><p>Absolute path string where the merged PDF will be saved.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>mergedPDFFileName</p>
@@ -136,18 +137,18 @@ removed after merge. (def. False)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getGIcmap">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getGIcmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxGI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getGIcmap" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getGIcmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxGI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getGIcmap" title="Link to this definition"></a></dt>
 <dd><p>Get colormap for Gamma Index images.</p>
 <p>The function creates a colormap for Gamma Index (GI) images,
 that can be used by matplotlib.pyplot.imshow function for
 displaying 2D images. The colormap is created from 0 to
-the <cite>maxGI</cite> value, whereas from 0 to 1 (GI test passed) the colour
-is changing from dark blue to white, and from 1 to <cite>maxGI</cite> it is
-changing from light red to red.</p>
+the <cite>maxGI</cite> value, whereas from 0 to 1 (GI test passed) the color
+changes from dark blue to white, and from 1 to <cite>maxGI</cite> it changes
+from light red to red.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>maxGI</strong> (<em>scalar</em>) – Maximum value of the colormap.</p></li>
+<li><p><strong>maxGI</strong> (<em>scalar</em>) – The maximum value of the colormap.</p></li>
 <li><p><strong>N</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Number of segments of the colormap. (def. 256)</p></li>
 </ul>
 </dd>
@@ -161,14 +162,14 @@ changing from light red to red.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="gammaIndexAnalyse.html#fredtools.calcGammaIndex" title="fredtools.calcGammaIndex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcGammaIndex</span></code></a></dt><dd><p>calculate Gamma Index for two images.</p>
+<dt><a class="reference internal" href="gammaIndexAnalyse.html#fredtools.calcGammaIndex" title="fredtools.calcGammaIndex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcGammaIndex</span></code></a></dt><dd><p>calculate the Gamma Index for two images.</p>
 </dd>
 </dl>
 </div>
 <div class="admonition-examples admonition">
 <p class="admonition-title">Examples</p>
 <p>It is assumed that the img is an image describing a slice
-of Gamma Index (GI) values calculate up to maximum value 3.
+of Gamma Index (GI) values calculated up to maximum value 3.
 To plot the GI map with the GI colormap:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ft</span><span class="o">.</span><span class="n">arr</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">getGIcmap</span><span class="p">(</span><span class="n">maxGI</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
 </pre></div>
@@ -178,7 +179,7 @@ To plot the GI map with the GI colormap:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getHistogram">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getHistogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returnBinCenters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getHistogram" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getHistogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returnBinCenters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getHistogram" title="Link to this definition"></a></dt>
 <dd><p>Get histogram or differential histogram.</p>
 <p>The function creates a histogram data from a given dataX iterable in the defined bins.
 It is possible to generate a differential histogram where the values of the histogram
@@ -195,16 +196,16 @@ It must be of the same size as <cite>dataX</cite>. For instance, it can be: a si
 pandas DataFrame, pandas Series, 1D numpy array, 1D list, 1D tuple etc. (def. None)</p></li>
 <li><p><strong>bins</strong> (<em>1D array_like</em><em>, </em><em>optional</em>) – 1D array-like iterable with the bins’ edges to calculate histogram.
 If none, then the bins will be generated automatically between
-minimum and maximum value of <cite>dataX</cite> in 100 steps linearly. (def. None)</p></li>
+the minimum and maximum value of <cite>dataX</cite> in 100 steps linearly. (def. None)</p></li>
 <li><p><strong>kind</strong> (<em>{'mean'</em><em>, </em><em>'sum'</em><em>, </em><em>'std'</em><em>, </em><em>'median'</em><em>, </em><em>'min'</em><em>, </em><em>'max'</em><em>, </em><em>'mean-std'</em><em>, </em><em>'mean+std'}</em><em>, </em><em>optional</em>) – Determine the <cite>dataY</cite> quantity evaluation for a differential histogram.
 It can be: mean, standard deviation, median, minimum, maximum, sum
 value or mean +/- standard deviation. (def. ‘mean’)</p></li>
-<li><p><strong>returnBinCenters</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the first element of returned list is going to
-be the bin centres (True) or bin edges (False). (def. True)</p></li>
+<li><p><strong>returnBinCenters</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the first element of the returned list is going to
+be the bin centers (True) or bin edges (False). (def. True)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Two-element tuple of 1D numpy ndarrays, where the first element
+<dd class="field-even"><p>A two-element tuple of 1D numpy ndarrays, where the first element
 is a list of bin centres (or edges) and the second is a list of
 histogram values.</p>
 </dd>
@@ -216,7 +217,7 @@ histogram values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.pdfLandau">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfLandau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfLandau" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfLandau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfLandau" title="Link to this definition"></a></dt>
 <dd><p>Landau probability density function (PDF).</p>
 <p>The function generates a Landau probability density with a given most probable
 value (<cite>mpv</cite>), width (described with <cite>xi</cite>) and amplitude at <cite>mpv</cite>. It was adapted
@@ -261,11 +262,11 @@ from <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noter
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.pdfLandauGauss">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfLandauGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfLandauGauss" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfLandauGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfLandauGauss" title="Link to this definition"></a></dt>
 <dd><p>Probability density function (PDF) of Landau convoluted with a Gaussian.</p>
 <p>The function generates a Landau convoluted with a Gaussian probability density with a given
-most probable value of the convoluted function (<cite>mpv</cite>), width of Landau (described with <cite>xi</cite>),
-standard deviation of gaussian and amplitude at <cite>mpv</cite>. It was adapted from <a class="footnote-reference brackets" href="#id7" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> which was implemented
+most probable value of the convoluted function (<cite>mpv</cite>), the width of Landau (described with <cite>xi</cite>),
+the standard deviation of Gaussian and amplitude at <cite>mpv</cite>. It was adapted from <a class="footnote-reference brackets" href="#id7" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> which was implemented
 based on the ROOT implementation. See <a class="footnote-reference brackets" href="#id9" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> for more details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -273,12 +274,12 @@ based on the ROOT implementation. See <a class="footnote-reference brackets" hre
 <li><p><strong>x</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Point (or points) where to calculate the PDF.</p></li>
 <li><p><strong>mpv</strong> (<em>scalar</em>) – Position of the most probable value (MPV) of the convoluted distribution.</p></li>
 <li><p><strong>xi</strong> (<em>float</em>) – Parameter ‘xi’ of the Landau distribution, it is a measure of its width.</p></li>
-<li><p><strong>sigma</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Standard deviation of the gaussian distribution. (def. 0)</p></li>
+<li><p><strong>sigma</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Standard deviation of the Gaussian distribution. (def. 0)</p></li>
 <li><p><strong>amp</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Amplitude of the PDF at MPV. (def. 1)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Single value or array of values of the Landau convoluted with gaussian PDF.</p>
+<dd class="field-even"><p>Single value or array of values of the Landau convoluted with Gaussian PDF.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>scalar or numpy array</p>
@@ -293,8 +294,8 @@ based on the ROOT implementation. See <a class="footnote-reference brackets" hre
 </div>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>The ‘mpv’ parameter dose not describe the MPV of the landau distribution but the MPV,
-i.e the position of the maximum value, of the whole Landau-gauss convoluted PDF.</p>
+<p>The ‘mpv’ parameter does not describe the MPV of the landau distribution but the MPV,
+i.e. the position of the maximum value, of the whole Landau-gauss convoluted PDF.</p>
 </div>
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
@@ -313,14 +314,14 @@ i.e the position of the maximum value, of the whole Landau-gauss convoluted PDF.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.pdfVavilov">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfVavilov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfVavilov" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">pdfVavilov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.pdfVavilov" title="Link to this definition"></a></dt>
 <dd><p>Probability density function (PDF) of Vavilov.</p>
 <p>The function generates a Vavilov probability density with a given
 most probable value function (<cite>mpv</cite>), amplitude (<cite>amp</cite>), as well as <cite>kappa</cite>,
 <cite>beta</cite> and <cite>scaling</cite> parameters. It uses the implementation of pyamtrack library <a class="footnote-reference brackets" href="#id13" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>
 that adopts the ROOT implementation <a class="footnote-reference brackets" href="#id14" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>. The implemented PDF is not a true Vavilov distribution
 and the <cite>scaling</cite> parameter is not included in the original ROOT implementation. Therefore, the parameters
-<cite>kappa</cite> and <cite>beta</cite> might not describe the the real kappa and beta parameters of the ROOT Vavilov.
+<cite>kappa</cite> and <cite>beta</cite> might not describe the real kappa and beta parameters of the ROOT Vavilov.
 Nevertheless, the PDF can be used for fitting the distribution to the measurement data
 and to retrieve the MPV but the user must be aware that, for instance, the energy calculated based on
 the <cite>beta</cite> parameter might be wrong.</p>
@@ -366,7 +367,7 @@ the <cite>beta</cite> parameter might be wrong.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.fitLandau">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitLandau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitLandau" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitLandau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitLandau" title="Link to this definition"></a></dt>
 <dd><p>Fit Landau distribution.</p>
 <p>The function fits Landau distribution to the data given as <cite>x</cite> and <cite>y</cite> values,
 using the least square algorithm.</p>
@@ -375,7 +376,7 @@ using the least square algorithm.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em>) – <cite>X</cite> values.</p></li>
 <li><p><strong>y</strong> (<em>array_like</em>) – <cite>Y</cite> values.</p></li>
-<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fiting.</p></li>
+<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fitting.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -398,16 +399,16 @@ using the least square algorithm.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.fitLandauGauss">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitLandauGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitLandauGauss" title="Permalink to this definition"></a></dt>
-<dd><p>Fit Landau convoluted with gaussian distribution.</p>
-<p>The function fits Landau convoluted with gaussian distribution
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitLandauGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitLandauGauss" title="Link to this definition"></a></dt>
+<dd><p>Fit Landau convoluted with Gaussian distribution.</p>
+<p>The function fits Landau convoluted with Gaussian distribution
 to the data given as <cite>x</cite> and <cite>y</cite> values, using the least square algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em>) – <cite>X</cite> values.</p></li>
 <li><p><strong>y</strong> (<em>array_like</em>) – <cite>Y</cite> values.</p></li>
-<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fiting.</p></li>
+<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fitting.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -430,10 +431,10 @@ to the data given as <cite>x</cite> and <cite>y</cite> values, using the least s
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.fitVavilov">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitVavilov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitVavilov" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fitVavilov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixAmplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fitVavilov" title="Link to this definition"></a></dt>
 <dd><p>Fit Vavilov distribution.</p>
-<p>The function fits Vavilov distribution to the data given as <cite>x</cite> and <cite>y</cite> values,
-using the least square algorithm. The fiting routine is sensitive for the initial
+<p>The function fits the Vavilov distribution to the data given as <cite>x</cite> and <cite>y</cite> values,
+using the least square algorithm. The fitting routine is sensitive to the initial
 values of kappa, beta and scaling. Therefore, the results should be always validated
 and different initial values of the parameters can be used if needed.</p>
 <dl class="field-list simple">
@@ -441,7 +442,7 @@ and different initial values of the parameters can be used if needed.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em>) – <cite>X</cite> values.</p></li>
 <li><p><strong>y</strong> (<em>array_like</em>) – <cite>Y</cite> values.</p></li>
-<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fiting.</p></li>
+<li><p><strong>fixAmplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – determine if the <cite>amp</cite> parameter of the PDF should be used in the fitting.</p></li>
 <li><p><strong>beta0</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Initial value of <cite>beta</cite> parameter. (def. 0.5)</p></li>
 <li><p><strong>kappa0</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Initial value of <cite>kappa</cite> parameter. (def. 0.3)</p></li>
 <li><p><strong>scaling0</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Initial value of <cite>scaling</cite> parameter. If it is less than 0 then
@@ -468,9 +469,9 @@ it is calculated based on the standard deviation of the distribution. (def. -1)<
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.sigma2fwhm">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sigma2fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sigma2fwhm" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sigma2fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sigma2fwhm" title="Link to this definition"></a></dt>
 <dd><p>Convert sigma to FWHM.</p>
-<p>The function recalculates sigma parameter of a Gaussian distribution
+<p>The function recalculates the sigma parameter of a Gaussian distribution
 to full width at half maximum (FWHM).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -494,7 +495,7 @@ to full width at half maximum (FWHM).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.fwhm2sigma">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fwhm2sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwhm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fwhm2sigma" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">fwhm2sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwhm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.fwhm2sigma" title="Link to this definition"></a></dt>
 <dd><p>Convert FWHM to sigma.</p>
 <p>The function recalculates full width at half maximum (FWHM)
 of a Gaussian distribution to sigma.</p>
@@ -516,6 +517,26 @@ of a Gaussian distribution to sigma.</p>
 </dd>
 </dl>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getCPUNo">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getCPUNo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getCPUNo" title="Link to this definition"></a></dt>
+<dd><p>Get a number of CPU cores.</p>
+<p>The function returns the number of CPU cores. Usually, it is used in functions utilizing
+multiprocessing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'one'}</em><em> or </em><em>integer</em><em>, </em><em>optional</em>) – A string of ‘auto’ or “one” for all the available CPU cores or a single one, respectively,
+or a positive integer showing the number of CPU cores. (def. ‘auto’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of CPU cores.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

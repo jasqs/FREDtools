@@ -49,3 +49,14 @@ DICOM files (\*.dcm, \*.dicom)
 .. autofunction:: fredtools.getExternalName
 
 .. autofunction:: fredtools.getCT
+
+.. autofunction:: fredtools.getPET
+
+.. autofunction:: fredtools.getRD
+
+.. autofunction:: fredtools.getRDFileNameForFieldNumber
+
+Other formats
+------------------------------------------------
+
+.. autofunction:: fredtools.readOPG

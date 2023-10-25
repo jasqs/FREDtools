@@ -5,18 +5,24 @@ A collection of useful functions to manipulate and change images. The image must
 
 .. autofunction:: fredtools.mapStructToImg
 
+.. autofunction:: fredtools.floatingToBinaryMask
+
 .. autofunction:: fredtools.cropImgToMask
 
 .. autofunction:: fredtools.setValueMask
 
-.. autofunction:: fredtools.overwriteCTPhysicalProperties
-
 .. autofunction:: fredtools.resampleImg
 
 .. autofunction:: fredtools.sumImg
+
+.. autofunction:: fredtools.sumVectorImg
 
 .. autofunction:: fredtools.createCylindricalMask
 
 .. autofunction:: fredtools.getImgBEV
 
 .. autofunction:: fredtools.setIdentityDirection
+
+.. autofunction:: fredtools.overwriteCTPhysicalProperties
+
+.. autofunction:: fredtools.addMarginToMask

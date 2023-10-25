@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dij influence matrix Analyse &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>Dij influence matrix Analyse &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -101,17 +101,17 @@
            <div itemprop="articleBody">
              
   <section id="dij-influence-matrix-analyse">
-<h1>Dij influence matrix Analyse<a class="headerlink" href="#dij-influence-matrix-analyse" title="Permalink to this heading"></a></h1>
+<h1>Dij influence matrix Analyse<a class="headerlink" href="#dij-influence-matrix-analyse" title="Link to this heading"></a></h1>
 <p>A collection of useful functions for reading and manipulating with Dij influence matrices produced by a Monte Carlo. The Dij influence matrix is usually a 3D image describing the influence (dose, LET or other) for each pencil beam, therefore it can be treated as a 4D image with geometrical X, Y, Z and pencil beam dimensions. Such matrices can occupy a lot of memory, therefore most of the functions implemented here are equipped with memory occupancy checking.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getDijFREDVectorImage">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDVectorImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PBNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returnOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseMemError</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDVectorImage" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDVectorImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PBNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returnOrder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseMemError</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDVectorImage" title="Link to this definition"></a></dt>
 <dd><p>Read FRED Dij image to SimpleITK vector image object.</p>
 <p>The function reads a Dij (influence matrix) file produced by
 the FRED Monte Carlo to an instance of a SimpleITK vector image object.
 The default type of the SimpleITK vector image object is “float32”. Each
 element of the vectors in voxels is a single pencil beam signal. By default,
-all the pencil beams saved to Dij influence matrix are read, but the user can
+all the pencil beams saved to the Dij influence matrix are read, but the user can
 ask for selected pencil beams (the field will be read automatically) or for
 all pencil beams for a given field or list of fields. See the Notes for more details.
 The order of the vectors is the order of the pencil beam’s signal saved in
@@ -132,7 +132,7 @@ along with the SimpleITK vector image. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object of a SimpleITK vector image, or SimpleITK Vector Image along with the pandas DataFtame
+<dd class="field-even"><p>An object of a SimpleITK vector image, or SimpleITK Vector Image along with the pandas DataFtame
 describing the order of the pencil beams and fields.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -142,11 +142,11 @@ describing the order of the pencil beams and fields.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getDijFREDInfo" title="fredtools.getDijFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDInfo</span></code></a></dt><dd><p>Get information from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDInfo" title="fredtools.getDijFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDInfo</span></code></a></dt><dd><p>get information from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDPoint" title="fredtools.getDijFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDPoint</span></code></a></dt><dd><p>Get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDPoint" title="fredtools.getDijFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDPoint</span></code></a></dt><dd><p>get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDSumImage" title="fredtools.getDijFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDSumImage</span></code></a></dt><dd><p>Get FRED Dij image to a sum SimpleITK image object.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDSumImage" title="fredtools.getDijFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDSumImage</span></code></a></dt><dd><p>get FRED Dij image to a sum SimpleITK image object.</p>
 </dd>
 </dl>
 </div>
@@ -166,12 +166,12 @@ describing the order of the pencil beams and fields.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getDijFREDSumImage">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDSumImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PBNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDSumImage" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDSumImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PBNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDSumImage" title="Link to this definition"></a></dt>
 <dd><p>Read FRED Dij image to sum SimpleITK image object.</p>
 <p>The function reads a Dij (influence matrix) file produced by
 the FRED Monte Carlo to an instance of a SimpleITK image object by summing
 the requested pencil beams with weights if requested. By default,
-all the pencil beams saved to Dij influence matrix are read with the unitary weights
+all the pencil beams saved to the Dij influence matrix are read with the unitary weights
 for all pencil beams, but the user can ask for selected pencil beams (the field will
 be read automatically) or for all pencil beams for a given field or list of fields.
 The weights can be provided as a single value for all pencil beams, for each pencil
@@ -196,11 +196,11 @@ beam separately or constant for each field. See the Notes for more details.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getDijFREDInfo" title="fredtools.getDijFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDInfo</span></code></a></dt><dd><p>Get information from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDInfo" title="fredtools.getDijFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDInfo</span></code></a></dt><dd><p>get information from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDPoint" title="fredtools.getDijFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDPoint</span></code></a></dt><dd><p>Get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDPoint" title="fredtools.getDijFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDPoint</span></code></a></dt><dd><p>get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDVectorImage" title="fredtools.getDijFREDVectorImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDVectorImage</span></code></a></dt><dd><p>Get a vector image from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDVectorImage" title="fredtools.getDijFREDVectorImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDVectorImage</span></code></a></dt><dd><p>get a vector image from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
 </dl>
 </div>
@@ -226,7 +226,7 @@ by FRED Monte Carlo.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getDijFREDPoint">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseMemError</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDPoint" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raiseMemError</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDPoint" title="Link to this definition"></a></dt>
 <dd><p>Get vector of interpolated values in a point from FRED Dij.</p>
 <p>The function reads a Dij (influence matrix) file produced by the FRED Monte Carlo
 and interpolates the signal value for a given point or list of points for each single
@@ -242,7 +242,7 @@ pencil beam.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Numpy array of shape NxP where N is the number of points and P is the number of pencil beams.</p>
+<dd class="field-even"><p>A Numpy array of shape NxP where N is the number of points and P is the number of pencil beams.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>NxP numpy array</p>
@@ -251,11 +251,11 @@ pencil beam.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getDijFREDInfo" title="fredtools.getDijFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDInfo</span></code></a></dt><dd><p>Get information from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDInfo" title="fredtools.getDijFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDInfo</span></code></a></dt><dd><p>get information from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDVectorImage" title="fredtools.getDijFREDVectorImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDVectorImage</span></code></a></dt><dd><p>Get a vector image from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDVectorImage" title="fredtools.getDijFREDVectorImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDVectorImage</span></code></a></dt><dd><p>get a vector image from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDSumImage" title="fredtools.getDijFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDSumImage</span></code></a></dt><dd><p>Get FRED Dij image to a sum SimpleITK image object.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDSumImage" title="fredtools.getDijFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDSumImage</span></code></a></dt><dd><p>get FRED Dij image to a sum SimpleITK image object.</p>
 </dd>
 </dl>
 </div>
@@ -285,7 +285,7 @@ recommended filtering the output of the function for such cases and recording th
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getDijFREDInfo">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDInfo" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDijFREDInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dijFileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDijFREDInfo" title="Link to this definition"></a></dt>
 <dd><p>Read basic information from FRED Dij</p>
 <p>The function reads a Dij (influence matrix) file produced by the FRED Monte Carlo
 and gets basic information about the pencil beams and fields saved.</p>
@@ -306,11 +306,11 @@ and gets basic information about the pencil beams and fields saved.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#fredtools.getDijFREDPoint" title="fredtools.getDijFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDPoint</span></code></a></dt><dd><p>Get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDPoint" title="fredtools.getDijFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDPoint</span></code></a></dt><dd><p>get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDVectorImage" title="fredtools.getDijFREDVectorImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDVectorImage</span></code></a></dt><dd><p>Get a vector image from a Dij influence matrix produced by FRED Monte Carlo.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDVectorImage" title="fredtools.getDijFREDVectorImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDVectorImage</span></code></a></dt><dd><p>get a vector image from a Dij influence matrix produced by FRED Monte Carlo.</p>
 </dd>
-<dt><a class="reference internal" href="#fredtools.getDijFREDSumImage" title="fredtools.getDijFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDSumImage</span></code></a></dt><dd><p>Get FRED Dij image to a sum SimpleITK image object.</p>
+<dt><a class="reference internal" href="#fredtools.getDijFREDSumImage" title="fredtools.getDijFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDSumImage</span></code></a></dt><dd><p>get FRED Dij image to a sum SimpleITK image object.</p>
 </dd>
 </dl>
 </div>

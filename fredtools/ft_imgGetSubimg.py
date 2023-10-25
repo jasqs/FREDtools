@@ -14,7 +14,7 @@ def _setSITKInterpolator(interpolation="linear", splineOrder=3):
     Returns
     -------
     interpolator
-        Object of a SimpleITK interpolator.
+        An object of a SimpleITK interpolator.
     """
     import SimpleITK as sitk
 
@@ -46,7 +46,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     """Get 2D slice from image.
 
     The function calculates a 2D slice image through a specified
-    `point` in a specified `plane` from an image defined as SimpleITK
+    `point` in a specified `plane` from an image defined as a SimpleITK
     image object. The slice is returned as an instance of a SimpleITK image
     object of the same dimension but describing a slice (the dimension
     of only two axes are different than one). The slice through a specified
@@ -57,17 +57,17 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     img : SimpleITK Image
         Object of a SimpleITK image.
     point : array_like
-        Point to generate the 2D slice through. It should have length
+        Point to generate the 2D slice through. It should have the length
         of the image dimension. A warning will be generated if the point is
         not inside the image extent.
     plane : str, optional
         Plane to generate the 2D slice given as a string. The string
-        should have form of two letters from [XYZT] set with +/- signs
-        (if no sign provided, then + is assumed). For instance it can be:
+        should have the form of two letters from [XYZT] set with +/- signs
+        (if no sign is provided, then + is assumed). For instance, it can be:
         `XY`,`ZY`,`-YX`, `Y-T`, etc. If the minus sign is found, then the
-        image is flipped in the following direction. The order of axis is
+        image is flipped in the following direction. The order of the axis is
         important and the output will be generated in this way to be consistent
-        with the axes displayed with matplotlib.pyplot.imshow. For instance
+        with the axes displayed with matplotlib.pyplot.imshow. For instance,
         plane `Z-X` will display Z-axis on X-axis in imshow and Y-axis of
         of imshow will be a reversed X-axis of the image. (def. 'XY')
     interpolation : {'linear', 'nearest', 'spline'}, optional
@@ -82,13 +82,13 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     Returns
     -------
     SimpleITK Image
-        Instance of a SimpleITK image object describing a slice.
+        An instance of a SimpleITK image object describing a slice.
 
     See Also
     --------
-        matplotlib.pyplot.imshow: displaying 2D images.
-        getExtent: get extent of the image in each direction.
-        arr: get squeezed array from image.
+        matplotlib.pyplot.imshow : displaying 2D images.
+        getExtent : get extent of the image in each direction.
+        arr : get squeezed array from image.
 
     Examples
     --------
@@ -226,10 +226,10 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
 
 
 def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo=False):
-    """Get 1D profile from image along axis.
+    """Get 1D profile from image along an axis.
 
     The function calculates a 1D profile image through a specified
-    `point` in a specified `axis` from an image defined as SimpleITK
+    `point` in a specified `axis` from an image defined as a SimpleITK
     image object. The profile is returned as an instance of a SimpleITK image
     object of the same dimension but describing a profile (the dimension
     of only one axes is different than one). The profile through a specified
@@ -238,15 +238,15 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     point : array_like
-        Point to generate the 2D slice through. It should have length
+        Point to generate the 2D slice through. It should have the length
         of the image dimension. A warning will be generated if the point is
         not inside the image extent.
     axis : str, optional
         Axis to generate the 1D profile given as a string. The string
-        should have form of one letter from [XYZT] set with +/- signs
-        (if no sign provided, then + is assumed). For instance it can be:
+        should have the form of one letter from [XYZT] set with +/- signs
+        (if no sign is provided, then + is assumed). For instance, it can be:
         `X`,`Y`,`-Z`, etc. If the minus sign is found, then the
         image is flipped in the following direction.
     interpolation : {'linear', 'nearest', 'spline'}, optional
@@ -265,9 +265,9 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
 
     See Also
     --------
-        matplotlib.pyplot.plot: displaying profiles.
-        pos: get voxels' centres for axes of size different than one.
-        vec: get vector with values for the img describing a profile.
+        matplotlib.pyplot.plot : displaying profiles.
+        pos : get voxels' centers for axes of size different than one.
+        vec : get a vector with values for the img describing a profile.
 
     Examples
     --------
@@ -406,7 +406,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
     """Get point value from image.
 
     The function calculates a point value in a specified `point` from an
-    image defined as SimpleITK image object. The point is returned as an
+    image defined as a SimpleITK image object. The point is returned as an
     instance of a SimpleITK image object of the same dimension but describing
     a point (the dimension of all axes is equal to one). The point value in
     a specified point is calculated with a specified `interpolation` type.
@@ -414,9 +414,9 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     point : array_like
-        Point to generate the value. It should have length of the image
+        Point to generate the value. It should have the length of the image
         dimension. A warning will be generated if the point is not inside
         the image extent.
     interpolation : {'linear', 'nearest', 'spline'}, optional
@@ -431,7 +431,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
     Returns
     -------
     SimpleITK Image
-        Instance of a SimpleITK image object describing a point.
+        An instance of a SimpleITK image object describing a point.
 
     Examples
     --------
@@ -535,23 +535,23 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
 
 
 def getInteg(img, axis="X", displayInfo=False):
-    """Get 1D integral profile from image.
+    """Get 1D integral profile from an image.
 
-    The function calculates a 1D integral profile image along specified `axis`
-    from an image defined as SimpleITK image object. The integral profile is
+    The function calculates a 1D integral profile image along the specified `axis`
+    from an image defined as a SimpleITK image object. The integral profile is
     returned as an instance of a SimpleITK image object of the same dimension
     but describing a profile (the dimension of only one axes is different than one).
     The integral means the sum of the voxel values multiplied by the voxel volume.
-    The routine is usefull to calculate an integral depth dose (IDD) distributions.
+    The routine is useful to calculate integral depth dose (IDD) distributions.
 
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     axis : str, optional
         Axis to generate the 1D integral profile given as a string. The string
         should have form of one letter from [XYZT] set with +/- signs
-        (if no sign provided, then + is assumed). For instance it can be:
+        (if no sign is provided, then + is assumed). For instance, it can be:
         `X`,`Y`,`-Z`, etc. If the minus sign is found, then the
         image is flipped in the following direction.
     displayInfo : bool, optional
@@ -565,8 +565,8 @@ def getInteg(img, axis="X", displayInfo=False):
     See Also
     --------
         matplotlib.pyplot.plot: displaying profiles.
-        pos: get voxels' centres for axes of size different than one.
-        vec: get vector with values for the img describing a profile.
+        pos: get voxels' centers for axes of size different than one.
+        vec: get a vector with values for the img describing a profile.
 
     Examples
     --------

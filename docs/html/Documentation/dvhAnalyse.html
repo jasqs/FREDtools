@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DVH Analyse &mdash; FRED Tools 0.6.77 documentation</title>
+  <title>DVH Analyse &mdash; FRED Tools 0.7.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -12,13 +12,13 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5a057da9"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,7 +39,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.6.77
+                0.7.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -59,7 +59,8 @@
 <li class="toctree-l1"><a class="reference internal" href="ImageAnalyse.html">Image Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spotAnalyse.html">Spot Analyse</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">DVH Analyse</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#fredtools.getDVH"><code class="docutils literal notranslate"><span class="pre">getDVH()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.getDVHMask"><code class="docutils literal notranslate"><span class="pre">getDVHMask()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.getDVHStruct"><code class="docutils literal notranslate"><span class="pre">getDVHStruct()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gammaIndexAnalyse.html">Gamma Index Analyse</a></li>
@@ -98,55 +99,30 @@
            <div itemprop="articleBody">
              
   <section id="dvh-analyse">
-<h1>DVH Analyse<a class="headerlink" href="#dvh-analyse" title="Permalink to this heading"></a></h1>
+<h1>DVH Analyse<a class="headerlink" href="#dvh-analyse" title="Link to this heading"></a></h1>
 <p>A collection of useful functions for Dose-Volume Histograms (DVH) analysis.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="fredtools.getDVH">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDVH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dosePrescribed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseLevelStep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampleImg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'allInside'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'smparallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDVH" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate DVH for structure.</p>
+<dt class="sig sig-object py" id="fredtools.getDVHMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDVHMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dosePrescribed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseLevelStep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDVHMask" title="Link to this definition"></a></dt>
+<dd><p>Calculate DVH for the mask.</p>
 <p>The function calculates a dose-volume histogram (DVH) for voxels inside
-a structure named <cite>structName</cite> and defined in the structure dicom file.
-The image can be resampled before mapping to increase the resolution and
-the routine supports multiple CPU computations. The routine exploits and returns
-dicompylercore.dvh.DVH class to hold the DVH. Read more about the dicompyler-core
-DVH module on <a class="reference external" href="https://dicompyler-core.readthedocs.io/en/latest/index.html">https://dicompyler-core.readthedocs.io/en/latest/index.html</a>.</p>
+a mask with the same field of reference (FoR). The mask must defined as
+a SimpleITK image object describing a binary or floating mask.
+The routine exploits and returns dicompylercore.dvh.DVH class to hold the DVH.
+Read more about the dicompyler-core DVH module
+on <a class="reference external" href="https://dicompyler-core.readthedocs.io/en/latest/index.html">https://dicompyler-core.readthedocs.io/en/latest/index.html</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
-<li><p><strong>RSfileName</strong> (<em>path</em>) – String path to RS dicom file.</p></li>
-<li><p><strong>structName</strong> (<em>string</em>) – Name of the structure to calculate the DVH in.</p></li>
+<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image describing the binary of floating mask.</p></li>
 <li><p><strong>dosePrescribed</strong> (<em>scalar</em>) – Target prescription dose.</p></li>
 <li><p><strong>doseLevelStep</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Size of dose bins. (def. 0.01)</p></li>
-<li><p><strong>resampleImg</strong> (<em>scalar</em><em>, </em><em>array_like</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if and how to resample the image while mapping the structure.
-Can be a scalar, then the same number will be used for each axis,
-3-element iterable defining the voxel size for each axis, or <cite>None</cite> meaning
-no interpolation. (def. None)</p></li>
-<li><p><strong>method</strong> (<em>{'allInside'</em><em>, </em><em>'centreInside'}</em><em>, </em><em>optional</em>) – <p>Method of calculation (def. ‘allInside’):</p>
-<blockquote>
-<div><ul>
-<li><p>’allInside’ : map only the centre of the voxels.</p></li>
-<li><p>’centreInside’ : map the voxels which are all inside the contour.</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>algorithm</strong> (<em>{'smparallel'</em><em>, </em><em>'matplotlib'}</em><em>, </em><em>optional</em>) – <p>Algorithm of calculation (def. ‘smparallel’):</p>
-<blockquote>
-<div><ul>
-<li><p>’smparallel’ : use matplotlib to calculate the voxels inside contours.</p></li>
-<li><p>’matplotlib’ : use multiprocessing sm algorithm to calculate the voxels inside contours.</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em>) – Define if the multiprocessing should be used and how many cores should
-be exploited (def. ‘auto’). Can be None, then no multiprocessing will be used,
-a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
-or a scalar defining the number of CPU cores to be used (def. ‘auto’).</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Instance of a dicompylercore.dvh.DVH class holding the DVH.</p>
+<dd class="field-even"><p>An instance of a dicompylercore.dvh.DVH class holding the DVH.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dicompylercore DVH</p>
@@ -161,17 +137,66 @@ or a scalar defining the number of CPU cores to be used (def. ‘auto’).</p></
 </dd>
 <dt><a class="reference internal" href="ImageManipulate.html#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>map structure to image (refer for more information about mapping algorithms).</p>
 </dd>
+<dt><a class="reference internal" href="#fredtools.getDVHStruct" title="fredtools.getDVHStruct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDVHStruct</span></code></a></dt><dd><p>calculate DVH for structure.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getDVHStruct">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getDVHStruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RSfileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dosePrescribed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doseLevelStep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampleImg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getDVHStruct" title="Link to this definition"></a></dt>
+<dd><p>Calculate DVH for the structure.</p>
+<p>The function calculates a dose-volume histogram (DVH) for voxels inside
+a structure named <cite>structName</cite> and is defined in the structure dicom file.
+The image can be resampled before mapping to increase the resolution. The routine
+exploits and returns dicompylercore.dvh.DVH class to hold the DVH.
+Read more about the dicompyler-core DVH module
+on <a class="reference external" href="https://dicompyler-core.readthedocs.io/en/latest/index.html">https://dicompyler-core.readthedocs.io/en/latest/index.html</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
+<li><p><strong>RSfileName</strong> (<em>path</em>) – String path to RS dicom file.</p></li>
+<li><p><strong>structName</strong> (<em>string</em>) – Name of the structure to calculate the DVH in.</p></li>
+<li><p><strong>dosePrescribed</strong> (<em>scalar</em>) – Target prescription dose.</p></li>
+<li><p><strong>doseLevelStep</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Size of dose bins. (def. 0.01)</p></li>
+<li><p><strong>resampleImg</strong> (<em>scalar</em><em>, </em><em>array_like</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define if and how to resample the image while mapping the structure.
+Can be a scalar, then the same number will be used for each axis,
+3-element iterable defining the voxel size for each axis, or <cite>None</cite> meaning
+no interpolation. (def. None)</p></li>
+<li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em>) – Define if the multiprocessing should be used and how many cores should
+be exploited (def. ‘auto’). Can be None, then no multiprocessing will be used,
+a string ‘auto’, then the number of cores will be determined by os.cpu_count(),
+or a scalar defining the number of CPU cores to be used (def. ‘auto’).</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of a dicompylercore.dvh.DVH class holding the DVH.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dicompylercore DVH</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">dicompylercore</span></code></dt><dd><p>more information about the dicompylercore.dvh.DVH.</p>
+</dd>
+<dt><a class="reference internal" href="ImageManipulate.html#fredtools.resampleImg" title="fredtools.resampleImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resampleImg</span></code></a></dt><dd><p>resample image.</p>
+</dd>
+<dt><a class="reference internal" href="ImageManipulate.html#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>map structure to image (refer for more information about mapping algorithms).</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getDVHMask" title="fredtools.getDVHMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDVHMask</span></code></a></dt><dd><p>calculate DVH for a mask.</p>
+</dd>
 </dl>
 </div>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>Although, the ‘allInside’ method seems have more sense, the method ‘centreInside’ shows
-more consistent results to clinical Treatment Planning System Varian Eclipse 15.6. Nevertheless,
-both methods should, in theory, converge to the same results while the voxel size of the input ‘img’
-decreasses. The comparison has been made for different structures of small/large volumes, with holes
-and with detached contours, with the image voxels size down to [0.2, 0.2, 0.2] mm. Consider, that
-decreasing the input image voxel size (for instance by the resampleImg function), its shape
-increases and the memory footprint increases.</p>
+<p>The structure mapping is performed in ‘floating’ mode meaning that the fractional structure
+occupancy is assigned to each voxel of the image. Use <cite>getDVHMask</cite> to use a specially prepared
+mask for the DVH calculation.</p>
 </div>
 </dd></dl>
 
