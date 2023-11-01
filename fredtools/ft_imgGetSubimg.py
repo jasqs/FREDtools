@@ -571,7 +571,7 @@ def getInteg(img, axis="X", displayInfo=False):
     Examples
     --------
     The example below shows how to generate and display a 1D integral profile
-    along 'Y' axis from a 3D image.
+    along Y axis from a 3D image.
 
     >>> img3D = fredtools.readMHD('imageCT.mhd', displayInfo = True)
     ### readMHD ###
@@ -628,7 +628,7 @@ def getInteg(img, axis="X", displayInfo=False):
     # check if axis is in proper format
     axis = axis.upper()
     if not {"X", "Y", "Z", "T", "-", "+"}.issuperset(axis):
-        raise ValueError(f"Axis parameter {axis} cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        raise ValueError(f"Axis parameter {axis} cannot be recognized. Only letters 'X', 'Y', 'Z', 'T', '-', '+' are supported.")
     if len(axis) > 2:
         raise ValueError(f"Axis parameter {axis} cannot be recognized. The length of the plane parameter should less or equal to 2.")
 
@@ -640,11 +640,11 @@ def getInteg(img, axis="X", displayInfo=False):
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
-        raise ValueError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        raise ValueError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
 
     # determine axis to accumulate and axis of integral
     if not axisSimple in axesNameAvailable:
-        raise ValueError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        raise ValueError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
     axesAcc = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if not x]
     axesInteg = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if x][0]
 
