@@ -17,6 +17,8 @@ A collection of useful functions for image analysis. The image must be an instan
 
 .. autofunction:: fredtools.getVoxelCentres
 
+.. autofunction:: fredtools.getVoxelEdges
+
 .. autofunction:: fredtools.displayImageInfo
 
 .. autofunction:: fredtools.getExtMpl
@@ -33,4 +35,10 @@ A collection of useful functions for image analysis. The image must be an instan
 
 .. autofunction:: fredtools.vec
 
+.. autofunction:: fredtools.transformIndexToPhysicalPoint
 
+.. autofunction:: fredtools.transformContinuousIndexToPhysicalPoint
+
+.. autofunction:: fredtools.transformPhysicalPointToIndex
+
+.. autofunction:: fredtools.transformPhysicalPointToContinuousIndex

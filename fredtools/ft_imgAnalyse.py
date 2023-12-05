@@ -26,8 +26,12 @@ def getExtent(img, displayInfo=False):
 
     ft._isSITK(img, raiseError=True)
 
-    cornerLow = img.TransformContinuousIndexToPhysicalPoint(np.zeros(img.GetDimension(), dtype="float64") - 0.5)
-    cornerHigh = img.TransformContinuousIndexToPhysicalPoint(np.array(img.GetSize(), dtype="float64") - 1 + 0.5)
+    cornerLow = img.TransformContinuousIndexToPhysicalPoint(
+        np.zeros(img.GetDimension(), dtype="float64") - 0.5
+    )
+    cornerHigh = img.TransformContinuousIndexToPhysicalPoint(
+        np.array(img.GetSize(), dtype="float64") - 1 + 0.5
+    )
 
     cornerLow = np.dot(np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, cornerLow)
     cornerHigh = np.dot(np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, cornerHigh)
@@ -38,7 +42,10 @@ def getExtent(img, displayInfo=False):
         print(f"### {ft._currentFuncName()} ###")
         axesNames = ["x", "y", "z", "t"]
         for ext, axisName in zip(extent, axesNames):
-            print("# {:s}-spatial extent [mm] = ".format(axisName), _generateExtentString(ext))
+            print(
+                "# {:s}-spatial extent [mm] = ".format(axisName),
+                _generateExtentString(ext),
+            )
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return extent
@@ -167,7 +174,9 @@ def getMassCenter(img, displayInfo=False):
     imgITK = ft.SITK2ITK(img)
     moments = itk.ImageMomentsCalculator.New(imgITK)
     moments.Compute()
-    massCentre = np.dot(np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, moments.GetCenterOfGravity())
+    massCentre = np.dot(
+        np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, moments.GetCenterOfGravity()
+    )
     massCentre = tuple(massCentre)
 
     if displayInfo:
@@ -215,7 +224,9 @@ def getMaxPosition(img, displayInfo=False):
 
     # check if only one maximum value exists and raise warning
     if (arr == np.nanmax(arr)).sum() > 1:
-        warnings.warn("Warning: more than one maximum value was found. The first one was returned.")
+        warnings.warn(
+            "Warning: more than one maximum value was found. The first one was returned."
+        )
 
     # get maximum position
     maxPosition = np.unravel_index(np.nanargmax(arr), arr.shape[::-1], order="F")
@@ -269,7 +280,9 @@ def getMinPosition(img, displayInfo=False):
 
     # check if only one minimum value exists and raise warning
     if (arr == np.nanmin(arr)).sum() > 1:
-        warnings.warn("Warning: more than one minimum value was found. The first one was returned.")
+        warnings.warn(
+            "Warning: more than one minimum value was found. The first one was returned."
+        )
 
     # get minimum position
     minPosition = np.unravel_index(np.nanargmin(arr), arr.shape[::-1], order="F")
@@ -302,31 +315,85 @@ def getVoxelCentres(img, displayInfo=False):
     Returns
     -------
     tuple
-        List of tuples with voxels' centres in each
+        A tuple of tuples with voxels' centres in each
         direction in form ([x0,x1,...],[y0,y1,...],...)
+
+    See Also
+    --------
+    getVoxelEdges : get voxel edges.
     """
     import numpy as np
     import fredtools as ft
 
     ft._isSITK(img, raiseError=True)
 
-    voxelCentresMaxSize = []
-    for i in range(np.array(img.GetSize()).max()):
-        voxelCentresMaxSize.append(img.TransformContinuousIndexToPhysicalPoint([i] * img.GetDimension()))
-    voxelCentresMaxSize = np.array(voxelCentresMaxSize).T
-    voxelCentresMaxSize = np.dot(np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, voxelCentresMaxSize)
-
     voxelCentres = []
     for axis, axisSize in enumerate(img.GetSize()):
-        voxelCentres.append(tuple(voxelCentresMaxSize[axis, range(axisSize)]))
+        voxelIndices = np.zeros([axisSize, 3], dtype=np.int32)
+        voxelIndices[:, axis] = np.arange(axisSize, dtype=np.int32)
+        voxelCentresAxis = np.array(ft.transformIndexToPhysicalPoint(img, voxelIndices))
+        voxelCentres.append(tuple(voxelCentresAxis[:, axis]))
 
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         axesNames = ["x", "y", "z", "t"]
         for vox, axisName in zip(voxelCentres, axesNames):
-            print("# {:s}-spatial voxel centre [mm] = ".format(axisName), _generateSpatialCentresString(vox))
+            print(
+                "# {:s}-spatial voxel centre [mm] = ".format(axisName),
+                _generateSpatialCentresString(vox),
+            )
         print("#" * len(f"### {ft._currentFuncName()} ###"))
-    return voxelCentres
+    return tuple(voxelCentres)
+
+
+def getVoxelEdges(img, displayInfo=False):
+    """Get voxel edges.
+
+    The function gets voxels' edges in each direction of an image
+    defined as a SimpleITK image object. It is assumed that the coordinate
+    system is in [mm].
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    tuple
+        A tuple of tuples with voxels' edges in each
+        direction in form ([x0,x1,...],[y0,y1,...],...)
+
+    See Also
+    --------
+    getVoxelCentres : get voxel centres.
+    """
+    import fredtools as ft
+    import numpy as np
+
+    ft._isSITK(img, raiseError=True)
+
+    voxelEdges = []
+    for axis, axisSize in enumerate(img.GetSize()):
+        voxelIndices = np.zeros([axisSize + 1, 3], dtype=np.float64)
+        voxelIndices[:, axis] = np.arange(axisSize + 1, dtype=np.float64) - 0.5
+        voxelEdgesAxis = np.array(
+            ft.transformContinuousIndexToPhysicalPoint(img, voxelIndices)
+        )
+        voxelEdges.append(tuple(voxelEdgesAxis[:, axis]))
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        axesNames = ["x", "y", "z", "t"]
+        for vox, axisName in zip(voxelEdges, axesNames):
+            print(
+                "# {:s}-spatial voxel edge [mm] = ".format(axisName),
+                _generateSpatialCentresString(vox),
+            )
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+    return tuple(voxelEdges)
 
 
 def _generateSpatialCentresString(pixelCentres):
@@ -346,13 +413,21 @@ def _generateSpatialCentresString(pixelCentres):
         Formatted string
     """
     if len(pixelCentres) > 4:
-        spatialCentresString = "[ {:12f}, {:12f}, ..., {:12f}, {:12f} ]".format(pixelCentres[0], pixelCentres[1], pixelCentres[-2], pixelCentres[-1])
+        spatialCentresString = "[ {:12f}, {:12f}, ..., {:12f}, {:12f} ]".format(
+            pixelCentres[0], pixelCentres[1], pixelCentres[-2], pixelCentres[-1]
+        )
     elif len(pixelCentres) == 4:
-        spatialCentresString = "[ {:12f}, {:12f}, {:12f}, {:12f} ]".format(pixelCentres[0], pixelCentres[1], pixelCentres[2], pixelCentres[3])
+        spatialCentresString = "[ {:12f}, {:12f}, {:12f}, {:12f} ]".format(
+            pixelCentres[0], pixelCentres[1], pixelCentres[2], pixelCentres[3]
+        )
     elif len(pixelCentres) == 3:
-        spatialCentresString = "[ {:12f}, {:12f}, {:12f} ]".format(pixelCentres[0], pixelCentres[1], pixelCentres[2])
+        spatialCentresString = "[ {:12f}, {:12f}, {:12f} ]".format(
+            pixelCentres[0], pixelCentres[1], pixelCentres[2]
+        )
     elif len(pixelCentres) == 2:
-        spatialCentresString = "[ {:12f}, {:12f} ]".format(pixelCentres[0], pixelCentres[1])
+        spatialCentresString = "[ {:12f}, {:12f} ]".format(
+            pixelCentres[0], pixelCentres[1]
+        )
     elif len(pixelCentres) == 1:
         spatialCentresString = "[ {:12f} ]".format(pixelCentres[0])
     return spatialCentresString
@@ -377,8 +452,12 @@ def _generateExtentString(axisExtent):
     import numpy as np
 
     if not len(axisExtent) == 2:
-        raise ValueError(f"Extent of a single axis must be of length 2 and is {len(axisExtent)}.")
-    extentString = "[ {:12f} , {:12f} ] => {:12f}".format(axisExtent[0], axisExtent[1], np.abs(np.diff(axisExtent)[0]))
+        raise ValueError(
+            f"Extent of a single axis must be of length 2 and is {len(axisExtent)}."
+        )
+    extentString = "[ {:12f} , {:12f} ] => {:12f}".format(
+        axisExtent[0], axisExtent[1], np.abs(np.diff(axisExtent)[0])
+    )
     return extentString
 
 
@@ -410,88 +489,204 @@ def _displayImageInfo(img):
     isIdentity = ft.ft_imgAnalyse._checkIdentity(img)
 
     if ft._isSITK_point(img):
-        print("# {:d}D{:s} image describing a point (0D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        print(
+            "# {:d}D{:s} image describing a point (0D) {:s}".format(
+                img.GetDimension(), " vector" if isVector else "", maskType
+            )
+        )
     elif ft._isSITK_profile(img):
-        print("# {:d}D{:s} image describing a profile (1D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        print(
+            "# {:d}D{:s} image describing a profile (1D) {:s}".format(
+                img.GetDimension(), " vector" if isVector else "", maskType
+            )
+        )
     elif ft._isSITK_slice(img):
-        print("# {:d}D{:s} image describing a slice (2D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        print(
+            "# {:d}D{:s} image describing a slice (2D) {:s}".format(
+                img.GetDimension(), " vector" if isVector else "", maskType
+            )
+        )
     elif ft._isSITK_volume(img):
-        print("# {:d}D{:s} image describing a volume (3D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        print(
+            "# {:d}D{:s} image describing a volume (3D) {:s}".format(
+                img.GetDimension(), " vector" if isVector else "", maskType
+            )
+        )
     elif ft._isSITK_timevolume(img):
-        print("# {:d}D{:s} image describing a time volume (4D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        print(
+            "# {:d}D{:s} image describing a time volume (4D) {:s}".format(
+                img.GetDimension(), " vector" if isVector else "", maskType
+            )
+        )
 
     if not isIdentity:
         print("# The image direction is not identity")
 
-    print("# dims ({:s}) = ".format("".join(axesNames[: img.GetDimension()])), np.array(img.GetSize()))
+    print(
+        "# dims ({:s}) = ".format("".join(axesNames[: img.GetDimension()])),
+        np.array(img.GetSize()),
+    )
     print("# voxel size [mm] = ", np.array(img.GetSpacing()))
     print("# origin [mm]     = ", np.array(img.GetOrigin()))
     for vox, axisName in zip(voxelCentres, axesNames):
-        print("# {:s}-spatial voxel centre [mm] = ".format(axisName), ft.ft_imgAnalyse._generateSpatialCentresString(vox))
+        print(
+            "# {:s}-spatial voxel centre [mm] = ".format(axisName),
+            ft.ft_imgAnalyse._generateSpatialCentresString(vox),
+        )
     for ext, axisName in zip(extent_mm, axesNames):
-        print("# {:s}-spatial extent [mm] = ".format(axisName), ft.ft_imgAnalyse._generateExtentString(ext))
+        print(
+            "# {:s}-spatial extent [mm] = ".format(axisName),
+            ft.ft_imgAnalyse._generateExtentString(ext),
+        )
 
-    realSize = [size for idx, size in enumerate(ft.getSize(img)) if img.GetSize()[idx] > 1]
+    realSize = [
+        size for idx, size in enumerate(ft.getSize(img)) if img.GetSize()[idx] > 1
+    ]
     if ft._isSITK_profile(img):
-        print("# length = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realSize), np.prod(realSize) / 1e1))
+        print(
+            "# length = {:.2f} mm  =>  {:.2f} cm".format(
+                np.prod(realSize), np.prod(realSize) / 1e1
+            )
+        )
     elif ft._isSITK_slice(img):
-        print("# area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realSize), np.prod(realSize) / 1e2))
+        print(
+            "# area = {:.2f} mm²  =>  {:.2f} cm²".format(
+                np.prod(realSize), np.prod(realSize) / 1e2
+            )
+        )
     elif ft._isSITK_volume(img):
-        print("# volume = {:.2f} mm³  =>  {:.2f} l".format(np.prod(realSize), np.prod(realSize) / 1e6))
+        print(
+            "# volume = {:.2f} mm³  =>  {:.2f} l".format(
+                np.prod(realSize), np.prod(realSize) / 1e6
+            )
+        )
     elif ft._isSITK_timevolume(img):
-        print("# time volume = {:.2f} mm³*s  =>  {:.2f} l*s".format(np.prod(realSize), np.prod(realSize) / 1e6))
+        print(
+            "# time volume = {:.2f} mm³*s  =>  {:.2f} l*s".format(
+                np.prod(realSize), np.prod(realSize) / 1e6
+            )
+        )
 
-    realVoxelSize = [size for idx, size in enumerate(img.GetSpacing()) if img.GetSize()[idx] > 1]
+    realVoxelSize = [
+        size for idx, size in enumerate(img.GetSpacing()) if img.GetSize()[idx] > 1
+    ]
     if ft._isSITK_profile(img):
-        print("# step size = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e1))
+        print(
+            "# step size = {:.2f} mm  =>  {:.2f} cm".format(
+                np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e1
+            )
+        )
     elif ft._isSITK_slice(img):
-        print("# pixel area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2))
+        print(
+            "# pixel area = {:.2f} mm²  =>  {:.2f} cm²".format(
+                np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2
+            )
+        )
     elif ft._isSITK_volume(img):
-        print("# voxel volume = {:.2f} mm³  =>  {:.2f} ul".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+        print(
+            "# voxel volume = {:.2f} mm³  =>  {:.2f} ul".format(
+                np.prod(realVoxelSize), np.prod(realVoxelSize)
+            )
+        )
     elif ft._isSITK_timevolume(img):
-        print("# voxel time volume = {:.2f} mm³*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+        print(
+            "# voxel time volume = {:.2f} mm³*s  =>  {:.2f} ul*s".format(
+                np.prod(realVoxelSize), np.prod(realVoxelSize)
+            )
+        )
 
-    print("# data type: ", img.GetPixelIDTypeAsString(), "with NaN values" if np.any(np.isnan(arr)) else "")
-    print("# range: from ", np.nanmin(arr), " to ", np.nanmax(arr), "(sum of vectors)" if isVector else "")
-    print("# sum =", np.nansum(arr), ", mean =", np.nanmean(arr), "(", np.nanstd(arr), ")", "(sum of vectors)" if isVector else "")
+    print(
+        "# data type: ",
+        img.GetPixelIDTypeAsString(),
+        "with NaN values" if np.any(np.isnan(arr)) else "",
+    )
+    print(
+        "# range: from ",
+        np.nanmin(arr),
+        " to ",
+        np.nanmax(arr),
+        "(sum of vectors)" if isVector else "",
+    )
+    print(
+        "# sum =",
+        np.nansum(arr),
+        ", mean =",
+        np.nanmean(arr),
+        "(",
+        np.nanstd(arr),
+        ")",
+        "(sum of vectors)" if isVector else "",
+    )
 
     nonZeroVoxels = (arr[~np.isnan(arr)] != 0).sum()
     nonAirVoxels = (arr[~np.isnan(arr)] > -1000).sum()
 
     if ft._isSITK_profile(img):
         print(
-            "# non-zero (dose=0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e1),
+            "# non-zero (dose=0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(
+                nonZeroVoxels,
+                nonZeroVoxels / arr.size,
+                np.prod(realVoxelSize) * nonZeroVoxels / 1e1,
+            ),
             "(sum of vectors)" if isVector else "",
         )
         print(
-            "# non-air (HU>-1000) values  = {:d} ({:.2%}) => {:.2f} cm".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e1),
+            "# non-air (HU>-1000) values  = {:d} ({:.2%}) => {:.2f} cm".format(
+                nonAirVoxels,
+                nonAirVoxels / arr.size,
+                np.prod(realVoxelSize) * nonAirVoxels / 1e1,
+            ),
             "(sum of vectors)" if isVector else "",
         )
     elif ft._isSITK_slice(img):
         print(
-            "# non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2),
+            "# non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(
+                nonZeroVoxels,
+                nonZeroVoxels / arr.size,
+                np.prod(realVoxelSize) * nonZeroVoxels / 1e2,
+            ),
             "(sum of vectors)" if isVector else "",
         )
         print(
-            "# non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2),
+            "# non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(
+                nonAirVoxels,
+                nonAirVoxels / arr.size,
+                np.prod(realVoxelSize) * nonAirVoxels / 1e2,
+            ),
             "(sum of vectors)" if isVector else "",
         )
     elif ft._isSITK_volume(img):
         print(
-            "# non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6),
+            "# non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(
+                nonZeroVoxels,
+                nonZeroVoxels / arr.size,
+                np.prod(realVoxelSize) * nonZeroVoxels / 1e6,
+            ),
             "(sum of vectors)" if isVector else "",
         )
         print(
-            "# non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6),
+            "# non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} l".format(
+                nonAirVoxels,
+                nonAirVoxels / arr.size,
+                np.prod(realVoxelSize) * nonAirVoxels / 1e6,
+            ),
             "(sum of vectors)" if isVector else "",
         )
     elif ft._isSITK_timevolume(img):
         print(
-            "# non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6),
+            "# non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(
+                nonZeroVoxels,
+                nonZeroVoxels / arr.size,
+                np.prod(realVoxelSize) * nonZeroVoxels / 1e6,
+            ),
             "(sum of vectors)" if isVector else "",
         )
         print(
-            "# non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6),
+            "# non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(
+                nonAirVoxels,
+                nonAirVoxels / arr.size,
+                np.prod(realVoxelSize) * nonAirVoxels / 1e6,
+            ),
             "(sum of vectors)" if isVector else "",
         )
 
@@ -635,7 +830,9 @@ def _getAxesNumberNotUnity(img):
 
     ft._isSITK(img, raiseError=True)
 
-    axesNumberNotUnity = [axis_idx for axis_idx, axis in enumerate(img.GetSize()) if axis != 1]
+    axesNumberNotUnity = [
+        axis_idx for axis_idx, axis in enumerate(img.GetSize()) if axis != 1
+    ]
 
     return tuple(axesNumberNotUnity)
 
@@ -685,7 +882,9 @@ def _checkIdentity(img):
 
     ft._isSITK(img, raiseError=True)
 
-    return np.all(np.identity(img.GetDimension(), dtype="int").flatten() == img.GetDirection())
+    return np.all(
+        np.identity(img.GetDimension(), dtype="int").flatten() == img.GetDirection()
+    )
 
 
 def getExtMpl(img):
@@ -726,7 +925,11 @@ def getExtMpl(img):
 
     ft._isSITK_slice(img, raiseError=True)
 
-    extent = [extent for axis_idx, extent in enumerate(ft.getExtent(img)) if axis_idx in _getAxesNumberNotUnity(img)]
+    extent = [
+        extent
+        for axis_idx, extent in enumerate(ft.getExtent(img))
+        if axis_idx in _getAxesNumberNotUnity(img)
+    ]
     extent[1] = extent[1][::-1]
     extent = [inner for outer in extent for inner in outer]
     return tuple(extent)
@@ -925,7 +1128,9 @@ def isPointInside(img, point, displayInfo=False):
 
     isIns = []
     for axis in range(point.shape[1]):
-        isIns.append((point[:, axis] >= extents[axis][0]) & (point[:, axis] <= extents[axis][1]))
+        isIns.append(
+            (point[:, axis] >= extents[axis][0]) & (point[:, axis] <= extents[axis][1])
+        )
     isIns = list(np.array(isIns).all(axis=0))
 
     if displayInfo:
@@ -991,7 +1196,9 @@ def getStatistics(img, displayInfo=False):
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         if isVector:
-            print("# Warning: The input image is a vector image. Statistics shown for the sum of vectors.")
+            print(
+                "# Warning: The input image is a vector image. Statistics shown for the sum of vectors."
+            )
         print("# Image mean/std: ", stat.GetMean(), "/", stat.GetSigma())
         print("# Image min/max: ", stat.GetMinimum(), "/", stat.GetMaximum())
         print("# Image sum: ", stat.GetSum())
@@ -1023,6 +1230,10 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
     bool
         A true/false value describing if the images are the same
         in the sense of the field of reference.
+
+    See Also
+    --------
+        SimpleITK.StatisticsImageFilter : more about possible statistics.
     """
     import fredtools as ft
     import numpy as np
@@ -1037,19 +1248,32 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
     sizeMatch = img1.GetSize() == img2.GetSize()
 
     # compare origin
-    originMatch = np.all(np.round(np.array(img1.GetOrigin()), decimals=decimals) == np.round(np.array(img2.GetOrigin()), decimals=decimals))
+    originMatch = np.all(
+        np.round(np.array(img1.GetOrigin()), decimals=decimals)
+        == np.round(np.array(img2.GetOrigin()), decimals=decimals)
+    )
 
     # compare spacing
-    spacingMatch = np.all(np.round(np.array(img1.GetSpacing()), decimals=decimals) == np.round(np.array(img2.GetSpacing()), decimals=decimals))
+    spacingMatch = np.all(
+        np.round(np.array(img1.GetSpacing()), decimals=decimals)
+        == np.round(np.array(img2.GetSpacing()), decimals=decimals)
+    )
 
     # compare direction
-    directionMatch = np.all(np.array(img1.GetDirection()) == np.array(img2.GetDirection()))
+    directionMatch = np.all(
+        np.array(img1.GetDirection()) == np.array(img2.GetDirection())
+    )
 
-    match = dimensionMatch and sizeMatch and originMatch and spacingMatch and directionMatch
+    match = (
+        dimensionMatch and sizeMatch and originMatch and spacingMatch and directionMatch
+    )
 
     # compare values if displayInfo
     if match and displayInfo:
-        valuesMatch = np.all(np.round(ft.arr(img1), decimals=decimals) == np.round(ft.arr(img2), decimals=decimals))
+        valuesMatch = np.all(
+            np.round(ft.arr(img1), decimals=decimals)
+            == np.round(ft.arr(img2), decimals=decimals)
+        )
     else:
         valuesMatch = False
 
@@ -1057,10 +1281,223 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
         print(f"### {ft._currentFuncName()} ###")
         print("# Dimension matching:      ", dimensionMatch)
         print("# Size matching:           ", sizeMatch)
-        print("# Origin matching:         ", originMatch, f"({decimals} decimals tolerance)")
-        print("# Spacing matching:        ", spacingMatch, f"({decimals} decimals tolerance)")
+        print(
+            "# Origin matching:         ",
+            originMatch,
+            f"({decimals} decimals tolerance)",
+        )
+        print(
+            "# Spacing matching:        ",
+            spacingMatch,
+            f"({decimals} decimals tolerance)",
+        )
         print("# Direction matching:      ", directionMatch)
         print("# Pixel-to-pixel matching: ", valuesMatch)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return match
+
+
+def transformIndexToPhysicalPoint(img, indices):
+    """Transform indices to physical points.
+
+    The function transforms an iterable of indices into a tuple of
+    physical points based on the field of reference (FoR) of an image
+    defined as an instance of a SimpleITK image object. The function is
+    a wrapper for `TransformIndexToPhysicalPoint` SimpleITK function, but
+    it works for multiple points. The shape of `indices` must be NxD, where N
+    is the number of points to be converted, and D is the dimension of the image.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    indices : NxD array_like
+        An iterable (numpy array, list of lists, etc) of N points.
+        Every index must be of the image dimension size and of any
+        integer type (int64, uint16, etc.).
+
+    Returns
+    -------
+    tuple
+        A NxD tuple of tuples with physical points.
+
+    See Also
+    --------
+        transformContinuousIndexToPhysicalPoint : transform indices to physical points.
+        transformPhysicalPointToIndex : transform physical points to indices.
+        transformPhysicalPointToContinuousIndex : transform physical points to continuous indices.
+    """
+    import numpy as np
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+
+    # transform iterable to numpy array
+    indices = np.array(indices)
+
+    # correct numpy array in case of single point
+    if indices.ndim == 1:
+        indices = np.expand_dims(indices, 0)
+
+    # check if type of indices is correct
+    if not np.issubdtype(indices.dtype, np.integer):
+        raise AttributeError(
+            f"The 'indices' parameter must of any integer type (int64, uint16, etc.)."
+        )
+
+    # check if shape of indices is correct
+    if indices.ndim != 2 or indices.shape[1] != img.GetDimension():
+        raise AttributeError(
+            f"The 'indices' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image."
+        )
+
+    return tuple(map(img.TransformIndexToPhysicalPoint, indices.tolist()))
+
+
+def transformContinuousIndexToPhysicalPoint(img, indices):
+    """Transform indices to physical points.
+
+    The function transforms an iterable of indices into a tuple of
+    physical points based on the field of reference (FoR) of an image
+    defined as an instance of a SimpleITK image object. The function is
+    a wrapper for `TransformContinuousIndexToPhysicalPoint` SimpleITK function, but
+    it works for multiple points. The shape of `indices` must be NxD, where N
+    is the number of points to be converted, and D is the dimension of the image.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    indices : NxD array_like
+        An iterable (numpy array, list of lists, etc) of N points.
+        Every index must be of the image dimension size and can be
+        of float or integer type.
+
+    Returns
+    -------
+    tuple
+        A NxD tuple of tuples with physical points.
+
+    See Also
+    --------
+        transformIndexToPhysicalPoint : transform indices to physical points.
+        transformPhysicalPointToIndex : transform physical points to indices.
+        transformPhysicalPointToContinuousIndex : transform physical points to continuous indices.
+    """
+    import numpy as np
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+
+    # transform iterable to numpy array
+    indices = np.array(indices)
+    # correct numpy array in case of single point
+    if indices.ndim == 1:
+        indices = np.expand_dims(indices, 0)
+
+    # check if shape of indices is correct
+    if indices.ndim != 2 or indices.shape[1] != img.GetDimension():
+        raise AttributeError(
+            f"The 'indices' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image."
+        )
+
+    return tuple(map(img.TransformContinuousIndexToPhysicalPoint, indices.tolist()))
+
+
+def transformPhysicalPointToIndex(img, points):
+    """Transform physical points to indices.
+
+    The function transforms an iterable of points into a tuple of
+    indices based on the field of reference (FoR) of an image
+    defined as an instance of a SimpleITK image object. The function is
+    a wrapper for `TransformPhysicalPointToIndex` SimpleITK function, but
+    it works for multiple points. The shape of `points` must be NxD, where N
+    is the number of points to be converted, and D is the dimension of the image.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    points : NxD array_like
+        An iterable (numpy array, list of lists, etc) of N points.
+        Every point must be of the image dimension size.
+
+    Returns
+    -------
+    tuple
+        A NxD tuple of tuples with indices.
+
+    See Also
+    --------
+        transformIndexToPhysicalPoint : transform indices to physical points.
+        transformContinuousIndexToPhysicalPoint : transform indices to physical points.
+        transformPhysicalPointToContinuousIndex : transform physical points to continuous indices.
+    """
+    import numpy as np
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+
+    # transform iterable to numpy array
+    points = np.array(points)
+    # correct numpy array in case of single point
+    if points.ndim == 1:
+        points = np.expand_dims(points, 0)
+
+    # check if shape of points is correct
+    if points.ndim != 2 or points.shape[1] != img.GetDimension():
+        raise AttributeError(
+            f"The 'points' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image."
+        )
+
+    return tuple(map(img.TransformPhysicalPointToIndex, points.tolist()))
+
+
+def transformPhysicalPointToContinuousIndex(img, points):
+    """Transform physical points to continuous indices.
+
+    The function transforms an iterable of points into a tuple of
+    continuous indices based on the field of reference (FoR) of an image
+    defined as an instance of a SimpleITK image object. The function is
+    a wrapper for `TransformPhysicalPointToContinuousIndex` SimpleITK function, but
+    it works for multiple points. The shape of `points` must be NxD, where N
+    is the number of points to be converted, and D is the dimension of the image.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    points : NxD array_like
+        An iterable (numpy array, list of lists, etc) of N points.
+        Every point must be of the image dimension size.
+
+    Returns
+    -------
+    tuple
+        A NxD tuple of tuples with continuous indices.
+
+    See Also
+    --------
+        transformIndexToPhysicalPoint : transform indices to physical points.
+        transformContinuousIndexToPhysicalPoint : transform indices to physical points.
+        transformPhysicalPointToIndex : transform physical points to indices.
+    """
+    import numpy as np
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+
+    # transform iterable to numpy array
+    points = np.array(points)
+    # correct numpy array in case of single point
+    if points.ndim == 1:
+        points = np.expand_dims(points, 0)
+
+    # check if shape of points is correct
+    if points.ndim != 2 or points.shape[1] != img.GetDimension():
+        raise AttributeError(
+            f"The 'points' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image."
+        )
+
+    return tuple(map(img.TransformPhysicalPointToContinuousIndex, points.tolist()))

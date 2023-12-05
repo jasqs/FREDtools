@@ -564,9 +564,9 @@ def getInteg(img, axis="X", displayInfo=False):
 
     See Also
     --------
-        matplotlib.pyplot.plot: displaying profiles.
-        pos: get voxels' centers for axes of size different than one.
-        vec: get a vector with values for the img describing a profile.
+        matplotlib.pyplot.plot : displaying profiles.
+        pos : get voxels' centers for axes of size different than one.
+        vec : get a vector with values for the img describing a profile.
 
     Examples
     --------
