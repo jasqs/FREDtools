@@ -27,7 +27,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
         Used only if binaryMask==True. (def. 0.5)
     CPUNo : {'auto', 'none'}, scalar or None, optional
         Define if the multiprocessing should be used and how many cores should
-        be exploited. Can be None, then no multiprocessing will be used,
+        be exploited. It can be None, and then no multiprocessing will be used,
         a string 'auto', then the number of cores will be determined by os.cpu_count(),
         or a scalar defining the number of CPU cores to be used. (def. 'auto')
     displayInfo : bool, optional
@@ -45,8 +45,8 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     Notes
     -----
-    1. the functionality of ``gatetools`` package has been tested but it turned
-    out that it does not consider holes and detached structures. Therefore a new
+    1. the functionality of ``gatetools`` package has been tested, but it turned
+    out that it does not consider holes and detached structures. Therefore, a new
     approach has been implemented
 
     2. The mapping is done for each contour separately and based on the direction (CW or CCW)
@@ -149,6 +149,13 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     if not set(StructureContoursDepths).issubset(MaskDepths):
         raise RuntimeError(f"Not all depths defined in coutour are represented in the created mask.")
 
+    # validate if all contour vertices are defined inside the image extent
+    StructureContoursExtent = np.stack((np.min(np.concatenate(StructureContours, axis=0), axis=0), np.max(np.concatenate(StructureContours, axis=0), axis=0)))
+    if not all(ft.isPointInside(img, StructureContoursExtent)):
+        warnings.warn(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
+                      f"The image extent is {ft.getExtent(img)}\n" +
+                      f"and the contour extent is {StructureContoursExtent.T.tolist()}.")
+
     # calculate mask size
     arrMaskSize = np.array([len(MaskDepths), img.GetSize()[1], img.GetSize()[0]])
 
@@ -161,7 +168,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     # convert all structure contour coordinates from the real world to pixel
     StructureContoursPx = []
     for StructureContour in StructureContours:
-        StructureContoursPx.append(np.array([imgMask.TransformPhysicalPointToContinuousIndex(Vertex) for Vertex in StructureContour]))
+        StructureContoursPx.append(np.array(ft.transformPhysicalPointToContinuousIndex(imgMask, StructureContour)))
 
     # map all structure contours to structure arrays using multiprocessing
     """
@@ -171,23 +178,17 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     with Pool(CPUNo) as p:
         StructureContoursArrays = p.map(_getStructureContourArray, StructureContoursPx)
 
-    # correct each structure contour array for the size (warn if the structure was mapped outside the image)
-    FLAGMaskOutsideImage = False
+    # correct each structure contour array for the size
     for StructureContoursArrayIdx in range(len(StructureContoursArrays)):
         StructureContoursArray = StructureContoursArrays[StructureContoursArrayIdx]
-        if np.any(StructureContoursArray.shape > arrMaskSize[1:]):
-            StructureContoursArray = StructureContoursArray[0 : arrMaskSize[1], 0 : arrMaskSize[2]]
-            FLAGMaskOutsideImage = True
-        else:
-            StructureContoursArray = np.pad(StructureContoursArray, ((0, arrMaskSize[1] - StructureContoursArray.shape[0]), (0, arrMaskSize[2] - StructureContoursArray.shape[1])))
+        StructureContoursArray = StructureContoursArray[0: arrMaskSize[1], 0: arrMaskSize[2]]  # clip array to given shape if needed
+        StructureContoursArray = np.pad(StructureContoursArray, ((0, arrMaskSize[1] - StructureContoursArray.shape[0]), (0, arrMaskSize[2] - StructureContoursArray.shape[1])))  # pad array to given shape if needed
         StructureContoursArrays[StructureContoursArrayIdx] = StructureContoursArray
-    if FLAGMaskOutsideImage:
-        warnings.warn(f"Warning: The structure '{structName}' was mapped outside the image. The mask was cropped to the image size.")
 
     # merge the structure contours arrays into a single mask
     """
     The 3D array is in floating numbers in the range 0-1, showing the voxel occupancy by the structure contour.
-    The positive-direction contours are added and the negative-direction subtracted. The routine proceeds 
+    The positive-direction contours are added, and the negative-direction contours are subtracted. The routine proceeds 
     in the order of appearance of the structure contour in the structure RS dicom. 
     """
     for MaskDepth_idx, MaskDepth in enumerate(MaskDepths):
@@ -206,11 +207,14 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     # prepare SimpleITK mask
     imgMask = sitk.GetImageFromArray(arrMask)
-    imgMask.SetOrigin([img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
-    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
+    imgMask.SetOrigin(
+        [img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
+    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[
+                       1], StructureContoursSpacing])
 
     # interpolate mask to input image
-    imgMask = sitk.Resample(imgMask, img, interpolator=ft.ft_imgGetSubimg._setSITKInterpolator(interpolation="linear"))
+    imgMask = sitk.Resample(
+        imgMask, img, interpolator=ft.ft_imgGetSubimg._setSITKInterpolator(interpolation="linear"))
 
     # prepare binary mask if requested, with fraction area threshold
     if binaryMask:
@@ -230,7 +234,8 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     imgMask.SetMetaData("ROIColor", str(StructInfo["Color"]))
     imgMask.SetMetaData("ROIName", StructInfo["Name"])
     imgMask.SetMetaData("ROINumber", str(StructInfo["Number"]))
-    imgMask.SetMetaData("ROIGenerationAlgorithm", StructInfo["GenerationAlgorithm"])
+    imgMask.SetMetaData("ROIGenerationAlgorithm",
+                        StructInfo["GenerationAlgorithm"])
     imgMask.SetMetaData("ROIType", StructInfo["Type"])
 
     if displayInfo:
@@ -261,7 +266,10 @@ def _getLineSegmentPixels(lineSegmentStart, lineSegmentEnd):
     if not (lineSegment[1, 0] - lineSegment[0, 0]) > 0:
         lineSegment = lineSegment[::-1, :]
 
-    gradient = dxy[1] / dxy[0]
+    if dxy[0] == 0:  # the dxy[0]==0 when the starting and ending points of a segment line are the same
+        gradient = 0
+    else:
+        gradient = dxy[1] / dxy[0]
 
     # handle the first and the last endpoint
     xyend = np.array((np.round(lineSegment[0, 0]), lineSegment[0, 1] + gradient * (np.round(lineSegment[0, 0]) - lineSegment[0, 0])))
@@ -316,15 +324,11 @@ def _getStructureContourArray(StructureContourPx):
     StructureContourBorderPixels = _getStructureContourBorderPixels(StructureContourPx[:, 0:2])
 
     # convert the contour and contour pixels to polygons
-    StructureContourBorderPixelsPolygons = [
-        sph.Polygon(StructureContourBorderPixel + np.array([[-0.5, -0.5], [-0.5, 0.5], [0.5, 0.5], [0.5, -0.5]])) for StructureContourBorderPixel in StructureContourBorderPixels
-    ]
+    StructureContourBorderPixelsPolygons = [sph.Polygon(StructureContourBorderPixel + np.array([[-0.5, -0.5], [-0.5, 0.5], [0.5, 0.5], [0.5, -0.5]])) for StructureContourBorderPixel in StructureContourBorderPixels]
     StructureContourPxPolygon = sph.Polygon(StructureContourPx[:, 0:2])
 
     # remove remaining pixels at the contour border that do not intersect with the contour
-    StructureContourBorderPixelsPolygonsIntersects = [
-        StructureContourBorderPixelsPlygon.intersects(StructureContourPxPolygon.boundary) for StructureContourBorderPixelsPlygon in StructureContourBorderPixelsPolygons
-    ]
+    StructureContourBorderPixelsPolygonsIntersects = [StructureContourBorderPixelsPlygon.intersects(StructureContourPxPolygon.boundary) for StructureContourBorderPixelsPlygon in StructureContourBorderPixelsPolygons]
     StructureContourBorderPixels = StructureContourBorderPixels[StructureContourBorderPixelsPolygonsIntersects]
     StructureContourBorderPixelsPolygons = np.array(StructureContourBorderPixelsPolygons)[StructureContourBorderPixelsPolygonsIntersects].tolist()
 
@@ -338,9 +342,7 @@ def _getStructureContourArray(StructureContourPx):
     arr = ndimage.binary_fill_holes(arr.astype("bool")).astype("float")
 
     # calculate the contour pixels area inside the contour
-    StructureContourBorderPixelsArea = [
-        StructureContourBorderPixelsPolygon.intersection(StructureContourPxPolygon).area for StructureContourBorderPixelsPolygon in StructureContourBorderPixelsPolygons
-    ]
+    StructureContourBorderPixelsArea = [StructureContourBorderPixelsPolygon.intersection(StructureContourPxPolygon).area for StructureContourBorderPixelsPolygon in StructureContourBorderPixelsPolygons]
 
     # set contour pixels with the area inside the contour
     arr[StructureContourBorderPixels[:, 1], StructureContourBorderPixels[:, 0]] = StructureContourBorderPixelsArea
@@ -595,7 +597,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     newOrigin = np.array(ft.getExtent(img))[:, 0] + np.array(spacingCorr) / 2
 
     # calculate default pixel value as min value of the input image
-    """comment: in principle, this value is assigned when useNearestNeighborExtrapolator=False and a value is to be 
+    """comment: In principle, this value is assigned when using NearestNeighborExtrapolator=False, and a value is to be 
     interpolated outside the 'img' extent. Such a case should not happen because it is assured in the line above that
     the centers of the most external voxels to be interpolated are inside the original image extent. However, the value
     of defaultPixelValue is set to the img minimum value, to avoid the situation that the border voxels have strange values.

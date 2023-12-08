@@ -9,7 +9,7 @@ def readOPG(fileName, depth=0, displayInfo=True):
     fileName : string
         A path to OPG file.
     depth : scalar, optional
-        A scalar defining the depth of 3D image. Usually, it is the depth of the measurement. (def. 0)
+        A scalar defining the depth of a 3D image. Usually, it is the depth of the measurement. (def. 0)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
