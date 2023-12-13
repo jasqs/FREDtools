@@ -87,7 +87,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     # get structure contour and structure info
     StructureContours, StructInfo = ft.dicom_io._getStructureContoursByName(RSfileName, structName)
 
-    # check if the StructureContours is empty and return empty mask (filled with 0) if true
+    # check if the StructureContours is empty and return an empty mask (filled with 0) if true
     if len(StructureContours) == 0:
         # make an empty mask (filled with 0)
         imgMask = sitk.Cast(img, sitk.sitkUInt8)
@@ -111,10 +111,6 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     # add the first point at the end of the contour for each contour (to make sure that the contour is closed)
     StructureContours = [np.append(StructureContour, np.expand_dims(StructureContour[0], axis=0), axis=0) for StructureContour in StructureContours]
-
-    # check if all structure contour vertices are inside the image
-    if not np.all(ft.isPointInside(img, np.concatenate(StructureContours))):
-        raise IndexError("All structure contour's vertices must be inside the image boundaries. Enlarge the image before mapping.")
 
     # check if all Z positions are the same for each contour
     for StructureContour in StructureContours:
