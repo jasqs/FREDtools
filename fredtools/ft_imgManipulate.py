@@ -161,10 +161,19 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     imgMask.SetOrigin([img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
     imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
 
-    # convert all structure contour coordinates from the real world to pixel
+    # convert all structure contour coordinates from the real world to pixel and correct the pixel coordinates
+    """
+    Correcting the pixel coordinates ensures that all contours are inside the image. 
+    This correction ensures that it will be mapped appropriately if the image is smaller than the contour 
+    (some of the contour vertices are outside the image's extent). It applies to the contour vertices' positions
+    in pixel coordinates, for which the positions in X and Y are below -0.5, meaning that they are outside the first 
+    voxel edges. In such a case, the mapped contour is not closed in the image FoR and cannot be filled.
+    """
     StructureContoursPx = []
     for StructureContour in StructureContours:
-        StructureContoursPx.append(np.array(ft.transformPhysicalPointToContinuousIndex(imgMask, StructureContour)))
+        StructureContourPx = np.array(ft.transformPhysicalPointToContinuousIndex(imgMask, StructureContour))
+        StructureContourPx[:, 0:2] = np.clip(StructureContourPx[:, 0:2], -0.5, None)  # correct contours
+        StructureContoursPx.append(StructureContourPx)
 
     # map all structure contours to structure arrays using multiprocessing
     """
@@ -203,10 +212,8 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     # prepare SimpleITK mask
     imgMask = sitk.GetImageFromArray(arrMask)
-    imgMask.SetOrigin(
-        [img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
-    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[
-                       1], StructureContoursSpacing])
+    imgMask.SetOrigin([img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
+    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
 
     # interpolate mask to input image
     imgMask = sitk.Resample(

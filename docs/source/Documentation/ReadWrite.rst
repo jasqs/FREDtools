@@ -56,6 +56,8 @@ DICOM files (\*.dcm, \*.dicom)
 
 .. autofunction:: fredtools.getRDFileNameForFieldNumber
 
+.. autofunction:: fredtools.anonymizeDicoms
+
 Other formats
 ------------------------------------------------
 

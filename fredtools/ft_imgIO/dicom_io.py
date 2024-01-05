@@ -646,7 +646,7 @@ def getRNFields(fileName, raiseWarning=True, displayInfo=False):
         fieldsInfo.loc[FDeliveryNo, "FnomRange"] = IonBeamDataset[(0x300B, 0x1004)].value if (0x300B, 0x1004) in IonBeamDataset else np.NaN
         fieldsInfo.loc[FDeliveryNo, "FnomSOBPWidth"] = IonBeamDataset[(0x300B, 0x100E)].value if (0x300B, 0x100E) in IonBeamDataset else np.NaN
         fieldsInfo.loc[FDeliveryNo, "FsupportID"] = IonBeamDataset.PatientSupportID if "PatientSupportID" in IonBeamDataset else "unknown"
-        fieldsInfo.at[FDeliveryNo, "FMagDist"] = IonBeamDataset.VirtualSourceAxisDistances if "VirtualSourceAxisDistances" in IonBeamDataset else np.NaN  #  Virtual Source-Axis Distances
+        fieldsInfo.at[FDeliveryNo, "FMagDist"] = IonBeamDataset.VirtualSourceAxisDistances if "VirtualSourceAxisDistances" in IonBeamDataset else np.NaN  # Virtual Source-Axis Distances
 
     # make consistency check and raise warning if raiseWarning==True
     if raiseWarning:
@@ -1294,3 +1294,59 @@ def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return fileName
+
+
+def anonymizeDicoms(fileNames, removePrivateTags=False, displayInfo=False):
+    """Anonymize dicom files.
+
+    The function anonymizes dicom files given as an iterable of file paths.
+    The function overwrites the original files.
+
+    Parameters
+    ----------
+    fileNames : array_like
+        An iterable (list, tuple, etc.) of paths to DICOM files.
+    removePrivateTags: bool, optional
+        Determine if the private tags should be removed. (def. False)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+    """
+    import pydicom as dicom
+    import fredtools as ft
+
+    # if fileName is a single string then make it a single element list
+    if isinstance(fileNames, str):
+        fileNames = [fileNames]
+
+    for fileName in fileNames:
+        dicomTags = dicom.read_file(fileName)
+        if "PatientName" in dicomTags:
+            dicomTags.PatientName = ""
+        if "PatientBirthDate" in dicomTags:
+            dicomTags.PatientBirthDate = ""
+        if "PatientBirthTime" in dicomTags:
+            dicomTags.PatientBirthTime = ""
+        if "PatientSex" in dicomTags:
+            dicomTags.PatientSex = ""
+        if "ReferringPhysicianName" in dicomTags:
+            dicomTags.ReferringPhysicianName = ""
+        if "ReviewerName" in dicomTags:
+            dicomTags.ReviewerName = ""
+        if "ReviewDate" in dicomTags:
+            dicomTags.ReviewDate = ""
+        if "ReviewTime" in dicomTags:
+            dicomTags.ReviewTime = ""
+        if "OperatorsName" in dicomTags:
+            dicomTags.OperatorsName = ""
+        if "PhysiciansOfRecord" in dicomTags:
+            dicomTags.PhysiciansOfRecord = ""
+
+        if removePrivateTags:
+            dicomTags.remove_private_tags()
+
+        dicom.write_file(fileName, dicomTags, write_like_original=True)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print(f"# Anonymized files: {len(fileNames)}")
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
