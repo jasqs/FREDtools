@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Manipulate &mdash; FRED Tools 0.7.5 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.7.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=a674670e"></script>
+        <script src="../_static/documentation_options.js?v=ddeecabf"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.5
+                0.7.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -73,7 +73,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.resampleImg"><code class="docutils literal notranslate"><span class="pre">resampleImg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.sumImg"><code class="docutils literal notranslate"><span class="pre">sumImg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.sumVectorImg"><code class="docutils literal notranslate"><span class="pre">sumVectorImg()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fredtools.createCylindricalMask"><code class="docutils literal notranslate"><span class="pre">createCylindricalMask()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.createEllipseMask"><code class="docutils literal notranslate"><span class="pre">createEllipseMask()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.createConeMask"><code class="docutils literal notranslate"><span class="pre">createConeMask()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.createCylinderMask"><code class="docutils literal notranslate"><span class="pre">createCylinderMask()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getImgBEV"><code class="docutils literal notranslate"><span class="pre">getImgBEV()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.setIdentityDirection"><code class="docutils literal notranslate"><span class="pre">setIdentityDirection()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.overwriteCTPhysicalProperties"><code class="docutils literal notranslate"><span class="pre">overwriteCTPhysicalProperties()</span></code></a></li>
@@ -359,13 +361,95 @@ is a scalar image.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="fredtools.createCylindricalMask">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createCylindricalMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createCylindricalMask" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fredtools.createEllipseMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createEllipseMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radii</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createEllipseMask" title="Link to this definition"></a></dt>
+<dd><p>Create an Ellipse mask in the image field of reference.</p>
+<p>The function creates an ellipse mask, defined with the center and radii
+in the frame of references of an image defined as a SimpleITK image
+object. Any dimension, i.e. 2D-4D, of the image is supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>point</strong> (<em>array_like</em>) – A point describing the position of the center of the ellipse. The dimension must match the image dimension.</p></li>
+<li><p><strong>radii</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Radii of the ellipse for each dimension. It might be a scalar, then the same radii will be used in each direction.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of a SimpleITK image object describing a binary mask (i.e. type ‘uint8’ with 0/1 values).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>crop an image to mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.createCylinderMask" title="fredtools.createCylinderMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createCylinderMask</span></code></a></dt><dd><p>create a cylinder mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.createConeMask" title="fredtools.createConeMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createConeMask</span></code></a></dt><dd><p>create a cone mask.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.createConeMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createConeMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startRadius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endRadius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createConeMask" title="Link to this definition"></a></dt>
+<dd><p>Create a cone mask in the image field of reference.</p>
+<p>The function creates a cone mask, defined with starting and ending points and radii
+in the frame of references of an image defined as a SimpleITK image object describing a 3D image.
+Only 3D images are supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
+<li><p><strong>startPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the center of the first cone base.</p></li>
+<li><p><strong>endPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the center of the second cone base.</p></li>
+<li><p><strong>startRadius</strong> (<em>scalar</em>) – Radious of the first cone base.</p></li>
+<li><p><strong>endRadius</strong> (<em>scalar</em>) – Radious of the second cone base.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of a SimpleITK image object describing a binary mask (i.e. type ‘uint8’ with 0/1 values).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.mapStructToImg" title="fredtools.mapStructToImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapStructToImg</span></code></a></dt><dd><p>mapping a structure to an image to create a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>crop an image to mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.createCylinderMask" title="fredtools.createCylinderMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createCylinderMask</span></code></a></dt><dd><p>create a cylinder mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.createEllipseMask" title="fredtools.createEllipseMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createEllipseMask</span></code></a></dt><dd><p>create an ellipse mask.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.createCylinderMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">createCylinderMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endPoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radious</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.createCylinderMask" title="Link to this definition"></a></dt>
 <dd><p>Create a cylindrical Mask in the image field of reference</p>
-<p>The function creates a cylindrical mask with a given <cite>dimension</cite> and height
+<p>The function creates a cylindrical mask with a given radious and height
 calculated from the starting and ending points of the cylinder in the frame of
 references of an image defined as a SimpleITK image object describing a 3D image.
-Only 3D images are supported. The routine might be helpful for instance for making
+Only 3D images are supported. For instance, the routine might help make
 a geometrical acceptance correction of a chamber used for Bragg peak measurements.
 The routine was adapted from a GitHub repository: <a class="reference external" href="https://github.com/heydude1337/SimplePhantomToolkit/">https://github.com/heydude1337/SimplePhantomToolkit/</a>.</p>
 <dl class="field-list simple">
@@ -374,7 +458,7 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 <li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK 3D image.</p></li>
 <li><p><strong>startPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the center of the first cylinder base.</p></li>
 <li><p><strong>endPoint</strong> (<em>array_like</em>) – 3-element point describing the position of the center of the second cylinder base.</p></li>
-<li><p><strong>dimension</strong> (<em>scalar</em>) – Dimension of the cylinder.</p></li>
+<li><p><strong>radious</strong> (<em>scalar</em>) – Radious of the cylinder.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -393,6 +477,10 @@ The routine was adapted from a GitHub repository: <a class="reference external" 
 <dt><a class="reference internal" href="#fredtools.setValueMask" title="fredtools.setValueMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setValueMask</span></code></a></dt><dd><p>setting values of the image inside/outside a mask.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.cropImgToMask" title="fredtools.cropImgToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cropImgToMask</span></code></a></dt><dd><p>crop an image to mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.createConeMask" title="fredtools.createConeMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createConeMask</span></code></a></dt><dd><p>create a cone mask.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.createEllipseMask" title="fredtools.createEllipseMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createEllipseMask</span></code></a></dt><dd><p>create an ellipse mask.</p>
 </dd>
 </dl>
 </div>

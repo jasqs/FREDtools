@@ -529,7 +529,7 @@ def getRNSpots(fileName, displayInfo=False):
             sliceInfo["PBPosX"] = IonControlPointDataset.ScanSpotPositionMap[0::2]
             sliceInfo["PBPosY"] = IonControlPointDataset.ScanSpotPositionMap[1::2]
             sliceInfo["PBTuneID"] = [IonControlPointDataset.ScanSpotTuneID] * spotsNo
-            sliceInfo["PNPainting"] = [IonControlPointDataset.NumberOfPaintings] * spotsNo
+            sliceInfo["PBPainting"] = [IonControlPointDataset.NumberOfPaintings] * spotsNo
             sliceInfo = pd.DataFrame(sliceInfo)
             slicesInfo.append(sliceInfo)
         slicesInfo = pd.concat(slicesInfo)

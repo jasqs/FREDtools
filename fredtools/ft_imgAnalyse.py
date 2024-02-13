@@ -316,7 +316,7 @@ def getVoxelCentres(img, displayInfo=False):
 
     voxelCentres = []
     for axis, axisSize in enumerate(img.GetSize()):
-        voxelIndices = np.zeros([axisSize, 3], dtype=np.int32)
+        voxelIndices = np.zeros([axisSize, img.GetDimension()], dtype=np.int32)
         voxelIndices[:, axis] = np.arange(axisSize, dtype=np.int32)
         voxelCentresAxis = np.array(ft.transformIndexToPhysicalPoint(img, voxelIndices))
         voxelCentres.append(tuple(voxelCentresAxis[:, axis]))
@@ -660,6 +660,37 @@ def _getAxesNumberNotUnity(img):
     axesNumberNotUnity = [axis_idx for axis_idx, axis in enumerate(img.GetSize()) if axis != 1]
 
     return tuple(axesNumberNotUnity)
+
+
+def _getAxesNumberUnity(img):
+    """Get axis indexes for the axes of size equal to one.
+
+    The function calculates the indexes of the axes for which the size is equal to one.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+
+    Returns
+    -------
+    tuple
+        Tuple axis indexes.
+
+    Examples
+    --------
+    Assuming that the `img` shape is [200,1,100,400] (4D image).
+
+    >>> fredtools.ft_imgAnalyse._getAxesNumberUnity(img)
+    (1)
+    """
+    import fredtools as ft
+
+    ft._isSITK(img, raiseError=True)
+
+    axesNumberUnity = [axis_idx for axis_idx, axis in enumerate(img.GetSize()) if axis == 1]
+
+    return tuple(axesNumberUnity)
 
 
 def _getDirectionArray(img):

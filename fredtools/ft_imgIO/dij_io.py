@@ -50,6 +50,10 @@ def getDijFREDVectorImage(dijFileName, FNo=None, PBNo=None, returnOrder=False, r
         - FNo=None, PBNo=[20,30,40]: will get just the pencil beams no 20, 30 and 40 and the field ID will be calculated automatically,
         - FNo=1, PBNo=None: will get all the pencil beams from field 1,
         - FNo=[3,1], PBNo=None: will get all the pencil beams from fields 1 and 3.
+
+    The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format 
+    but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or 
+    contact the FREDtools developers.
     """
     import struct
     import SimpleITK as sitk
@@ -129,7 +133,9 @@ def getDijFREDVectorImage(dijFileName, FNo=None, PBNo=None, returnOrder=False, r
         FIDs = []
         PBIDs = []
         for pencilBeam_idx in range(pencilBeamNo):
-            [PBID, FID, voxelsNo] = struct.unpack("3i", dijFile_h.read(12))
+            [PBTag, voxelsNo] = struct.unpack("2i", dijFile_h.read(8))
+            PBID = PBTag % 1000000
+            FID = int(PBTag / 1000000)
             if len(PBInfo.loc[(PBInfo.FID == FID) & (PBInfo.PBID == PBID)]) == 1:
                 FIDs.append(FID)
                 PBIDs.append(PBID)
@@ -218,6 +224,10 @@ def getDijFREDSumImage(dijFileName, FNo=None, PBNo=None, weight=None, displayInf
     In such a case, the weights represent the number of particles to be delivered, calculated from a treatment plan. It has been tested that
     the 3D dose distribution is consistent concerning the field-of-reference and values with the dose distribution calculated directly
     by FRED Monte Carlo.
+
+    The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format 
+    but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or 
+    contact the FREDtools developers.
     """
     import struct
     import SimpleITK as sitk
@@ -323,7 +333,9 @@ def getDijFREDSumImage(dijFileName, FNo=None, PBNo=None, weight=None, displayInf
         [sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, pencilBeamNo] = struct.unpack("<3i6f1i", dijFile_h.read(40))
 
         for pencilBeam_idx in range(pencilBeamNo):
-            [PBID, FID, voxelsNo] = struct.unpack("3i", dijFile_h.read(12))
+            [PBTag, voxelsNo] = struct.unpack("2i", dijFile_h.read(8))
+            PBID = PBTag % 1000000
+            FID = int(PBTag / 1000000)
             if len(PBInfo.loc[(PBInfo.FID == FID) & (PBInfo.PBID == PBID)]) == 1:
                 voxelIndices = np.frombuffer(dijFile_h.read(voxelsNo * 4), dtype="uint32", count=voxelsNo)
                 voxelValues = np.frombuffer(dijFile_h.read(voxelsNo * 4), dtype="float32", count=voxelsNo)
@@ -401,6 +413,12 @@ def getDijFREDPoint(dijFileName, point, interpolation="linear", raiseMemError=Tr
     References
     ----------
     .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.RegularGridInterpolator.html
+
+    Notes
+    -----
+    The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format 
+    but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or 
+    contact the FREDtools developers.
     """
     import struct
     import fredtools as ft
@@ -452,7 +470,7 @@ def getDijFREDPoint(dijFileName, point, interpolation="linear", raiseMemError=Tr
         # interpolate point value for BP
         pointValues = []
         for pencilBeam_idx in range(pencilBeamNo):
-            [PBID, FID, voxelsNo] = struct.unpack("3i", dijFile_h.read(12))
+            [PBTag, voxelsNo] = struct.unpack("2i", dijFile_h.read(8))
             voxelIndices = np.frombuffer(dijFile_h.read(voxelsNo * 4), dtype="uint32", count=voxelsNo)
             voxelValues = np.frombuffer(dijFile_h.read(voxelsNo * 4), dtype="float32", count=voxelsNo)
 
@@ -497,6 +515,12 @@ def getDijFREDInfo(dijFileName, displayInfo=False):
         getDijFREDPoint : get a vector of interpolated values in a point from a Dij influence matrix produced by FRED Monte Carlo.
         getDijFREDVectorImage : get a vector image from a Dij influence matrix produced by FRED Monte Carlo.
         getDijFREDSumImage : get FRED Dij image to a sum SimpleITK image object.
+
+    Notes
+    -----
+    The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format 
+    but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or 
+    contact the FREDtools developers.
     """
     import fredtools as ft
     import numpy as np
@@ -522,9 +546,9 @@ def getDijFREDInfo(dijFileName, displayInfo=False):
         FIDs = []
         voxelsNos = []
         for pencilBeam_idx in range(pencilBeamNo):
-            [PBID, FID, voxelsNo] = struct.unpack("3i", dijFile_h.read(12))
-            PBIDs.append(PBID)
-            FIDs.append(FID)
+            [PBTag, voxelsNo] = struct.unpack("2i", dijFile_h.read(8))
+            PBIDs.append(PBTag % 1000000)
+            FIDs.append(int(PBTag / 1000000))
             voxelsNos.append(voxelsNo)
 
             dijFile_h.seek(voxelsNo * 8, 1)

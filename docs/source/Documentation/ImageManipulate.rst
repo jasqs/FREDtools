@@ -17,7 +17,11 @@ A collection of useful functions to manipulate and change images. The image must
 
 .. autofunction:: fredtools.sumVectorImg
 
-.. autofunction:: fredtools.createCylindricalMask
+.. autofunction:: fredtools.createEllipseMask
+
+.. autofunction:: fredtools.createConeMask
+
+.. autofunction:: fredtools.createCylinderMask
 
 .. autofunction:: fredtools.getImgBEV
 

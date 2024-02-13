@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Miscellaneous &mdash; FRED Tools 0.7.5 documentation</title>
+  <title>Miscellaneous &mdash; FRED Tools 0.7.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=a674670e"></script>
+        <script src="../_static/documentation_options.js?v=ddeecabf"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -40,7 +40,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.5
+                0.7.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -70,6 +70,7 @@
 <li class="toctree-l1"><a class="reference internal" href="optimisationTools.html">Optimisation Tools</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Miscellaneous</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.mergePDF"><code class="docutils literal notranslate"><span class="pre">mergePDF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.getLineFromFile"><code class="docutils literal notranslate"><span class="pre">getLineFromFile()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getGIcmap"><code class="docutils literal notranslate"><span class="pre">getGIcmap()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getHistogram"><code class="docutils literal notranslate"><span class="pre">getHistogram()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.pdfLandau"><code class="docutils literal notranslate"><span class="pre">pdfLandau()</span></code></a></li>
@@ -135,6 +136,49 @@ removed after the merge. (def. False)</p></li>
 <dd class="field-odd"><p>mergedPDFFileName</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getLineFromFile">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getLineFromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startLine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removeEoL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getLineFromFile" title="Link to this definition"></a></dt>
+<dd><p>Read the line and line number from an ASCI file.</p>
+<p>The function searches an ASCI file for lines matching a pattern and returns
+the line or lines number and the line strings. The pattern follows the Python
+regular expression <a href="#id17"><span class="problematic" id="id1">[1]_</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>string</em>) – A string describing the regular expression. It is recommended
+the string be a row string, starting with r’…’.</p></li>
+<li><p><strong>fileName</strong> (<em>string</em>) – Path String to ASCI file.</p></li>
+<li><p><strong>kind</strong> (<em>{'all'</em><em>, </em><em>'first'</em><em>, </em><em>'last'}</em><em>, </em><em>optional</em>) – Determine which line is to be returned: the first only, the last, or
+all the lines. (def. ‘all’)</p></li>
+<li><p><strong>startLine</strong> (<em>int</em><em>, </em><em>optional</em>) – The line number to start the search (def. 1)</p></li>
+<li><p><strong>removeEoL</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determine if the end-of-line should be removed from
+each returned line. (def. True)</p></li>
+<li><p><strong>comment</strong> (<em>strung</em><em>, </em><em>optional</em>) – If not None or an empty string, then no lines starting with this
+string (leading white spaces are removed) will be returned. (def. ‘#’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If kind=’all’: a tuple of two tuples where the first one is the
+matched line numbers and the second is the line strings.
+If kind=’first’ or kind=’last’: a tuple with the first or last
+reached line number and the line string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>line index, line string</p>
+</dd>
+</dl>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://docs.python.org/3/library/re.html">Regular expression operations</a></p>
+</aside>
+</aside>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -223,7 +267,7 @@ histogram values.</p>
 <dd><p>Landau probability density function (PDF).</p>
 <p>The function generates a Landau probability density with a given most probable
 value (<cite>mpv</cite>), width (described with <cite>xi</cite>) and amplitude at <cite>mpv</cite>. It was adapted
-from <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> which was implemented based on the ROOT implementation. See <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> for more details.</p>
+from <a href="#id18"><span class="problematic" id="id3">[1]_</span></a> which was implemented based on the ROOT implementation. See <a class="footnote-reference brackets" href="#id6" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> for more details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -250,12 +294,12 @@ from <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noter
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id3" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id5" role="note">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://pypi.org/project/landaupy/">landaupy python package</a></p>
 </aside>
-<aside class="footnote brackets" id="id4" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id6" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/SengerM/landaupy">landaupy package documentation</a></p>
 </aside>
 </aside>
@@ -268,8 +312,8 @@ from <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noter
 <dd><p>Probability density function (PDF) of Landau convoluted with a Gaussian.</p>
 <p>The function generates a Landau convoluted with a Gaussian probability density with a given
 most probable value of the convoluted function (<cite>mpv</cite>), the width of Landau (described with <cite>xi</cite>),
-the standard deviation of Gaussian and amplitude at <cite>mpv</cite>. It was adapted from <a class="footnote-reference brackets" href="#id7" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> which was implemented
-based on the ROOT implementation. See <a class="footnote-reference brackets" href="#id9" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> for more details.</p>
+the standard deviation of Gaussian and amplitude at <cite>mpv</cite>. It was adapted from <a class="footnote-reference brackets" href="#id9" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> which was implemented
+based on the ROOT implementation. See <a class="footnote-reference brackets" href="#id11" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> for more details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -302,12 +346,12 @@ i.e. the position of the maximum value, of the whole Landau-gauss convoluted PDF
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id7" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">3</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id9" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">3</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://pypi.org/project/landaupy/">landaupy python package</a></p>
 </aside>
-<aside class="footnote brackets" id="id9" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">4</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id11" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">4</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/SengerM/landaupy">landaupy package documentation</a></p>
 </aside>
 </aside>
@@ -320,8 +364,8 @@ i.e. the position of the maximum value, of the whole Landau-gauss convoluted PDF
 <dd><p>Probability density function (PDF) of Vavilov.</p>
 <p>The function generates a Vavilov probability density with a given
 most probable value function (<cite>mpv</cite>), amplitude (<cite>amp</cite>), as well as <cite>kappa</cite>,
-<cite>beta</cite> and <cite>scaling</cite> parameters. It uses the implementation of pyamtrack library <a class="footnote-reference brackets" href="#id13" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>
-that adopts the ROOT implementation <a class="footnote-reference brackets" href="#id14" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>. The implemented PDF is not a true Vavilov distribution
+<cite>beta</cite> and <cite>scaling</cite> parameters. It uses the implementation of pyamtrack library <a class="footnote-reference brackets" href="#id15" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>
+that adopts the ROOT implementation <a class="footnote-reference brackets" href="#id16" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>. The implemented PDF is not a true Vavilov distribution
 and the <cite>scaling</cite> parameter is not included in the original ROOT implementation. Therefore, the parameters
 <cite>kappa</cite> and <cite>beta</cite> might not describe the real kappa and beta parameters of the ROOT Vavilov.
 Nevertheless, the PDF can be used for fitting the distribution to the measurement data
@@ -355,12 +399,12 @@ the <cite>beta</cite> parameter might be wrong.</p>
 <div class="admonition-references admonition">
 <p class="admonition-title">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id13" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id11">5</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id15" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">5</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/libamtrack/pyamtrack">pyamtrack python package</a></p>
 </aside>
-<aside class="footnote brackets" id="id14" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id12">6</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id16" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id14">6</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://root.cern/doc/master/classROOT_1_1Math_1_1Vavilov.html">ROOT Vavilov class reference</a></p>
 </aside>
 </aside>

@@ -5,6 +5,8 @@ A collection of useful miscellaneous functions with no category.
 
 .. autofunction:: fredtools.mergePDF
 
+.. autofunction:: fredtools.getLineFromFile
+
 .. autofunction:: fredtools.getGIcmap
 
 .. autofunction:: fredtools.getHistogram

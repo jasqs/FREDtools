@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dij influence matrix Analyse &mdash; FRED Tools 0.7.5 documentation</title>
+  <title>Dij influence matrix Analyse &mdash; FRED Tools 0.7.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=a674670e"></script>
+        <script src="../_static/documentation_options.js?v=ddeecabf"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.5
+                0.7.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -163,6 +163,9 @@ describing the order of the pencil beams and fields.</p>
 <li><p>FNo=[3,1], PBNo=None: will get all the pencil beams from fields 1 and 3.</p></li>
 </ul>
 </div></blockquote>
+<p>The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format
+but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or
+contact the FREDtools developers.</p>
 </div>
 </dd></dl>
 
@@ -223,6 +226,9 @@ beam separately or constant for each field. See the Notes for more details.</p>
 In such a case, the weights represent the number of particles to be delivered, calculated from a treatment plan. It has been tested that
 the 3D dose distribution is consistent concerning the field-of-reference and values with the dose distribution calculated directly
 by FRED Monte Carlo.</p>
+<p>The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format
+but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or
+contact the FREDtools developers.</p>
 </div>
 </dd></dl>
 
@@ -283,6 +289,12 @@ recommended filtering the output of the function for such cases and recording th
 </aside>
 </aside>
 </div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format
+but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or
+contact the FREDtools developers.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -315,6 +327,12 @@ and gets basic information about the pencil beams and fields saved.</p>
 <dt><a class="reference internal" href="#fredtools.getDijFREDSumImage" title="fredtools.getDijFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDijFREDSumImage</span></code></a></dt><dd><p>get FRED Dij image to a sum SimpleITK image object.</p>
 </dd>
 </dl>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The binary influence matrix file format had changed from FRED 3.69.3 version. The function has been aligned to this format
+but will not work for the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or
+contact the FREDtools developers.</p>
 </div>
 </dd></dl>
 

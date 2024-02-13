@@ -691,11 +691,13 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
     fileName : string
         Path String to ASCI file.
     kind : {'all', 'first', 'last'}, optional
-        Determine which line is to be returned: the first only, the last or all the lines. (def. 'all')
+        Determine which line is to be returned: the first only, the last, or 
+        all the lines. (def. 'all')
     startLine : int, optional
         The line number to start the search (def. 1)
     removeEoL : bool, optional
-        Determine if the end-of-line ('\n') should be removed from each returned line. (def. True)
+        Determine if the end-of-line should be removed from 
+        each returned line. (def. True)
     comment : strung, optional
         If not None or an empty string, then no lines starting with this
         string (leading white spaces are removed) will be returned. (def. '#')
@@ -703,8 +705,10 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
     Returns
     -------
     line index, line string
-        If kind='all': a tuple of two tuples where the first one is the matched line numbers and the second is the line strings.
-        If kind='first' or kind='last': a tuple with the first or last matched line number and the line string.
+        If kind='all': a tuple of two tuples where the first one is the 
+        matched line numbers and the second is the line strings.
+        If kind='first' or kind='last': a tuple with the first or last 
+        reached line number and the line string.
 
     References
     ----------
@@ -732,6 +736,10 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
             if removeEoL:
                 line = line.replace("\n", "")
             lineString.append(line)
+
+    # return None if not matching was found
+    if not lineIdx:
+        return None
 
     if kind.lower() == "first":
         lineIdx = lineIdx[0]

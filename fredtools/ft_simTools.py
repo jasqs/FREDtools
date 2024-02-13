@@ -77,7 +77,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     """Read FRED simulation statistics information from the log file.
 
     The function reads some statistics information from a FRED run.out logfile.
-    If some information is not available, then a NaN or numpy.nan is returned.
+    If some information is unavailable, then a NaN or numpy.nan is returned.
 
     Parameters
     ----------
@@ -108,6 +108,15 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
         else:
             return nan
 
+    def matchData(lineInclude, matching, startLine=1):
+        lineFromFile = ft.getLineFromFile(lineInclude, fileNameLogOut, kind="first", startLine=startLine)
+        if not lineFromFile:
+            return "NaN"
+        value = re.findall(matching, lineFromFile[1])
+        if not value:
+            return "NaN"
+        return value[0]
+
     # check if file exists
     if not os.path.isfile(fileNameLogOut):
         raise ValueError(f"The file {fileNameLogOut} dose not exist.")
@@ -116,102 +125,82 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
         "fredVersion": "NaN",
         "fredVersionDate": "NaN",
         "runConfig": "NaN",
-        "runConfigMPI": nan,
-        "runConfigTHREADS": nan,
-        "runConfigGPU": nan,
-        "runWallclockTime_s": nan,
-        "primarySimulated": nan,
-        "trackingRate_prim_s": nan,
-        "trackTimePerPrimary_us": nan,
-        "timingInitialization_s": nan,
-        "timingPBSkimming_s": nan,
-        "timingPrimaryList_s": nan,
-        "timingGeometryChecking_s": nan,
-        "timingTracking_s": nan,
-        "timingWritingOutput_s": nan,
-        "timingOther_s": nan,
+        "runWallclockTime_s": np.nan,
+        "primarySimulated": np.nan,
+        "trackingRate_prim_s": np.nan,
+        "trackTimePerPrimary_us": np.nan,
+        "timingInitialization_s": np.nan,
+        "timingPrimaryList_s": np.nan,
+        "timingDeliveryChecking_s": np.nan,
+        "timingGeometryChecking_s": np.nan,
+        "timingTracking_s": np.nan,
+        "timingWritingOutput_s": np.nan,
+        "timingOther_s": np.nan,
     }
 
-    with open(fileNameLogOut) as f:
-        for num, line in enumerate(f, 1):
-            # FRED Version and release date
-            Version_re = re.search(r"Version\W+([\S+.]+)", line)
-            VersionDate_re = re.search(r"Version.*([0-9]{4}\/[0-9]{2}\/[0-9]{2})", line)
-            if Version_re:
-                simInfo["fredVersion"] = Version_re.group(1)
-            if VersionDate_re:
-                simInfo["fredVersionDate"] = VersionDate_re.group(1)
+    simInfo["fredVersion"] = matchData(r"Version", r"Version\W+([\S+.]+)")
+    simInfo["fredVersionDate"] = matchData(r"Version", r"Version.*([0-9]{4}\/[0-9]{2}\/[0-9]{2})")
 
-            # configuration fo the run
-            RunningConfig_re = re.search(r"Running config.*([0-9]+)\,([0-9]+)\,([0-9]+)", line)
-            if RunningConfig_re:
-                simInfo["runConfigMPI"] = int(RunningConfig_re.group(1))
-                simInfo["runConfigTHREADS"] = int(RunningConfig_re.group(2))
-                simInfo["runConfigGPU"] = int(RunningConfig_re.group(3))
-                if simInfo["runConfigGPU"] == 0:
-                    simInfo["runConfig"] = "CPUx{:d}".format(simInfo["runConfigTHREADS"])
-                else:
-                    simInfo["runConfig"] = "GPUx{:d}".format(simInfo["runConfigGPU"])
+    # check run config
+    runningConfigLine = ft.getLineFromFile(r"Running config", fileNameLogOut, kind="first")
+    if runningConfigLine:
+        runningConfigTypes = re.findall(r"\w+", re.findall(r"Running config.*\((.*)\)", runningConfigLine[1])[0])
+        runningConfigValues = re.findall(r"\d+", re.findall(r"Running config.*:(.*)", runningConfigLine[1])[0])
+        for runningConfigType, runningConfigValue in zip(runningConfigTypes, runningConfigValues):
+            simInfo["runConfig"+runningConfigType] = int(runningConfigValue)
+        if "runConfigGPU" in simInfo.keys() and simInfo["runConfigGPU"] > 0:
+            simInfo["runConfig"] = "GPUx{:d}".format(simInfo["runConfigGPU"])
+        elif "runConfigPTHREADS" in simInfo.keys():
+            simInfo["runConfig"] = "CPUx{:d}".format(simInfo["runConfigPTHREADS"])
+        else:
+            simInfo["runConfig"] = "NaN"
 
-            # total run time
-            RunWallclockTime_re = re.findall(r"Run wallclock time:\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
-            if RunWallclockTime_re:
-                simInfo["runWallclockTime_s"] = float(RunWallclockTime_re[0])
+    simInfo["runWallclockTime_s"] = float(matchData(r"Run wallclock time", rf"Run wallclock time:\W+({ft.re_number})"))
+    simInfo["primarySimulated"] = int(float(matchData(r"Number of primary particles", rf"Number of primary particles:\W+({ft.re_number})")))
 
-            # total number of primaries simulated
-            PrimarySimulated_re = re.findall(r"Number of primary particles\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
-            if PrimarySimulated_re:
-                simInfo["primarySimulated"] = int(float(PrimarySimulated_re[0]))
+    simInfo["trackingRate_prim_s"] = int(float(matchData(r"Tracking rate", rf"Tracking rate:\W+({ft.re_number})")))
+    simInfo["trackTimePerPrimary_us"] = float(matchData(r"Track time per primary", rf"Track time per primary:\W+({ft.re_number})"))
+    simInfo["trackTimePerPrimary_us"] /= scaleUnit(matchData(r"Track time per primary", rf"Track time per primary\W+{ft.re_number}\W*(\w+)"))
+    simInfo["trackTimePerPrimary_us"] *= 1E6
 
-            # Average Tracking Rate (prim/s)
-            TrackingRate_re = re.findall(r"Tracking rate\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)", line)
-            if TrackingRate_re:
-                simInfo["trackingRate_prim_s"] = float(TrackingRate_re[0])
+    timingSummaryStartLine = ft.getLineFromFile(r"^Timing summary", fileNameLogOut, kind="first")
+    if timingSummaryStartLine:
+        simInfo["timingInitialization_s"] = float(matchData(r"initialization", rf"initialization\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
+        simInfo["timingInitialization_s"] /= scaleUnit(matchData(r"initialization", rf"initialization\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
 
-            # Average Track time per prim
-            TrackTimePerPrimary_re = re.findall(r"Track time per primary\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+(.+)", line)
-            if TrackTimePerPrimary_re:
-                simInfo["trackTimePerPrimary_us"] = float(TrackTimePerPrimary_re[0][0]) / scaleUnit(TrackTimePerPrimary_re[0][1]) * 1e6
+        simInfo["timingPrimaryList_s"] = float(matchData(r"primary list", rf"primary list\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
+        simInfo["timingPrimaryList_s"] /= scaleUnit(matchData(r"primary list", rf"primary list\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
 
-            # Timing: initialization
-            TimingInitialization_re = re.findall(r"\W+initialization\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
-            if TimingInitialization_re:
-                simInfo["timingInitialization_s"] = float(TimingInitialization_re[0][0]) / scaleUnit(TimingInitialization_re[0][1])
-            # Timing: PB skimming
-            TimingPBSkimming_re = re.findall(r"\W+PB skimming\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
-            if TimingPBSkimming_re:
-                simInfo["timingPBSkimming_s"] = float(TimingPBSkimming_re[0][0]) / scaleUnit(TimingPBSkimming_re[0][1])
-            # Timing: primary list
-            TimingPrimaryList_re = re.findall(r"\W+primary list\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
-            if TimingPrimaryList_re:
-                simInfo["timingPrimaryList_s"] = float(TimingPrimaryList_re[0][0]) / scaleUnit(TimingPrimaryList_re[0][1])
-            # Timing: geometry checking
-            TimingGeometryChecking_re = re.findall(r"\W+geometry checking\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
-            if TimingGeometryChecking_re:
-                simInfo["timingGeometryChecking_s"] = float(TimingGeometryChecking_re[0][0]) / scaleUnit(TimingGeometryChecking_re[0][1])
-            # Timing: tracking
-            TimingTracking_re = re.findall(r"\W+tracking\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
-            if TimingTracking_re:
-                simInfo["timingTracking_s"] = float(TimingTracking_re[0][0]) / scaleUnit(TimingTracking_re[0][1])
-            # Timing: writing output
-            TimingWritingOutput_re = re.findall(r"\W+writing output\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
-            if TimingWritingOutput_re:
-                simInfo["timingWritingOutput_s"] = float(TimingWritingOutput_re[0][0]) / scaleUnit(TimingWritingOutput_re[0][1])
-            # Timing: other
-            TimingOther_re = re.findall(r"\W+other\W+([-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?)\W+([A-Za-z]+)", line)
-            if TimingOther_re:
-                simInfo["timingOther_s"] = float(TimingOther_re[0][0]) / scaleUnit(TimingOther_re[0][1])
+        simInfo["timingDeliveryChecking_s"] = float(matchData(r"delivery checking", rf"delivery checking\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
+        simInfo["timingDeliveryChecking_s"] /= scaleUnit(matchData(r"delivery checking", rf"delivery checking\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
+
+        simInfo["timingGeometryChecking_s"] = float(matchData(r"geometry checking", rf"geometry checking\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
+        simInfo["timingGeometryChecking_s"] /= scaleUnit(matchData(r"geometry checking", rf"geometry checking\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
+
+        simInfo["timingTracking_s"] = float(matchData(r"tracking", rf"tracking\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
+        simInfo["timingTracking_s"] /= scaleUnit(matchData(r"tracking", rf"tracking\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
+
+        simInfo["timingWritingOutput_s"] = float(matchData(r"writing output", rf"writing output\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
+        simInfo["timingWritingOutput_s"] /= scaleUnit(matchData(r"writing output", rf"writing output\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
+
+        simInfo["timingOther_s"] = float(matchData(r"other", rf"other\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
+        simInfo["timingOther_s"] /= scaleUnit(matchData(r"other", rf"other\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
 
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
         print("# FRED Version: {:s}".format(simInfo["fredVersion"]))
         print("# FRED Version Date: {:s}".format(simInfo["fredVersionDate"]))
-        print("# Run Config (MPI,THREADS,GPU): {:d},{:d},{:d}".format(simInfo["runConfigMPI"], simInfo["runConfigTHREADS"], simInfo["runConfigGPU"]))
+        runConfigKeys = [key for key in simInfo.keys() if re.search("runConfig.+", key)]
+        if runConfigKeys:
+            runConfigValues = [simInfo[runConfigKey] for runConfigKey in runConfigKeys]
+            runConfigKeys = [runConfigKey.replace("runConfig", "") for runConfigKey in runConfigKeys]
+            print(f"# Run Config ({','.join(runConfigKeys)}): {str(runConfigValues).replace('[','').replace(']','')}")
         print("# Run Config: {:s}".format(simInfo["runConfig"]))
         print("# Run Wall clock Time: {:.2f} s".format(simInfo["runWallclockTime_s"]))
         print("# Average Track Time Per Primary: {:5f} us".format(simInfo["trackTimePerPrimary_us"]))
         print("# Average Tracking Rate: {:.3E} prim/s".format(simInfo["trackingRate_prim_s"]))
         print("#" * len(f"### {ft._currentFuncName()} ###"))
+
     return simInfo
 
 
@@ -267,7 +256,7 @@ def readBeamModel(fileName):
     for key in beamModel.keys():
         if isinstance(beamModel[key], list):
             if ("row" in beamModel[key][-1]) and ("column" in beamModel[key][-1]):  # the key is a pandas DataFrame
-                beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), delim_whitespace=True)
+                beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), sep='\s+')
                 if "nomEnergy" in beamModel[key].columns:
                     beamModel[key].set_index("nomEnergy", inplace=True)
 

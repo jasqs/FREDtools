@@ -34,7 +34,7 @@ def readOPG(fileName, depth=0, displayInfo=True):
 
     with open(fileName, "r") as file:
         data = file.readlines()
-    data = data[ft.getLineFromFile(rf"Y\[{LengthUnit}\]", fileName, kind="first", startLine=asciibodyStart)[0] : asciibodyEnd - 1]
+    data = data[ft.getLineFromFile(rf"Y\[{LengthUnit}\]", fileName, kind="first", startLine=asciibodyStart)[0]: asciibodyEnd - 1]
     arr = []
     for dataLine in data:
         arr.append(np.fromstring(dataLine.replace("\t", ""), sep=" "))
@@ -70,7 +70,8 @@ def readOPG(fileName, depth=0, displayInfo=True):
     arr = np.expand_dims(arr, 0)
 
     img = sitk.GetImageFromArray(arr)
-    img.SetSpacing([np.unique(np.diff(Xcoor).round(2))[0], np.unique(np.diff(Ycoor).round(2))[0], 0.1])
+    # img.SetSpacing([np.unique(np.diff(Xcoor).round(2))[0], np.unique(np.diff(Ycoor).round(2))[0], 0.1])
+    img.SetSpacing([7.619354838709677, 7.619354838709677, 0.1])  # values set to constant distance of MatriXX PT
     img.SetOrigin([Xcoor[0], Ycoor[0], depth])
 
     if displayInfo:

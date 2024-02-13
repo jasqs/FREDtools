@@ -665,13 +665,186 @@ def sumImg(imgs, displayInfo=False):
     return img
 
 
-def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=False):
+def createEllipseMask(img, point, radii, displayInfo=False):
+    """Create an Ellipse mask in the image field of reference.
+
+    The function creates an ellipse mask, defined with the center and radii
+    in the frame of references of an image defined as a SimpleITK image 
+    object. Any dimension, i.e. 2D-4D, of the image is supported.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        Object of a SimpleITK image.
+    point : array_like
+        A point describing the position of the center of the ellipse. The dimension must match the image dimension.
+    radii : scalar or array_like
+        Radii of the ellipse for each dimension. It might be a scalar, then the same radii will be used in each direction.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
+
+    See Also
+    --------
+        mapStructToImg : mapping a structure to an image to create a mask.
+        setValueMask : setting values of the image inside/outside a mask.
+        cropImgToMask : crop an image to mask.
+        createCylinderMask: create a cylinder mask.
+        createConeMask : create a cone mask.
+    """
+    import itk
+    import fredtools as ft
+    from collections.abc import Iterable
+    import numpy as np
+
+    ft._isSITK(img, raiseError=True)
+
+    # convert image to ITK
+    imgITK = ft.SITK2ITK(img)
+
+    # check radii and point parameters
+    if isinstance(radii, Iterable):
+        radii = list(radii)
+    if np.isscalar(radii):
+        radii = [radii]*img.GetDimension()
+    if len(radii) != img.GetDimension():
+        raise ValueError(f"The `radii` parameter must be an iterable of the same length as the image dimension. Image dimension is {img.GetDimension()} but radii {radii} was used.")
+    if len(point) != img.GetDimension():
+        raise ValueError(f"The `point` parameter must be an iterable of the same length as the image dimension. Image dimension is {img.GetDimension()} but point {point} was used.")
+
+    # create ellipse and mapping objects
+    match img.GetDimension():
+        case 2:
+            EllipseSpatialObject = itk.itkEllipseSpatialObjectPython.itkEllipseSpatialObject2_New()
+            SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO2IUC2_New()
+        case 3:
+            EllipseSpatialObject = itk.itkEllipseSpatialObjectPython.itkEllipseSpatialObject3_New()
+            SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO3IUC3_New()
+        case 2:
+            EllipseSpatialObject = itk.itkEllipseSpatialObjectPython.itkEllipseSpatialObject4_New()
+            SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO4IUC4_New()
+
+    EllipseSpatialObject.SetCenterInObjectSpace(point)
+    EllipseSpatialObject.SetRadiusInObjectSpace(radii)
+
+    # map spatial object to image FoR
+    SpatialObjectToImage.SetInsideValue(1)
+    SpatialObjectToImage.SetOutsideValue(0)
+    SpatialObjectToImage.SetInput(EllipseSpatialObject)
+    SpatialObjectToImage.SetSize(imgITK.GetLargestPossibleRegion().GetSize())
+    SpatialObjectToImage.SetDirection(imgITK.GetDirection())
+    SpatialObjectToImage.SetOrigin(imgITK.GetOrigin())
+    SpatialObjectToImage.SetSpacing(imgITK.GetSpacing())
+    SpatialObjectToImage.Update()
+    imgMask = SpatialObjectToImage.GetOutput()
+
+    imgMask = ft.ITK2SITK(imgMask)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(imgMask)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgMask
+
+
+def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInfo=False):
+    """Create a cone mask in the image field of reference.
+
+    The function creates a cone mask, defined with starting and ending points and radii 
+    in the frame of references of an image defined as a SimpleITK image object describing a 3D image.
+    Only 3D images are supported.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        Object of a SimpleITK 3D image.
+    startPoint : array_like
+        3-element point describing the position of the center of the first cone base.
+    endPoint : array_like
+        3-element point describing the position of the center of the second cone base.
+    startRadius : scalar
+        Radious of the first cone base.
+    endRadius : scalar
+        Radious of the second cone base.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
+
+    See Also
+    --------
+        mapStructToImg : mapping a structure to an image to create a mask.
+        setValueMask : setting values of the image inside/outside a mask.
+        cropImgToMask : crop an image to mask.
+        createCylinderMask: create a cylinder mask.
+        createEllipseMask : create an ellipse mask.
+    """
+    import itk
+    import fredtools as ft
+
+    ft._isSITK3D(img, raiseError=True)
+
+    # convert image to ITK
+    imgITK = ft.SITK2ITK(img)
+
+    if not isinstance(startPoint, list):
+        startPoint = list(startPoint)
+    if not isinstance(endPoint, list):
+        endPoint = list(endPoint)
+
+    # define tube spatial object woth two points
+    TubeSpatialObject = itk.itkTubeSpatialObjectPython.itkTubeSpatialObject3_New()
+
+    TubeSpatialObjectPoints = [itk.itkTubeSpatialObjectPointPython.itkTubeSpatialObjectPoint3(),
+                               itk.itkTubeSpatialObjectPointPython.itkTubeSpatialObjectPoint3()]
+
+    TubeSpatialObjectPoints[0].SetPositionInObjectSpace(startPoint)
+    TubeSpatialObjectPoints[0].SetRadiusInObjectSpace(startRadius)
+    TubeSpatialObjectPoints[1].SetPositionInObjectSpace(endPoint)
+    TubeSpatialObjectPoints[1].SetRadiusInObjectSpace(endRadius)
+
+    TubeSpatialObject.SetPoints(TubeSpatialObjectPoints)
+    TubeSpatialObject.SetEndRounded(False)
+    TubeSpatialObject.Update()
+
+    # map spatial object to image FoR
+    SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO3IUC3_New()
+
+    SpatialObjectToImage.SetInsideValue(1)
+    SpatialObjectToImage.SetOutsideValue(0)
+    SpatialObjectToImage.SetInput(TubeSpatialObject)
+    SpatialObjectToImage.SetSize(imgITK.GetLargestPossibleRegion().GetSize())
+    SpatialObjectToImage.SetDirection(imgITK.GetDirection())
+    SpatialObjectToImage.SetOrigin(imgITK.GetOrigin())
+    SpatialObjectToImage.SetSpacing(imgITK.GetSpacing())
+    SpatialObjectToImage.Update()
+    imgMask = SpatialObjectToImage.GetOutput()
+
+    imgMask = ft.ITK2SITK(imgMask)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(imgMask)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgMask
+
+
+def createCylinderMask(img, startPoint, endPoint, radious, displayInfo=False):
     """Create a cylindrical Mask in the image field of reference
 
-    The function creates a cylindrical mask with a given `dimension` and height
+    The function creates a cylindrical mask with a given radious and height
     calculated from the starting and ending points of the cylinder in the frame of
     references of an image defined as a SimpleITK image object describing a 3D image.
-    Only 3D images are supported. The routine might be helpful for instance for making
+    Only 3D images are supported. For instance, the routine might help make
     a geometrical acceptance correction of a chamber used for Bragg peak measurements.
     The routine was adapted from a GitHub repository: https://github.com/heydude1337/SimplePhantomToolkit/.
 
@@ -683,8 +856,8 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
         3-element point describing the position of the center of the first cylinder base.
     endPoint : array_like
         3-element point describing the position of the center of the second cylinder base.
-    dimension : scalar
-        Dimension of the cylinder.
+    radious : scalar
+        Radious of the cylinder.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -698,70 +871,20 @@ def createCylindricalMask(img, startPoint, endPoint, dimension, displayInfo=Fals
         mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
+        createConeMask: create a cone mask.
+        createEllipseMask : create an ellipse mask.
     """
     import SimpleITK as sitk
     import fredtools as ft
     import numpy as np
 
-    def dot(v, w):
-        # Dot product
-        return sum([vi * wi for vi, wi in zip(v, w)])
-
-    def cross(u, v):
-        # Cross product
-        s1 = float(u[1]) * v[2] - float(u[2]) * v[1]
-        s2 = float(u[2]) * v[0] - float(u[0]) * v[2]
-        s3 = float(u[0]) * v[1] - float(u[1]) * v[0]
-        return (s1, s2, s3)
-
-    def grid_from_image(image):
-        # Similar to numpy.meshgrid using sitk. Grids will be in world (physical) space.
-        imsize = image.GetSize()
-        spacing = image.GetSpacing()
-        origin = image.GetOrigin()
-        direction = image.GetDirection()
-        grid = sitk.PhysicalPointSource(sitk.sitkVectorFloat64, imsize, origin, spacing, direction)
-
-        dim = image.GetDimension()
-        grid = [sitk.VectorIndexSelectionCast(grid, i) for i in range(0, dim)]
-
-        for gi in grid:
-            gi.CopyInformation(image)
-        return grid
-
-    ft._isSITK3D(img, raiseError=True)
-
-    if not isinstance(startPoint, list):
-        startPoint = list(startPoint)
-
-    if not isinstance(endPoint, list):
-        endPoint = list(endPoint)
-
-    startPoint = np.array(startPoint, dtype="double")
-    endPoint = np.array(endPoint, dtype="double")
-
-    heightVector = (np.array(startPoint) - np.array(endPoint)).astype("double")
-    height = np.sqrt(heightVector.dot(heightVector))
-    radius = dimension / 2
-
-    x, y, z = grid_from_image(img)
-
-    u = (float(startPoint[0]) - x, float(startPoint[1]) - y, float(startPoint[2]) - z)
-
-    dxyz = cross(heightVector, u)
-
-    d = (sitk.Sqrt(sum([dxyzS**2 for dxyzS in dxyz])) / height) <= radius
-    side1 = dot(heightVector.tolist(), (x - float(startPoint[0]), y - float(startPoint[1]), z - float(startPoint[2]))) <= 0
-    side2 = dot(heightVector.tolist(), (x - float(endPoint[0]), y - float(endPoint[1]), z - float(endPoint[2]))) >= 0
-
-    imgMask = d * side1 * side2
+    imgMask = ft.createConeMask(img, startPoint, endPoint, radious, radious)
 
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
-        print(f"# Cylinder height/dimension [mm]: {height:.2f} / {dimension:.2f}")
-        print("# Cylinder volume theoretical/real [cm3]: {:.2f} / {:.2f}".format(height * np.pi * radius**2 / 1e3, np.prod(imgMask.GetSpacing()) * sitk.GetArrayFromImage(imgMask).sum() / 1e3))
         ft.ft_imgAnalyse._displayImageInfo(imgMask)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
+
     return imgMask
 
 
