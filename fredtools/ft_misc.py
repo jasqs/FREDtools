@@ -248,7 +248,7 @@ def pdfLandau(x, mpv, xi, amp=1):
 
     The function generates a Landau probability density with a given most probable
     value (`mpv`), width (described with `xi`) and amplitude at `mpv`. It was adapted
-    from [1]_ which was implemented based on the ROOT implementation. See [2]_ for more details.
+    from 3 which was implemented based on the ROOT implementation. See [1]_ and [2]_ for more details.
 
     Parameters
     ----------
@@ -278,7 +278,7 @@ def pdfLandau(x, mpv, xi, amp=1):
     from landaupy import landau
     import numpy as np
 
-    # check parameters
+    # check para3eters
     if not np.isscalar(mpv):
         raise TypeError(f"The 'mpv' parameter must be a scalar but it is {type(mpv)}")
     if not np.isscalar(xi):
@@ -681,7 +681,7 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
 
     The function searches an ASCI file for lines matching a pattern and returns
     the line or lines number and the line strings. The pattern follows the Python
-    regular expression [1]_.
+    regular expression [7]_.
 
     Parameters
     ----------
@@ -712,7 +712,7 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
 
     References
     ----------
-    .. [1] `Regular expression operations <https://docs.python.org/3/library/re.html>`_
+    .. [7] `Regular expression operations <https://docs.python.org/3/library/re.html>`_
     """
     import re
 
