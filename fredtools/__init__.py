@@ -15,7 +15,7 @@ import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 7, 11]
+version_info = [0, 7, 13]
 __version__ = ".".join(map(str, version_info))
 
 
@@ -40,14 +40,14 @@ def _checkMatplotlibBackend():
 
 
 def _currentFuncName(n=0):
-    r"""Get name of the function where the currentFuncName() is called.
+    """Get name of the function where the currentFuncName() is called.
     currentFuncName(1) get the name of the caller.
     """
     return sys._getframe(n + 1).f_code.co_name
 
 
 def _isITK2D(img, raiseError=False):
-    r"""Check if input is a 2D itk.Image object and raise error if requested."""
+    """Check if input is a 2D itk.Image object and raise error if requested."""
     if not _isITK(img, raiseError=raiseError):
         return False
     elif not img.ndim == 2:
@@ -59,7 +59,7 @@ def _isITK2D(img, raiseError=False):
 
 
 def _isITK3D(img, raiseError=False):
-    r"""Check if input is a 3D itk.Image object and raise error if requested."""
+    """Check if input is a 3D itk.Image object and raise error if requested."""
     if not _isITK(img, raiseError=raiseError):
         return False
     elif not img.ndim == 3:
@@ -71,7 +71,7 @@ def _isITK3D(img, raiseError=False):
 
 
 def _isITK4D(img, raiseError=False):
-    r"""Check if input is a 4D itk.Image object and raise error if requested."""
+    """Check if input is a 4D itk.Image object and raise error if requested."""
     if not _isITK(img, raiseError=raiseError):
         return False
     elif not img.ndim == 4:
@@ -83,7 +83,7 @@ def _isITK4D(img, raiseError=False):
 
 
 def _isITK(img, raiseError=False):
-    r"""Check if input is an itk.Image object and raise error if requested."""
+    """Check if input is an itk.Image object and raise error if requested."""
     from itk import Image as ITKImage
 
     if isinstance(img, ITKImage):
@@ -95,7 +95,7 @@ def _isITK(img, raiseError=False):
 
 
 def _isSITK2D(img, raiseError=False):
-    r"""Check if input is a 2D SimpleITK.Image object and raise error if requested."""
+    """Check if input is a 2D SimpleITK.Image object and raise error if requested."""
     if not _isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetDimension() == 2:
@@ -107,7 +107,7 @@ def _isSITK2D(img, raiseError=False):
 
 
 def _isSITK3D(img, raiseError=False):
-    r"""Check if input is a 3D SimpleITK.Image object and raise error if requested."""
+    """Check if input is a 3D SimpleITK.Image object and raise error if requested."""
     if not _isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetDimension() == 3:
@@ -119,7 +119,7 @@ def _isSITK3D(img, raiseError=False):
 
 
 def _isSITK4D(img, raiseError=False):
-    r"""Check if input is a 4D SimpleITK.Image object and raise error if requested."""
+    """Check if input is a 4D SimpleITK.Image object and raise error if requested."""
     if not _isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetDimension() == 4:
@@ -131,7 +131,7 @@ def _isSITK4D(img, raiseError=False):
 
 
 def _isSITK(img, raiseError=False):
-    r"""Check if input is an SimpleITK.Image object and raise error if requested."""
+    """Check if input is an SimpleITK.Image object and raise error if requested."""
     from SimpleITK import Image as SITKImage
 
     if isinstance(img, SITKImage):
@@ -287,7 +287,7 @@ def _copyImgMetaData(imgSrc, imgDes):
 
 
 def SITK2ITK(imgSITK):
-    r"""Convert image from SimpleITK.Image object to ITK.Image object."""
+    """Convert image from SimpleITK.Image object to ITK.Image object."""
     import numpy as np
     import itk
     import SimpleITK as sitk
@@ -302,7 +302,7 @@ def SITK2ITK(imgSITK):
 
 
 def ITK2SITK(imgITK):
-    r"""Convert image from ITK.Image object to SimpleITK.Image object."""
+    """Convert image from ITK.Image object to SimpleITK.Image object."""
     import SimpleITK as sitk
     import fredtools as ft
 

@@ -599,7 +599,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     # calculate new origin to preserve the same extent
     newOrigin = np.array(ft.getExtent(img))[:, 0] + np.array(spacingCorr) / 2
 
-    # calculate default pixel value as min value of the input image
+    # calculate the default pixel value as min value of the input image
     """comment: In principle, this value is assigned when using NearestNeighborExtrapolator=False, and a value is to be 
     interpolated outside the 'img' extent. Such a case should not happen because it is assured in the line above that
     the centers of the most external voxels to be interpolated are inside the original image extent. However, the value
@@ -628,7 +628,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
 
 
 def sumImg(imgs, displayInfo=False):
-    """Sum list of images
+    """Sum list of images.
 
     The function sums an iterable (list, tuple, etc.) of images
     defined as instances of a SimpleITK image object. The frame
@@ -665,6 +665,61 @@ def sumImg(imgs, displayInfo=False):
     return img
 
 
+def imgDivide(imgNum, imgDen, displayInfo=False):
+    """Divide two images.
+
+    The function divides two images images defined as instances 
+    of a SimpleITK image object. The frame of references of both images 
+    must be the same. For a given voxel it returns:
+
+        -  NaN value if any of the numerator or denominator voxel value is NaN
+        -  0 value if denominator voxel value is zero
+        -  Quotient for all other cases
+
+    Parameters
+    ----------
+    imgNum : SimpleITK Image
+        An object of a SimpleITK image describing numerator.
+    imgDen : SimpleITK Image
+        An object of a SimpleITK image describing denominator.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An object of a SimpleITK image.
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    ft._isSITK(imgNum, raiseError=True)
+    ft._isSITK(imgDen, raiseError=True)
+
+    # check if numerator and denominator images have the same FoR
+    if not ft.compareImgFoR(imgNum, imgDen):
+        raise ValueError(f"The numerator and denominator images must have the same field of reference.")
+
+    arrNum = sitk.GetArrayViewFromImage(imgNum)
+    arrDen = sitk.GetArrayViewFromImage(imgDen)
+
+    arr = np.zeros(arrNum.shape)
+
+    arr[arrDen > 0] = arrNum[arrDen > 0]/arrDen[arrDen > 0]
+    arr[np.isnan(arrNum) | np.isnan(arrDen)] = np.nan
+
+    imgDiv = sitk.GetImageFromArray(arr)
+    imgDiv.CopyInformation(imgNum)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(imgDiv)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgDiv
+
+
 def createEllipseMask(img, point, radii, displayInfo=False):
     """Create an Ellipse mask in the image field of reference.
 
@@ -675,7 +730,7 @@ def createEllipseMask(img, point, radii, displayInfo=False):
     Parameters
     ----------
     img : SimpleITK Image
-        Object of a SimpleITK image.
+        An object of a SimpleITK image.
     point : array_like
         A point describing the position of the center of the ellipse. The dimension must match the image dimension.
     radii : scalar or array_like

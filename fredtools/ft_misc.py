@@ -705,7 +705,7 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
     Returns
     -------
     line index, line string
-        If kind='all': a tuple of two tuples where the first one is the 
+        If kind='all': a tuple of two tuples where the first is the 
         matched line numbers and the second is the line strings.
         If kind='first' or kind='last': a tuple with the first or last 
         reached line number and the line string.
@@ -756,7 +756,7 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
     return lineIdx, lineString
 
 
-def getCPUNo(CPUNo="auto"):
+def getCPUNo(CPUNo="auto") -> int | None:
     """Get a number of CPU cores.
 
     The function returns the number of CPU cores. Usually, it is used in functions utilizing

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Reading and Writing &mdash; FRED Tools 0.7.11 documentation</title>
+  <title>Image Reading and Writing &mdash; FRED Tools 0.7.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=7016d275"></script>
+        <script src="../_static/documentation_options.js?v=e396dc06"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.11
+                0.7.13
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -98,7 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gammaIndexAnalyse.html">Gamma Index Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DijAnalyse.html">Dij influence matrix Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InmAnalyse.html">Influence matrix Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ImageManipulate.html">Image Manipulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="displayImage.html">Display Image</a></li>
@@ -766,7 +766,7 @@ The function overwrites the original files.</p>
 <h2>Other formats<a class="headerlink" href="#other-formats" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.readOPG">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readOPG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readOPG" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">readOPG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.readOPG" title="Link to this definition"></a></dt>
 <dd><p>Read OPG files from OmniPro software.</p>
 <p>The function reads a single OPG file exported from OmniPro software (IBA)
 and creates an instance of a SimpleITK object.</p>

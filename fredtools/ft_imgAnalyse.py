@@ -1090,6 +1090,7 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
     """
     import fredtools as ft
     import numpy as np
+    import SimpleITK as sitk
 
     ft._isSITK(img1, raiseError=True)
     ft._isSITK(img2, raiseError=True)
@@ -1113,7 +1114,7 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
 
     # compare values if displayInfo
     if match and displayInfo:
-        valuesMatch = np.all(np.round(ft.arr(img1), decimals=decimals) == np.round(ft.arr(img2), decimals=decimals))
+        valuesMatch = np.allclose(sitk.GetArrayFromImage(img1), sitk.GetArrayFromImage(img2), rtol=0, atol=1/(10**decimals), equal_nan=True)
     else:
         valuesMatch = False
 

@@ -77,7 +77,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     """Read FRED simulation statistics information from the log file.
 
     The function reads some statistics information from a FRED run.out logfile.
-    If some information is unavailable, then a NaN or numpy.nan is returned.
+    If some information is unavailable, then a NaN or numpy.np.nan is returned.
 
     Parameters
     ----------
@@ -93,7 +93,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     """
     import os
     import re
-    from numpy import nan
+    import numpy as np
     import fredtools as ft
 
     def scaleUnit(unit):
@@ -106,7 +106,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
         if unit == "s":
             return 1
         else:
-            return nan
+            return np.nan
 
     def matchData(lineInclude, matching, startLine=1):
         lineFromFile = ft.getLineFromFile(lineInclude, fileNameLogOut, kind="first", startLine=startLine)
@@ -124,18 +124,18 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     simInfo = {
         "fredVersion": "NaN",
         "fredVersionDate": "NaN",
-        "runConfig": "NaN",
-        "runWallclockTime_s": nan,
-        "primarySimulated": nan,
-        "trackingRate_prim_s": nan,
-        "trackTimePerPrimary_us": nan,
-        "timingInitialization_s": nan,
-        "timingPrimaryList_s": nan,
-        "timingDeliveryChecking_s": nan,
-        "timingGeometryChecking_s": nan,
-        "timingTracking_s": nan,
-        "timingWritingOutput_s": nan,
-        "timingOther_s": nan,
+        "runConfig": np.nan,
+        "runWallclockTime_s": np.nan,
+        "primarySimulated": np.nan,
+        "trackingRate_prim_s": np.nan,
+        "trackTimePerPrimary_us": np.nan,
+        "timingInitialization_s": np.nan,
+        "timingPrimaryList_s": np.nan,
+        "timingDeliveryChecking_s": np.nan,
+        "timingGeometryChecking_s": np.nan,
+        "timingTracking_s": np.nan,
+        "timingWritingOutput_s": np.nan,
+        "timingOther_s": np.nan,
     }
 
     simInfo["fredVersion"] = matchData(r"Version", r"Version\W+([\S+.]+)")
@@ -149,16 +149,19 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
         for runningConfigType, runningConfigValue in zip(runningConfigTypes, runningConfigValues):
             simInfo["runConfig"+runningConfigType] = int(runningConfigValue)
         if "runConfigGPU" in simInfo.keys() and simInfo["runConfigGPU"] > 0:
-            simInfo["runConfig"] = "GPUx{:d}".format(simInfo["runConfigGPU"])
+            simInfo["runConfig"] = "{:d}xGPU".format(simInfo["runConfigGPU"])
         elif "runConfigPTHREADS" in simInfo.keys():
-            simInfo["runConfig"] = "CPUx{:d}".format(simInfo["runConfigPTHREADS"])
+            simInfo["runConfig"] = "{:d}xCPU".format(simInfo["runConfigPTHREADS"])
         else:
-            simInfo["runConfig"] = "NaN"
+            simInfo["runConfig"] = np.nan
 
     simInfo["runWallclockTime_s"] = float(matchData(r"Run wallclock time", rf"Run wallclock time:\W+({ft.re_number})"))
-    simInfo["primarySimulated"] = int(float(matchData(r"Number of primary particles", rf"Number of primary particles:\W+({ft.re_number})")))
+    simInfo["primarySimulated"] = float(matchData(r"Number of primary particles", rf"Number of primary particles:\W+({ft.re_number})"))
+    simInfo["primarySimulated"] = int(simInfo["primarySimulated"]) if not np.isnan(simInfo["primarySimulated"]) else np.nan
 
-    simInfo["trackingRate_prim_s"] = int(float(matchData(r"Tracking rate", rf"Tracking rate:\W+({ft.re_number})")))
+    simInfo["trackingRate_prim_s"] = float(matchData(r"Tracking rate", rf"Tracking rate:\W+({ft.re_number})"))
+    simInfo["trackingRate_prim_s"] = int(simInfo["trackingRate_prim_s"]) if not np.isnan(simInfo["trackingRate_prim_s"]) else np.nan
+
     simInfo["trackTimePerPrimary_us"] = float(matchData(r"Track time per primary", rf"Track time per primary:\W+({ft.re_number})"))
     simInfo["trackTimePerPrimary_us"] /= scaleUnit(matchData(r"Track time per primary", rf"Track time per primary\W+{ft.re_number}\W*(\w+)"))
     simInfo["trackTimePerPrimary_us"] *= 1E6
@@ -195,7 +198,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
             runConfigValues = [simInfo[runConfigKey] for runConfigKey in runConfigKeys]
             runConfigKeys = [runConfigKey.replace("runConfig", "") for runConfigKey in runConfigKeys]
             print(f"# Run Config ({','.join(runConfigKeys)}): {str(runConfigValues).replace('[','').replace(']','')}")
-        print("# Run Config: {:s}".format(simInfo["runConfig"]))
+        print("# Run Config: {}".format(simInfo["runConfig"]))
         print("# Run Wall clock Time: {:.2f} s".format(simInfo["runWallclockTime_s"]))
         print("# Average Track Time Per Primary: {:5f} us".format(simInfo["trackTimePerPrimary_us"]))
         print("# Average Tracking Rate: {:.3E} prim/s".format(simInfo["trackingRate_prim_s"]))
@@ -248,9 +251,7 @@ def readBeamModel(fileName):
 
     # check if all required sections are present in the beam model
     if not {"BM Description", "BM Energy", "BM RangeShifters", "BM Materials"}.issubset(beamModel.keys()):
-        raise ValueError(
-            f"Missing sections in the beam model loaded from {fileName}\nThe beam model must include at least 'BM Description', 'BM Energy', 'BM RangeShifters' and 'BM Materials' sections."
-        )
+        raise ValueError(f"Missing sections in the beam model loaded from {fileName}\nThe beam model must include at least 'BM Description', 'BM Energy', 'BM RangeShifters' and 'BM Materials' sections.")
 
     # convert all dataFrame-like lists of strings to dataFrame
     for key in beamModel.keys():

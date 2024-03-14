@@ -15,6 +15,8 @@ A collection of useful functions to manipulate and change images. The image must
 
 .. autofunction:: fredtools.sumImg
 
+.. autofunction:: fredtools.imgDivide
+
 .. autofunction:: fredtools.sumVectorImg
 
 .. autofunction:: fredtools.createEllipseMask

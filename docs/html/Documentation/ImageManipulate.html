@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Manipulate &mdash; FRED Tools 0.7.11 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.7.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=7016d275"></script>
+        <script src="../_static/documentation_options.js?v=e396dc06"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.11
+                0.7.13
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -63,7 +63,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dvhAnalyse.html">DVH Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gammaIndexAnalyse.html">Gamma Index Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="braggPeakAnalyse.html">Bragg Peak Analyse</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DijAnalyse.html">Dij influence matrix Analyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InmAnalyse.html">Influence matrix Analyse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Image Manipulate</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.mapStructToImg"><code class="docutils literal notranslate"><span class="pre">mapStructToImg()</span></code></a></li>
@@ -72,6 +72,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.setValueMask"><code class="docutils literal notranslate"><span class="pre">setValueMask()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.resampleImg"><code class="docutils literal notranslate"><span class="pre">resampleImg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.sumImg"><code class="docutils literal notranslate"><span class="pre">sumImg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.imgDivide"><code class="docutils literal notranslate"><span class="pre">imgDivide()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.sumVectorImg"><code class="docutils literal notranslate"><span class="pre">sumVectorImg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.createEllipseMask"><code class="docutils literal notranslate"><span class="pre">createEllipseMask()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.createConeMask"><code class="docutils literal notranslate"><span class="pre">createConeMask()</span></code></a></li>
@@ -316,7 +317,7 @@ SimpleITK.Resample routine.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.sumImg">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">sumImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.sumImg" title="Link to this definition"></a></dt>
-<dd><p>Sum list of images</p>
+<dd><p>Sum list of images.</p>
 <p>The function sums an iterable (list, tuple, etc.) of images
 defined as instances of a SimpleITK image object. The frame
 of references of all images must be the same.</p>
@@ -324,6 +325,37 @@ of references of all images must be the same.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>imgs</strong> (<em>iterable</em>) – An iterable (list, tuple, etc.) of SimpleITK image objects.</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An object of a SimpleITK image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.imgDivide">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">imgDivide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgNum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgDen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.imgDivide" title="Link to this definition"></a></dt>
+<dd><p>Divide two images.</p>
+<p>The function divides two images images defined as instances
+of a SimpleITK image object. The frame of references of both images
+must be the same. For a given voxel it returns:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>NaN value if any of the numerator or denominator voxel value is NaN</p></li>
+<li><p>0 value if denominator voxel value is zero</p></li>
+<li><p>Quotient for all other cases</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgNum</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image describing numerator.</p></li>
+<li><p><strong>imgDen</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image describing denominator.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>
 </dd>
@@ -370,7 +402,7 @@ object. Any dimension, i.e. 2D-4D, of the image is supported.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – Object of a SimpleITK image.</p></li>
+<li><p><strong>img</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image.</p></li>
 <li><p><strong>point</strong> (<em>array_like</em>) – A point describing the position of the center of the ellipse. The dimension must match the image dimension.</p></li>
 <li><p><strong>radii</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Radii of the ellipse for each dimension. It might be a scalar, then the same radii will be used in each direction.</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>

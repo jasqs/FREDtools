@@ -161,7 +161,7 @@ def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
                 rayCrossPoints.append(linePlaneIntersectionPoint(rayPosition, rayTarget, planesPosition, planesNormal[i]))
         rayCrossPoints = np.concatenate(rayCrossPoints)
 
-        # add taget point to list of crossing points
+        # add target point to list of crossing points
         rayCrossPoints = np.append(rayCrossPoints, np.expand_dims(rayTarget, 0), axis=0)
 
         # sort crossing points by Z
@@ -224,10 +224,10 @@ def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
 
 
 def generateIsoLayers(minRange, maxRange, beamParams):
-    """Calculate isoWET layers and corresponding energies.
+    """Calculate iso-WET layers and corresponding energies.
 
     The function calculates iso Water-Equivalent Thickness (WET) layers between
-    minimum and maximum range, based on predefined parameters of the beam. 
+    minimum and maximum range based on predefined parameters of the beam. 
 
     Parameters
     ----------
