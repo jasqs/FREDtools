@@ -772,16 +772,8 @@ def createEllipseMask(img, point, radii, displayInfo=False):
         raise ValueError(f"The `point` parameter must be an iterable of the same length as the image dimension. Image dimension is {img.GetDimension()} but point {point} was used.")
 
     # create ellipse and mapping objects
-    match img.GetDimension():
-        case 2:
-            EllipseSpatialObject = itk.itkEllipseSpatialObjectPython.itkEllipseSpatialObject2_New()
-            SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO2IUC2_New()
-        case 3:
-            EllipseSpatialObject = itk.itkEllipseSpatialObjectPython.itkEllipseSpatialObject3_New()
-            SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO3IUC3_New()
-        case 2:
-            EllipseSpatialObject = itk.itkEllipseSpatialObjectPython.itkEllipseSpatialObject4_New()
-            SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO4IUC4_New()
+    EllipseSpatialObject = itk.EllipseSpatialObject[img.GetDimension()].New()
+    SpatialObjectToImage = itk.SpatialObjectToImageFilter[itk.SpatialObject[img.GetDimension()], itk.Image[itk.UC, img.GetDimension()]].New()
 
     EllipseSpatialObject.SetCenterInObjectSpace(point)
     EllipseSpatialObject.SetRadiusInObjectSpace(radii)
@@ -856,10 +848,10 @@ def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInf
         endPoint = list(endPoint)
 
     # define tube spatial object woth two points
-    TubeSpatialObject = itk.itkTubeSpatialObjectPython.itkTubeSpatialObject3_New()
+    TubeSpatialObject = itk.TubeSpatialObject[3].New()
 
-    TubeSpatialObjectPoints = [itk.itkTubeSpatialObjectPointPython.itkTubeSpatialObjectPoint3(),
-                               itk.itkTubeSpatialObjectPointPython.itkTubeSpatialObjectPoint3()]
+    TubeSpatialObjectPoints = [itk.TubeSpatialObjectPoint[3](),
+                               itk.TubeSpatialObjectPoint[3]()]
 
     TubeSpatialObjectPoints[0].SetPositionInObjectSpace(startPoint)
     TubeSpatialObjectPoints[0].SetRadiusInObjectSpace(startRadius)
@@ -871,7 +863,7 @@ def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInf
     TubeSpatialObject.Update()
 
     # map spatial object to image FoR
-    SpatialObjectToImage = itk.itkSpatialObjectToImageFilterPython.itkSpatialObjectToImageFilterSO3IUC3_New()
+    SpatialObjectToImage = itk.SpatialObjectToImageFilter[itk.SpatialObject[3], itk.Image[itk.UC, 3]].New()
 
     SpatialObjectToImage.SetInsideValue(1)
     SpatialObjectToImage.SetOutsideValue(0)

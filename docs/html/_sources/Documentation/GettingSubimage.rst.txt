@@ -12,3 +12,5 @@ calculated user defined interpolation. The interpolation of 'nearest', 'linear' 
 .. autofunction:: fredtools.getPoint
 
 .. autofunction:: fredtools.getInteg
+
+.. autofunction:: fredtools.getCumSum

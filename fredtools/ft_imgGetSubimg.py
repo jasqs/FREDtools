@@ -168,7 +168,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     planeSimple = re.sub("[-+]", "", plane)
 
     # determine available axis names based on img dimension
-    axesNameAvailable = ["X", "Y", "Z", "T"][0 : img.GetDimension()]
+    axesNameAvailable = ["X", "Y", "Z", "T"][0: img.GetDimension()]
 
     # check if plane definition is correct for img dimension
     for planeSimpleAxis in planeSimple:
@@ -358,7 +358,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
     axisSimple = re.sub("[-+]", "", axis)
 
     # determine available axis names based on img dimension
-    axesNameAvailable = ["X", "Y", "Z", "T"][0 : img.GetDimension()]
+    axesNameAvailable = ["X", "Y", "Z", "T"][0: img.GetDimension()]
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
@@ -550,10 +550,10 @@ def getInteg(img, axis="X", displayInfo=False):
         An object of a SimpleITK image.
     axis : str, optional
         Axis to generate the 1D integral profile given as a string. The string
-        should have form of one letter from [XYZT] set with +/- signs
+        should have the form of one letter from [XYZT] set with +/- signs
         (if no sign is provided, then + is assumed). For instance, it can be:
-        `X`,`Y`,`-Z`, etc. If the minus sign is found, then the
-        image is flipped in the following direction.
+        `X`, `Y`, `-Z`, etc. If the minus sign is found, then the
+        image is flipped in the following direction. (def. "X")
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -636,7 +636,7 @@ def getInteg(img, axis="X", displayInfo=False):
     axisSimple = re.sub("[-+]", "", axis)
 
     # determine available axis names based on img dimension
-    axesNameAvailable = ["X", "Y", "Z", "T"][0 : img.GetDimension()]
+    axesNameAvailable = ["X", "Y", "Z", "T"][0: img.GetDimension()]
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
@@ -671,3 +671,70 @@ def getInteg(img, axis="X", displayInfo=False):
         ft.ft_imgAnalyse._displayImageInfo(integ)
         print("#" * len(f"### {ft._currentFuncName()} ###"))
     return integ
+
+
+def getCumSum(img, axis="X", displayInfo=False):
+    """Get cumulative sum image.
+
+    The function calculates a cumulative sum image along the specified `axis`
+    from an image defined as a SimpleITK image object. The cumulative sum image is
+    returned as an instance of a SimpleITK image object of the same dimension.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    axis : str, optional
+        An axis is used to generate the cumulative sum given as a string. The string
+        should have the form of one letter from [XYZT] set. (def. "X")
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        Instance of a SimpleITK image object describing a profile.
+
+    See Also
+    --------
+        getInteg : get 1D integral profile from an image.
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    # validate imgCT
+    ft._isSITK(img, raiseError=True)
+
+    # check if axis is in proper format
+    axis = axis.upper()
+    if not {"X", "Y", "Z", "T"}.issuperset(axis):
+        raise ValueError(f"Axis parameter {axis} cannot be recognized. Only letters 'X', 'Y', 'Z', 'T' are supported.")
+    if len(axis) > 1:
+        raise ValueError(f"Axis parameter {axis} cannot be recognized. The length of the plane parameter should less or equal to 1.")
+
+    # determine available axis names based on img dimension
+    axesNameAvailable = ["X", "Y", "Z", "T"][0: img.GetDimension()]
+
+    # check if the profile definition is correct for img dimension
+    if not axis in axesNameAvailable:
+        raise ValueError(f"Axis '{axis}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+
+    # determine axis along which to calculate the cumulative sum
+    axisxyz = [i for i, x in enumerate([axis.upper() == i for i in axesNameAvailable]) if x][0]  # in xyz convention for simpleITK
+    axisijk = [i for i, x in enumerate([axis.upper() == i for i in axesNameAvailable[::-1]]) if x][0]  # in ijk convention for numpy
+
+    # calculate CT WET along axisWET
+    arr = sitk.GetArrayFromImage(img)
+    arrCumSum = np.cumsum(arr, axis=axisijk)
+    imgCumSum = sitk.GetImageFromArray(arrCumSum)
+    imgCumSum.CopyInformation(img)
+    ft._copyImgMetaData(img, imgCumSum)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print("# Axis: '{:s}'".format(axis))
+        ft.ft_imgAnalyse._displayImageInfo(imgCumSum)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgCumSum

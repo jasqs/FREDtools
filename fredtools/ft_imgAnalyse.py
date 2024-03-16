@@ -1125,10 +1125,10 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
         print("# Origin matching:         ", originMatch, f"({decimals} decimals tolerance)")
         print("# Spacing matching:        ", spacingMatch, f"({decimals} decimals tolerance)")
         print("# Direction matching:      ", directionMatch)
-        print("# Pixel-to-pixel matching: ", valuesMatch)
+        print("# Pixel-to-pixel matching: ", valuesMatch, f"({decimals} decimals tolerance)")
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
-    return match
+    return bool(match)
 
 
 def transformIndexToPhysicalPoint(img, indices):
