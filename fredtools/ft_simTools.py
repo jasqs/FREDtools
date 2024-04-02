@@ -211,19 +211,23 @@ def readBeamModel(fileName):
     """Read beam model from a YAML file.
 
     The function reads the beam model parameters from a YAML beam model file.
-    The beam model must be defined as a dictionary at least including keys:
+    The beam model must be defined as a dictionary, at least including keys:
 
-        - "BM Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
-        - "BM Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns:
+        - "Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
+        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns named 'nomEnergy' (nominal energy) and 'Energy' (energy in Monte Carlo).
+
+    The beam model can contain any other parameters, for instance:
+
+        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, like:
 
             -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
             -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
-            -  *Optical Parameters*: Alpha, beta and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
+            -  *Optical Parameters*: Alpha, beta, and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
 
-        - "BM RangeShifters": a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.
-        - "BM Materials": a dictionary of the materials and its parameters, like density, composition, etc.
+        - "Regions": a dictionary with the range shifters or apertures and their parameters, like position, thickness, material, etc.
+        - "Materials": a dictionary of the materials and their parameters, like density, composition, etc.
 
-    Additionally, other parameters can be defined.
+    All the pandas DataFrame-like lists will be converted to pandas.DataFrame objects, whereas any items in square brackets will be converted to a numpy array object.
 
     Parameters
     ----------
@@ -239,34 +243,52 @@ def readBeamModel(fileName):
     --------
     writeBeamModel : write beam model to YAML file.
     interpolateBeamModel : interpolate all beam model parameters for a given nominal energy.
+
+    Notes
+    -----
+    The keys 'BM Description' and 'BM Energy' are depreciated in favor to 'Description' and 'Energy', respectively.
     """
     import numpy as np
     import yaml
     import pandas as pd
     from io import StringIO
+    import re
 
     # load beam model from file
     with open(fileName, "r") as yaml_file:
         beamModel = yaml.load(yaml_file, Loader=yaml.SafeLoader)
 
     # check if all required sections are present in the beam model
-    if not {"BM Description", "BM Energy", "BM RangeShifters", "BM Materials"}.issubset(beamModel.keys()):
-        raise ValueError(f"Missing sections in the beam model loaded from {fileName}\nThe beam model must include at least 'BM Description', 'BM Energy', 'BM RangeShifters' and 'BM Materials' sections.")
+    if not ({"Description", "Energy"}.issubset(beamModel.keys()) or {"BM Description", "BM Energy"}.issubset(beamModel.keys())):
+        raise ValueError(f"Missing sections in the beam model loaded from {fileName}\nThe beam model must include at least 'Description' and 'Energy' keys.")
 
     # convert all dataFrame-like lists of strings to dataFrame
+    def numpyArray(item):
+        """Convert all items in dataFrame-like list in square brackets to numpy arrays"""
+        if not isinstance(item, str):
+            return item
+        if itemArray := re.findall('\[(.*)\]', item):
+            return np.fromstring(itemArray[0], sep=",")
+        else:
+            return item
+
     for key in beamModel.keys():
         if isinstance(beamModel[key], list):
             if ("row" in beamModel[key][-1]) and ("column" in beamModel[key][-1]):  # the key is a pandas DataFrame
-                beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), sep='\s+')
-                if "nomEnergy" in beamModel[key].columns:
-                    beamModel[key].set_index("nomEnergy", inplace=True)
+                beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), sep='\s+(?![^\[]*[\]])', engine="python")
+                beamModel[key] = beamModel[key].map(numpyArray)  # map data in square brackets to numpy
+                beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first cloumn as index
+
+    # get current Energy key name
+    """This is a patch to cover the old naming convention. See notes for more details."""
+    energyKeyName = "BM Energy" if "BM Energy" in beamModel else "Energy"
 
     # validate if required columns exist in BM Energy
-    if not {"Energy", "dEnergy", "scalingFactor", "alphaX", "betaX", "epsilonX", "alphaY", "betaY", "epsilonY"}.issubset(beamModel["BM Energy"].columns):
-        raise ValueError(f"Missing columns or wrong column names of 'BM Energy' when loading beam model from {fileName}.")
+    if not {"Energy"}.issubset(beamModel[energyKeyName].columns):
+        raise ValueError(f"The 'Energy' section of the beam model loaded from {fileName} must include at least 'Energy' column.")
     # validate if there are any missing (None, NaN) values in BM Energy
-    if np.any((beamModel["BM Energy"]).isna()):
-        raise ValueError(f"Missing values for some records in the 'BM Energy' for the beam model loaded from {fileName}.")
+    if np.any((beamModel[energyKeyName]).isna()):
+        raise ValueError(f"Missing values for some records in the 'Energy' section for the beam model loaded from {fileName}.")
 
     return beamModel
 
@@ -274,18 +296,24 @@ def readBeamModel(fileName):
 def writeBeamModel(beamModel, fileName):
     """Write beam model to YAML.
 
-    The function writes the beam model parameters to a beam model file in YAML format.
-    The beam model must be defined as a dictionary at least including keys:
+    The function writes the beam model parameters in YAML format for a beam model file.
+    The beam model must be defined as a dictionary, at least including keys:
 
-        - "BM Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
-        - "BM Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns:
+        - "Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
+        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns:
+
+            -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy')
+
+    The beam model can contain any other parameters, for instance:
+
+        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, like:
 
             -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
             -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
-            -  *Optical Parameters*: Alpha, beta and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
+            -  *Optical Parameters*: Alpha, beta, and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
 
-        - "BM RangeShifters": a dictionary with the range shifters and its parameters, like position, thickness, meterial, etc.
-        - "BM Materials": a dictionary of the materials and its parameters, like density, composition, etc.
+        - "Regions": a dictionary with the range shifters or apertures and their parameters, like position, thickness, material, etc.
+        - "Materials": a dictionary of the materials and their parameters, like density, composition, etc.
 
     Additionally, other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
     it will be saved to a nicely formatted table.
@@ -312,32 +340,33 @@ def writeBeamModel(beamModel, fileName):
     beamModelSave = deepcopy(beamModel)
 
     # check if all required sections are present in the beam model
-    if not {"BM Energy", "BM RangeShifters", "BM Materials"}.issubset(beamModelSave.keys()):
-        raise ValueError(f"Missing sections (keys) in the beam model.\nThe beam model must include at least 'BM Description', 'BM Energy', 'BM RangeShifters' and 'BM Materials' sections.")
+    if not {"Energy"}.issubset(beamModelSave.keys()):
+        raise ValueError(f"Missing sections (keys) in the beam model.\nThe beam model must include at least 'Energy' key.")
 
-    # add "BM Description" to the beam model and add/modify values and/or keys order
-    if not "BM Description" in beamModelSave.keys():
-        beamModelSave["BM Description"] = {}
-    BMDescription = {}
-    if "name" in beamModelSave["BM Description"].keys():
-        BMDescription["name"] = beamModelSave["BM Description"].pop("name")
-    else:
-        BMDescription["name"] = os.path.splitext(os.path.basename(fileName))[0]
-    if "creationTime" in beamModelSave["BM Description"].keys():
-        BMDescription["creationTime"] = beamModelSave["BM Description"].pop("creationTime")
-    else:
-        BMDescription["creationTime"] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    BMDescription.update(beamModelSave["BM Description"])
-    beamModelSave["BM Description"] = BMDescription
+    # check depreciated naming convention
+    if not {"BM Energy", "BM Description"}.isdisjoint(["Energy", "Description"]):
+        raise KeyError("'BM Energy' and 'BM Description' are depreciated in favor to 'Description' and 'Energy', respectively.")
+
+    # add "Description" to the beam model and add/modify values and/or keys order
+    if not "Description" in beamModelSave.keys():
+        beamModelSave["Description"] = {}
+    if not "name" in beamModelSave["Description"].keys():
+        beamModelSave["Description"]["name"] = os.path.splitext(os.path.basename(fileName))[0]
+    if not "creationTime" in beamModelSave["Description"].keys():
+        beamModelSave["Description"]["creationTime"] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+    # BMDescription.update(beamModelSave["Description"])
+    # beamModelSave["Description"] = BMDescription
 
     # validate if required columns exist in BM Energy
-    if not {"Energy", "dEnergy", "scalingFactor", "alphaX", "betaX", "epsilonX", "alphaY", "betaY", "epsilonY"}.issubset(beamModelSave["BM Energy"].columns):
-        raise ValueError(f"Missing columns or wrong column names of 'BM Energy' section in the beam model.")
+    if not {"Energy"}.issubset(beamModelSave["Energy"].columns):
+        raise ValueError(f"Missing columns or wrong column names of 'Energy' section in the beam model.")
     # validate if there are any missing (None, NaN) values in BM Energy
-    if np.any((beamModelSave["BM Energy"]).isna()):
-        raise ValueError(f"Missing values for some records in the 'BM Energy' section of the beam model.")
+    if np.any((beamModelSave["Energy"]).isna()):
+        raise ValueError(f"Missing values for some records in the 'Energy' section of the beam model.")
 
-    # beamModelSave["BM Energy"] = beamModelSave["BM Energy"].to_dict()
+    # order dictionary to have 'Description' and 'Energy' at the beginning
+    beamModelSave = {'Energy': beamModelSave.pop('Energy'), **beamModelSave}
+    beamModelSave = {'Description': beamModelSave.pop('Description'), **beamModelSave}
 
     # convert all dataFrames to a nicely formated list of strings
     for key in beamModel.keys():
@@ -412,9 +441,7 @@ def interpolateBeamModel(beamModel, nomEnergy, interpolation="linear", splineOrd
 
     # check if all given nomEnergy are in range of the beam model
     if np.array(nomEnergy).min() < beamModel.index.min() or np.array(nomEnergy).max() > beamModel.index.max():
-        raise ValueError(
-            f"The range of nominal energies for interpolation is {np.array(nomEnergy).min()}-{np.array(nomEnergy).max()} and it is outside the beam model nominal energy range {beamModel.index.min()}-{beamModel.index.max()}."
-        )
+        raise ValueError(f"The range of nominal energies for interpolation is {np.array(nomEnergy).min()}-{np.array(nomEnergy).max()} and it is outside the beam model nominal energy range {beamModel.index.min()}-{beamModel.index.max()}.")
 
     # interpolate each parameter of the beam model with a given interpolation method
     beamModelEnergyInterp = {}
