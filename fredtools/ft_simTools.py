@@ -246,7 +246,7 @@ def readBeamModel(fileName):
 
     Notes
     -----
-    The keys 'BM Description' and 'BM Energy' are depreciated in favor to 'Description' and 'Energy', respectively.
+    The keys 'BM Description' and 'BM Energy' are depreciated in favor of 'Description' and 'Energy'.
     """
     import numpy as np
     import yaml
@@ -329,6 +329,10 @@ def writeBeamModel(beamModel, fileName):
     --------
     readBeamModel : read beam model from YAML beam model file.
     interpolateBeamModel : interpolate all beam model parameters for a given nominal energy.
+
+    Notes
+    -----
+    The keys 'BM Description' and 'BM Energy' are depreciated in favor of 'Description' and 'Energy'.
     """
     from datetime import datetime
     import os
@@ -339,13 +343,15 @@ def writeBeamModel(beamModel, fileName):
 
     beamModelSave = deepcopy(beamModel)
 
+    # correct depreciated naming convention
+    if "BM Energy" in beamModelSave.keys():
+        beamModelSave["Energy"] = deepcopy(beamModelSave["BM Energy"])
+    if "BM Description" in beamModelSave.keys():
+        beamModelSave["Description"] = deepcopy(beamModelSave["BM Description"])
+
     # check if all required sections are present in the beam model
     if not {"Energy"}.issubset(beamModelSave.keys()):
         raise ValueError(f"Missing sections (keys) in the beam model.\nThe beam model must include at least 'Energy' key.")
-
-    # check depreciated naming convention
-    if not {"BM Energy", "BM Description"}.isdisjoint(["Energy", "Description"]):
-        raise KeyError("'BM Energy' and 'BM Description' are depreciated in favor to 'Description' and 'Energy', respectively.")
 
     # add "Description" to the beam model and add/modify values and/or keys order
     if not "Description" in beamModelSave.keys():
@@ -354,10 +360,8 @@ def writeBeamModel(beamModel, fileName):
         beamModelSave["Description"]["name"] = os.path.splitext(os.path.basename(fileName))[0]
     if not "creationTime" in beamModelSave["Description"].keys():
         beamModelSave["Description"]["creationTime"] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    # BMDescription.update(beamModelSave["Description"])
-    # beamModelSave["Description"] = BMDescription
 
-    # validate if required columns exist in BM Energy
+    # validate if required columns exist in Energy
     if not {"Energy"}.issubset(beamModelSave["Energy"].columns):
         raise ValueError(f"Missing columns or wrong column names of 'Energy' section in the beam model.")
     # validate if there are any missing (None, NaN) values in BM Energy
@@ -369,7 +373,7 @@ def writeBeamModel(beamModel, fileName):
     beamModelSave = {'Description': beamModelSave.pop('Description'), **beamModelSave}
 
     # convert all dataFrames to a nicely formated list of strings
-    for key in beamModel.keys():
+    for key in beamModelSave.keys():
         if isinstance(beamModelSave[key], pd.DataFrame):
             beamModelSave[key].reset_index(inplace=True)
             if "nomEnergy" in beamModelSave[key].columns:
@@ -384,7 +388,6 @@ def writeBeamModel(beamModel, fileName):
                     beamModelSave[key][columnName] = beamModelSave[key][columnName].map(lambda x: "{:<+17.10E}".format(x))
             beamModelSave[key] = beamModelSave[key].to_string(index=False, col_space=20, header=True, justify="left", show_dimensions=True).split("\n")
             beamModelSave[key] = [x.rstrip() for x in beamModelSave[key]]
-
     # write beam model to file
     with open(fileName, "w") as yaml_file:
         yaml.dump(beamModelSave, yaml_file, sort_keys=False, width=2000, default_flow_style=False, allow_unicode=True)
@@ -400,7 +403,7 @@ def interpolateBeamModel(beamModel, nomEnergy, interpolation="linear", splineOrd
     Parameters
     ----------
     beamModel : DataFrame
-        Beam model defined in a pandas DataFrame.
+        Beam model defined as a pandas DataFrame object.
     nomEnergy : scalar or list
         The list of nominal energies to interpolate the beam model parameters for.
     interpolation : {'linear', 'nearest', 'spline'}, optional
