@@ -32,3 +32,14 @@ A collection of useful functions to manipulate and change images. The image must
 .. autofunction:: fredtools.overwriteCTPhysicalProperties
 
 .. autofunction:: fredtools.addMarginToMask
+
+.. autofunction:: fredtools.addGaussMarginToMask
+
+.. autofunction:: fredtools.addExpMarginToMask
+
+.. figure:: images/targetEdgeDefinition.png
+   :width: 80%
+   :alt: Target edge definition
+   :align: center
+
+   Definition of Gaussian and exponential margins.

@@ -76,3 +76,13 @@ The FRED tools documentation is written in reStructuredText format and build wit
    Documentation/simTools
    Documentation/optimisationTools
    Documentation/misc
+
+Support
+----------------------------
+If You like the project and want to support our work you can buy as a coffee by clicking the image.
+
+.. image:: buyCaffe.png
+   :scale: 80%
+   :alt: By a Caffee
+   :align: center
+   :target: https://buycoffee.to/fredtools

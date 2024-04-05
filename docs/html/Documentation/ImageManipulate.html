@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Manipulate &mdash; FRED Tools 0.7.15 documentation</title>
+  <title>Image Manipulate &mdash; FRED Tools 0.7.18 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=8c67c8d2"></script>
+        <script src="../_static/documentation_options.js?v=f7fd6563"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.15
+                0.7.18
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -81,6 +81,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.setIdentityDirection"><code class="docutils literal notranslate"><span class="pre">setIdentityDirection()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.overwriteCTPhysicalProperties"><code class="docutils literal notranslate"><span class="pre">overwriteCTPhysicalProperties()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.addMarginToMask"><code class="docutils literal notranslate"><span class="pre">addMarginToMask()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.addGaussMarginToMask"><code class="docutils literal notranslate"><span class="pre">addGaussMarginToMask()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.addExpMarginToMask"><code class="docutils literal notranslate"><span class="pre">addExpMarginToMask()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="displayImage.html">Display Image</a></li>
@@ -682,6 +684,90 @@ routine can be used to get the beam’s eye view.</p>
 </div>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.addGaussMarginToMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">addGaussMarginToMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussSigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fractionAtEdge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgeDist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.addGaussMarginToMask" title="Link to this definition"></a></dt>
+<dd><p>Add Gaussian margin to mask.</p>
+<p>The function adds a Gaussian margin to a binary mask defined as an instance of a SimpleITK
+image describing a binary mask. The Gaussian shape is defined by the sigma value, <cite>gaussSigma,</cite> and
+the distance from the mask, <cite>edgeDist</cite>, at which the Gaussian slope should reach the fraction
+<cite>fractionAtEdge</cite>. See the FREDtools web page for a more descriptive image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK 3D image describing a binary mask.</p></li>
+<li><p><strong>gaussSigma</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Sigma of the Gaussian shape, usually in [mm]. (def. 6)</p></li>
+<li><p><strong>fractionAtEdge</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Fraction of the Gaussian slope. (def. 0.9)</p></li>
+<li><p><strong>edgeDist</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Distance from the mask edge, at which the Gaussian slope should reach the given fraction, usually in [mm]. (def. 4)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Object of a SimpleITK image describing the mask with a Gaussian margin.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.addExpMarginToMask" title="fredtools.addExpMarginToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addExpMarginToMask</span></code></a></dt><dd><p>add exponential margin to mask.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The distance from the binary mask is calculated with the <a class="reference external" href="https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1SignedDanielssonDistanceMapImageFilter.html">SimpleITK.SignedDanielssonDistanceMap</a>
+routine, which calculates the distance from the nearest mask voxel center and not from the voxel edge.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.addExpMarginToMask">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">addExpMarginToMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgeDist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.addExpMarginToMask" title="Link to this definition"></a></dt>
+<dd><p>Add exponential margin to mask.</p>
+<p>The function adds an exponential fall-off margin to a binary mask defined as an instance of a SimpleITK
+image describing a binary mask. The exponential fall-off shape is defined by the <cite>exponent</cite> parameter and
+the distance from the mask, <cite>edgeDist</cite>, at which the exponent starts. The exponent is described with the equation:</p>
+<p><img class="math" src="../_images/math/d05f2875f9a3e1e68b7195ede15693c1635133cc.png" alt="e^{-exponent \cdot ( distance - edgeDist )}"/></p>
+<p>See the FREDtools web page for a more descriptive image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image describing a binary mask.</p></li>
+<li><p><strong>exponent</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Exponent value, usually in [1/mm]. (def. 0.25)</p></li>
+<li><p><strong>edgeDist</strong> (<em>scalar</em><em>, </em><em>optional</em>) – Distance from the mask edge, at which the exponential fall-off starts, usually in [mm]. (def. 4)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Object of a SimpleITK image describing the mask with an exponential margin.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.addGaussMarginToMask" title="fredtools.addGaussMarginToMask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addGaussMarginToMask</span></code></a></dt><dd><p>add Gaussian margin to mask.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The distance from the binary mask is calculated with the <a class="reference external" href="https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1SignedDanielssonDistanceMapImageFilter.html">SimpleITK.SignedDanielssonDistanceMap</a>
+routine, which calculates the distance from the nearest mask voxel center and not from the voxel edge.</p>
+</div>
+</dd></dl>
+
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/targetEdgeDefinition.png"><img alt="Target edge definition" src="../_images/targetEdgeDefinition.png" style="width: 80%;" /></a>
+<figcaption>
+<p><span class="caption-text">Definition of Gaussian and exponential margins.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
 </section>
 
 

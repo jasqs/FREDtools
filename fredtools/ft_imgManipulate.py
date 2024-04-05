@@ -1400,3 +1400,132 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
     return imgExt
+
+
+def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, displayInfo=False):
+    """Add Gaussian margin to mask.
+
+    The function adds a Gaussian margin to a binary mask defined as an instance of a SimpleITK 
+    image describing a binary mask. The Gaussian shape is defined by the sigma value, `gaussSigma,` and 
+    the distance from the mask, `edgeDist`, at which the Gaussian slope should reach the fraction 
+    `fractionAtEdge`. See the FREDtools web page for a more descriptive image. 
+
+    Parameters
+    ----------
+    imgMask : SimpleITK Image
+        An object of a SimpleITK 3D image describing a binary mask.
+    gaussSigma : scalar, optional
+        Sigma of the Gaussian shape, usually in [mm]. (def. 6)
+    fractionAtEdge : scalar, optional
+        Fraction of the Gaussian slope. (def. 0.9)
+    edgeDist : scalar, optional
+        Distance from the mask edge, at which the Gaussian slope should reach the given fraction, usually in [mm]. (def. 4)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        Object of a SimpleITK image describing the mask with a Gaussian margin.
+
+    See Also
+    --------
+        addExpMarginToMask : add exponential margin to mask.
+
+    Notes
+    -----
+    The distance from the binary mask is calculated with the `SimpleITK.SignedDanielssonDistanceMap <https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1SignedDanielssonDistanceMapImageFilter.html>`_ 
+    routine, which calculates the distance from the nearest mask voxel center and not from the voxel edge.         
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    ft._isSITK_maskBinary(imgMask, raiseError=True)
+
+    # calculate constant value distance from ROI
+    marginConstantEdgeDist = edgeDist-np.sqrt(np.abs(2*gaussSigma**2*np.log(fractionAtEdge)))
+
+    # calculate distance from ROI
+    imgMaskDist = sitk.SignedDanielssonDistanceMap(imgMask, useImageSpacing=True)
+
+    # add constant margin
+    imgMaskConstMargin = sitk.BinaryThreshold(imgMaskDist, lowerThreshold=ft.getStatistics(imgMaskDist).GetMinimum(), upperThreshold=marginConstantEdgeDist)
+
+    # add gaussian margin
+    imgMaskConstMarginGauss = sitk.Exp(-(imgMaskDist-marginConstantEdgeDist)**2/(2*gaussSigma**2))
+    imgMaskConstMarginGauss = sitk.Mask(imgMaskConstMarginGauss, imgMaskConstMargin, maskingValue=1, outsideValue=1)
+
+    # validate floating Mask
+    ft._isSITK_maskFloating(imgMaskConstMarginGauss, raiseError=True)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(imgMaskConstMarginGauss)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgMaskConstMarginGauss
+
+
+def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo=False):
+    """Add exponential margin to mask.
+
+    The function adds an exponential fall-off margin to a binary mask defined as an instance of a SimpleITK 
+    image describing a binary mask. The exponential fall-off shape is defined by the `exponent` parameter and 
+    the distance from the mask, `edgeDist`, at which the exponent starts. The exponent is described with the equation:
+
+    :math:`e^{-exponent \cdot ( distance - edgeDist )}` 
+
+
+    See the FREDtools web page for a more descriptive image. 
+
+    Parameters
+    ----------
+    imgMask : SimpleITK Image
+        An object of a SimpleITK image describing a binary mask.
+    exponent : scalar, optional
+        Exponent value, usually in [1/mm]. (def. 0.25)
+    edgeDist : scalar, optional
+        Distance from the mask edge, at which the exponential fall-off starts, usually in [mm]. (def. 4)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        Object of a SimpleITK image describing the mask with an exponential margin.
+
+    See Also
+    --------
+        addGaussMarginToMask : add Gaussian margin to mask.
+
+    Notes
+    -----
+    The distance from the binary mask is calculated with the `SimpleITK.SignedDanielssonDistanceMap <https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1SignedDanielssonDistanceMapImageFilter.html>`_ 
+    routine, which calculates the distance from the nearest mask voxel center and not from the voxel edge. 
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    ft._isSITK_maskBinary(imgMask, raiseError=True)
+
+    # calculate distance from ROI
+    imgMaskDist = sitk.SignedDanielssonDistanceMap(imgMask, useImageSpacing=True)
+
+    # add constant margin
+    imgMaskConstMargin = sitk.BinaryThreshold(imgMaskDist, lowerThreshold=ft.getStatistics(imgMaskDist).GetMinimum(), upperThreshold=edgeDist)
+
+    # add gaussian margin
+    imgMaskConstMarginExp = sitk.ExpNegative(exponent*(imgMaskDist-edgeDist))
+    imgMaskConstMarginExp = sitk.Mask(imgMaskConstMarginExp, imgMaskConstMargin, maskingValue=1, outsideValue=1)
+
+    # validate floating Mask
+    ft._isSITK_maskFloating(imgMaskConstMarginExp, raiseError=True)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(imgMaskConstMarginExp)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgMaskConstMarginExp

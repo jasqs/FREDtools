@@ -50,6 +50,7 @@ extensions = [
     # 'numpydoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.autodoc',
+    'sphinx.ext.imgmath',
 ]
 
 # Napoleon settings
