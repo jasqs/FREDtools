@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Optimisation Tools &mdash; FRED Tools 0.7.18 documentation</title>
+  <title>Optimisation Tools &mdash; FRED Tools 0.7.20 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=f7fd6563"></script>
+        <script src="../_static/documentation_options.js?v=793e26a0"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.18
+                0.7.20
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -145,23 +145,24 @@ linearly.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.ft_optimisation.calcWETfromWER">
-<span class="sig-prename descclassname"><span class="pre">fredtools.ft_optimisation.</span></span><span class="sig-name descname"><span class="pre">calcWETfromWER</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgWER</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SAD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.ft_optimisation.calcWETfromWER" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.ft_optimisation.</span></span><span class="sig-name descname"><span class="pre">calcWETfromWER</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgWER</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SAD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgMask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CPUNo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.ft_optimisation.calcWETfromWER" title="Link to this definition"></a></dt>
 <dd><p>Calculate WET image from WER image for point-like source.</p>
 <p>The function calculates Water-Equivalent Thickness (WET) for each voxel of
 an image defined as a SimpleITK image object containing Water-Equivalent
 Ratio values (WER), inside a mask, defined as a SimpleITK image object describing
-a mask. The WET values are calculated starting from a virtual source, located
+a binary mask. The WET values are calculated starting from a virtual source, located
 at [X,Y]=[0,0] position and with Z position defined with a two-element <cite>SAD</cite>,
-describing the source point in X and Y. Partucullarly, te WET is calculated for
+describing the source point in X and Y. Particularly, the WET is calculated for
 a virtual source, where rays are deflected in X and Y directions in different
 distances from the isocenter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>imgWER</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image with WER values.</p></li>
-<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em>) – An object of a SimpleITK image describing a mask.</p></li>
 <li><p><strong>SAD</strong> (<em>2-element array_like</em>) – Z coordinates of the virtual point source for deflection
 in X and Y directions, respectively.</p></li>
+<li><p><strong>imgMask</strong> (<em>SimpleITK Image</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – An object of a SimpleITK image describing a binary mask, or None,
+then all voxel positions will be calculated (def. None)</p></li>
 <li><p><strong>CPUNo</strong> (<em>{'auto'</em><em>, </em><em>'none'}</em><em>, </em><em>scalar</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define whether multiprocessing should be used and how many cores should
 be exploited (def. ‘auto’). Can be None, then no multiprocessing will be used,
 a string ‘auto’, then the number of cores will be determined by os.cpu_count(),

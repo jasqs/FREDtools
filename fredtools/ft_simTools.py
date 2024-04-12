@@ -211,23 +211,9 @@ def readBeamModel(fileName):
     """Read beam model from a YAML file.
 
     The function reads the beam model parameters from a YAML beam model file.
-    The beam model must be defined as a dictionary, at least including keys:
-
-        - "Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
-        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns named 'nomEnergy' (nominal energy) and 'Energy' (energy in Monte Carlo).
-
-    The beam model can contain any other parameters, for instance:
-
-        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, like:
-
-            -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
-            -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
-            -  *Optical Parameters*: Alpha, beta, and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
-
-        - "Regions": a dictionary with the range shifters or apertures and their parameters, like position, thickness, material, etc.
-        - "Materials": a dictionary of the materials and their parameters, like density, composition, etc.
-
-    All the pandas DataFrame-like lists will be converted to pandas.DataFrame objects, whereas any items in square brackets will be converted to a numpy array object.
+    The beam model must be defined as a dictionary. All the pandas DataFrame-like lists 
+    will be converted to pandas.DataFrame objects, whereas any items in square
+    brackets will be converted to a numpy array object.
 
     Parameters
     ----------
@@ -243,10 +229,6 @@ def readBeamModel(fileName):
     --------
     writeBeamModel : write beam model to YAML file.
     interpolateBeamModel : interpolate all beam model parameters for a given nominal energy.
-
-    Notes
-    -----
-    The keys 'BM Description' and 'BM Energy' are depreciated in favor of 'Description' and 'Energy'.
     """
     import numpy as np
     import yaml
@@ -257,10 +239,6 @@ def readBeamModel(fileName):
     # load beam model from file
     with open(fileName, "r") as yaml_file:
         beamModel = yaml.load(yaml_file, Loader=yaml.SafeLoader)
-
-    # check if all required sections are present in the beam model
-    if not ({"Description", "Energy"}.issubset(beamModel.keys()) or {"BM Description", "BM Energy"}.issubset(beamModel.keys())):
-        raise ValueError(f"Missing sections in the beam model loaded from {fileName}\nThe beam model must include at least 'Description' and 'Energy' keys.")
 
     # convert all dataFrame-like lists of strings to dataFrame
     def numpyArray(item):
@@ -279,17 +257,6 @@ def readBeamModel(fileName):
                 beamModel[key] = beamModel[key].map(numpyArray)  # map data in square brackets to numpy
                 beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first cloumn as index
 
-    # get current Energy key name
-    """This is a patch to cover the old naming convention. See notes for more details."""
-    energyKeyName = "BM Energy" if "BM Energy" in beamModel else "Energy"
-
-    # validate if required columns exist in BM Energy
-    if not {"Energy"}.issubset(beamModel[energyKeyName].columns):
-        raise ValueError(f"The 'Energy' section of the beam model loaded from {fileName} must include at least 'Energy' column.")
-    # validate if there are any missing (None, NaN) values in BM Energy
-    if np.any((beamModel[energyKeyName]).isna()):
-        raise ValueError(f"Missing values for some records in the 'Energy' section for the beam model loaded from {fileName}.")
-
     return beamModel
 
 
@@ -297,25 +264,7 @@ def writeBeamModel(beamModel, fileName):
     """Write beam model to YAML.
 
     The function writes the beam model parameters in YAML format for a beam model file.
-    The beam model must be defined as a dictionary, at least including keys:
-
-        - "Description": a dictionary with the beam model descriptions. At least the keys "name" and "creationDate" are required and will be added automatically if not provided.
-        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, with at least columns:
-
-            -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy')
-
-    The beam model can contain any other parameters, for instance:
-
-        - "Energy": a pandas DataFrame of beam energetic and propagation parameters, like:
-
-            -  *Energy parameters*: nominal energy ('nomEnergy'), energy in Monte Carlo ('Energy') and energy spread in Monte Carlo ('dEnergy')
-            -  *Dosimetric parameter*: scaling factor to recalculate MU to number of protons ('scalingFactor')
-            -  *Optical Parameters*: Alpha, beta, and epsilon describing the beam emittance in X/Y directions ('alphaX', 'betaX', 'epsilonX', 'alphaY', 'betaY' and 'epsilonY')
-
-        - "Regions": a dictionary with the range shifters or apertures and their parameters, like position, thickness, material, etc.
-        - "Materials": a dictionary of the materials and their parameters, like density, composition, etc.
-
-    Additionally, other parameters can be defined as keys and will be saved. If a value of a given key is a pandas DataFrame,
+    The beam model must be defined as a dictionary. If a value of a given key is a pandas DataFrame,
     it will be saved to a nicely formatted table.
 
     Parameters
@@ -329,10 +278,6 @@ def writeBeamModel(beamModel, fileName):
     --------
     readBeamModel : read beam model from YAML beam model file.
     interpolateBeamModel : interpolate all beam model parameters for a given nominal energy.
-
-    Notes
-    -----
-    The keys 'BM Description' and 'BM Energy' are depreciated in favor of 'Description' and 'Energy'.
     """
     from datetime import datetime
     import os
@@ -342,35 +287,6 @@ def writeBeamModel(beamModel, fileName):
     from copy import deepcopy
 
     beamModelSave = deepcopy(beamModel)
-
-    # correct depreciated naming convention
-    if "BM Energy" in beamModelSave.keys():
-        beamModelSave["Energy"] = deepcopy(beamModelSave["BM Energy"])
-    if "BM Description" in beamModelSave.keys():
-        beamModelSave["Description"] = deepcopy(beamModelSave["BM Description"])
-
-    # check if all required sections are present in the beam model
-    if not {"Energy"}.issubset(beamModelSave.keys()):
-        raise ValueError(f"Missing sections (keys) in the beam model.\nThe beam model must include at least 'Energy' key.")
-
-    # add "Description" to the beam model and add/modify values and/or keys order
-    if not "Description" in beamModelSave.keys():
-        beamModelSave["Description"] = {}
-    if not "name" in beamModelSave["Description"].keys():
-        beamModelSave["Description"]["name"] = os.path.splitext(os.path.basename(fileName))[0]
-    if not "creationTime" in beamModelSave["Description"].keys():
-        beamModelSave["Description"]["creationTime"] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-
-    # validate if required columns exist in Energy
-    if not {"Energy"}.issubset(beamModelSave["Energy"].columns):
-        raise ValueError(f"Missing columns or wrong column names of 'Energy' section in the beam model.")
-    # validate if there are any missing (None, NaN) values in BM Energy
-    if np.any((beamModelSave["Energy"]).isna()):
-        raise ValueError(f"Missing values for some records in the 'Energy' section of the beam model.")
-
-    # order dictionary to have 'Description' and 'Energy' at the beginning
-    beamModelSave = {'Energy': beamModelSave.pop('Energy'), **beamModelSave}
-    beamModelSave = {'Description': beamModelSave.pop('Description'), **beamModelSave}
 
     # convert all dataFrames to a nicely formated list of strings
     for key in beamModelSave.keys():
@@ -827,3 +743,57 @@ def readGATEStat(fileNameLogOut, displayInfo=False):
         print("# Average Tracking Rate:  {:.3E} prim/s".format(simStat["PPS"]))
         print("#" * len(f"### {ft._currentFuncName()} ###"))
     return simStat
+
+
+def calcRaysVectors(targetPoint, SAD):
+    """Calculate rays positions and direction versors.
+
+    The function calculates the ray position and direction versor from the target position. 
+    The target point can be a 3-element iterable or Nx3 iterable for multiple points.
+    The Source-To-Axis Distance (SAD) describes the absolute distances of the spreading
+    devices in order [X, Y]. It does not matter if the first divergence is in X or Y, the function 
+    takes this information from the distances, but the order [X,Y] must be preserved.
+
+
+    Parameters
+    ----------
+    targetPoint : 3-element or Nx3 iterable 
+        The position of a single target point or positions of N target points.
+    SAD : 2-element iterable
+        The absolute distances of the spreading devices in order [X,Y].
+
+    Returns
+    -------
+    (Nx3 numpy.array, Nx3 numpy.array)
+        A tuple with two Nx3 arrays, where the first is the ray position and the second is the ray direction versor.
+    """
+    from collections.abc import Iterable
+    import numpy as np
+
+    # validate targetPoint
+    raysTarget = np.asarray(targetPoint)
+    if raysTarget.ndim == 1:
+        raysTarget = np.expand_dims(raysTarget, 0)
+
+    if raysTarget.shape[1] != 3 or raysTarget.ndim != 2:
+        raise AttributeError("The targetPoint parameter must be an iterable of shape Nx3.")
+
+    # validate SAD
+    if not isinstance(SAD, Iterable) or len(SAD) != 2:
+        raise AttributeError("The SAD parameterm must be an iterable with two elements.")
+
+    raysPosition = np.zeros((raysTarget.shape[0], 3), dtype=np.float64)
+
+    if SAD[0] > SAD[1]:  # diverging first in X and then in Y directions, i.e. SAD[0] is upstream and SAD[1] is downstream
+        raysPosition[:, 0] = (SAD[0] - SAD[1]) * raysTarget[:, 0] / (raysTarget[:, 2] + SAD[0])
+        raysPosition[:, 2] = -SAD[1]
+    elif SAD[0] < SAD[1]:  # diverging first in Y and then in X directions, i.e. SAD[1] is upstream and SAD[0] is downstream
+        raysPosition[:, 1] = (SAD[1] - SAD[0]) * raysTarget[:, 1] / (raysTarget[:, 2] + SAD[1])
+        raysPosition[:, 2] = -SAD[0]
+    elif SAD[0] == SAD[1]:  # diverging in Y and X directions in the same place
+        raysPosition[:, 2] = -SAD[0]
+
+    raysVersor = raysTarget-raysPosition
+    raysVersor = raysVersor / np.linalg.norm(raysVersor, axis=1)[:, None]
+
+    return raysPosition, raysVersor

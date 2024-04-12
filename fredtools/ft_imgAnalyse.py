@@ -375,6 +375,67 @@ def getVoxelEdges(img, displayInfo=False):
     return tuple(voxelEdges)
 
 
+def getVoxelPhysicalPoints(img, insideMask=False, displayInfo=False):
+    """Get physical positions of voxels.
+
+    The function gets voxels' physical positions of an image
+    defined as a SimpleITK image object. If the image is a binary mask, 
+    then the voxel positions only inside the mask can be requested with
+    insideMask parameter, otherwise all voxels' positions will be returned.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    insideMask : bool, optional
+        Determine if only the voxels' positions inside the mask shuld be returned. 
+        The `img` must describe a binary mask. (def. False)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    NxD numpy.array
+        A munpy array of size NxD where N is the number of voxel 
+        and D is the axis.
+
+    See Also
+    --------
+    getVoxelCentres : get voxel centres.
+
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    ft._isSITK(img, raiseError=True)
+
+    # generate voxel positions for all voxels if insideMask == False
+    if insideMask == False:
+        imgMask = sitk.Cast(img, sitk.sitkUInt8)
+        imgMask[:] = 1
+    else:
+        imgMask = img
+
+    ft._isSITK_maskBinary(imgMask, raiseError=True)
+
+    # get all voxel positions
+    PhysicalPointImageSource = sitk.PhysicalPointImageSource()
+    PhysicalPointImageSource.SetReferenceImage(imgMask)
+    imgMaskPhysPos = PhysicalPointImageSource.Execute()
+
+    # get voxel positions in mask only
+    arrMaskPhysPos = sitk.GetArrayViewFromImage(imgMaskPhysPos)
+    voxelsIdx = np.where(sitk.GetArrayViewFromImage(imgMask))
+    voxelsPos = arrMaskPhysPos[voxelsIdx]
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        print(f"Voxel positions returned/all: {voxelsPos.shape[0]}/{np.prod(imgMask.GetSize())} ")
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+    return voxelsPos
+
+
 def _generateSpatialCentresString(pixelCentres):
     """Generate voxels' centres string
 

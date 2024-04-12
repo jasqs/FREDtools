@@ -15,7 +15,7 @@ import SimpleITK as sitk
 
 import sys
 
-version_info = [0, 7, 18]
+version_info = [0, 7, 20]
 __version__ = ".".join(map(str, version_info))
 
 

@@ -71,15 +71,15 @@ def convertCTtoWER(img, HU, WER, displayInfo=False):
     return imgWER
 
 
-def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
+def calcWETfromWER(imgWER, SAD, imgMask=None, CPUNo="auto", displayInfo=False):
     """Calculate WET image from WER image for point-like source.
 
     The function calculates Water-Equivalent Thickness (WET) for each voxel of 
     an image defined as a SimpleITK image object containing Water-Equivalent 
     Ratio values (WER), inside a mask, defined as a SimpleITK image object describing
-    a mask. The WET values are calculated starting from a virtual source, located 
+    a binary mask. The WET values are calculated starting from a virtual source, located 
     at [X,Y]=[0,0] position and with Z position defined with a two-element `SAD`, 
-    describing the source point in X and Y. Partucullarly, te WET is calculated for 
+    describing the source point in X and Y. Particularly, the WET is calculated for 
     a virtual source, where rays are deflected in X and Y directions in different 
     distances from the isocenter.
 
@@ -87,11 +87,12 @@ def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
     ----------
     imgWER : SimpleITK Image
         An object of a SimpleITK image with WER values.
-    imgMask : SimpleITK Image
-        An object of a SimpleITK image describing a mask.
     SAD : 2-element array_like
         Z coordinates of the virtual point source for deflection 
         in X and Y directions, respectively.
+    imgMask : SimpleITK Image or None, optional
+        An object of a SimpleITK image describing a binary mask, or None, 
+        then all voxel positions will be calculated (def. None)
     CPUNo : {'auto', 'none'}, scalar or None, optional
         Define whether multiprocessing should be used and how many cores should
         be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
@@ -116,8 +117,11 @@ def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
 
     # check input images
     ft._isSITK3D(imgWER, raiseError=True)
+    if not imgMask:
+        imgMask = sitk.Cast(imgWER, sitk.sitkUInt8)
+        imgMask[:] = 1
     ft._isSITK3D(imgMask, raiseError=True)
-    ft._isSITK_mask(imgMask, raiseError=True)
+    ft._isSITK_maskBinary(imgMask, raiseError=True)
     if not ft.compareImgFoR(imgWER, imgMask):
         raise AttributeError("Both 'imgWER' and 'imgMask' must have the same FoR.")
 
@@ -130,39 +134,53 @@ def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
     # get the number of CPUs to be used for computation
     CPUNo = ft.getCPUNo(CPUNo)
 
-    def linePlaneIntersectionPoint(rayPosition, rayTarget, planesPosition, planeNormal):
-        u = rayTarget - rayPosition
-        dot = np.dot(planeNormal, u)
-        if np.abs(dot) > 0:
-            fac = np.sum((planesPosition - rayPosition) * planeNormal, axis=1) / dot
-            fac = np.expand_dims(fac, 1)
-            return rayPosition + (u * fac)
-        return None
+    # def linePlaneIntersectionPoint(rayPosition, rayTarget, planesPosition, planeNormal):
+    #     """General-purpose version"""
+    #     u = rayTarget - rayPosition
+    #     dot = np.dot(planeNormal, u)
+    #     if np.abs(dot) > 0:
+    #         fac = np.sum((planesPosition - rayPosition) * planeNormal, axis=1) / dot
+    #         # fac = np.expand_dims(fac, 1)
+    #         fac = np.array([fac]).T
+    #         return rayPosition + (u * fac)
+    #     return None
 
-    def calcWETRay(rayPosition, rayTarget, imgWER, imgVoxelEdges):
+    def linePlaneIntersectionPoint(rayPosition, rayTarget, planesPosition, axis):
+        """Plane-normal version"""
+        u = rayTarget - rayPosition
+        if u[axis] == 0:
+            return None
+        else:
+            fac = (planesPosition[:, axis] - rayPosition[axis]) / u[axis]
+            fac = np.array([fac]).T
+            return rayPosition + (u * fac)
+
+    def calcWETRay(rayPosition, rayTarget, imgWEROrigin, imgWERSpacing, arrWERView, imgVoxelEdges, volumeEntrance):
 
         # calculate ray position at the volume entrance
-        volumeEntrance = imgWER.GetOrigin()[2]-imgWER.GetSpacing()[2]/2  # min Z coordinate of the volume extent
-        rayEntrance = linePlaneIntersectionPoint(rayPosition, rayTarget, np.array([[0, 0, volumeEntrance]]), np.array([0, 0, 1.]))[0]
+        u = rayTarget - rayPosition
+        rayEntrance = rayPosition + (u * (volumeEntrance - rayPosition[2]) / u[2])
 
         # filter valid voxel edges that can be potentially within the ray
-        rayVoxelEdges = []
-        rayVoxelEdges.append(imgVoxelEdges[0][np.where((imgVoxelEdges[0] >= np.array([rayEntrance[0], rayTarget[0]]).min()) & (imgVoxelEdges[0] <= np.array([rayEntrance[0], rayTarget[0]]).max()))[0]])
-        rayVoxelEdges.append(imgVoxelEdges[1][np.where((imgVoxelEdges[1] >= np.array([rayEntrance[1], rayTarget[1]]).min()) & (imgVoxelEdges[1] <= np.array([rayEntrance[1], rayTarget[1]]).max()))[0]])
-        rayVoxelEdges.append(imgVoxelEdges[2][np.where((imgVoxelEdges[2] >= np.array([rayEntrance[2], rayTarget[2]]).min()) & (imgVoxelEdges[2] <= np.array([rayEntrance[2], rayTarget[2]]).max()))[0]])
+        rayVoxelEdges = [
+            imgVoxelEdges[0][np.logical_and(imgVoxelEdges[0] >= min([rayEntrance[0], rayTarget[0]])-1E-5, imgVoxelEdges[0] <= max([rayEntrance[0], rayTarget[0]])+1E-5)],
+            imgVoxelEdges[1][np.logical_and(imgVoxelEdges[1] >= min([rayEntrance[1], rayTarget[1]])-1E-5, imgVoxelEdges[1] <= max([rayEntrance[1], rayTarget[1]])+1E-5)],
+            imgVoxelEdges[2][imgVoxelEdges[2] <= max([rayEntrance[2], rayTarget[2]])],
+        ]
 
         # calculate voxel crossings for all axes
-        planesNormal = np.identity(3)  # plane normal versors
         rayCrossPoints = []
         for i in range(3):
-            if rayVoxelEdges[i].size > 0:
+            if rayVoxelEdges[i].size == 0:
+                continue
+            else:
                 planesPosition = np.zeros((len(rayVoxelEdges[i]), 3))
                 planesPosition[:, i] = rayVoxelEdges[i]
-                rayCrossPoints.append(linePlaneIntersectionPoint(rayPosition, rayTarget, planesPosition, planesNormal[i]))
+                rayCrossPoints.append(linePlaneIntersectionPoint(rayPosition, rayTarget, planesPosition, i))
         rayCrossPoints = np.concatenate(rayCrossPoints)
 
         # add target point to list of crossing points
-        rayCrossPoints = np.append(rayCrossPoints, np.expand_dims(rayTarget, 0), axis=0)
+        rayCrossPoints = np.append(rayCrossPoints, [rayTarget], axis=0)
 
         # sort crossing points by Z
         rayCrossPoints = rayCrossPoints[rayCrossPoints[:, 2].argsort()]
@@ -174,8 +192,10 @@ def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
         rayMeanPoints = (rayCrossPoints[0:-1]+rayCrossPoints[1:])/2
 
         # calculate voxels' indices (transform point to index)
-        rayVoxelsIndices = ft.transformPhysicalPointToIndex(imgWER, rayMeanPoints)
-        rayVoxelsValues = np.array(list(map(imgWER.GetPixel, rayVoxelsIndices)))
+        rayVoxelsIndices = np.round((rayMeanPoints-imgWEROrigin)/imgWERSpacing).astype(int)
+
+        # get voxel values along the ray
+        rayVoxelsValues = arrWERView[rayVoxelsIndices[:, 2], rayVoxelsIndices[:, 1], rayVoxelsIndices[:, 0]]
 
         # calculate WET
         WET = np.sum(rayCrossLengths*rayVoxelsValues)
@@ -183,37 +203,43 @@ def calcWETfromWER(imgWER, imgMask, SAD, CPUNo="auto", displayInfo=False):
         return WET
 
     # get all voxel positions inside the mask
-    raysTargetIdx = np.array(np.where(ft.arr(imgMask).T)).T
-    raysTarget = np.array(ft.transformIndexToPhysicalPoint(imgMask, raysTargetIdx))
+    raysTarget = ft.getVoxelPhysicalPoints(imgMask, insideMask=True)
 
     # get voxel edges
     imgVoxelEdges = [np.array(item) for item in ft.getVoxelEdges(imgWER)]
 
-    # calculate ray position at the downstream magnet
-    """It is assumed that the upstream magnet is diverging the beam in X direction and the downstream in Y direction"""
-    raysPosition = np.zeros((raysTarget.shape[0], 3), dtype=np.float64)
-    raysPosition[:, 0] = (SAD[0] - SAD[1]) * raysTarget[:, 0] / (raysTarget[:, 2] + SAD[0])
-    raysPosition[:, 2] = -SAD[1]
+    # # calculate ray position at the downstream magnet
+    raysPosition, _ = ft.calcRaysVectors(raysTarget, SAD)
 
-    # generate an empty image with the same FoR as the imgWER
-    imgWET = sitk.GetImageFromArray(np.zeros(imgWER.GetSize()).T)
-    imgWET.CopyInformation(imgWER)
+    # get volume volume parameters
+    volumeEntrance = imgWER.GetOrigin()[2]-imgWER.GetSpacing()[2]/2  # min Z coordinate of the volume extent
+    imgWEROrigin, imgWERSpacing = imgWER.GetOrigin(), imgWER.GetSpacing()
+    arrWERView = sitk.GetArrayViewFromImage(imgWER)
 
     global calcWETRayPool  # make the function global to use it in multiprocessing
 
     def calcWETRayPool(ray):
         # imgWER and imgVoxelEdges are be shared
-        return calcWETRay(ray[0], ray[1], imgWER, imgVoxelEdges)
+        return calcWETRay(ray[0], ray[1], imgWEROrigin, imgWERSpacing, arrWERView, imgVoxelEdges, volumeEntrance)
 
     # run multiprocessing calculation
     with Pool(CPUNo) as pool:
-        WETs = pool.map(calcWETRayPool, zip(raysPosition,  raysTarget))
+        WETs = pool.map(calcWETRayPool, zip(raysPosition, raysTarget))
 
     del (calcWETRayPool)  # remove the global function
 
-    # assign WET values to given voxel
-    for rayTargetIdx, WET in zip(raysTargetIdx, WETs):
-        imgWET[rayTargetIdx.tolist()] = WET
+    # run single-thread calculation
+    # WETs=[]
+    # for rayPosition,  rayTarget in zip(raysPosition,  raysTarget):
+    #     WET=calcWETRay(rayPosition,  rayTarget, imgWEROrigin, imgWERSpacing, arrWERView, imgVoxelEdges, volumeEntrance)
+    #     WETs.append(WET)
+
+    # generate an empty image and assign WET values to given voxel
+    arrWET = np.zeros(imgWER.GetSize()).T*np.nan
+    raysTargetIdx = np.where(sitk.GetArrayViewFromImage(imgMask))
+    arrWET[raysTargetIdx] = WETs
+    imgWET = sitk.GetImageFromArray(arrWET)
+    imgWET.CopyInformation(imgWER)
 
     if displayInfo:
         print(f"### {ft._currentFuncName()} ###")
