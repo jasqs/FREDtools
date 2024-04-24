@@ -77,8 +77,8 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     # check if fraction area is correct
     if binaryMask:
-        if not np.isscalar(areaFraction) or areaFraction <= 0 or areaFraction > 1:
-            raise ValueError(f"The parameter 'areaFraction' must be a scalar larger than 0 and less or equal to 1.")
+        if not np.isscalar(areaFraction) or areaFraction < 0 or areaFraction > 1:
+            raise ValueError(f"The parameter 'areaFraction' must be a scalar larger or equal to 0 and less or equal to 1.")
 
     # check if the structName is in the RS dicom
     if not structName in ft.getRSInfo(RSfileName).ROIName.tolist():
@@ -237,8 +237,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     imgMask.SetMetaData("ROIColor", str(StructInfo["Color"]))
     imgMask.SetMetaData("ROIName", StructInfo["Name"])
     imgMask.SetMetaData("ROINumber", str(StructInfo["Number"]))
-    imgMask.SetMetaData("ROIGenerationAlgorithm",
-                        StructInfo["GenerationAlgorithm"])
+    imgMask.SetMetaData("ROIGenerationAlgorithm", StructInfo["GenerationAlgorithm"])
     imgMask.SetMetaData("ROIType", StructInfo["Type"])
 
     if displayInfo:
@@ -353,7 +352,7 @@ def _getStructureContourArray(StructureContourPx):
     return arr
 
 
-def floatingToBinaryMask(imgMask, threshold=0.5, displayInfo=False):
+def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayInfo=False):
     """Convert floating mask to binary mask.
 
     The function converts an image defined as an instance of a SimpleITK
@@ -366,6 +365,9 @@ def floatingToBinaryMask(imgMask, threshold=0.5, displayInfo=False):
         An object of a SimpleITK image describing a binary mask.
     threshold : scalar, optional
         The threshold to calculate the binary mask. (def. 0.5)
+    thresholdEqual : bool, optional
+        Determines if the threshold is larger or larger of equal. 
+        If the parameter is true, then the `threshold` must be larger than 0. (def. False)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -385,11 +387,20 @@ def floatingToBinaryMask(imgMask, threshold=0.5, displayInfo=False):
     ft._isSITK_maskFloating(imgMask, raiseError=True)
 
     # check if the threshold is correct
-    if not np.isscalar(threshold) or threshold <= 0 or threshold > 1:
-        raise ValueError(f"The parameter 'threshold' must be a scalar larger than 0 and less or equal to 1.")
+    if not np.isscalar(threshold):
+        raise AttributeError(f"The parameter 'threshold' must be a scalar.")
+    if thresholdEqual:
+        if threshold <= 0 or threshold > 1:
+            raise ValueError(f"If thresholdEqual=True, then the parameter 'threshold' must be a scalar larger than 0 and less or equal to 1.")
+    else:
+        if threshold < 0 or threshold > 1:
+            raise ValueError(f"If thresholdEqual=False, then the parameter 'threshold' must be a scalar larger or equal to 0 and less or equal to 1.")
 
-    imgMaskBinary = sitk.BinaryThreshold(imgMask, lowerThreshold=threshold, upperThreshold=ft.getStatistics(imgMask).GetMaximum() + 1, insideValue=1, outsideValue=0)
-    imgMaskBinary = sitk.Cast(imgMaskBinary, sitk.sitkUInt8)
+    if thresholdEqual:
+        imgMaskBinary = imgMask >= threshold
+    else:
+        imgMaskBinary = imgMask > threshold
+
     imgMaskBinary = ft._copyImgMetaData(imgMask, imgMaskBinary)
 
     # make sure the image is a binary mask

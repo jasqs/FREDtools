@@ -1,3 +1,59 @@
+def getInmFREDBaseImg(fileName, dtype=float, displayInfo=False):
+    """Get base image defined in FRED influence matrix.
+
+    The function reads an influence matrix file produced by the FRED Monte Carlo
+    and builds the basic image of a given type, defined as an instance of a SimpleITK image object, 
+    with the frame of reference defined in the influence matrix. 
+
+    Parameters
+    ----------
+    fileName : path
+        Path to FRED influence matrix file to read.
+    dtype : data-type, optional
+        The desired data-type for the output image, e.g., `numpy.uint32` or `float32`. (def. numpy.float64)        
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An object of a SimpleITK image.
+
+    See Also
+    --------
+        getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
+        getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
+        getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
+        getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+    import pandas as pd
+    import struct
+
+    with open(fileName, "rb") as file_h:
+        # get FoR of the Inm image and pencil beam number
+        [fileVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
+        shape = np.array([sizeX, sizeY, sizeZ])
+        size = np.prod(shape)
+        spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=7) * 10
+        offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=7) * 10
+        origin = offset + spacing / 2
+
+        # create empty basic image with FoR defined in Inm
+        imgBase = sitk.GetImageFromArray(np.zeros(shape[::-1], dtype=dtype))
+        imgBase.SetOrigin(origin)
+        imgBase.SetSpacing(spacing)
+
+    if displayInfo:
+        print(f"### {ft._currentFuncName()} ###")
+        ft.ft_imgAnalyse._displayImageInfo(imgBase)
+        print("#" * len(f"### {ft._currentFuncName()} ###"))
+
+    return imgBase
+
+
 def getInmFREDSumImage(fileName, inmInfo=None, dtype=float, displayInfo=False):
     """Read the FRED influence matrix to sum up the SimpleITK image object.
 
@@ -27,15 +83,10 @@ def getInmFREDSumImage(fileName, inmInfo=None, dtype=float, displayInfo=False):
 
     See Also
     --------
+        getInmFREDBaseImg : get base image defined in FRED influence matrix.
         getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
         getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
         getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
-
-    Notes
-    -----
-    The binary influence matrix file format had changed from the FRED 3.70.99 version. The function has been aligned with this format 
-    but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or 
-    contact the FREDtools developers.
     """
     import struct
     import SimpleITK as sitk
@@ -134,6 +185,7 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
 
     See Also
     --------
+        getInmFREDBaseImg : get base image defined in FRED influence matrix.
         getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
         getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
         getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
@@ -168,10 +220,6 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
 
     >> out[0, :, 2].sum()/out[1,:,2].sum() - calculate the ratio of the signals' sum from all pencil beams of component 0 to component 1. 
     In particular, this might be the LETd value at point 2, where the numerator is saved to component 0 and the denominator to component 1.
-
-    The binary influence matrix file format had changed from the FRED 3.70.99 version. The function has been aligned with this format 
-    but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or 
-    contact the FREDtools developers.
     """
     import struct
     import fredtools as ft
@@ -278,15 +326,10 @@ def getInmFREDInfo(fileName, displayInfo=False):
 
     See Also
     --------
+        getInmFREDBaseImg : get base image defined in FRED influence matrix.
         getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
         getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
         getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
-
-    Notes
-    -----
-    The binary influence matrix file format had changed from FRED 3.70.99 version. The function has been aligned with this format 
-    but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or 
-    contact the FREDtools developers.
     """
     import fredtools as ft
     import numpy as np

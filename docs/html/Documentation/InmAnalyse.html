@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Influence Matrix Analyse &mdash; FRED Tools 0.7.20 documentation</title>
+  <title>Influence Matrix Analyse &mdash; FRED Tools 0.7.21 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,8 +16,8 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=793e26a0"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/documentation_options.js?v=dd46a2b9"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
         <script src="../_static/copybutton.js?v=f281be69"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.20
+                0.7.21
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -67,6 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDSumImage"><code class="docutils literal notranslate"><span class="pre">getInmFREDSumImage()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDPoint"><code class="docutils literal notranslate"><span class="pre">getInmFREDPoint()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDInfo"><code class="docutils literal notranslate"><span class="pre">getInmFREDInfo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDBaseImg"><code class="docutils literal notranslate"><span class="pre">getInmFREDBaseImg()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="GettingSubimage.html">Getting Subimage</a></li>
@@ -104,6 +105,10 @@
   <section id="influence-matrix-analyse">
 <h1>Influence Matrix Analyse<a class="headerlink" href="#influence-matrix-analyse" title="Link to this heading"></a></h1>
 <p>A collection of useful functions for reading and manipulating with influence matrices produced by a Monte Carlo. The influence matrix is usually a 3D image describing the influence (dose, LET or other) for each pencil beam, therefore it can be treated as a 4D image with geometrical X, Y, Z and pencil beam dimensions. Such matrices can occupy a lot of memory, therefore most of the functions implemented here are equipped with memory occupancy checking.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The binary influence matrix file format had changed from the FRED 3.70.99 version. The function has been aligned with this format but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or contact the FREDtools developers.</p>
+</div>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getInmFREDSumImage">
 <span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getInmFREDSumImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmInfo=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'float'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getInmFREDSumImage" title="Link to this definition"></a></dt>
@@ -134,6 +139,8 @@ can include column ‘weight’, which will be used for weight calculation.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getInmFREDBaseImg" title="fredtools.getInmFREDBaseImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDBaseImg</span></code></a></dt><dd><p>get base image defined in FRED influence matrix.</p>
+</dd>
 <dt><a class="reference internal" href="#fredtools.getInmFREDInfo" title="fredtools.getInmFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDInfo</span></code></a></dt><dd><p>get information from an influence matrix produced by FRED Monte Carlo.</p>
 </dd>
 <dt><a class="reference internal" href="#fredtools.getInmFREDPoint" title="fredtools.getInmFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDPoint</span></code></a></dt><dd><p>get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.</p>
@@ -141,12 +148,6 @@ can include column ‘weight’, which will be used for weight calculation.</p>
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDVectorImage</span></code></dt><dd><p>get a vector image from an influence matrix produced by FRED Monte Carlo.</p>
 </dd>
 </dl>
-</div>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>The binary influence matrix file format had changed from the FRED 3.70.99 version. The function has been aligned with this format
-but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or
-contact the FREDtools developers.</p>
 </div>
 </dd></dl>
 
@@ -182,6 +183,8 @@ can include column ‘weight’, which will be used for weight calculation.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getInmFREDBaseImg" title="fredtools.getInmFREDBaseImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDBaseImg</span></code></a></dt><dd><p>get base image defined in FRED influence matrix.</p>
+</dd>
 <dt><a class="reference internal" href="#fredtools.getInmFREDInfo" title="fredtools.getInmFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDInfo</span></code></a></dt><dd><p>get information from an influence matrix produced by FRED Monte Carlo.</p>
 </dd>
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDVectorImage</span></code></dt><dd><p>get a vector image from an influence matrix produced by FRED Monte Carlo.</p>
@@ -221,9 +224,6 @@ The following examples help with understanding the order of dimensions:</p>
 <p>&gt;&gt; out[0, 2, 5] - get signal from the component 0, pencil beam 2 at point 5.</p>
 <p>&gt;&gt; out[0, :, 2].sum()/out[1,:,2].sum() - calculate the ratio of the signals’ sum from all pencil beams of component 0 to component 1.
 In particular, this might be the LETd value at point 2, where the numerator is saved to component 0 and the denominator to component 1.</p>
-<p>The binary influence matrix file format had changed from the FRED 3.70.99 version. The function has been aligned with this format
-but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or
-contact the FREDtools developers.</p>
 </div>
 </dd></dl>
 
@@ -250,6 +250,8 @@ and gets the basic information about the pencil beams and fields saved.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getInmFREDBaseImg" title="fredtools.getInmFREDBaseImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDBaseImg</span></code></a></dt><dd><p>get base image defined in FRED influence matrix.</p>
+</dd>
 <dt><a class="reference internal" href="#fredtools.getInmFREDPoint" title="fredtools.getInmFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDPoint</span></code></a></dt><dd><p>get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.</p>
 </dd>
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDVectorImage</span></code></dt><dd><p>get a vector image from an influence matrix produced by FRED Monte Carlo.</p>
@@ -258,11 +260,42 @@ and gets the basic information about the pencil beams and fields saved.</p>
 </dd>
 </dl>
 </div>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>The binary influence matrix file format had changed from FRED 3.70.99 version. The function has been aligned with this format
-but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or
-contact the FREDtools developers.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getInmFREDBaseImg">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getInmFREDBaseImg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'float'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getInmFREDBaseImg" title="Link to this definition"></a></dt>
+<dd><p>Get base image defined in FRED influence matrix.</p>
+<p>The function reads an influence matrix file produced by the FRED Monte Carlo
+and builds the basic image of a given type, defined as an instance of a SimpleITK image object,
+with the frame of reference defined in the influence matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileName</strong> (<em>path</em>) – Path to FRED influence matrix file to read.</p></li>
+<li><p><strong>dtype</strong> (<em>data-type</em><em>, </em><em>optional</em>) – The desired data-type for the output image, e.g., <cite>numpy.uint32</cite> or <cite>float32</cite>. (def. numpy.float64)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An object of a SimpleITK image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SimpleITK Image</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getInmFREDInfo" title="fredtools.getInmFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDInfo</span></code></a></dt><dd><p>get information from an influence matrix produced by FRED Monte Carlo.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getInmFREDPoint" title="fredtools.getInmFREDPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDPoint</span></code></a></dt><dd><p>get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDVectorImage</span></code></dt><dd><p>get a vector image from an influence matrix produced by FRED Monte Carlo.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getInmFREDSumImage" title="fredtools.getInmFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDSumImage</span></code></a></dt><dd><p>get FRED influence matrix image to a sum SimpleITK image object.</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 
