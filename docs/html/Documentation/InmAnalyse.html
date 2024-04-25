@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Influence Matrix Analyse &mdash; FRED Tools 0.7.21 documentation</title>
+  <title>Influence Matrix Analyse &mdash; FRED Tools 0.7.22 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=dd46a2b9"></script>
+        <script src="../_static/documentation_options.js?v=eabe28d3"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.21
+                0.7.22
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -111,7 +111,7 @@
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="fredtools.getInmFREDSumImage">
-<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getInmFREDSumImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmInfo=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'float'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getInmFREDSumImage" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getInmFREDSumImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmInfo=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'float'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getInmFREDSumImage" title="Link to this definition"></a></dt>
 <dd><p>Read the FRED influence matrix to sum up the SimpleITK image object.</p>
 <p>The function reads an influence matrix file produced by
 the FRED Monte Carlo to an instance of a SimpleITK image object by summing
@@ -125,6 +125,9 @@ can include column ‘weight’, which will be used for weight calculation.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fileName</strong> (<em>path</em>) – Path to FRED influence matrix file to read.</p></li>
 <li><p><strong>inmInfo</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – A pandas DataFrame with at least columns ‘PBID’ and ‘FID’. (def. None)</p></li>
+<li><p><strong>threshold</strong> (<em>scalar</em><em>, </em><em>array_like</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The threshold for which the values are filtered, defined as the fraction
+of maximum value for each bencim beam. It can be a scalar for a single component
+influence matrix or an iterable of the same size as the number of components. (def. None)</p></li>
 <li><p><strong>dtype</strong> (<em>data-type</em><em>, </em><em>optional</em>) – The desired data-type for the output image, e.g., <cite>numpy.uint32</cite> or <cite>float32</cite>. (def. numpy.float64)</p></li>
 <li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
 </ul>

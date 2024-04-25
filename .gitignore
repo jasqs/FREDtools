@@ -146,3 +146,7 @@ examples/ROI_External.mhd
 examples/ROI_Mix.mhd
 
 examples/ROI_Sphere.mhd
+
+docs/doctrees/
+
+docs/html/

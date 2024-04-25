@@ -54,7 +54,7 @@ def getInmFREDBaseImg(fileName, dtype=float, displayInfo=False):
     return imgBase
 
 
-def getInmFREDSumImage(fileName, inmInfo=None, dtype=float, displayInfo=False):
+def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, displayInfo=False):
     """Read the FRED influence matrix to sum up the SimpleITK image object.
 
     The function reads an influence matrix file produced by
@@ -71,6 +71,10 @@ def getInmFREDSumImage(fileName, inmInfo=None, dtype=float, displayInfo=False):
         Path to FRED influence matrix file to read.
     inmInfo : pandas.DataFrame, optional
         A pandas DataFrame with at least columns 'PBID' and 'FID'. (def. None)
+    threshold : scalar, array_like or None, optional
+        The threshold for which the values are filtered, defined as the fraction 
+        of maximum value for each bencim beam. It can be a scalar for a single component
+        influence matrix or an iterable of the same size as the number of components. (def. None)
     dtype : data-type, optional
         The desired data-type for the output image, e.g., `numpy.uint32` or `float32`. (def. numpy.float64)
     displayInfo : bool, optional
@@ -105,8 +109,18 @@ def getInmFREDSumImage(fileName, inmInfo=None, dtype=float, displayInfo=False):
         offset = np.around(np.array([offsetX, offsetY, offsetZ]) * 10, decimals=3)  # [mm]
         origin = offset + spacing / 2  # [mm]
 
+    # validate threshold
+    if threshold:
+        if np.isscalar(threshold):
+            threshold = tuple([threshold])
+        else:
+            threshold = tuple(threshold)
+
+        if len(threshold) != componentNo:
+            raise AttributeError(f"The influence matrix describes {componentNo} components but threshold is {threshold}. The size of threshold must be the same as the number of components.")
+
     # get requested pencil beams info
-    inmInfoRequested = _mergeInmInfo(inmInfo, fileName)
+    inmInfoRequested = ft.ft_imgIO.influenceMatrix_io._mergeInmInfo(inmInfo, fileName)
 
     # create empty vector
     arrVec = [np.zeros(size, dtype="float64") for _ in range(componentNo)]
@@ -122,9 +136,21 @@ def getInmFREDSumImage(fileName, inmInfo=None, dtype=float, displayInfo=False):
             voxelIndices = np.frombuffer(file_h.read(voxelsNo * 4), dtype="uint32", count=voxelsNo)
             voxelValues = np.frombuffer(file_h.read(voxelsNo * componentNo * 4), dtype="float32", count=voxelsNo*componentNo)
 
+            # filter voxels for low signal
+            # voxelsFilter=np.where(voxelValues>=(np.max(voxelValues)*0.1))
+            # voxelIndices=
             # add values to array for each component
             for component in range(componentNo):
-                arrVec[component][voxelIndices] += voxelValues[component::componentNo] * inmInfoRow.weight  # add values to array
+
+                voxelValuesComponent = voxelValues[component::componentNo]
+                # filter values if requested
+                """The filterring is done for values above or equal to a given fraction of the maximum value, defined with the threshold for a given component"""
+                if threshold:
+                    voxelsFilter = np.where(voxelValuesComponent >= (np.max(voxelValuesComponent)*threshold[component]))
+                    voxelValuesComponent = voxelValuesComponent[voxelsFilter]
+                    voxelIndices = voxelIndices[voxelsFilter]
+
+                arrVec[component][voxelIndices] += voxelValuesComponent * inmInfoRow.weight  # add values to array
 
     # reshape each array
     for component in range(componentNo):
