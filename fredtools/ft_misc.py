@@ -213,7 +213,7 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
             histEntry = dataY[(dataX >= hist[0][i]) & (dataX < hist[0][i + 1])]
 
             if not len(histEntry):
-                histEntry = np.nan
+                histEntry = 0
             else:
                 if kind == "sum":
                     histEntry = histEntry.sum()
