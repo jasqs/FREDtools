@@ -24,13 +24,13 @@ def getExtent(img, displayInfo=False):
     import numpy as np
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     cornerLow = img.TransformContinuousIndexToPhysicalPoint(np.zeros(img.GetDimension(), dtype="float64") - 0.5)
     cornerHigh = img.TransformContinuousIndexToPhysicalPoint(np.array(img.GetSize(), dtype="float64") - 1 + 0.5)
 
-    cornerLow = np.dot(np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, cornerLow)
-    cornerHigh = np.dot(np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, cornerHigh)
+    cornerLow = np.dot(np.abs(_getDirectionArray(img)).T, cornerLow)
+    cornerHigh = np.dot(np.abs(_getDirectionArray(img)).T, cornerHigh)
 
     extent = tuple(zip(cornerLow, cornerHigh))
 
@@ -70,7 +70,7 @@ def getSize(img, displayInfo=False):
     import numpy as np
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     size = tuple(np.abs(np.diff(getExtent(img))).squeeze())
 
@@ -111,7 +111,7 @@ def getImageCenter(img, displayInfo=False):
     import numpy as np
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     imageCentre = tuple(np.mean(np.array(getExtent(img)), 1))
 
@@ -154,7 +154,7 @@ def getMassCenter(img, displayInfo=False):
     import SimpleITK as sitk
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # check if are nan values in the image and replace them with zeros
     arr = sitk.GetArrayFromImage(img)
@@ -167,7 +167,7 @@ def getMassCenter(img, displayInfo=False):
     imgITK = ft.SITK2ITK(img)
     moments = itk.ImageMomentsCalculator.New(imgITK)
     moments.Compute()
-    massCentre = np.dot(np.abs(ft.ft_imgAnalyse._getDirectionArray(img)).T, moments.GetCenterOfGravity())
+    massCentre = np.dot(np.abs(_getDirectionArray(img)).T, moments.GetCenterOfGravity())
     massCentre = tuple(massCentre)
 
     if displayInfo:
@@ -208,7 +208,7 @@ def getMaxPosition(img, displayInfo=False):
     import fredtools as ft
     import warnings
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # convert image to array
     arr = ft.arr(img)
@@ -262,7 +262,7 @@ def getMinPosition(img, displayInfo=False):
     import fredtools as ft
     import warnings
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # convert image to array
     arr = ft.arr(img)
@@ -312,7 +312,7 @@ def getVoxelCentres(img, displayInfo=False):
     import numpy as np
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     voxelCentres = []
     for axis, axisSize in enumerate(img.GetSize()):
@@ -357,7 +357,7 @@ def getVoxelEdges(img, displayInfo=False):
     import fredtools as ft
     import numpy as np
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     voxelEdges = []
     for axis, axisSize in enumerate(img.GetSize()):
@@ -408,7 +408,7 @@ def getVoxelPhysicalPoints(img, insideMask=False, displayInfo=False):
     import numpy as np
     import SimpleITK as sitk
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # generate voxel positions for all voxels if insideMask == False
     if insideMask == False:
@@ -417,7 +417,7 @@ def getVoxelPhysicalPoints(img, insideMask=False, displayInfo=False):
     else:
         imgMask = img
 
-    ft.isSITK_maskBinary(imgMask, raiseError=True)
+    ft._imgTypeChecker.isSITK_maskBinary(imgMask, raiseError=True)
 
     # get all voxel positions
     PhysicalPointImageSource = sitk.PhysicalPointImageSource()
@@ -461,7 +461,7 @@ def _getAxesVectorNotUnity(img):
     """
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     axesVectorNotUnity = [int(axis != 1) for axis in img.GetSize()]
 
@@ -492,7 +492,7 @@ def _getAxesNumberNotUnity(img):
     """
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     axesNumberNotUnity = [axis_idx for axis_idx, axis in enumerate(img.GetSize()) if axis != 1]
 
@@ -523,7 +523,7 @@ def _getAxesNumberUnity(img):
     """
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     axesNumberUnity = [axis_idx for axis_idx, axis in enumerate(img.GetSize()) if axis == 1]
 
@@ -550,7 +550,7 @@ def _getDirectionArray(img):
     import numpy as np
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     return np.array(img.GetDirection()).reshape(img.GetDimension(), img.GetDimension())
 
@@ -574,7 +574,7 @@ def _checkIdentity(img):
     import fredtools as ft
     import numpy as np
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     return np.all(np.identity(img.GetDimension(), dtype="int").flatten() == img.GetDirection())
 
@@ -615,7 +615,7 @@ def getExtMpl(img):
     """
     import fredtools as ft
 
-    ft.isSITK_slice(img, raiseError=True)
+    ft._imgTypeChecker.isSITK_slice(img, raiseError=True)
 
     extent = [extent for axis_idx, extent in enumerate(ft.getExtent(img)) if axis_idx in _getAxesNumberNotUnity(img)]
     extent[1] = extent[1][::-1]
@@ -667,7 +667,7 @@ def pos(img):
     """
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     pos = ft.getVoxelCentres(img)
     pos = [pos[i] for i in range(img.GetDimension()) if not img.GetSize()[i] == 1]
@@ -711,7 +711,7 @@ def arr(img):
     import SimpleITK as sitk
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
     arr = sitk.GetArrayFromImage(img).squeeze()
 
     return arr
@@ -750,7 +750,7 @@ def vec(img):
     import SimpleITK as sitk
     import fredtools as ft
 
-    ft.isSITK_profile(img, raiseError=True)
+    ft._imgTypeChecker.isSITK_profile(img, raiseError=True)
     arr = sitk.GetArrayFromImage(img).squeeze()
 
     return arr
@@ -806,7 +806,7 @@ def isPointInside(img, point, displayInfo=False):
     import numpy as np
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # convert point to numpy array
     point = np.array(point, ndmin=1)
@@ -876,11 +876,11 @@ def getStatistics(img, displayInfo=False):
     import SimpleITK as sitk
     import fredtools as ft
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     isVector = False
-    if ft.isSITK_vector(img):
-        img = ft.ft_imgManipulate.sumVectorImg(img)
+    if ft._imgTypeChecker.isSITK_vector(img):
+        img = ft.sumVectorImg(img)
         isVector = True
 
     stat = sitk.StatisticsImageFilter()
@@ -929,8 +929,8 @@ def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
     import numpy as np
     import SimpleITK as sitk
 
-    ft.isSITK(img1, raiseError=True)
-    ft.isSITK(img2, raiseError=True)
+    ft._imgTypeChecker.isSITK(img1, raiseError=True)
+    ft._imgTypeChecker.isSITK(img2, raiseError=True)
 
     # compare dimension
     dimensionMatch = img1.GetDimension() == img2.GetDimension()

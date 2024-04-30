@@ -1,2 +1,2 @@
-from .optimiseBeamPositions import *
-from .preoptimizer import *
+from . import optimiseBeamPositions
+from . import preoptimizer

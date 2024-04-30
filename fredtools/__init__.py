@@ -38,9 +38,11 @@ from .BraggPeak.braggPeakAnalyse import (braggPeak)
 from . import GammaIndex
 from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
+from . import ProtonOptimisation
+
+from ._logger import _getLogger
 
 _version = [0, 8, 2]
 __version__ = ".".join(map(str, _version))
 
-
-print(f"imported FREDtools library {__version__}")
+_getLogger(__name__).debug(f"imported FREDtools library {__version__}")

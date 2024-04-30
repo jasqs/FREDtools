@@ -213,7 +213,7 @@ def isSITK_mask(img, raiseError=False):
         return True
 
 
-def _getMaskType(img):
+def getMaskType(img):
     import fredtools as ft
     import SimpleITK as sitk
 

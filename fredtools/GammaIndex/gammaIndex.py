@@ -108,13 +108,13 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
     import SimpleITK as sitk
 
     # validate imgRef
-    ft.isSITK(imgRef, raiseError=True)
-    if not ft.isSITK_slice(imgRef, raiseError=False) and not ft.isSITK_volume(imgRef, raiseError=False):
+    ft._imgTypeChecker.isSITK(imgRef, raiseError=True)
+    if not ft._imgTypeChecker.isSITK_slice(imgRef, raiseError=False) and not ft._imgTypeChecker.isSITK_volume(imgRef, raiseError=False):
         raise TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
 
     # validate imgEval
-    ft.isSITK(imgEval, raiseError=True)
-    if not ft.isSITK_slice(imgEval, raiseError=False) and not ft.isSITK_volume(imgEval, raiseError=False):
+    ft._imgTypeChecker.isSITK(imgEval, raiseError=True)
+    if not ft._imgTypeChecker.isSITK_slice(imgEval, raiseError=False) and not ft._imgTypeChecker.isSITK_volume(imgEval, raiseError=False):
         raise TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
 
     # validate DTA, DD, DDType, DCO and globalNorm

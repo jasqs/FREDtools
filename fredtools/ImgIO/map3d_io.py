@@ -24,7 +24,7 @@ def writeMap3D(img, filePath, displayInfo=False):
     import struct
     import fredtools as ft
 
-    ft.isSITK3D(img, raiseError=True)
+    ft._imgTypeChecker.isSITK3D(img, raiseError=True)
 
     try:
         fout = open(filePath, "wb")

@@ -39,9 +39,9 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=Fal
     import numpy as np
     import SimpleITK as sitk
 
-    ft.isSITK3D(img, raiseError=True)
-    ft.isSITK3D(imgMask, raiseError=True)
-    ft.isSITK_mask(imgMask, raiseError=True)
+    ft._imgTypeChecker.isSITK3D(img, raiseError=True)
+    ft._imgTypeChecker.isSITK3D(imgMask, raiseError=True)
+    ft._imgTypeChecker.isSITK_mask(imgMask, raiseError=True)
 
     # check FoR matching of img and mask
     if not ft.compareImgFoR(img, imgMask, displayInfo=False):
@@ -142,7 +142,7 @@ def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01
     import fredtools as ft
     import numpy as np
 
-    ft.isSITK3D(img, raiseError=True)
+    ft._imgTypeChecker.isSITK3D(img, raiseError=True)
     if not ft.ft_imgIO.dicom_io._isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 

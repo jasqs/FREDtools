@@ -33,7 +33,7 @@ def convertCTtoWER(img, HU, WER, displayInfo=False):
     import SimpleITK as sitk
 
     # validate img
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # validate HU and WET vectors
     if not len(HU) == len(WER):
@@ -116,12 +116,12 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, CPUNo="auto", displayInfo=False):
     import SimpleITK as sitk
 
     # check input images
-    ft.isSITK3D(imgWER, raiseError=True)
+    ft._imgTypeChecker.isSITK3D(imgWER, raiseError=True)
     if not imgMask:
         imgMask = sitk.Cast(imgWER, sitk.sitkUInt8)
         imgMask[:] = 1
-    ft.isSITK3D(imgMask, raiseError=True)
-    ft.isSITK_maskBinary(imgMask, raiseError=True)
+    ft._imgTypeChecker.isSITK3D(imgMask, raiseError=True)
+    ft._imgTypeChecker.isSITK_maskBinary(imgMask, raiseError=True)
     if not ft.compareImgFoR(imgWER, imgMask):
         raise AttributeError("Both 'imgWER' and 'imgMask' must have the same FoR.")
 
@@ -348,8 +348,8 @@ def calcContours(imgMask, level=0.5, displayInfo=False):
     from skimage import measure
     import shapely as sph
     # check if the image is a binary mask describing a slice
-    ft.isSITK_mask(imgMask, raiseError=True)
-    ft.isSITK2D(imgMask, raiseError=True)
+    ft._imgTypeChecker.isSITK_mask(imgMask, raiseError=True)
+    ft._imgTypeChecker.isSITK2D(imgMask, raiseError=True)
 
     # get contours
     contours = measure.find_contours(ft.arr(imgMask).T, positive_orientation="low", level=level)

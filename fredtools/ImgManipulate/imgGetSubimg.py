@@ -99,7 +99,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     import fredtools as ft
     import numpy as np
 
-    if not (ft.isSITK3D(img) or ft.isSITK4D(img)):
+    if not (ft._imgTypeChecker.isSITK3D(img) or ft._imgTypeChecker.isSITK4D(img)):
         raise TypeError(f"The object '{type(img)}' is not an instance of a 3D or 4D SimpleITK image.")
 
     # check if point dimension matches the img dim.
@@ -278,10 +278,10 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
     import fredtools as ft
     import numpy as np
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # check if img is already a profile
-    if ft.isSITK_profile(img):
+    if ft._imgTypeChecker.isSITK_profile(img):
         raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile.")
 
     # check if point dimension matches the img dim.
@@ -446,10 +446,10 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
     import fredtools as ft
     import numpy as np
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # check if img is already a point
-    if ft.isSITK_point(img):
+    if ft._imgTypeChecker.isSITK_point(img):
         raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a point.")
 
     # check if point dimension matches the img dim.
@@ -575,10 +575,10 @@ def getInteg(img, axis="X", displayInfo=False):
     import fredtools as ft
     import numpy as np
 
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # check if img is already a profile or integral
-    if ft.isSITK_profile(img):
+    if ft._imgTypeChecker.isSITK_profile(img):
         raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile or integral.")
 
     # check if axis is in proper format
@@ -660,7 +660,7 @@ def getCumSum(img, axis="X", displayInfo=False):
     import SimpleITK as sitk
 
     # validate imgCT
-    ft.isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     # check if axis is in proper format
     axis = axis.upper()
