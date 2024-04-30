@@ -93,15 +93,6 @@ def pdfLandauGauss(x, mpv, xi, sigma=0, amp=1):
     import numpy as np
     from scipy.interpolate import InterpolatedUnivariateSpline
 
-    def getMPV(x, y):
-        # calculate MPV and the maximum value
-        interpFun = InterpolatedUnivariateSpline(x, y, k=4)
-        cr_pts = interpFun.derivative().roots()
-        cr_pts = np.append(cr_pts, (x[0], x[-1]))
-        cr_vals = interpFun(cr_pts)
-        max_index = np.argmax(cr_vals)
-        return cr_pts[max_index], cr_vals[max_index]
-
     # check parameters
     if not np.isscalar(mpv):
         raise TypeError(f"The 'mpv' parameter must be a scalar but it is {type(mpv)}")
@@ -122,7 +113,7 @@ def pdfLandauGauss(x, mpv, xi, sigma=0, amp=1):
     xInternal = x.copy()
 
     # move x position to the expected mpv
-    mpvInternal = getMPV(xInternal, langauss.pdf(xInternal, landau_x_mpv=mpv, landau_xi=xi, gauss_sigma=sigma))
+    mpvInternal = _getMPV(xInternal, langauss.pdf(xInternal, landau_x_mpv=mpv, landau_xi=xi, gauss_sigma=sigma))
     xInternal += mpvInternal[0] - mpv
 
     # normalize PDF to the amplitude
@@ -273,15 +264,6 @@ def pdfVavilov(x, mpv, kappa, beta, scaling, amp=1):
     import numpy as np
     from scipy.interpolate import InterpolatedUnivariateSpline
 
-    def getMPV(x, y):
-        # calculate MPV and the maximum value
-        interpFun = InterpolatedUnivariateSpline(x, y, k=4)
-        cr_pts = interpFun.derivative().roots()
-        cr_pts = np.append(cr_pts, (x[0], x[-1]))
-        cr_vals = interpFun(cr_pts)
-        max_index = np.argmax(cr_vals)
-        return cr_pts[max_index], cr_vals[max_index]
-
     # check parameters
     if not np.isscalar(mpv):
         raise TypeError(f"The 'mpv' parameter must be a scalar but it is {type(mpv)}")
@@ -309,7 +291,7 @@ def pdfVavilov(x, mpv, kappa, beta, scaling, amp=1):
     xMPVCalc = np.linspace(-10, 10, 1000)
     yMPVCalc = np.zeros(xMPVCalc.size)
     AT_Vavilov_PDF(xMPVCalc.tolist(), p_kappa=kappa, p_beta=beta, p_density=yMPVCalc)
-    mpvInternal = getMPV(xMPVCalc, yMPVCalc)
+    mpvInternal = _getMPV(xMPVCalc, yMPVCalc)
     xInternal /= scaling
     xInternal += mpvInternal[0]
     xInternal -= mpv / scaling
@@ -379,3 +361,13 @@ def fitVavilov(x, y, beta0=0.5, kappa0=0.3, scaling0=-1, fixAmplitude=False):
     fitResult = fitModel.fit(data=y, x=x)
 
     return fitResult
+
+
+def _getMPV(x, y):
+    # calculate MPV and the maximum value
+    interpFun = InterpolatedUnivariateSpline(x, y, k=4)
+    cr_pts = interpFun.derivative().roots()
+    cr_pts = np.append(cr_pts, (x[0], x[-1]))
+    cr_vals = interpFun(cr_pts)
+    max_index = np.argmax(cr_vals)
+    return cr_pts[max_index], cr_vals[max_index]

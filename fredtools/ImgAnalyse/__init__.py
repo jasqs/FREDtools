@@ -1,7 +1,7 @@
-from .dvhAnalyse import *
-from .imgAnalyse import *
-from .imgDisplay import *
-from .imgInfo import *
-from .imgTransform import *
-from .imgTypeChecker import *
-from .spotAnalyse import *
+from . import spotAnalyse
+from . import imgTransform
+from . import imgInfo
+from . import imgDisplay
+from . import imgAnalyse
+from . import dvhAnalyse
+# from ._imgTypeChecker import *

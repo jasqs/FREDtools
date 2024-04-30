@@ -1,2 +1,2 @@
-from .imgGetSubimg import *
-from .imgManipulate import *
+from . import imgGetSubimg
+from . import imgManipulate

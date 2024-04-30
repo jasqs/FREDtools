@@ -75,11 +75,11 @@ def readOPG(fileName, depth=0, displayInfo=False):
     img.SetOrigin([Xcoor[0], Ycoor[0], depth])
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Original Data Unit:   {DataUnit}")
         print(f"# Original Data Factor: {DataFactor}")
         print(f"# Original Length Unit: {LengthUnit}")
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return img

@@ -66,7 +66,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     import warnings
     from multiprocessing import Pool
 
-    if not ft._isSITK3D(img, raiseError=True):
+    if not ft.isSITK3D(img, raiseError=True):
         raise ValueError(f"The image is a SimpleITK image of dimension {img.GetDimension()}. Only mapping ROI to 3D images are supported now.")
 
     if not ft.ft_imgIO.dicom_io._isDicomRS(RSfileName):
@@ -100,12 +100,12 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
         imgMask.SetMetaData("ROIType", StructInfo["Type"])
 
         if displayInfo:
-            print(f"### {ft._currentFuncName()} ###")
+            print(f"### {ft.currentFuncName()} ###")
             print("# Warning: no 'StructureContours' was defined for this structure and an empty mask was returned")
             print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
             print("# Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3))
             ft.ft_imgAnalyse._displayImageInfo(imgMask)
-            print("#" * len(f"### {ft._currentFuncName()} ###"))
+            print("#" * len(f"### {ft.currentFuncName()} ###"))
 
         return imgMask
 
@@ -129,7 +129,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     StructureContoursSpacing = StructureContoursSpacing[StructureContoursSpacing != 0].min()
 
     # get CW (True) or CCW (False) direction for each contour
-    StructureContoursDirection = [ft.ft_imgIO.dicom_io._checkContourCWDirection(StructureContour) for StructureContour in StructureContours]
+    StructureContoursDirection = [_checkContourCWDirection(StructureContour) for StructureContour in StructureContours]
 
     # get structure bounding box in Z
     """
@@ -217,7 +217,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     # interpolate mask to input image
     imgMask = sitk.Resample(
-        imgMask, img, interpolator=ft.ft_imgGetSubimg._setSITKInterpolator(interpolation="linear"))
+        imgMask, img, interpolator=ft.ft_imgGetSubimg.setSITKInterpolator(interpolation="linear"))
 
     # prepare binary mask if requested, with fraction area threshold
     if binaryMask:
@@ -229,7 +229,7 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
         imgMask = sitk.Cast(imgMask, sitk.sitkFloat64)
         # make sure the image is a floating mask
         try:
-            ft._isSITK_maskFloating(imgMask, raiseError=True)
+            ft.isSITK_maskFloating(imgMask, raiseError=True)
         except TypeError:
             raise RuntimeError("The structure was mapped but the floating mask is incorrect.")
 
@@ -241,13 +241,23 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     imgMask.SetMetaData("ROIType", StructInfo["Type"])
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
         print("# Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3))
         ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgMask
+
+
+def _checkContourCWDirection(contour):
+    import numpy as np
+
+    """Check if the contour has CW (True) or CCW (False) direction. 
+    The CW (True) contour direction usually means that it is a filled polygon
+    and the CCW (False) contour direction that it is a hole in the filled polygon."""
+    result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
+    return result < 0
 
 
 def _getLineSegmentPixels(lineSegmentStart, lineSegmentEnd):
@@ -384,7 +394,7 @@ def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayIn
     import SimpleITK as sitk
     import numpy as np
 
-    ft._isSITK_maskFloating(imgMask, raiseError=True)
+    ft.isSITK_maskFloating(imgMask, raiseError=True)
 
     # check if the threshold is correct
     if not np.isscalar(threshold):
@@ -401,18 +411,18 @@ def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayIn
     else:
         imgMaskBinary = imgMask > threshold
 
-    imgMaskBinary = ft._copyImgMetaData(imgMask, imgMaskBinary)
+    imgMaskBinary = ft.copyImgMetaData(imgMask, imgMaskBinary)
 
     # make sure the image is a binary mask
     try:
-        ft._isSITK_maskBinary(imgMaskBinary, raiseError=True)
+        ft.isSITK_maskBinary(imgMaskBinary, raiseError=True)
     except TypeError:
         raise RuntimeError("The the input image is a floating mask but the binary mask is incorrect.")
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgMaskBinary)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgMaskBinary
 
@@ -450,15 +460,15 @@ def cropImgToMask(img, imgMask, displayInfo=False):
     import fredtools as ft
     import copy
 
-    ft._isSITK(img, raiseError=True)
-    ft._isSITK_mask(imgMask, raiseError=True)
+    ft.isSITK(img, raiseError=True)
+    ft.isSITK_mask(imgMask, raiseError=True)
 
     # check FoR of the image and the mask
     if not ft.compareImgFoR(img, imgMask):
         raise ValueError(f"FoR of the 'img' {img.GetSize()} must be the same as the FoR of the 'imgMask' {imgMask.GetSize()}.")
 
     # convert the floating mask to binary with a minimum threshold larger than 0
-    if ft._isSITK_maskFloating(imgMask):
+    if ft.isSITK_maskFloating(imgMask):
         imgMaskNonZero = copy.copy(imgMask)
         imgMaskNonZero[imgMaskNonZero == 0] = np.nan
         imgMask = ft.floatingToBinaryMask(imgMask, threshold=ft.getStatistics(imgMaskNonZero).GetMinimum())
@@ -470,9 +480,9 @@ def cropImgToMask(img, imgMask, displayInfo=False):
     upperBoundaryCropSize = np.array(img.GetSize()) - np.array(boundingBox[1::2]) - 1
     imgCrop = sitk.Crop(img, lowerBoundaryCropSize=lowerBoundaryCropSize, upperBoundaryCropSize=[int(i) for i in upperBoundaryCropSize])
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgCrop)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgCrop
 
@@ -516,15 +526,15 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
     import copy
     import numpy as np
 
-    ft._isSITK(img, raiseError=True)
-    ft._isSITK_mask(imgMask, raiseError=True)
+    ft.isSITK(img, raiseError=True)
+    ft.isSITK_mask(imgMask, raiseError=True)
 
     # check FoR of the image and the mask
     if not ft.compareImgFoR(img, imgMask):
         raise ValueError(f"FoR of the 'img' {img.GetSize()} must be the same as the FoR of the 'imgMask' {imgMask.GetSize()}.")
 
     # convert the floating mask to binary with a minimum threshold larger than 0
-    if ft._isSITK_maskFloating(imgMask):
+    if ft.isSITK_maskFloating(imgMask):
         imgMaskNonZero = copy.copy(imgMask)
         imgMaskNonZero[imgMaskNonZero == 0] = np.nan
         imgMask = ft.floatingToBinaryMask(imgMask, threshold=ft.getStatistics(imgMaskNonZero).GetMinimum())
@@ -537,9 +547,9 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
     imgMasked = sitk.Mask(img, imgMask, outsideValue=value, maskingValue=maskingValue)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgMasked)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return imgMasked
 
 
@@ -577,9 +587,9 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
-    if ft._isSITK_point(img):
+    if ft.isSITK_point(img):
         raise ValueError(
             f"The 'img' is an instance of SimleITK image but describes a single point (size of 'img' is {img.GetSize()}). Interpolation cannot be performed on images describing a single point."
         )
@@ -597,7 +607,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
         spacingCorr = spacing
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # correct spacing according to image direction
     spacingCorr = np.dot(ft.ft_imgAnalyse._getDirectionArray(img).T, spacingCorr)
@@ -632,9 +642,9 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     )
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgRes)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return imgRes
 
 
@@ -661,7 +671,7 @@ def sumImg(imgs, displayInfo=False):
 
     # check if all images have the same FoR
     for img in imgs:
-        ft._isSITK(img, raiseError=True)
+        ft.isSITK(img, raiseError=True)
         if not ft.compareImgFoR(img, imgs[0]):
             raise ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
 
@@ -669,9 +679,9 @@ def sumImg(imgs, displayInfo=False):
     img = sum(imgs)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return img
 
@@ -705,8 +715,8 @@ def imgDivide(imgNum, imgDen, displayInfo=False):
     import numpy as np
     import SimpleITK as sitk
 
-    ft._isSITK(imgNum, raiseError=True)
-    ft._isSITK(imgDen, raiseError=True)
+    ft.isSITK(imgNum, raiseError=True)
+    ft.isSITK(imgDen, raiseError=True)
 
     # check if numerator and denominator images have the same FoR
     if not ft.compareImgFoR(imgNum, imgDen):
@@ -724,9 +734,9 @@ def imgDivide(imgNum, imgDen, displayInfo=False):
     imgDiv.CopyInformation(imgNum)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgDiv)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgDiv
 
@@ -767,7 +777,7 @@ def createEllipseMask(img, point, radii, displayInfo=False):
     from collections.abc import Iterable
     import numpy as np
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # convert image to ITK
     imgITK = ft.SITK2ITK(img)
@@ -803,9 +813,9 @@ def createEllipseMask(img, point, radii, displayInfo=False):
     imgMask = ft.ITK2SITK(imgMask)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgMask
 
@@ -848,7 +858,7 @@ def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInf
     import itk
     import fredtools as ft
 
-    ft._isSITK3D(img, raiseError=True)
+    ft.isSITK3D(img, raiseError=True)
 
     # convert image to ITK
     imgITK = ft.SITK2ITK(img)
@@ -889,9 +899,9 @@ def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInf
     imgMask = ft.ITK2SITK(imgMask)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgMask
 
@@ -939,9 +949,9 @@ def createCylinderMask(img, startPoint, endPoint, radious, displayInfo=False):
     imgMask = ft.createConeMask(img, startPoint, endPoint, radious, radious)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgMask
 
@@ -969,7 +979,7 @@ def sumVectorImg(img, displayInfo=False):
     import fredtools as ft
     import SimpleITK as sitk
 
-    ft._isSITK_vector(img, raiseError=True)
+    ft.isSITK_vector(img, raiseError=True)
 
     imgs = []
     for componentIdx in range(img.GetNumberOfComponentsPerPixel()):
@@ -978,9 +988,9 @@ def sumVectorImg(img, displayInfo=False):
     imgSum = ft.sumImg(imgs)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgSum)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return imgSum
 
 
@@ -1014,8 +1024,8 @@ def _getFORTransformed(img, transform):
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
-    ft._isSITK_transform(transform, raiseError=True)
+    ft.isSITK(img, raiseError=True)
+    ft.isSITK_transform(transform, raiseError=True)
 
     startPX = [0, 0, 0]
     endPX = [int(size) for size in np.array(img.GetSize()) - 1]
@@ -1088,10 +1098,10 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     import SimpleITK as sitk
     import fredtools as ft
 
-    ft._isSITK3D(img, raiseError=True)
+    ft.isSITK3D(img, raiseError=True)
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if isocentrePosition dimension matches the img dim.
     if len(isocentrePosition) != img.GetDimension():
@@ -1139,15 +1149,15 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     )
 
     # copy metadata if they exist
-    imgBEV = ft._copyImgMetaData(img, imgBEV)
+    imgBEV = ft.copyImgMetaData(img, imgBEV)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Isocentre position [mm]: ", np.array(isocentrePosition))
         print("# Gantry angle [deg]: {:.1f}".format(gantryAngle))
         print("# Couch angle [deg]: {:.1f}".format(couchAngle))
         ft.ft_imgAnalyse._displayImageInfo(imgBEV)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgBEV
 
@@ -1218,7 +1228,7 @@ def overwriteCTPhysicalProperties(
     import warnings
     import pydicom as dicom
 
-    ft._isSITK3D(img, raiseError=True)
+    ft.isSITK3D(img, raiseError=True)
 
     # check if dicom is RN
     ft.ft_imgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
@@ -1259,14 +1269,14 @@ def overwriteCTPhysicalProperties(
         img = ft.setValueMask(img, roiStruct, value=structInfo.ROIPhysicalHUValue, outside=False)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         if len(structsInfo) > 0:
             print(f"# Overwritten HU values for {len(structsInfo)}", "structure" if len(structsInfo) <= 1 else "structures:")
             for ID, structInfo in structsInfo.iterrows():
                 print(f"# Structure '{structInfo.ROIName}' (ID: {ID}) with HU={structInfo.ROIPhysicalHUValue} (Rel. Elec. Dens. {structInfo.ROIPhysicalPropertyValue})")
         else:
             print(f"# No structures found to overwrite HU values.")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return img
 
@@ -1292,14 +1302,14 @@ def setIdentityDirection(img, displayInfo=False):
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     img.SetDirection(np.identity(img.GetDimension()).flatten())
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return img
 
@@ -1342,8 +1352,8 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     import numpy as np
     import SimpleITK as sitk
 
-    ft._isSITK3D(imgMask, raiseError=True)
-    ft._isSITK_maskBinary(imgMask, raiseError=True)
+    ft.isSITK3D(imgMask, raiseError=True)
+    ft.isSITK_maskBinary(imgMask, raiseError=True)
 
     # set kernel type
     if lateralKernelType.lower() == "circular":
@@ -1356,7 +1366,7 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
         raise ValueError(f"Lateral Kernel Type type '{lateralKernelType}' cannot be recognized. Only 'circular', 'box' and 'cross' are supported.")
 
     # get an interpolator suitable for mask interpolation
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation="linear")
+    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation="linear")
 
     # get pixel spacing
     pixelSpacing = imgMask.GetSpacing()
@@ -1398,17 +1408,17 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     imgExt = sitk.Crop(imgExt, [0, 0, marginDistalPixel], [0, 0, marginProximalPixel])
 
     # copy and modify information about the mask
-    ft._copyImgMetaData(imgMask, imgExt)
+    ft.copyImgMetaData(imgMask, imgExt)
     if "ROIName" in imgExt.GetMetaDataKeys():
         imgExt.SetMetaData("ROIName", imgExt.GetMetaData("ROIName") + " Margin")
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Added lateral (X/Y) margins: {marginLateral} mm of {lateralKernelType.lower()} type")
         print(f"# Added distal (+Z) margin: {marginDistal} mm")
         print(f"# Added proximal (-Z) margin: {marginProximal} mm")
         ft.ft_imgAnalyse._displayImageInfo(imgExt)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgExt
 
@@ -1452,7 +1462,7 @@ def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, 
     import numpy as np
     import SimpleITK as sitk
 
-    ft._isSITK_maskBinary(imgMask, raiseError=True)
+    ft.isSITK_maskBinary(imgMask, raiseError=True)
 
     # calculate constant value distance from ROI
     marginConstantEdgeDist = edgeDist-np.sqrt(np.abs(2*gaussSigma**2*np.log(fractionAtEdge)))
@@ -1468,12 +1478,12 @@ def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, 
     imgMaskConstMarginGauss = sitk.Mask(imgMaskConstMarginGauss, imgMaskConstMargin, maskingValue=1, outsideValue=1)
 
     # validate floating Mask
-    ft._isSITK_maskFloating(imgMaskConstMarginGauss, raiseError=True)
+    ft.isSITK_maskFloating(imgMaskConstMarginGauss, raiseError=True)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgMaskConstMarginGauss)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgMaskConstMarginGauss
 
@@ -1519,7 +1529,7 @@ def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo=False):
     import numpy as np
     import SimpleITK as sitk
 
-    ft._isSITK_maskBinary(imgMask, raiseError=True)
+    ft.isSITK_maskBinary(imgMask, raiseError=True)
 
     # calculate distance from ROI
     imgMaskDist = sitk.SignedDanielssonDistanceMap(imgMask, useImageSpacing=True)
@@ -1532,11 +1542,11 @@ def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo=False):
     imgMaskConstMarginExp = sitk.Mask(imgMaskConstMarginExp, imgMaskConstMargin, maskingValue=1, outsideValue=1)
 
     # validate floating Mask
-    ft._isSITK_maskFloating(imgMaskConstMarginExp, raiseError=True)
+    ft.isSITK_maskFloating(imgMaskConstMarginExp, raiseError=True)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgMaskConstMarginExp)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgMaskConstMarginExp

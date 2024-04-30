@@ -39,9 +39,9 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=Fal
     import numpy as np
     import SimpleITK as sitk
 
-    ft._isSITK3D(img, raiseError=True)
-    ft._isSITK3D(imgMask, raiseError=True)
-    ft._isSITK_mask(imgMask, raiseError=True)
+    ft.isSITK3D(img, raiseError=True)
+    ft.isSITK3D(imgMask, raiseError=True)
+    ft.isSITK_mask(imgMask, raiseError=True)
 
     # check FoR matching of img and mask
     if not ft.compareImgFoR(img, imgMask, displayInfo=False):
@@ -71,7 +71,7 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=Fal
     dvhMask = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=maskName, color=maskColor, dvh_type="differential").cumulative
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Structure name: '{dvhMask.name}'")
         print(f"# Prescribed dose: {dosePrescribed:.3f} Gy")
         print(f"# Volume: {dvhMask.volume:.3f} {dvhMask.volume_units}")
@@ -81,7 +81,7 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=Fal
         print(f"# D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}")
         print(f"# D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}")
         print(f"# D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return dvhMask
 
@@ -142,7 +142,7 @@ def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01
     import fredtools as ft
     import numpy as np
 
-    ft._isSITK3D(img, raiseError=True)
+    ft.isSITK3D(img, raiseError=True)
     if not ft.ft_imgIO.dicom_io._isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
@@ -176,7 +176,7 @@ def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01
     dvhROI = getDVHMask(img, imgROI, dosePrescribed=dosePrescribed, doseLevelStep=doseLevelStep)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Structure name: '{dvhROI.name}'")
         print(f"# Prescribed dose: {dosePrescribed:.3f} Gy")
         print(f"# Volume: {dvhROI.volume:.3f} {dvhROI.volume_units}")
@@ -186,5 +186,5 @@ def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01
         print(f"# D98: {dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}")
         print(f"# D50: {dvhROI.statistic('D50').value:.3f} {dvhROI.dose_units}")
         print(f"# D02: {dvhROI.statistic('D02').value:.3f} {dvhROI.dose_units}")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return dvhROI

@@ -1,1 +1,1 @@
-from .braggPeakAnalyse import braggPeak
+from . import braggPeakAnalyse

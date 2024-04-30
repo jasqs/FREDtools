@@ -31,7 +31,7 @@ def transformIndexToPhysicalPoint(img, indices):
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # transform iterable to numpy array
     indices = np.array(indices)
@@ -84,7 +84,7 @@ def transformContinuousIndexToPhysicalPoint(img, indices):
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # transform iterable to numpy array
     indices = np.array(indices)
@@ -131,7 +131,7 @@ def transformPhysicalPointToIndex(img, points):
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # transform iterable to numpy array
     points = np.array(points)
@@ -178,7 +178,7 @@ def transformPhysicalPointToContinuousIndex(img, points):
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # transform iterable to numpy array
     points = np.array(points)

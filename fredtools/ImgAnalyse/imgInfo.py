@@ -66,27 +66,27 @@ def _displayImageInfo(img):
     import numpy as np
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     extent_mm = ft.getExtent(img)
     size_mm = ft.getSize(img)
     axesNames = ["x", "y", "z", "t"]
     arr = sitk.GetArrayFromImage(img)
     voxelCentres = ft.getVoxelCentres(img)
-    isVector = ft._isSITK_vector(img)
-    isMask = ft._isSITK_mask(img)
+    isVector = ft.isSITK_vector(img)
+    isMask = ft.isSITK_mask(img)
     maskType = f"({ft._getMaskType(img)} mask)" if isMask else ""
     isIdentity = ft.ft_imgAnalyse._checkIdentity(img)
 
-    if ft._isSITK_point(img):
+    if ft.isSITK_point(img):
         print("# {:d}D{:s} image describing a point (0D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
-    elif ft._isSITK_profile(img):
+    elif ft.isSITK_profile(img):
         print("# {:d}D{:s} image describing a profile (1D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
-    elif ft._isSITK_slice(img):
+    elif ft.isSITK_slice(img):
         print("# {:d}D{:s} image describing a slice (2D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
-    elif ft._isSITK_volume(img):
+    elif ft.isSITK_volume(img):
         print("# {:d}D{:s} image describing a volume (3D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
-    elif ft._isSITK_timevolume(img):
+    elif ft.isSITK_timevolume(img):
         print("# {:d}D{:s} image describing a time volume (4D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
 
     if not isIdentity:
@@ -101,23 +101,23 @@ def _displayImageInfo(img):
         print("# {:s}-spatial extent [mm] = ".format(axisName), ft.ft_imgAnalyse._generateExtentString(ext))
 
     realSize = [size for idx, size in enumerate(ft.getSize(img)) if img.GetSize()[idx] > 1]
-    if ft._isSITK_profile(img):
+    if ft.isSITK_profile(img):
         print("# length = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realSize), np.prod(realSize) / 1e1))
-    elif ft._isSITK_slice(img):
+    elif ft.isSITK_slice(img):
         print("# area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realSize), np.prod(realSize) / 1e2))
-    elif ft._isSITK_volume(img):
+    elif ft.isSITK_volume(img):
         print("# volume = {:.2f} mm³  =>  {:.2f} l".format(np.prod(realSize), np.prod(realSize) / 1e6))
-    elif ft._isSITK_timevolume(img):
+    elif ft.isSITK_timevolume(img):
         print("# time volume = {:.2f} mm³*s  =>  {:.2f} l*s".format(np.prod(realSize), np.prod(realSize) / 1e6))
 
     realVoxelSize = [size for idx, size in enumerate(img.GetSpacing()) if img.GetSize()[idx] > 1]
-    if ft._isSITK_profile(img):
+    if ft.isSITK_profile(img):
         print("# step size = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e1))
-    elif ft._isSITK_slice(img):
+    elif ft.isSITK_slice(img):
         print("# pixel area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2))
-    elif ft._isSITK_volume(img):
+    elif ft.isSITK_volume(img):
         print("# voxel volume = {:.2f} mm³  =>  {:.2f} ul".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
-    elif ft._isSITK_timevolume(img):
+    elif ft.isSITK_timevolume(img):
         print("# voxel time volume = {:.2f} mm³*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
 
     print("# data type: ", img.GetPixelIDTypeAsString(), "with NaN values" if np.any(np.isnan(arr)) else "")
@@ -127,16 +127,16 @@ def _displayImageInfo(img):
     nonZeroVoxels = (arr[~np.isnan(arr)] != 0).sum()
     nonAirVoxels = (arr[~np.isnan(arr)] > -1000).sum()
 
-    if ft._isSITK_profile(img):
+    if ft.isSITK_profile(img):
         print("# non-zero (dose=0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e1), "(sum of vectors)" if isVector else "")
         print("# non-air (HU>-1000) values  = {:d} ({:.2%}) => {:.2f} cm".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e1), "(sum of vectors)" if isVector else "")
-    elif ft._isSITK_slice(img):
+    elif ft.isSITK_slice(img):
         print("# non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2), "(sum of vectors)" if isVector else "")
         print("# non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2), "(sum of vectors)" if isVector else "")
-    elif ft._isSITK_volume(img):
+    elif ft.isSITK_volume(img):
         print("# non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6), "(sum of vectors)" if isVector else "")
         print("# non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6), "(sum of vectors)" if isVector else "")
-    elif ft._isSITK_timevolume(img):
+    elif ft.isSITK_timevolume(img):
         print("# non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6), "(sum of vectors)" if isVector else "")
         print("# non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6), "(sum of vectors)" if isVector else "")
 
@@ -215,8 +215,8 @@ def displayImageInfo(img):
     """
     import fredtools as ft
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
-    print(f"### {ft._currentFuncName()} ###")
+    print(f"### {ft.currentFuncName()} ###")
     _displayImageInfo(img)
-    print("#" * len(f"### {ft._currentFuncName()} ###"))
+    print("#" * len(f"### {ft.currentFuncName()} ###"))

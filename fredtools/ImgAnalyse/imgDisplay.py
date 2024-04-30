@@ -123,7 +123,7 @@ def showSlice(
     # show back slice image
     if imgBack:
         # check if imgBack is a 3D SimpleITK image
-        ft._isSITK_volume(imgBack)
+        ft.isSITK_volume(imgBack)
 
         slBack = ft.getSlice(imgBack, point=point, plane=plane, raiseWarning=raiseWarning)
         axesImage = ax.imshow(sitk.GetArrayViewFromImage(slBack).squeeze(), cmap=cmapBack, extent=ft.getExtMpl(slBack), vmax=vmaxBack)
@@ -131,7 +131,7 @@ def showSlice(
     # show front slice image
     if imgFront:
         # check if imgFront is a 3D SimpleITK image
-        ft._isSITK_volume(imgFront)
+        ft.isSITK_volume(imgFront)
 
         slFront = ft.getSlice(imgFront, point=point, plane=plane, raiseWarning=raiseWarning)
         axesImage = ax.imshow(sitk.GetArrayViewFromImage(slFront).squeeze(), cmap=cmapFront, extent=ft.getExtMpl(slFront), alpha=alphaFront, vmin=0, vmax=vmaxFront)
@@ -139,10 +139,10 @@ def showSlice(
     # show ROIs slice
     if imgROIs:
         for imgROI in imgROIs if isinstance(imgROIs, list) else [imgROIs]:
-            ft._isSITK_mask(imgROI, raiseError=True)
+            ft.isSITK_mask(imgROI, raiseError=True)
 
             # convert the floating mask to binary if needed
-            if ft._isSITK_maskFloating(imgROI):
+            if ft.isSITK_maskFloating(imgROI):
                 imgROI = ft.floatingToBinaryMask(imgROI, threshold=0.5)
                 if raiseWarning:
                     warnings.warn(f"Warning: The floating mask was converted to binary mask with threshold=0.5.")
@@ -269,11 +269,11 @@ class showSlices:
             statBack = ft.getStatistics(self.imgBack)
 
         # determine if interactive is possible (only jupyter)
-        if interactive and ft._checkJupyterMode():
+        if interactive and ft.checkJupyterMode():
             ipython = get_ipython()
             # ipython.run_line_magic("matplotlib widget")
             ipython.run_line_magic("matplotlib", "widget")
-        elif not interactive and ft._checkJupyterMode():
+        elif not interactive and ft.checkJupyterMode():
             ipython = get_ipython()
             # ipython.run_line_magic("matplotlib inline")
             ipython.run_line_magic("matplotlib", "inline")

@@ -1,3 +1,3 @@
-from .beamModel import *
-from .fredMC import *
-from .gateMC import *
+from . import beamModel
+from . import fredMC
+from . import gateMC

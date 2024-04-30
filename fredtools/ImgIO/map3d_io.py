@@ -24,7 +24,7 @@ def writeMap3D(img, filePath, displayInfo=False):
     import struct
     import fredtools as ft
 
-    ft._isSITK3D(img, raiseError=True)
+    ft.isSITK3D(img, raiseError=True)
 
     try:
         fout = open(filePath, "wb")
@@ -63,9 +63,9 @@ def writeMap3D(img, filePath, displayInfo=False):
     fout.write(map3dheader)
     fout.write(ft.arr(img).tobytes(order="F"))  # write out as column-major
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
 
 def readMap3D(filePath, displayInfo=False):
@@ -127,7 +127,7 @@ def readMap3D(filePath, displayInfo=False):
     elif format == 10:
         M = np.zeros(N, dtype=_map3d_datatypeString2dtype(datatype))
         pos = 64
-        [nvxl] = struct.unpack("i", buffer[pos : pos + 4])
+        [nvxl] = struct.unpack("i", buffer[pos: pos + 4])
         pos = pos + 4
         if nvxl > 0:
             Ivxl = np.frombuffer(buffer[pos:], dtype="uint32", count=nvxl)
@@ -148,9 +148,9 @@ def readMap3D(filePath, displayInfo=False):
     img.SetOrigin((xoff + hs / 2) * 10)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return img
 
 

@@ -43,7 +43,6 @@ def getDicomTypeName(dicomVar):
 
 def _isDicomCT(dicomVar, raiseError=False):
     r"""Check if the dicom is of CT type and raise an error if requested."""
-    import itk
 
     instanceBool = "CT Image Storage" in getDicomTypeName(dicomVar)
 
@@ -54,7 +53,6 @@ def _isDicomCT(dicomVar, raiseError=False):
 
 def _isDicomRS(dicomVar, raiseError=False):
     r"""Check if the dicom is of RS type and raise an error if requested."""
-    import itk
 
     instanceBool = "Structure Set Storage" in getDicomTypeName(dicomVar)
 
@@ -65,7 +63,6 @@ def _isDicomRS(dicomVar, raiseError=False):
 
 def _isDicomRN(dicomVar, raiseError=False):
     r"""Check if the dicom is of RN type and raise an error if requested."""
-    import itk
 
     instanceBool = "Plan Storage" in getDicomTypeName(dicomVar)  # ("RT Plan Storage" or "RT Ion Plan Storage")
 
@@ -76,7 +73,6 @@ def _isDicomRN(dicomVar, raiseError=False):
 
 def _isDicomRD(dicomVar, raiseError=False):
     r"""Check if the dicom is of RD type and raise an error if requested."""
-    import itk
 
     instanceBool = "Dose Storage" in getDicomTypeName(dicomVar)
 
@@ -87,7 +83,6 @@ def _isDicomRD(dicomVar, raiseError=False):
 
 def _isDicomPET(dicomVar, raiseError=False):
     r"""Check if the dicom is of PET type and raise an error if requested."""
-    import itk
 
     instanceBool = "Positron Emission Tomography Image Storage" in getDicomTypeName(dicomVar)
 
@@ -183,13 +178,13 @@ def sortDicoms(searchFolder, recursive=False, displayInfo=False):
         else:
             UnknownfileNames.append(dicomFileName)  # unrecognized dicoms
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(
             "# Found dicoms: {:d} x CT, {:d} x RS, {:d} x RN, {:d} x RD, {:d} x PET, {:d} x unknown".format(
                 len(CTfileNames), len(RSfileNames), len(RNfileNames), len(RDfileNames), len(PETfileNames), len(UnknownfileNames)
             )
         )
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     dicomTypes = {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "PETfileNames": PETfileNames, "Unknown": UnknownfileNames}
     for dicomType, dicomName in dicomTypes.items():
@@ -344,9 +339,9 @@ def getRNMachineName(fileName, displayInfo=False):
         raise ValueError(f"Not all 'TreatmentMachineName' tags in 'IonBeamSequence' are the same but are: {treatmentMachineName}.")
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Machine name: '{:s}'".format(treatmentMachineName[0]))
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return treatmentMachineName[0]
 
@@ -415,9 +410,9 @@ def getRNIsocenter(fileName, displayInfo=False):
         isocenterPosition = isocenterPosition[0]
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Isocenter position [mm]: ", isocenterPosition)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return isocenterPosition.tolist()
 
@@ -547,12 +542,12 @@ def getRNSpots(fileName, displayInfo=False):
     spotsInfo.index = range(1, len(spotsInfo) + 1)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Fields No:  {spotsInfo.FNo.nunique()}")
         print(f"# Rows No:    {len(spotsInfo)}")
         print(f"# Spots No:   {len(spotsInfo.loc[spotsInfo.PBMU!=0])}")
         print(f"# Total MU:   {spotsInfo.PBMU.sum():.2f}")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return spotsInfo
 
 
@@ -660,12 +655,12 @@ def getRNFields(fileName, raiseWarning=True, displayInfo=False):
     fieldsInfo.dropna(axis="columns", how="all", inplace=True)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
-        if ft._checkJupyterMode():
+        print(f"### {ft.currentFuncName()} ###")
+        if ft.checkJupyterMode():
             display(fieldsInfo)
         else:
             print(fieldsInfo)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return fieldsInfo
 
@@ -789,7 +784,7 @@ def getRNInfo(fileName, displayInfo=False):
             planInfo["otherFieldsNumber"] += 1
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Patient name:     '{:s}'".format(planInfo["patientName"].replace("^", " ")))
         print("# Plan label:       '{:s}'".format(planInfo["planLabel"]))
         print("# Plan date:        '{:s}'".format(planInfo["planDate"]))
@@ -800,7 +795,7 @@ def getRNInfo(fileName, displayInfo=False):
         print("# Dose pres. (single fraction):  {:.3f} Gy RBE".format(np.round(planInfo["dosePrescribed"] / planInfo["fractionNo"], 3)))
         print("# Number of treatment fields: {:d}".format(planInfo["treatmentFieldsNumber"]))
         print("# Number of setup fields:     {:d}".format(planInfo["setupFieldsNumber"]))
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return planInfo
 
 
@@ -868,10 +863,10 @@ def getRSInfo(fileName, displayInfo=False):
     ROITable = ROITable.set_index("ID")
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Found {:d} structures:".format(ROITable.shape[0]))
         print("#", ROITable.groupby("ROIType")["ROIType"].count())
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return ROITable
 
@@ -912,9 +907,9 @@ def getExternalName(fileName, displayInfo=False):
     externalName = externalName[0]
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# ROI name of type EXTERNAL: '{externalName}'")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return externalName
 
@@ -1003,9 +998,9 @@ def getCT(fileNames, displayInfo=False):
     img = sitk.ReadImage(fileNamesSorted, outputPixelType=sitk.sitkInt16)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return img
 
@@ -1107,9 +1102,9 @@ def getPET(fileNames, SUV=True, displayInfo=False):
         img = img * float(SUV_factor)  # [g/ml] = [Bq/ml] * [g/Bq]
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return img
 
@@ -1162,9 +1157,9 @@ def getRD(fileNames, displayInfo=False):
         imgOut.append(img)
 
         if displayInfo:
-            print(f"### {ft._currentFuncName()} ###")
+            print(f"### {ft.currentFuncName()} ###")
             ft.ft_imgAnalyse._displayImageInfo(img)
-            print("#" * len(f"### {ft._currentFuncName()} ###"))
+            print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgOut[0] if len(imgOut) == 1 else tuple(imgOut)
 
@@ -1239,16 +1234,6 @@ def _getStructureContoursByName(RSfileName, structName):
     return StructureContours, ROIinfo
 
 
-def _checkContourCWDirection(contour):
-    import numpy as np
-
-    """Check if the contour has CW (True) or CCW (False) direction. 
-    The CW (True) contour direction usually means that it is a filled polygon
-    and the CCW (False) contour direction that it is a hole in the filled polygon."""
-    result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
-    return result < 0
-
-
 def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
     """Get the file name of the RD dose dicom of for the given field number.
 
@@ -1288,10 +1273,10 @@ def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
         warnings.warn(f"Warning: could not find RD dose dicom file for the field number {fieldNumber}.")
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Path to the RD dose dicom with the field number {fieldNumber}:")
         print(f"# {fileName}")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return fileName
 
@@ -1347,6 +1332,6 @@ def anonymizeDicoms(fileNames, removePrivateTags=False, displayInfo=False):
         dicom.write_file(fileName, dicomTags, write_like_original=True)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Anonymized files: {len(fileNames)}")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))

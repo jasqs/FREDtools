@@ -47,9 +47,9 @@ def getInmFREDBaseImg(fileName, dtype=float, displayInfo=False):
         imgBase.SetSpacing(spacing)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgBase)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgBase
 
@@ -167,12 +167,12 @@ def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, disp
     img.SetSpacing(spacing)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Number of PBs: ", len(inmInfoRequested))
         print("# Number of fields: ", len(inmInfoRequested.FID.unique()))
         print("# Number of components: ", componentNo)
         ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return img
 
@@ -320,14 +320,14 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
     pointValues = np.stack(pointValues, axis=1)  # [component, pb, point]
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Number of points: ", pointsNo)
         print("# Number of PBs: ", len(inmInfoRequested))
         print("# Number of fields: ", len(inmInfoRequested.FID.unique()))
         print("# Number of components: ", componentNo)
         print(f"# Number of no-signal points: {(pointValues.sum(axis=0).sum(axis=0)==0).sum()} ({((pointValues.sum(axis=0).sum(axis=0)==0).sum()/pointsNo)*100:.2f}%)")  # no signal in any component
         print(f"# Memory used: {(pencilBeamNo*pointsNo*4/1024**3):.2f} GB")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return pointValues
 
@@ -394,7 +394,7 @@ def getInmFREDInfo(fileName, displayInfo=False):
     InmInfo = pd.DataFrame({"PBID": PBIDs, "FID": FIDs, "voxelsNo": voxelsNos})
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Influence file version: ", fileVersion/10)
         print("# Number of PBs: ", InmInfo.PBID.size)
         print("# Number of fields: ", InmInfo.FID.unique().size)
@@ -403,7 +403,7 @@ def getInmFREDInfo(fileName, displayInfo=False):
         print(f"# Percent of voxels (min/max/mean): {InmInfo.voxelsNo.min()/size*100:.2f}%/{InmInfo.voxelsNo.max()/size*100:.2f}%/{InmInfo.voxelsNo.mean()/size*100:.2f}%")
         print("# FoR of the image:")
         ft.ft_imgAnalyse._displayImageInfo(imgBase)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return InmInfo
 

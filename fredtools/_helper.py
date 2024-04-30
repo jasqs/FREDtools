@@ -1,4 +1,4 @@
-def _setSITKInterpolator(interpolation="linear", splineOrder=3):
+def setSITKInterpolator(interpolation="linear", splineOrder=3):
     """Set SimpleITK interpolator for interpolation method.
 
     The function is setting a specific interpolation method for
@@ -42,13 +42,38 @@ def _setSITKInterpolator(interpolation="linear", splineOrder=3):
         raise ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
 
 
-def _copyImgMetaData(imgSrc, imgDes):
+def copyImgMetaData(imgSrc, imgDes):
     """Copy meta data to the image source to the image destination"""
-    _isSITK(imgSrc, raiseError=True)
-    _isSITK(imgDes, raiseError=True)
+    isSITK(imgSrc, raiseError=True)
+    isSITK(imgDes, raiseError=True)
     for key in imgSrc.GetMetaDataKeys():
         imgDes.SetMetaData(key, imgSrc.GetMetaData(key))
     return imgDes
 
 
-re_number = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
+def checkJupyterMode():
+    """Check if the FREDtools was loaded from jupyter"""
+    try:
+        if get_ipython().config["IPKernelApp"]:
+            return True
+    except:
+        return False
+
+
+def checkMatplotlibBackend():
+    import matplotlib
+
+    if "inline" in matplotlib.get_backend():
+        return "inline"
+    elif "ipympl" in matplotlib.get_backend():
+        return "ipympl"
+    else:
+        return "unknown"
+
+
+def currentFuncName(n=0):
+    """Get name of the function where the currentFuncName() is called.
+    currentFuncName(1) get the name of the caller.
+    """
+    import sys
+    return sys._getframe(n + 1).f_code.co_name

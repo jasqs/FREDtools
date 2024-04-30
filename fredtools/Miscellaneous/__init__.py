@@ -1,2 +1,2 @@
-from .landauVavilovGauss import *
-from .miscellaneous import *
+from . import landauVavilovGauss
+from . import miscellaneous

@@ -186,10 +186,10 @@ def readGATEStat(fileNameLogOut, displayInfo=False):
             else:
                 simStat[key] = float(value)
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Number of events: {:d}".format(simStat["NumberOfEvents"]))
         print("# Elapsed Time (total):   {:2f} s".format(simStat["ElapsedTime"]))
         print("# Elapsed Time (no init): {:2f} s".format(simStat["ElapsedTimeWoInit"]))
         print("# Average Tracking Rate:  {:.3E} prim/s".format(simStat["PPS"]))
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return simStat

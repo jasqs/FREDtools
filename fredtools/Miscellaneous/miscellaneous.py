@@ -1,3 +1,6 @@
+re_number = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
+
+
 def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo=False):
     """Merge multiple PDF files to a single PDF.
 
@@ -47,12 +50,12 @@ def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo=Fa
     mergedPDF.save(mergedPDFFileName)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# Merged PDF files:\n# " + "\n# ".join(PDFFileNames))
         print(f"# Saved merged PDF to: ", mergedPDFFileName)
         if removeSource:
             print(f"# Removed the source PDF files")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return os.path.abspath(mergedPDFFileName)
 

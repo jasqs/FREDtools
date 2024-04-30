@@ -5,7 +5,7 @@ def SITK2ITK(imgSITK):
     import SimpleITK as sitk
     import fredtools as ft
 
-    ft._isSITK(imgSITK, raiseError=True)
+    ft.isSITK(imgSITK, raiseError=True)
     imgITK = itk.GetImageFromArray(sitk.GetArrayFromImage(imgSITK), is_vector=imgSITK.GetNumberOfComponentsPerPixel() > 1)
     imgITK.SetOrigin(imgSITK.GetOrigin())
     imgITK.SetSpacing(imgSITK.GetSpacing())
@@ -19,7 +19,7 @@ def ITK2SITK(imgITK):
     import fredtools as ft
     import itk
 
-    ft._isITK(imgITK, raiseError=True)
+    ft.isITK(imgITK, raiseError=True)
     imgSITK = sitk.GetImageFromArray(itk.GetArrayFromImage(imgITK), isVector=imgITK.GetNumberOfComponentsPerPixel() > 1)
     imgSITK.SetOrigin(list(imgITK.GetOrigin()))
     imgSITK.SetSpacing(list(imgITK.GetSpacing()))

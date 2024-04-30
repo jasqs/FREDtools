@@ -108,13 +108,13 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
     import SimpleITK as sitk
 
     # validate imgRef
-    ft._isSITK(imgRef, raiseError=True)
-    if not ft._isSITK_slice(imgRef, raiseError=False) and not ft._isSITK_volume(imgRef, raiseError=False):
+    ft.isSITK(imgRef, raiseError=True)
+    if not ft.isSITK_slice(imgRef, raiseError=False) and not ft.isSITK_volume(imgRef, raiseError=False):
         raise TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
 
     # validate imgEval
-    ft._isSITK(imgEval, raiseError=True)
-    if not ft._isSITK_slice(imgEval, raiseError=False) and not ft._isSITK_volume(imgEval, raiseError=False):
+    ft.isSITK(imgEval, raiseError=True)
+    if not ft.isSITK_slice(imgEval, raiseError=False) and not ft.isSITK_volume(imgEval, raiseError=False):
         raise TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
 
     # validate DTA, DD, DDType, DCO and globalNorm
@@ -267,9 +267,9 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
 
     if displayInfo:
         print()
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         ft.ft_imgAnalyse._displayImageInfo(imgGI)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgGI
 
@@ -327,12 +327,12 @@ def getGIstat(imgGI, displayInfo=False):
         GIstat["max"] = np.nanmax(arrGI)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# GIPR: {:.2f}".format(GIstat["passRate"]))
         if mode == "gamma":
             print("# mean/std: {:.2f} / {:.2f}".format(GIstat["mean"], GIstat["std"]))
             print("# min/max: {:.2f} / {:.2f}".format(GIstat["min"], GIstat["max"]))
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return GIstat
 
 

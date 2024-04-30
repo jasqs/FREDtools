@@ -67,9 +67,9 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=F
         os.mkdir(os.path.join(simFolder, f"{fieldInfo.FDeliveryNo:d}_Field{fieldInfo.FNo:d}"))
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Created {:d} field folders in {:s}".format(len(fieldsInfo), simFolder))
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return simFolder
 
 
@@ -190,7 +190,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
         simInfo["timingOther_s"] /= scaleUnit(matchData(r"other", rf"other\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# FRED Version: {:s}".format(simInfo["fredVersion"]))
         print("# FRED Version Date: {:s}".format(simInfo["fredVersionDate"]))
         runConfigKeys = [key for key in simInfo.keys() if re.search("runConfig.+", key)]
@@ -202,7 +202,7 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
         print("# Run Wall clock Time: {:.2f} s".format(simInfo["runWallclockTime_s"]))
         print("# Average Track Time Per Primary: {:5f} us".format(simInfo["trackTimePerPrimary_us"]))
         print("# Average Tracking Rate: {:.3E} prim/s".format(simInfo["trackingRate_prim_s"]))
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return simInfo
 
@@ -363,7 +363,7 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo=False):
     FREDrunCommand = r" ".join(FREDrunCommand)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print(f"# {fredVersName}")
         print(f"# Running FRED sim. in folder {simFolderName}")
         print(f"# FRED command: {FREDrunCommand}")
@@ -379,5 +379,5 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo=False):
             print("# FRED sim. done in {:.0f} s with {:.2E} prim/s".format(FREDSimStat["runWallclockTime_s"], FREDSimStat["trackingRate_prim_s"]))
         else:
             print(f"# ERROR in FRED sim. Check {simFolderName}/out/log/run.out")
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return stdout.splitlines()

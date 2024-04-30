@@ -1,6 +1,11 @@
-def _isITK2D(img, raiseError=False):
+from itk import Image as ITKImage
+from SimpleITK import Image as SITKImage
+from SimpleITK import Transform as SITKTransform
+
+
+def isITK2D(img, raiseError=False):
     """Check if input is a 2D itk.Image object and raise error if requested."""
-    if not _isITK(img, raiseError=raiseError):
+    if not isITK(img, raiseError=raiseError):
         return False
     elif not img.ndim == 2:
         if raiseError:
@@ -10,9 +15,9 @@ def _isITK2D(img, raiseError=False):
         return True
 
 
-def _isITK3D(img, raiseError=False):
+def isITK3D(img, raiseError=False):
     """Check if input is a 3D itk.Image object and raise error if requested."""
-    if not _isITK(img, raiseError=raiseError):
+    if not isITK(img, raiseError=raiseError):
         return False
     elif not img.ndim == 3:
         if raiseError:
@@ -22,9 +27,9 @@ def _isITK3D(img, raiseError=False):
         return True
 
 
-def _isITK4D(img, raiseError=False):
+def isITK4D(img, raiseError=False):
     """Check if input is a 4D itk.Image object and raise error if requested."""
-    if not _isITK(img, raiseError=raiseError):
+    if not isITK(img, raiseError=raiseError):
         return False
     elif not img.ndim == 4:
         if raiseError:
@@ -34,10 +39,8 @@ def _isITK4D(img, raiseError=False):
         return True
 
 
-def _isITK(img, raiseError=False):
+def isITK(img: ITKImage, raiseError=False):
     """Check if input is an itk.Image object and raise error if requested."""
-    from itk import Image as ITKImage
-
     if isinstance(img, ITKImage):
         return True
     elif raiseError:
@@ -46,9 +49,9 @@ def _isITK(img, raiseError=False):
         return False
 
 
-def _isSITK2D(img, raiseError=False):
+def isSITK2D(img, raiseError=False):
     """Check if input is a 2D SimpleITK.Image object and raise error if requested."""
-    if not _isSITK(img, raiseError=raiseError):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetDimension() == 2:
         if raiseError:
@@ -58,9 +61,9 @@ def _isSITK2D(img, raiseError=False):
         return True
 
 
-def _isSITK3D(img, raiseError=False):
+def isSITK3D(img, raiseError=False):
     """Check if input is a 3D SimpleITK.Image object and raise error if requested."""
-    if not _isSITK(img, raiseError=raiseError):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetDimension() == 3:
         if raiseError:
@@ -70,9 +73,9 @@ def _isSITK3D(img, raiseError=False):
         return True
 
 
-def _isSITK4D(img, raiseError=False):
+def isSITK4D(img, raiseError=False):
     """Check if input is a 4D SimpleITK.Image object and raise error if requested."""
-    if not _isSITK(img, raiseError=raiseError):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetDimension() == 4:
         if raiseError:
@@ -82,10 +85,8 @@ def _isSITK4D(img, raiseError=False):
         return True
 
 
-def _isSITK(img, raiseError=False):
+def isSITK(img, raiseError=False):
     """Check if input is an SimpleITK.Image object and raise error if requested."""
-    from SimpleITK import Image as SITKImage
-
     if isinstance(img, SITKImage):
         return True
     elif raiseError:
@@ -94,8 +95,8 @@ def _isSITK(img, raiseError=False):
         return False
 
 
-def _isSITK_volume(img, raiseError=False):
-    if not _isSITK(img, raiseError=raiseError):
+def isSITK_volume(img, raiseError=False):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetSize().count(1) == (img.GetDimension() - 3):
         if raiseError:
@@ -105,8 +106,8 @@ def _isSITK_volume(img, raiseError=False):
         return True
 
 
-def _isSITK_timevolume(img, raiseError=False):
-    if not _isSITK(img, raiseError=raiseError):
+def isSITK_timevolume(img, raiseError=False):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetSize().count(1) == (img.GetDimension() - 4):
         if raiseError:
@@ -116,8 +117,8 @@ def _isSITK_timevolume(img, raiseError=False):
         return True
 
 
-def _isSITK_slice(img, raiseError=False):
-    if not _isSITK(img, raiseError=raiseError):
+def isSITK_slice(img, raiseError=False):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetSize().count(1) == (img.GetDimension() - 2):
         if raiseError:
@@ -127,8 +128,8 @@ def _isSITK_slice(img, raiseError=False):
         return True
 
 
-def _isSITK_profile(img, raiseError=False):
-    if not _isSITK(img, raiseError=raiseError):
+def isSITK_profile(img, raiseError=False):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetSize().count(1) == (img.GetDimension() - 1):
         if raiseError:
@@ -138,8 +139,8 @@ def _isSITK_profile(img, raiseError=False):
         return True
 
 
-def _isSITK_point(img, raiseError=False):
-    if not _isSITK(img, raiseError=raiseError):
+def isSITK_point(img, raiseError=False):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not img.GetSize().count(1) == img.GetDimension():
         if raiseError:
@@ -149,8 +150,8 @@ def _isSITK_point(img, raiseError=False):
         return True
 
 
-def _isSITK_vector(img, raiseError=False):
-    if not _isSITK(img, raiseError=raiseError):
+def isSITK_vector(img, raiseError=False):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not "vector" in img.GetPixelIDTypeAsString():
         if raiseError:
@@ -160,9 +161,7 @@ def _isSITK_vector(img, raiseError=False):
         return True
 
 
-def _isSITK_transform(img, raiseError=False):
-    from SimpleITK import Transform as SITKTransform
-
+def isSITK_transform(img, raiseError=False):
     if isinstance(img, SITKTransform):
         return True
     elif raiseError:
@@ -171,13 +170,13 @@ def _isSITK_transform(img, raiseError=False):
         return False
 
 
-def _isSITK_maskBinary(img, raiseError=False):
+def isSITK_maskBinary(img, raiseError=False):
     import fredtools as ft
     from SimpleITK import sitkUInt8
 
     stat = ft.getStatistics(img)
 
-    if not _isSITK(img, raiseError=raiseError):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not ((stat.GetMaximum() in [0, 1]) and (stat.GetMinimum() in [0, 1]) and (img.GetPixelID() == sitkUInt8)):
         if raiseError:
@@ -187,13 +186,13 @@ def _isSITK_maskBinary(img, raiseError=False):
         return True
 
 
-def _isSITK_maskFloating(img, raiseError=False):
+def isSITK_maskFloating(img, raiseError=False):
     import fredtools as ft
     from SimpleITK import sitkFloat32, sitkFloat64
 
     stat = ft.getStatistics(img)
 
-    if not _isSITK(img, raiseError=raiseError):
+    if not isSITK(img, raiseError=raiseError):
         return False
     elif not ((stat.GetMaximum() <= 1) and (stat.GetMinimum() >= 0) and ((img.GetPixelID() == sitkFloat64) or (img.GetPixelID() == sitkFloat32))):
         if raiseError:
@@ -203,10 +202,10 @@ def _isSITK_maskFloating(img, raiseError=False):
         return True
 
 
-def _isSITK_mask(img, raiseError=False):
-    if not _isSITK(img, raiseError=raiseError):
+def isSITK_mask(img, raiseError=False):
+    if not isSITK(img, raiseError=raiseError):
         return False
-    elif not (_isSITK_maskBinary(img) or _isSITK_maskFloating(img)):
+    elif not (isSITK_maskBinary(img) or isSITK_maskFloating(img)):
         if raiseError:
             raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but does not describe floating nor binary mask.")
         return False
@@ -218,12 +217,12 @@ def _getMaskType(img):
     import fredtools as ft
     import SimpleITK as sitk
 
-    ft._isSITK(img, raiseError=True)
-    ft._isSITK_mask(img, raiseError=True)
+    isSITK(img, raiseError=True)
+    isSITK_mask(img, raiseError=True)
 
-    if _isSITK_maskBinary(img):
+    if isSITK_maskBinary(img):
         return "binary"
-    elif _isSITK_maskFloating(img):
+    elif isSITK_maskFloating(img):
         return "floating"
     else:
         return "unknown"

@@ -99,7 +99,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     import fredtools as ft
     import numpy as np
 
-    if not (ft._isSITK3D(img) or ft._isSITK4D(img)):
+    if not (ft.isSITK3D(img) or ft.isSITK4D(img)):
         raise TypeError(f"The object '{type(img)}' is not an instance of a 3D or 4D SimpleITK image.")
 
     # check if point dimension matches the img dim.
@@ -107,7 +107,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
         raise ValueError(f"Dimension of 'point' {point} does not match 'img' dimension {img.GetDimension()}.")
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point) and raiseWarning:
@@ -173,11 +173,11 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
         sl = sitk.Flip(sl, flipAxes=axesFlip)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Point: ", np.array(point))
         print("# Plane: '{:s}'".format(plane))
         ft.ft_imgAnalyse._displayImageInfo(sl)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return sl
 
 
@@ -278,10 +278,10 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
     import fredtools as ft
     import numpy as np
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # check if img is already a profile
-    if ft._isSITK_profile(img):
+    if ft.isSITK_profile(img):
         raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile.")
 
     # check if point dimension matches the img dim.
@@ -297,7 +297,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
         point = pointCorr
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point) and raiseWarning:
@@ -350,11 +350,11 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
         prof = sitk.Flip(prof, flipAxes=axesFlip)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Point: ", np.array(point))
         print("# Axis: '{:s}'".format(axis))
         ft.ft_imgAnalyse._displayImageInfo(prof)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return prof
 
 
@@ -446,10 +446,10 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
     import fredtools as ft
     import numpy as np
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # check if img is already a point
-    if ft._isSITK_point(img):
+    if ft.isSITK_point(img):
         raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a point.")
 
     # check if point dimension matches the img dim.
@@ -465,7 +465,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
         point = pointCorr
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg._setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point) and raiseWarning:
@@ -482,11 +482,11 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
     )
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Point: ", np.array(point))
         print("# Value: ", ft.arr(pointVal))
         ft.ft_imgAnalyse._displayImageInfo(pointVal)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return pointVal
 
 
@@ -575,10 +575,10 @@ def getInteg(img, axis="X", displayInfo=False):
     import fredtools as ft
     import numpy as np
 
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # check if img is already a profile or integral
-    if ft._isSITK_profile(img):
+    if ft.isSITK_profile(img):
         raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile or integral.")
 
     # check if axis is in proper format
@@ -622,10 +622,10 @@ def getInteg(img, axis="X", displayInfo=False):
         integ = sitk.Flip(integ, flipAxes=axesFlip)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Axis: '{:s}'".format(axis))
         ft.ft_imgAnalyse._displayImageInfo(integ)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
     return integ
 
 
@@ -660,7 +660,7 @@ def getCumSum(img, axis="X", displayInfo=False):
     import SimpleITK as sitk
 
     # validate imgCT
-    ft._isSITK(img, raiseError=True)
+    ft.isSITK(img, raiseError=True)
 
     # check if axis is in proper format
     axis = axis.upper()
@@ -685,12 +685,12 @@ def getCumSum(img, axis="X", displayInfo=False):
     arrCumSum = np.cumsum(arr, axis=axisijk)
     imgCumSum = sitk.GetImageFromArray(arrCumSum)
     imgCumSum.CopyInformation(img)
-    ft._copyImgMetaData(img, imgCumSum)
+    ft.copyImgMetaData(img, imgCumSum)
 
     if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
+        print(f"### {ft.currentFuncName()} ###")
         print("# Axis: '{:s}'".format(axis))
         ft.ft_imgAnalyse._displayImageInfo(imgCumSum)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+        print("#" * len(f"### {ft.currentFuncName()} ###"))
 
     return imgCumSum

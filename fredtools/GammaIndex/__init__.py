@@ -1,1 +1,1 @@
-from .gammaIndex import *
+from . import gammaIndex
