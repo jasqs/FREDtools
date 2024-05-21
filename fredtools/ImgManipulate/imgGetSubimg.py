@@ -99,6 +99,8 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     import fredtools as ft
     import numpy as np
 
+    logger = ft._getLogger(__name__)
+
     if not (ft._imgTypeChecker.isSITK3D(img) or ft._imgTypeChecker.isSITK4D(img)):
         raise TypeError(f"The object '{type(img)}' is not an instance of a 3D or 4D SimpleITK image.")
 
@@ -107,7 +109,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
         raise ValueError(f"Dimension of 'point' {point} does not match 'img' dimension {img.GetDimension()}.")
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point) and raiseWarning:
@@ -173,11 +175,15 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
         sl = sitk.Flip(sl, flipAxes=axesFlip)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Point: ", np.array(point))
-        print("# Plane: '{:s}'".format(plane))
-        ft.ft_imgAnalyse._displayImageInfo(sl)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        logger.info(f"{ft._helper.currentFuncName()}")
+        logger.info(f"Point: {np.array(point)}")
+        logger.info(f"Plane: '{plane}'")
+        ft.ImgAnalyse.imgInfo._displayImageInfo(img)
+        logger.info("#" * len(f"### {ft._helper.currentFuncName()} ###"))
+
+        # print(f"### {ft.currentFuncName()} ###")
+        # ft.ft_imgAnalyse._displayImageInfo(sl)
+        # print("#" * len(f"### {ft.currentFuncName()} ###"))
     return sl
 
 
@@ -297,7 +303,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
         point = pointCorr
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point) and raiseWarning:
@@ -465,7 +471,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
         point = pointCorr
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if point is inside the image
     if not ft.isPointInside(img, point) and raiseWarning:

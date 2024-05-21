@@ -66,7 +66,10 @@ def _displayImageInfo(img):
     import numpy as np
     import fredtools as ft
 
-    logger = ft._getLogger(__name__)
+    import inspect
+    print(__name__)
+    print(inspect.getmodule(inspect.stack()[1][0]).__name__)
+    logger = ft._getLogger(inspect.getmodule(inspect.stack()[1][0]).__name__)
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 

@@ -15,7 +15,7 @@ def _getLogger(name: str) -> logging.Logger:
             logging.DEBUG:
             grey + '[%(asctime)s.%(msecs)-0.3d] %(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
             logging.INFO:
-            red + '# %(message)s' + reset,
+            grey + '# %(message)s' + reset,
             logging.WARNING:
             yellow + '[%(asctime)s.%(msecs)-0.3d] %(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
             logging.ERROR:
