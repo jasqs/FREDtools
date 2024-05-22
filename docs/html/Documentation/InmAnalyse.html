@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Influence Matrix Analyse &mdash; FRED Tools 0.7.22 documentation</title>
+  <title>Influence Matrix Analyse &mdash; FRED Tools 0.7.24 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=eabe28d3"></script>
+        <script src="../_static/documentation_options.js?v=854f3c07"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
               <img src="../_static/FREDtools_logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.7.22
+                0.7.24
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -66,6 +66,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Influence Matrix Analyse</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDSumImage"><code class="docutils literal notranslate"><span class="pre">getInmFREDSumImage()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDPoint"><code class="docutils literal notranslate"><span class="pre">getInmFREDPoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDPointSparse"><code class="docutils literal notranslate"><span class="pre">getInmFREDPointSparse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDInfo"><code class="docutils literal notranslate"><span class="pre">getInmFREDInfo()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fredtools.getInmFREDBaseImg"><code class="docutils literal notranslate"><span class="pre">getInmFREDBaseImg()</span></code></a></li>
 </ul>
@@ -218,8 +219,8 @@ Filtering the function’s output for such cases and recording the zero-signal v
 </aside>
 </aside>
 </div>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
 <p>The output array is a 3-dimensional array showing the signal for each component, each pencil beam, and each point.
 The following examples help with understanding the order of dimensions:</p>
 <p>&gt;&gt; out[0, :, :] - get signals for all pencil beams at each point for component 0. It is useful for single-component scorers like dose or Edep.</p>
@@ -227,6 +228,80 @@ The following examples help with understanding the order of dimensions:</p>
 <p>&gt;&gt; out[0, 2, 5] - get signal from the component 0, pencil beam 2 at point 5.</p>
 <p>&gt;&gt; out[0, :, 2].sum()/out[1,:,2].sum() - calculate the ratio of the signals’ sum from all pencil beams of component 0 to component 1.
 In particular, this might be the LETd value at point 2, where the numerator is saved to component 0 and the denominator to component 1.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fredtools.getInmFREDPointSparse">
+<span class="sig-prename descclassname"><span class="pre">fredtools.</span></span><span class="sig-name descname"><span class="pre">getInmFREDPointSparse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float64'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayInfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fredtools.getInmFREDPointSparse" title="Link to this definition"></a></dt>
+<dd><p>Get a sparse array with values in a point from FRED influence matrix.</p>
+<p>The function reads an influence matrix file produced by the FRED Monte Carlo to a list of row-based list
+of lists sparse arrays, defined as instances of a scipy.sparse.lil_array objects. The list length equals
+the number of components in the influence matrix file, i.e. each component is read to a separate sparse array.
+By default, all the pencil beams saved to the Inm influence matrix will be read with the unitary weights
+for all pencil beams. Still, the user can ask for selected pencil beams providing influence
+matrix info pandas DataFrame, which must include at least columns ‘PBID’ and ‘FID’, and
+can include column ‘weight’, which will be used for weight calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileName</strong> (<em>path</em>) – Path to FRED influence matrix file to read.</p></li>
+<li><p><strong>point</strong> (<em>Nx3 array_like</em>) – 3-element iterable or an N-element iterable of 3-element iterables describing the points in
+the physical coordinates. The points do not have to be defined in the voxel centers. However,
+they will be converted internally to pixel coordinates.</p></li>
+<li><p><strong>inmInfo</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – A pandas DataFrame with at least columns ‘PBID’ and ‘FID’. (def. None)</p></li>
+<li><p><strong>dtype</strong> (<em>data-type</em><em>, </em><em>optional</em>) – The desired data-type for the output sparse array, e.g., <cite>numpy.uint32</cite> or <cite>float32</cite>. (def. ‘float64’)</p></li>
+<li><p><strong>displayInfo</strong> (<em>bool</em><em>, </em><em>optional</em>) – Displays a summary of the function results. (def. False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of scipy sparse arrays in row-based list of lists format, describing the influence from each
+pencil beam to a given voxel. The number of rows in each sparse array will equal the number of
+pencil beams saved in the Inm influence matrix file, and the number of columns will equal
+the number of points requested.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of scipy.sparse.lil_array</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#fredtools.getInmFREDBaseImg" title="fredtools.getInmFREDBaseImg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDBaseImg</span></code></a></dt><dd><p>get base image defined in FRED influence matrix.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getInmFREDInfo" title="fredtools.getInmFREDInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDInfo</span></code></a></dt><dd><p>get information from an influence matrix produced by FRED Monte Carlo.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDVectorImage</span></code></dt><dd><p>get a vector image from an influence matrix produced by FRED Monte Carlo.</p>
+</dd>
+<dt><a class="reference internal" href="#fredtools.getInmFREDSumImage" title="fredtools.getInmFREDSumImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getInmFREDSumImage</span></code></a></dt><dd><p>get FRED influence matrix image to a sum SimpleITK image object.</p>
+</dd>
+</dl>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<ol class="arabic simple">
+<li><p>The function exploits the scipy.sparse <a class="footnote-reference brackets" href="#id4" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> package.</p></li>
+</ol>
+<p>2. The function does not check the memory occupancy of the sparse arrays, as this depends strictly
+on the number of requested points. The user is advised to use it carefully as it can quickly
+fill all the machine’s memory when a large influence matrix is loaded.</p>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/sparse.html">https://docs.scipy.org/doc/scipy/reference/sparse.html</a></p>
+</aside>
+</aside>
+</div>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>The output is a list of 2D sparse arrays. The following examples help with understanding the order of slicing:</p>
+<p>&gt;&gt; out[0] - get a sparse matrix of the first component. It is helpful for single-component scorers like dose or Edep.</p>
+<p>&gt;&gt; out[1][:,[2]] - get signals from all pencil beams for component 1 and point 2.</p>
+<p>&gt;&gt; out[5][[7],:] - get signals from the pencil beam no 7 for component 5 in all points.</p>
+<p>&gt;&gt; out[0][[2], [5]] - get signal from the component 0, pencil beam 2 at point 5.</p>
 </div>
 </dd></dl>
 

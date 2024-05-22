@@ -10,6 +10,8 @@ A collection of useful functions for reading and manipulating with influence mat
 
 .. autofunction:: fredtools.getInmFREDPoint
 
+.. autofunction:: fredtools.getInmFREDPointSparse
+
 .. autofunction:: fredtools.getInmFREDInfo
 
 .. autofunction:: fredtools.getInmFREDBaseImg
