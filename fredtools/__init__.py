@@ -1,3 +1,5 @@
+from ._logger import _getLogger
+
 from . import _helper
 
 from . import ImgAnalyse
@@ -40,9 +42,11 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-from ._logger import _getLogger
+
+global LOG_LEVEL
+LOG_LEVEL = 30
 
 _version = [0, 8, 2]
 __version__ = ".".join(map(str, _version))
 
-_getLogger(__name__).debug(f"imported FREDtools library {__version__}")
+# _getLogger(__name__).debug(f"imported FREDtools library v. {__version__}")

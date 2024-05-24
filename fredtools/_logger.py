@@ -13,15 +13,16 @@ def _getLogger(name: str) -> logging.Logger:
 
         FORMATS = {
             logging.DEBUG:
-            grey + '[%(asctime)s.%(msecs)-0.3d] %(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+            grey + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
             logging.INFO:
-            grey + '# %(message)s' + reset,
+            # grey + '# %(message)s' + reset,
+            grey + '%(funcName)s: %(message)s' + reset,
             logging.WARNING:
-            yellow + '[%(asctime)s.%(msecs)-0.3d] %(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+            yellow + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
             logging.ERROR:
-            red + '[%(asctime)s.%(msecs)-0.3d] %(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+            red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
             logging.CRITICAL:
-            bold_red + '[%(asctime)s.%(msecs)-0.3d] %(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset
+            bold_red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset
         }
 
         def format(self, record):
@@ -32,9 +33,55 @@ def _getLogger(name: str) -> logging.Logger:
     loggingStreamHandler = logging.StreamHandler(sys.stdout)
     loggingStreamHandler.setFormatter(customFormatter())
 
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.WARNING,
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[loggingStreamHandler],
                         force=False)
 
-    return logging.getLogger(name)
+    logger = logging.getLogger(name)
+
+    return logger
+
+
+def _loggerDecorator(func):
+    import functools
+    import inspect
+
+    @functools.wraps(func)
+    def decorator(*args, **kwargs):
+        # from fredtools._logger import *
+        import fredtools as ft
+        from fredtools import LOG_LEVEL
+        global LOG_LEVEL
+
+        logger = ft._getLogger(func.__module__)
+        # logger.setLevel(LOG_LEVEL)
+        loggerLevel = logger.getEffectiveLevel()
+
+        bindArgs = inspect.signature(func).bind(*args, **kwargs).arguments
+        # print(bindArgs)
+        if "displayInfo" in bindArgs.keys() and bindArgs["displayInfo"]:
+
+            # print("decorator: ", func.__module__)
+            # logger.warning("Something is happening before the function is called.")
+            # print("Something is happening before the function is called.")
+
+            logger.setLevel(ft._logger.logging.INFO)
+
+            print("effective loging level: ", ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
+
+        funcOut = func(*args, **kwargs)
+
+        if "displayInfo" in bindArgs.keys() and bindArgs["displayInfo"]:
+            # print("Something is happening after the function is called.")
+            logger.setLevel(loggerLevel)
+            # print(ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
+            del logger
+
+        return funcOut
+    return decorator
+
+
+# # print("XXXXXXXXXXXXXXXXXXXXXXXXX")
+# logger = _getLogger(__name__)
+# logger.info(f"fredtools version: {ft.__version__}")

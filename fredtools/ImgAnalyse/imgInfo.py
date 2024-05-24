@@ -67,7 +67,8 @@ def _displayImageInfo(img):
     import fredtools as ft
 
     imageInfo = []
-    imageInfo.append(f"Image info called by {ft._helper.currentFuncName(1)}:")
+    # imageInfo.append(f"Image info called by {ft._helper.currentFuncName(1)}:")
+    imageInfo.append(f"Image info:")
 
     # import inspect
     # print("%%%%%%%%")
@@ -164,7 +165,7 @@ def _displayImageInfo(img):
             if "UNKNOWN_PRINT_CHARACTERISTICS" in img.GetMetaData(key):
                 continue
             imageInfo.append(f"{key.ljust(keyLen)} : {img.GetMetaData(key)}")
-    return "\n#\t".join(imageInfo)
+    return "\n\t".join(imageInfo)
     # return imageInfo
 
 

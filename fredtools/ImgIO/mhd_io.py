@@ -1,3 +1,6 @@
+from fredtools._logger import _loggerDecorator
+
+
 def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=False, compressionLevel=5, displayInfo=False):
     """Write image to MetaImage format.
 
@@ -70,6 +73,7 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=Fals
         print("#" * len(f"### {ft._currentFuncName()} ###"))
 
 
+@_loggerDecorator
 def readMHD(fileNames, displayInfo=False):
     """Read MetaImage image to SimpleITK image object.
 
@@ -95,8 +99,14 @@ def readMHD(fileNames, displayInfo=False):
     """
     import fredtools as ft
     import SimpleITK as sitk
-
     logger = ft._getLogger(__name__)
+    # print("effective loging level: ", ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
+
+    # loggerLevel = logger.getEffectiveLevel()
+    # if displayInfo and loggerLevel > ft._logger.logging.INFO:
+
+    #     # print(ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
+    #     logger.setLevel(ft._logger.logging.INFO)
 
     # if fileName is a single string then make it a single element list
     if isinstance(fileNames, str):
@@ -106,12 +116,16 @@ def readMHD(fileNames, displayInfo=False):
     for fileName in fileNames:
         img.append(sitk.ReadImage(fileName, imageIO="MetaImageIO"))
 
-    if displayInfo:
-        logger.info(f"Display info of {ft._helper.currentFuncName()}")
-        # print(f"### {ft._currentFuncName()} ###")
-        # ft.ft_imgAnalyse._displayImageInfo(img[0])
-        # print("#" * len(f"### {ft._currentFuncName()} ###"))
-        logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0]))
+    logger.debug("example debug")
+    logger.warning("example warning")
+    logger.error("example error")
+
+    logger.info(f"Read {len(img)} {'file' if len(img) else 'files'}")
+    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0]))
+
+    # if loggerLevel != logger.getEffectiveLevel():
+    #     logger.setLevel(loggerLevel)
+    # del logger
 
     return img[0] if len(img) == 1 else tuple(img)
 
