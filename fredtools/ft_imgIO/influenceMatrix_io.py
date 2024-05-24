@@ -105,8 +105,8 @@ def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, disp
         [fileVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(fileHeaderSize))
         shape = np.array([sizeX, sizeY, sizeZ])
         size = np.prod(shape)
-        spacing = np.around(np.array([spacingX, spacingY, spacingZ]) * 10, decimals=7)  # [mm]
-        offset = np.around(np.array([offsetX, offsetY, offsetZ]) * 10, decimals=7)  # [mm]
+        spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=7) * 10  # [mm]
+        offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=7) * 10  # [mm]
         origin = offset + spacing / 2  # [mm]
 
     # validate threshold
@@ -417,8 +417,8 @@ def getInmFREDPointSparse(fileName, point, dtype="float64", inmInfo=None, displa
         [fileVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(fileHeaderSize))
         shape = np.array([sizeX, sizeY, sizeZ])
         size = np.prod(shape)
-        spacing = np.around(np.array([spacingX, spacingY, spacingZ]) * 10, decimals=7)  # [mm]
-        offset = np.around(np.array([offsetX, offsetY, offsetZ]) * 10, decimals=7)  # [mm]
+        spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=7) * 10  # [mm]
+        offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=7) * 10  # [mm]
         origin = offset + spacing / 2  # [mm]
 
     # get requested pencil beams info
