@@ -57,7 +57,7 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=Fal
     arrMask = arrMask[arrMaskValid]
 
     # calculate DVH
-    doseBins = np.arange(0, arrImg.max() + doseLevelStep, doseLevelStep)
+    doseBins = np.arange(0, np.nanmax(arrImg) + doseLevelStep, doseLevelStep)
     volume, doseBins = np.histogram(arrImg, doseBins, weights=arrMask.astype("float"))
 
     # calculate volume in real units [mm3]
