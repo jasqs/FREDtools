@@ -66,10 +66,19 @@ def _displayImageInfo(img):
     import numpy as np
     import fredtools as ft
 
-    import inspect
-    print(__name__)
-    print(inspect.getmodule(inspect.stack()[1][0]).__name__)
-    logger = ft._getLogger(inspect.getmodule(inspect.stack()[1][0]).__name__)
+    imageInfo = []
+    imageInfo.append(f"Image info called by {ft._helper.currentFuncName(1)}:")
+
+    # import inspect
+    # print("%%%%%%%%")
+    # print(__name__)
+    # print(inspect.getmodule(inspect.stack()[0][0]))
+    # print(ft._helper.currentFuncName(1))
+    # print(inspect.getmodule(inspect.stack()[1][0]).__name__)
+    # logger = ft._getLogger(inspect.getmodule(inspect.stack()[1][0]).__name__)
+    # print("%%%%%%%%")
+    # logger = ft._getLogger(__name__)
+    # logger = ft._getLogger(inspect.getmodule(inspect.stack()[1][0]).__name__)
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
@@ -84,69 +93,69 @@ def _displayImageInfo(img):
     isIdentity = ft.ImgAnalyse.imgAnalyse._checkIdentity(img)
 
     if ft._imgTypeChecker.isSITK_point(img):
-        logger.info("{:d}D{:s} image describing a point (0D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        imageInfo.append("{:d}D{:s} image describing a point (0D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._imgTypeChecker.isSITK_profile(img):
-        logger.info("{:d}D{:s} image describing a profile (1D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        imageInfo.append("{:d}D{:s} image describing a profile (1D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._imgTypeChecker.isSITK_slice(img):
-        logger.info("{:d}D{:s} image describing a slice (2D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        imageInfo.append("{:d}D{:s} image describing a slice (2D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._imgTypeChecker.isSITK_volume(img):
-        logger.info("{:d}D{:s} image describing a volume (3D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        imageInfo.append("{:d}D{:s} image describing a volume (3D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
     elif ft._imgTypeChecker.isSITK_timevolume(img):
-        logger.info("{:d}D{:s} image describing a time volume (4D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
+        imageInfo.append("{:d}D{:s} image describing a time volume (4D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
 
     if not isIdentity:
-        logger.info("# The image direction is not identity")
+        imageInfo.append("# The image direction is not identity")
 
-    logger.info(f"dims ({''.join(axesNames[: img.GetDimension()])})      = {np.array(img.GetSize())}")
-    logger.info(f"voxel size [mm] = {np.array(img.GetSpacing())}")
-    logger.info(f"origin [mm]     = {np.array(img.GetOrigin())}")
+    imageInfo.append(f"dims ({''.join(axesNames[: img.GetDimension()])})      = {np.array(img.GetSize())}")
+    imageInfo.append(f"voxel size [mm] = {np.array(img.GetSpacing())}")
+    imageInfo.append(f"origin [mm]     = {np.array(img.GetOrigin())}")
     for vox, axisName in zip(voxelCentres, axesNames):
-        logger.info(f"{axisName}-spatial voxel centre [mm] = {_generateSpatialCentresString(vox)}")
+        imageInfo.append(f"{axisName}-spatial voxel centre [mm] = {_generateSpatialCentresString(vox)}")
     for ext, axisName in zip(extent_mm, axesNames):
-        logger.info(f"{axisName}-spatial extent [mm] = {_generateExtentString(ext)}")
+        imageInfo.append(f"{axisName}-spatial extent [mm] = {_generateExtentString(ext)}")
 
     realSize = [size for idx, size in enumerate(ft.getSize(img)) if img.GetSize()[idx] > 1]
     if ft._imgTypeChecker.isSITK_profile(img):
-        logger.info("length = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realSize), np.prod(realSize) / 1e1))
+        imageInfo.append("length = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realSize), np.prod(realSize) / 1e1))
     elif ft._imgTypeChecker.isSITK_slice(img):
-        logger.info("area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realSize), np.prod(realSize) / 1e2))
+        imageInfo.append("area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realSize), np.prod(realSize) / 1e2))
     elif ft._imgTypeChecker.isSITK_volume(img):
-        logger.info("volume = {:.2f} mm³  =>  {:.2f} l".format(np.prod(realSize), np.prod(realSize) / 1e6))
+        imageInfo.append("volume = {:.2f} mm³  =>  {:.2f} l".format(np.prod(realSize), np.prod(realSize) / 1e6))
     elif ft._imgTypeChecker.isSITK_timevolume(img):
-        logger.info("time volume = {:.2f} mm³*s  =>  {:.2f} l*s".format(np.prod(realSize), np.prod(realSize) / 1e6))
+        imageInfo.append("time volume = {:.2f} mm³*s  =>  {:.2f} l*s".format(np.prod(realSize), np.prod(realSize) / 1e6))
 
     realVoxelSize = [size for idx, size in enumerate(img.GetSpacing()) if img.GetSize()[idx] > 1]
     if ft._imgTypeChecker.isSITK_profile(img):
-        logger.info("step size = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e1))
+        imageInfo.append("step size = {:.2f} mm  =>  {:.2f} cm".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e1))
     elif ft._imgTypeChecker.isSITK_slice(img):
-        logger.info("pixel area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2))
+        imageInfo.append("pixel area = {:.2f} mm²  =>  {:.2f} cm²".format(np.prod(realVoxelSize), np.prod(realVoxelSize) / 1e2))
     elif ft._imgTypeChecker.isSITK_volume(img):
-        logger.info("voxel volume = {:.2f} mm³  =>  {:.2f} ul".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+        imageInfo.append("voxel volume = {:.2f} mm³  =>  {:.2f} ul".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
     elif ft._imgTypeChecker.isSITK_timevolume(img):
-        logger.info("voxel time volume = {:.2f} mm³*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
+        imageInfo.append("voxel time volume = {:.2f} mm³*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
 
-    logger.info(f"data type: {img.GetPixelIDTypeAsString()}" + ("with NaN values" if np.any(np.isnan(arr)) else ""))
-    logger.info(f"range: from {np.nanmin(arr)} to {np.nanmax(arr)}" + (" (sum of vectors)" if isVector else ""))
-    logger.info(f"sum = {np.nansum(arr)}, mean = {np.nanmean(arr)} ({np.nanstd(arr)})" + ("(sum of vectors)" if isVector else ""))
+    imageInfo.append(f"data type: {img.GetPixelIDTypeAsString()}" + ("with NaN values" if np.any(np.isnan(arr)) else ""))
+    imageInfo.append(f"range: from {np.nanmin(arr)} to {np.nanmax(arr)}" + (" (sum of vectors)" if isVector else ""))
+    imageInfo.append(f"sum = {np.nansum(arr)}, mean = {np.nanmean(arr)} ({np.nanstd(arr)})" + ("(sum of vectors)" if isVector else ""))
 
     nonZeroVoxels = (arr[~np.isnan(arr)] != 0).sum()
     nonAirVoxels = (arr[~np.isnan(arr)] > -1000).sum()
 
     if ft._imgTypeChecker.isSITK_profile(img):
-        logger.info("non-zero (dose=0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e1) + ("(sum of vectors)" if isVector else ""))
-        logger.info("non-air (HU>-1000) values  = {:d} ({:.2%}) => {:.2f} cm".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e1) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose=0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e1) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-air (HU>-1000) values  = {:d} ({:.2%}) => {:.2f} cm".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e1) + ("(sum of vectors)" if isVector else ""))
     elif ft._imgTypeChecker.isSITK_slice(img):
-        logger.info("non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2) + ("(sum of vectors)" if isVector else ""))
-        logger.info("non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2) + ("(sum of vectors)" if isVector else ""))
     elif ft._imgTypeChecker.isSITK_volume(img):
-        logger.info("non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
-        logger.info("non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
     elif ft._imgTypeChecker.isSITK_timevolume(img):
-        logger.info("non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
-        logger.info("non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
 
     if img.GetMetaDataKeys():
-        logger.info("# Additional metadata:")
+        imageInfo.append("Additional metadata:")
         keyLen = []
         for key in img.GetMetaDataKeys():
             keyLen.append(len(key))
@@ -154,7 +163,9 @@ def _displayImageInfo(img):
         for key in img.GetMetaDataKeys():
             if "UNKNOWN_PRINT_CHARACTERISTICS" in img.GetMetaData(key):
                 continue
-            logger.info(f"{key.ljust(keyLen)} : {img.GetMetaData(key)}")
+            imageInfo.append(f"{key.ljust(keyLen)} : {img.GetMetaData(key)}")
+    return "\n#\t".join(imageInfo)
+    # return imageInfo
 
 
 def displayImageInfo(img):
@@ -223,6 +234,6 @@ def displayImageInfo(img):
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    logger.info(f"{ft._helper.currentFuncName()}")
+    logger.info(ft._helper.currentFuncName())
     _displayImageInfo(img)
-    logger.info("#" * len(f"### {ft._helper.currentFuncName()} ###"))
+    # logger.info("#" * len(f"### {ft._helper.currentFuncName()} ###"))
