@@ -1,4 +1,4 @@
-def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=None, stepSize=10, fractionalStepSize=True, mode="gamma", CPUNo="auto", displayInfo=False):
+def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=None, stepSize=10, fractionalStepSize=True, mode="gamma", CPUNo="auto", displayInfo: bool = False):
     """Calculate gamma index map.
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
@@ -274,7 +274,7 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
     return imgGI
 
 
-def getGIstat(imgGI, displayInfo=False):
+def getGIstat(imgGI, displayInfo: bool = False):
     """Get statistics of Gamma Index.
 
     The function calculates Gamma Index statistics from an image defined

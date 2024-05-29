@@ -1,4 +1,4 @@
-def getInmFREDBaseImg(fileName, dtype=float, displayInfo=False):
+def getInmFREDBaseImg(fileName, dtype=float, displayInfo: bool = False):
     """Get base image defined in FRED influence matrix.
 
     The function reads an influence matrix file produced by the FRED Monte Carlo
@@ -54,7 +54,7 @@ def getInmFREDBaseImg(fileName, dtype=float, displayInfo=False):
     return imgBase
 
 
-def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, displayInfo=False):
+def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, displayInfo: bool = False):
     """Read the FRED influence matrix to sum up the SimpleITK image object.
 
     The function reads an influence matrix file produced by
@@ -177,7 +177,7 @@ def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, disp
     return img
 
 
-def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="linear", raiseMemError=True, displayInfo=False):
+def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="linear", raiseMemError=True, displayInfo: bool = False):
     """Get vector of interpolated values in a point from FRED influence matrix.
 
     The function reads an influence matrix file produced by the FRED Monte Carlo
@@ -332,7 +332,7 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
     return pointValues
 
 
-def getInmFREDInfo(fileName, displayInfo=False):
+def getInmFREDInfo(fileName, displayInfo: bool = False):
     """Read basic information from FRED influence matrix.
 
     The function reads an influence matrix file produced by the FRED Monte Carlo

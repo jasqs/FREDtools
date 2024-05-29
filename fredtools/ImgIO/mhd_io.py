@@ -1,7 +1,10 @@
-from fredtools._logger import _loggerDecorator
+from fredtools._logger import loggerDecorator
+from SimpleITK import Image as SITKImage
+from typing import Iterable, Literal, Union
 
 
-def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=False, compressionLevel=5, displayInfo=False):
+@loggerDecorator
+def writeMHD(img: SITKImage, filePath: str, singleFile: bool = True, overwrite: bool = True, useCompression: bool = False, compressionLevel: int = 5, displayInfo: bool = False) -> None:
     """Write image to MetaImage format.
 
     The function writes a SimpleITK image object to the MetaImage file. The function
@@ -36,8 +39,9 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=Fals
     import fileinput
     import fredtools as ft
     import SimpleITK as sitk
+    logger = ft._getLogger(__name__)
 
-    ft._isSITK(img, raiseError=True)
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     if os.path.exists(filePath) and not overwrite:
         raise ValueError("Warning: {:s} file already exists.".format(filePath))
@@ -65,16 +69,14 @@ def writeMHD(img, filePath, singleFile=True, overwrite=True, useCompression=Fals
             # remove raw/zraw file
             os.remove(rawFileName)
         except:
-            print("IO error: cannot save voxel map to file:", voxels)
+            logger.error(f"IO error: cannot save voxel map to file: {filePath}")
 
-    if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+    logger.debug(f"Writing image to {os.path.abspath(filePath)}")
+    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))
 
 
-@_loggerDecorator
-def readMHD(fileNames, displayInfo=False):
+@loggerDecorator
+def readMHD(fileNames: str | Iterable[str], displayInfo: bool = False) -> SITKImage | tuple[SITKImage]:
     """Read MetaImage image to SimpleITK image object.
 
     The function reads a single MetaImage file or an iterable of MetaImage files
@@ -100,13 +102,6 @@ def readMHD(fileNames, displayInfo=False):
     import fredtools as ft
     import SimpleITK as sitk
     logger = ft._getLogger(__name__)
-    # print("effective loging level: ", ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
-
-    # loggerLevel = logger.getEffectiveLevel()
-    # if displayInfo and loggerLevel > ft._logger.logging.INFO:
-
-    #     # print(ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
-    #     logger.setLevel(ft._logger.logging.INFO)
 
     # if fileName is a single string then make it a single element list
     if isinstance(fileNames, str):
@@ -116,21 +111,15 @@ def readMHD(fileNames, displayInfo=False):
     for fileName in fileNames:
         img.append(sitk.ReadImage(fileName, imageIO="MetaImageIO"))
 
-    logger.debug("example debug")
-    logger.warning("example warning")
-    logger.error("example error")
+    logger.debug(f"Read {len(img)} {'file' if len(img)==1 else 'files'} from:\n" + "\n".join(fileNames))
 
-    logger.info(f"Read {len(img)} {'file' if len(img) else 'files'}")
-    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0]))
-
-    # if loggerLevel != logger.getEffectiveLevel():
-    #     logger.setLevel(loggerLevel)
-    # del logger
+    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0], logger.getEffectiveLevel()))
 
     return img[0] if len(img) == 1 else tuple(img)
 
 
-def convertMHDtoSingleFile(filePath, displayInfo=False):
+@loggerDecorator
+def convertMHDtoSingleFile(fileName: str, displayInfo: bool = False) -> None:
     """Convert two-files MetaImage to two-files.
 
     The function reads a MetaImage file (two- or single-file) and saves it as
@@ -138,7 +127,7 @@ def convertMHDtoSingleFile(filePath, displayInfo=False):
 
     Parameters
     ----------
-    filePath : path
+    fileName : path
         Path to file to be converted.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -149,17 +138,20 @@ def convertMHDtoSingleFile(filePath, displayInfo=False):
     writeMHD : writing MetaImage file.
     """
     import fredtools as ft
+    logger = ft._getLogger(__name__)
 
-    img = ft.readMHD(filePath)
-    ft.writeMHD(img, filePath, singleFile=True, overwrite=True)
+    img = ft.readMHD(fileName)
+    if isinstance(img, tuple):
+        img = img[0]
 
-    if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+    ft.writeMHD(img, fileName, singleFile=True, overwrite=True)
+    logger.debug(f"Converted file {fileName} to a single file MHD")
+
+    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))
 
 
-def convertMHDtoDoubleFiles(filePath, displayInfo=False):
+@loggerDecorator
+def convertMHDtoDoubleFiles(fileName: str, displayInfo: bool = False):
     """Convert single file MetaImage to double- file.
 
     The function reads a MetaImage file (two- or single-file) and saves it as
@@ -167,7 +159,7 @@ def convertMHDtoDoubleFiles(filePath, displayInfo=False):
 
     Parameters
     ----------
-    filePath : path
+    fileName : path
         Path to file to be converted.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -178,11 +170,13 @@ def convertMHDtoDoubleFiles(filePath, displayInfo=False):
     writeMHD : writing MetaImage file.
     """
     import fredtools as ft
+    logger = ft._getLogger(__name__)
 
-    img = ft.readMHD(filePath)
-    ft.writeMHD(img, filePath, singleFile=False, overwrite=True)
+    img = ft.readMHD(fileName)
+    if isinstance(img, tuple):
+        img = img[0]
+    ft.writeMHD(img, fileName, singleFile=False, overwrite=True)
 
-    if displayInfo:
-        print(f"### {ft._currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft._currentFuncName()} ###"))
+    logger.debug(f"Converted file {fileName} to a double files MHD")
+
+    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))

@@ -1,4 +1,4 @@
-def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0.5, CPUNo="auto", displayInfo=False):
+def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0.5, CPUNo="auto", displayInfo: bool = False):
     """Map structure to image and create a mask.
 
     The function reads a `structName` structure from the RS dicom file and maps it to
@@ -362,7 +362,7 @@ def _getStructureContourArray(StructureContourPx):
     return arr
 
 
-def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayInfo=False):
+def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayInfo: bool = False):
     """Convert floating mask to binary mask.
 
     The function converts an image defined as an instance of a SimpleITK
@@ -427,7 +427,7 @@ def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayIn
     return imgMaskBinary
 
 
-def cropImgToMask(img, imgMask, displayInfo=False):
+def cropImgToMask(img, imgMask, displayInfo: bool = False):
     """Crop image to mask boundary.
 
     The function calculates the boundaries of the `imgMask` defined
@@ -487,7 +487,7 @@ def cropImgToMask(img, imgMask, displayInfo=False):
     return imgCrop
 
 
-def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
+def setValueMask(img, imgMask, value, outside=True, displayInfo: bool = False):
     """Set value inside/outside mask.
 
     The function sets the values of the `img` defined as an instance of
@@ -553,7 +553,7 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo=False):
     return imgMasked
 
 
-def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo=False):
+def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo: bool = False):
     """Resample image to other voxel spacing.
 
     The function resamples an image defined as an instance of a
@@ -648,7 +648,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     return imgRes
 
 
-def sumImg(imgs, displayInfo=False):
+def sumImg(imgs, displayInfo: bool = False):
     """Sum list of images.
 
     The function sums an iterable (list, tuple, etc.) of images
@@ -686,7 +686,7 @@ def sumImg(imgs, displayInfo=False):
     return img
 
 
-def imgDivide(imgNum, imgDen, displayInfo=False):
+def imgDivide(imgNum, imgDen, displayInfo: bool = False):
     """Divide two images.
 
     The function divides two images images defined as instances 
@@ -741,7 +741,7 @@ def imgDivide(imgNum, imgDen, displayInfo=False):
     return imgDiv
 
 
-def createEllipseMask(img, point, radii, displayInfo=False):
+def createEllipseMask(img, point, radii, displayInfo: bool = False):
     """Create an Ellipse mask in the image field of reference.
 
     The function creates an ellipse mask, defined with the center and radii
@@ -820,7 +820,7 @@ def createEllipseMask(img, point, radii, displayInfo=False):
     return imgMask
 
 
-def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInfo=False):
+def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInfo: bool = False):
     """Create a cone mask in the image field of reference.
 
     The function creates a cone mask, defined with starting and ending points and radii 
@@ -906,7 +906,7 @@ def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInf
     return imgMask
 
 
-def createCylinderMask(img, startPoint, endPoint, radious, displayInfo=False):
+def createCylinderMask(img, startPoint, endPoint, radious, displayInfo: bool = False):
     """Create a cylindrical Mask in the image field of reference
 
     The function creates a cylindrical mask with a given radious and height
@@ -956,7 +956,7 @@ def createCylinderMask(img, startPoint, endPoint, radious, displayInfo=False):
     return imgMask
 
 
-def sumVectorImg(img, displayInfo=False):
+def sumVectorImg(img, displayInfo: bool = False):
     """Sum vector image.
 
     The function sums all elements of a vector in a vector image
@@ -1041,7 +1041,7 @@ def _getFORTransformed(img, transform):
     return sizePX, originRW, spacingRW, directionIdentity
 
 
-def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue="auto", interpolation="linear", splineOrder=3, displayInfo=False):
+def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue="auto", interpolation="linear", splineOrder=3, displayInfo: bool = False):
     """Transform an image to Beam's Eye View (BEV).
 
     The function transforms a 3D image defined as a SimpleITK 3D image object to
@@ -1281,7 +1281,7 @@ def overwriteCTPhysicalProperties(
     return img
 
 
-def setIdentityDirection(img, displayInfo=False):
+def setIdentityDirection(img, displayInfo: bool = False):
     """Set an identity direction for the image.
 
     The function sets an identity direction of an image defined as an instance of a
@@ -1314,7 +1314,7 @@ def setIdentityDirection(img, displayInfo=False):
     return img
 
 
-def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, lateralKernelType="circular", displayInfo=False):
+def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, lateralKernelType="circular", displayInfo: bool = False):
     """Add lateral, proximal and distal margins to mask.
 
     The function adds lateral, proximal and/or distal margins to a binary mask defined as an
@@ -1423,7 +1423,7 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     return imgExt
 
 
-def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, displayInfo=False):
+def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, displayInfo: bool = False):
     """Add Gaussian margin to mask.
 
     The function adds a Gaussian margin to a binary mask defined as an instance of a SimpleITK 
@@ -1488,7 +1488,7 @@ def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, 
     return imgMaskConstMarginGauss
 
 
-def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo=False):
+def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo: bool = False):
     """Add exponential margin to mask.
 
     The function adds an exponential fall-off margin to a binary mask defined as an instance of a SimpleITK 

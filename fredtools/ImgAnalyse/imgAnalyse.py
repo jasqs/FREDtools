@@ -1,4 +1,43 @@
-def getExtent(img, displayInfo=False):
+from fredtools._logger import loggerDecorator, _getLogger
+from SimpleITK import Image as SITKImage
+from typing import Any
+logger = _getLogger(__name__)
+
+# def _getExtent(img: SITKImage) -> tuple[tuple[float, float], ...]:
+#     """Get the extent of an image.
+
+#     The function gets the extent of an image defined as a SimpleITK image object.
+#     Extent means the coordinates of most side voxels' borders
+#     in each direction. It is assumed that the coordinate system is in [mm].
+
+#     Parameters
+#     ----------
+#     img : SimpleITK Image
+#         An object of a SimpleITK image.
+
+#     Returns
+#     -------
+#     tuple
+#         A tuple of extent values in form ((xmin,xmax),(ymin,ymax),...)
+#     """
+#     import numpy as np
+#     import fredtools as ft
+
+#     ft._imgTypeChecker.isSITK(img, raiseError=True)
+
+#     cornerLow = img.TransformContinuousIndexToPhysicalPoint(np.zeros(img.GetDimension(), dtype="float64") - 0.5)
+#     cornerHigh = img.TransformContinuousIndexToPhysicalPoint(np.array(img.GetSize(), dtype="float64") - 1 + 0.5)
+
+#     cornerLow = np.dot(np.abs(_getDirectionArray(img)).T, cornerLow)
+#     cornerHigh = np.dot(np.abs(_getDirectionArray(img)).T, cornerHigh)
+
+#     extent = tuple(zip(cornerLow, cornerHigh))
+
+#     return extent
+
+
+@loggerDecorator
+def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, float], ...]:
     """Get the extent of an image.
 
     The function gets the extent of an image defined as a SimpleITK image object.
@@ -23,6 +62,7 @@ def getExtent(img, displayInfo=False):
     """
     import numpy as np
     import fredtools as ft
+    # logger = ft._getLogger(__name__)
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
@@ -34,17 +74,18 @@ def getExtent(img, displayInfo=False):
 
     extent = tuple(zip(cornerLow, cornerHigh))
 
-    if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        axesNames = ["x", "y", "z", "t"]
-        for ext, axisName in zip(extent, axesNames):
-            print("# {:s}-spatial extent [mm] = ".format(axisName), _generateExtentString(ext))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+    # if displayInfo:
+    axesNames = ["x", "y", "z", "t"]
+    extentLog = []
+    for ext, axisName in zip(extent, axesNames):
+        extentLog.append(f"   {axisName}-spatial extent [mm] = " + ft.ImgAnalyse.imgInfo._generateExtentString(ext))
+    logger.info("Image extent:\n" + "\n".join(extentLog))
 
     return extent
 
 
-def getSize(img, displayInfo=False):
+@loggerDecorator
+def getSize(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     """Get the size of an image.
 
     The function gets the size of an image defined as a SimpleITK image object
@@ -69,22 +110,23 @@ def getSize(img, displayInfo=False):
     """
     import numpy as np
     import fredtools as ft
+    # logger = ft._getLogger(__name__)
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     size = tuple(np.abs(np.diff(getExtent(img))).squeeze())
 
-    if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        axesNames = ["x", "y", "z", "t"]
-        for siz, axisName in zip(size, axesNames):
-            print("# {:s}-spatial size [mm] = ".format(axisName), siz)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+    # if displayInfo:
+    axesNames = ["x", "y", "z", "t"]
+    sizeLog = []
+    for siz, axisName in zip(size, axesNames):
+        sizeLog.append(f"   {axisName}-spatial size [mm] = " + str(siz))
+    logger.info("Image size:\n" + "\n".join(sizeLog))
 
     return size
 
 
-def getImageCenter(img, displayInfo=False):
+def getImageCenter(img: SITKImage, displayInfo: bool = False):
     """Get the centre of an image.
 
     The function calculates the centre of an image defined as a SimpleITK image object
@@ -124,7 +166,7 @@ def getImageCenter(img, displayInfo=False):
     return imageCentre
 
 
-def getMassCenter(img, displayInfo=False):
+def getMassCenter(img: SITKImage, displayInfo: bool = False):
     """Get the centre of mass of an image.
 
     The function calculates the centre of mass of an image defined as
@@ -179,7 +221,7 @@ def getMassCenter(img, displayInfo=False):
     return massCentre
 
 
-def getMaxPosition(img, displayInfo=False):
+def getMaxPosition(img: SITKImage, displayInfo: bool = False):
     """Get the maximum position of an image.
 
     The function calculates the position of the maximum voxel of
@@ -231,7 +273,7 @@ def getMaxPosition(img, displayInfo=False):
     return maxPosition
 
 
-def getMinPosition(img, displayInfo=False):
+def getMinPosition(img: SITKImage, displayInfo: bool = False):
     """Get the minimum position of an image.
 
     The function calculates the position of the minimum voxel of
@@ -285,7 +327,7 @@ def getMinPosition(img, displayInfo=False):
     return minPosition
 
 
-def getVoxelCentres(img, displayInfo=False):
+def getVoxelCentres(img: SITKImage, displayInfo: bool = False):
     """Get voxel centres.
 
     The function gets voxels' centres in each direction of an image
@@ -330,7 +372,7 @@ def getVoxelCentres(img, displayInfo=False):
     return tuple(voxelCentres)
 
 
-def getVoxelEdges(img, displayInfo=False):
+def getVoxelEdges(img: SITKImage, displayInfo: bool = False):
     """Get voxel edges.
 
     The function gets voxels' edges in each direction of an image
@@ -375,7 +417,7 @@ def getVoxelEdges(img, displayInfo=False):
     return tuple(voxelEdges)
 
 
-def getVoxelPhysicalPoints(img, insideMask=False, displayInfo=False):
+def getVoxelPhysicalPoints(img: SITKImage, insideMask=False, displayInfo: bool = False):
     """Get physical positions of voxels.
 
     The function gets voxels' physical positions of an image
@@ -436,7 +478,7 @@ def getVoxelPhysicalPoints(img, insideMask=False, displayInfo=False):
     return voxelsPos
 
 
-def _getAxesVectorNotUnity(img):
+def _getAxesVectorNotUnity(img: SITKImage):
     """Get a boolean vector of axes size unitary.
 
     The function calculates a boolean vector of size equal to the image dimension,
@@ -468,7 +510,7 @@ def _getAxesVectorNotUnity(img):
     return tuple(axesVectorNotUnity)
 
 
-def _getAxesNumberNotUnity(img):
+def _getAxesNumberNotUnity(img: SITKImage):
     """Get axis indexes for the axes of size different than one.
 
     The function calculates the indexes of the axes for which the size is more than one.
@@ -499,7 +541,7 @@ def _getAxesNumberNotUnity(img):
     return tuple(axesNumberNotUnity)
 
 
-def _getAxesNumberUnity(img):
+def _getAxesNumberUnity(img: SITKImage):
     """Get axis indexes for the axes of size equal to one.
 
     The function calculates the indexes of the axes for which the size is equal to one.
@@ -530,7 +572,7 @@ def _getAxesNumberUnity(img):
     return tuple(axesNumberUnity)
 
 
-def _getDirectionArray(img):
+def _getDirectionArray(img: SITKImage):
     """Get direction in the form of a 2D array.
 
     The function converts direction from an image defined as a SimpleITK image
@@ -555,7 +597,7 @@ def _getDirectionArray(img):
     return np.array(img.GetDirection()).reshape(img.GetDimension(), img.GetDimension())
 
 
-def _checkIdentity(img):
+def _checkIdentity(img: SITKImage):
     """Check image identity.
 
     The function checks if the image direction represents the identity matrix
@@ -579,7 +621,7 @@ def _checkIdentity(img):
     return np.all(np.identity(img.GetDimension(), dtype="int").flatten() == img.GetDirection())
 
 
-def getExtMpl(img):
+def getExtMpl(img: SITKImage):
     """Get the extent of a slice in a format consistent with imshow of matplotlib module.
 
     The function gets the extent of an image defined as a SimpleITK image object
@@ -624,7 +666,7 @@ def getExtMpl(img):
     return tuple(extent)
 
 
-def pos(img):
+def pos(img: SITKImage):
     """Get voxels' centres for axes of the size different than one.
 
     The function calculates the voxels' centres of an image defined
@@ -678,7 +720,7 @@ def pos(img):
     return pos
 
 
-def arr(img):
+def arr(img: SITKImage):
     """Get squeezed array from image.
 
     The function gets a squeezed array (with no unitary dimensions) from
@@ -717,7 +759,7 @@ def arr(img):
     return arr
 
 
-def vec(img):
+def vec(img: SITKImage):
     """Get 1D array from image describing a profile.
 
     The function gets a squeezed (with no unitary dimensions), 1D array from
@@ -756,7 +798,7 @@ def vec(img):
     return arr
 
 
-def isPointInside(img, point, displayInfo=False):
+def isPointInside(img: SITKImage, point, displayInfo: bool = False):
     """Check if a point is inside the image extent.
 
     The function checks if a point or list of points are inside
@@ -836,7 +878,7 @@ def isPointInside(img, point, displayInfo=False):
     return isIns[0] if len(isIns) == 1 else tuple(isIns)
 
 
-def getStatistics(img, displayInfo=False):
+def getStatistics(img: SITKImage, displayInfo: bool = False):
     """Get statistics of image
 
     The function gets basic statistics of an image defined as
@@ -897,7 +939,7 @@ def getStatistics(img, displayInfo=False):
     return stat
 
 
-def compareImgFoR(img1, img2, decimals=3, displayInfo=False):
+def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: bool = False):
     """Compare two images frame of reference
 
     The function gets two images defined as instances of a SimpleITK image

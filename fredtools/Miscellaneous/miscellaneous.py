@@ -1,7 +1,7 @@
 re_number = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
 
 
-def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo=False):
+def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo: bool = False):
     """Merge multiple PDF files to a single PDF.
 
     The function merges multiple PDF files given as a list of

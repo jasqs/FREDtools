@@ -2,227 +2,331 @@ from itk import Image as ITKImage
 from SimpleITK import Image as SITKImage
 from SimpleITK import Transform as SITKTransform
 
+#### ITK Image checkers ####
 
-def isITK2D(img, raiseError=False):
+
+def isITK2D(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 2D itk.Image object and raise error if requested."""
-    if not isITK(img, raiseError=raiseError):
-        return False
-    elif not img.ndim == 2:
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is not an instance of a 2D itk.Image object.")
-        return False
-    else:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isITK(img, raiseError=raiseError) and img.ndim == 2:
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is not an instance of a 2D itk.Image object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isITK3D(img, raiseError=False):
+def isITK3D(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 3D itk.Image object and raise error if requested."""
-    if not isITK(img, raiseError=raiseError):
-        return False
-    elif not img.ndim == 3:
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is not an instance of a 3D itk.Image object.")
-        return False
-    else:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isITK(img, raiseError=raiseError) and img.ndim == 3:
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is not an instance of a #D itk.Image object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isITK4D(img, raiseError=False):
+def isITK4D(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 4D itk.Image object and raise error if requested."""
-    if not isITK(img, raiseError=raiseError):
-        return False
-    elif not img.ndim == 4:
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is not an instance of a 4D itk.Image object.")
-        return False
-    else:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isITK(img, raiseError=raiseError) and img.ndim == 4:
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is not an instance of a 4D itk.Image object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isITK(img: ITKImage, raiseError=False):
+def isITK(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is an itk.Image object and raise error if requested."""
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
     if isinstance(img, ITKImage):
         return True
-    elif raiseError:
-        raise TypeError(f"The object '{type(img)}' is not an instance of an itk.Image object.")
     else:
-        return False
+        error = TypeError(f"The object '{type(img)}' is not an instance of an itk.Image object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+#### SimleITK Image checkers ####
 
 
-def isSITK2D(img, raiseError=False):
+def isSITK2D(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 2D SimpleITK.Image object and raise error if requested."""
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetDimension() == 2:
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is not an instance of a 2D SimpleITK.Image object.")
-        return False
-    else:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetDimension() == 2:
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is not an instance of a 2D SimpleITK.Image object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isSITK3D(img, raiseError=False):
+def isSITK3D(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 3D SimpleITK.Image object and raise error if requested."""
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetDimension() == 3:
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is not an instance of a 3D SimpleITK.Image object.")
-        return False
-    else:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetDimension() == 3:
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is not an instance of a 3D SimpleITK.Image object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isSITK4D(img, raiseError=False):
+def isSITK4D(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 4D SimpleITK.Image object and raise error if requested."""
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetDimension() == 4:
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is not an instance of a 4D SimpleITK.Image object.")
-        return False
-    else:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetDimension() == 4:
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is not an instance of a 4D SimpleITK.Image object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isSITK(img, raiseError=False):
+def isSITK(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is an SimpleITK.Image object and raise error if requested."""
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
     if isinstance(img, SITKImage):
         return True
-    elif raiseError:
-        raise TypeError(f"The object '{type(img)}' is not an instance of an SimpleITK.Image object.")
     else:
-        return False
+        error = TypeError(f"The object '{type(img)}' is not an instance of an SimpleITK.Image object.")
 
-
-def isSITK_volume(img, raiseError=False):
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetSize().count(1) == (img.GetDimension() - 3):
         if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a volume. Size of 'img' is {img.GetSize()}.")
-        return False
-    else:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+
+def isSITK_point(img: SITKImage, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 0):
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a point. Size of 'img' is {img.GetSize()}.")
 
-
-def isSITK_timevolume(img, raiseError=False):
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetSize().count(1) == (img.GetDimension() - 4):
         if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a time volume. Size of 'img' is {img.GetSize()}.")
-        return False
-    else:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+
+def isSITK_profile(img: SITKImage, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 1):
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a profile. Size of 'img' is {img.GetSize()}.")
 
-
-def isSITK_slice(img, raiseError=False):
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetSize().count(1) == (img.GetDimension() - 2):
         if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a slice. Size of 'img' is {img.GetSize()}.")
-        return False
-    else:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+
+def isSITK_slice(img: SITKImage, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 2):
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a slice. Size of 'img' is {img.GetSize()}.")
 
-
-def isSITK_profile(img, raiseError=False):
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetSize().count(1) == (img.GetDimension() - 1):
         if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a profile. Size of 'img' is {img.GetSize()}.")
-        return False
-    else:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+
+def isSITK_volume(img: SITKImage, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 3):
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a volume. Size of 'img' is {img.GetSize()}.")
 
-
-def isSITK_point(img, raiseError=False):
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not img.GetSize().count(1) == img.GetDimension():
         if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a point. Size of 'img' is {img.GetSize()}.")
-        return False
-    else:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+
+def isSITK_timevolume(img: SITKImage, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 4):
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimpleITK.Image object but does not describe a time volume. Size of 'img' is {img.GetSize()}.")
 
-
-def isSITK_vector(img, raiseError=False):
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not "vector" in img.GetPixelIDTypeAsString():
         if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but not a vector image.")
-        return False
-    else:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+
+def isSITK_vector(img: SITKImage, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and "vector" in img.GetPixelIDTypeAsString():
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but not a vector image.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isSITK_transform(img, raiseError=False):
+def isSITK_transform(img: SITKTransform, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
     if isinstance(img, SITKTransform):
         return True
-    elif raiseError:
-        raise TypeError(f"The object '{type(img)}' is not an instance of an SimpleITK.Transform object.")
     else:
-        return False
+        error = TypeError(f"The object '{type(img)}' is not an instance of an SimpleITK.Transform object.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+#### SimleITK Image Mask checkers ####
 
 
-def isSITK_maskBinary(img, raiseError=False):
+def isSITK_maskBinary(img: SITKImage, raiseError: bool = False) -> bool:
     import fredtools as ft
     from SimpleITK import sitkUInt8
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
 
     stat = ft.getStatistics(img)
 
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not ((stat.GetMaximum() in [0, 1]) and (stat.GetMinimum() in [0, 1]) and (img.GetPixelID() == sitkUInt8)):
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but does not describe a binary mask. Binary mask image must be of type '8-bit unsigned integer' and contain only voxels with values 0 or 1.")
-        return False
-    else:
+    if isSITK(img, raiseError=raiseError) and ((stat.GetMaximum() in [0, 1]) and (stat.GetMinimum() in [0, 1]) and (img.GetPixelID() == sitkUInt8)):
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but does not describe a binary mask. Binary mask image must be of type '8-bit unsigned integer' and contain only voxels with values 0 or 1.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def isSITK_maskFloating(img, raiseError=False):
+def isSITK_maskFloating(img: SITKImage, raiseError: bool = False) -> bool:
     import fredtools as ft
     from SimpleITK import sitkFloat32, sitkFloat64
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
 
     stat = ft.getStatistics(img)
 
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not ((stat.GetMaximum() <= 1) and (stat.GetMinimum() >= 0) and ((img.GetPixelID() == sitkFloat64) or (img.GetPixelID() == sitkFloat32))):
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but does not describe a floating mask. Floating mask image must be of type '32-bit float' or '64-bit float' and contain only voxels with values in range 0-1.")
-        return False
-    else:
+    if isSITK(img, raiseError=raiseError) and ((stat.GetMaximum() <= 1) and (stat.GetMinimum() >= 0) and ((img.GetPixelID() == sitkFloat64) or (img.GetPixelID() == sitkFloat32))):
         return True
-
-
-def isSITK_mask(img, raiseError=False):
-    if not isSITK(img, raiseError=raiseError):
-        return False
-    elif not (isSITK_maskBinary(img) or isSITK_maskFloating(img)):
-        if raiseError:
-            raise TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but does not describe floating nor binary mask.")
-        return False
     else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but does not describe a floating mask. Floating mask image must be of type '32-bit float' or '64-bit float' and contain only voxels with values in range 0-1.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
+
+
+def isSITK_mask(img: SITKImage, raiseError: bool = False) -> bool:
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
+
+    if isSITK(img, raiseError=raiseError) and ((isSITK_maskBinary(img) or isSITK_maskFloating(img))):
         return True
+    else:
+        error = TypeError(f"The object '{type(img)}' is an instance of SimspleITK.Image object but does not describe floating nor binary mask.")
+
+        if raiseError:
+            logger.error(error)
+            raise error
+        else:
+            return False
 
 
-def getMaskType(img):
-    import fredtools as ft
-    import SimpleITK as sitk
+def getMaskType(img: SITKImage):
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
 
     isSITK(img, raiseError=True)
     isSITK_mask(img, raiseError=True)
 
     if isSITK_maskBinary(img):
-        return "binary"
+        maskType = "binary"
     elif isSITK_maskFloating(img):
-        return "floating"
+        maskType = "floating"
     else:
-        return "unknown"
+        maskType = "unknown"
+
+    logger.debug(f"The mask type is {maskType}")
+
+    return maskType

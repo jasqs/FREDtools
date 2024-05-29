@@ -1,4 +1,4 @@
-def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo=False):
+def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo: bool = False):
     """Get 2D slice from image.
 
     The function calculates a 2D slice image through a specified
@@ -187,7 +187,7 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     return sl
 
 
-def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo=False):
+def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo: bool = False):
     """Get 1D profile from image along an axis.
 
     The function calculates a 1D profile image through a specified
@@ -364,7 +364,7 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
     return prof
 
 
-def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo=False):
+def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo: bool = False):
     """Get point value from image.
 
     The function calculates a point value in a specified `point` from an
@@ -496,7 +496,7 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
     return pointVal
 
 
-def getInteg(img, axis="X", displayInfo=False):
+def getInteg(img, axis="X", displayInfo: bool = False):
     """Get 1D integral profile from an image.
 
     The function calculates a 1D integral profile image along the specified `axis`
@@ -635,7 +635,7 @@ def getInteg(img, axis="X", displayInfo=False):
     return integ
 
 
-def getCumSum(img, axis="X", displayInfo=False):
+def getCumSum(img, axis="X", displayInfo: bool = False):
     """Get cumulative sum image.
 
     The function calculates a cumulative sum image along the specified `axis`

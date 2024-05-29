@@ -1,4 +1,4 @@
-def convertCTtoWER(img, HU, WER, displayInfo=False):
+def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
     """Convert CT map to WER map.
 
     The function converts a 3D Computed Tomography (CT) map with Houndsfield 
@@ -71,7 +71,7 @@ def convertCTtoWER(img, HU, WER, displayInfo=False):
     return imgWER
 
 
-def calcWETfromWER(imgWER, SAD, imgMask=None, CPUNo="auto", displayInfo=False):
+def calcWETfromWER(imgWER, SAD, imgMask=None, CPUNo="auto", displayInfo: bool = False):
     """Calculate WET image from WER image for point-like source.
 
     The function calculates Water-Equivalent Thickness (WET) for each voxel of 
@@ -315,7 +315,7 @@ def generateIsoLayers(minRange, maxRange, beamParams):
     return layersInfo
 
 
-def calcContours(imgMask, level=0.5, displayInfo=False):
+def calcContours(imgMask, level=0.5, displayInfo: bool = False):
     """Calculate contours from 2D binary mask.
 
     The function calculates list of contours from a 2D image defined as

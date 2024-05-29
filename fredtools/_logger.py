@@ -1,37 +1,75 @@
 import logging
+from typing import Literal
+
+
+class customFormatterINFO(logging.Formatter):
+    grey = "\x1b[38;21m"
+    yellow = "\x1b[33m"
+    red = "\x1b[31m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+
+    FORMATS = {
+        logging.DEBUG:
+        grey + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        logging.INFO:
+        grey + '%(funcName)s: %(message)s' + reset,
+        logging.WARNING:
+        yellow + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        logging.ERROR:
+        red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        logging.CRITICAL:
+        bold_red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+
+class customFormatterDEBUG(logging.Formatter):
+    grey = "\x1b[38;21m"
+    yellow = "\x1b[33m"
+    red = "\x1b[31m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+
+    FORMATS = {
+        logging.DEBUG:
+        grey + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        logging.INFO:
+        grey + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        logging.WARNING:
+        yellow + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        logging.ERROR:
+        red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        logging.CRITICAL:
+        bold_red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+
+def getConsoleLogHandler():
+    consoleHandler = logging.StreamHandler(sys.stdout)
+    consoleHandler.setFormatter(customFormatterINFO())
+    return consoleHandler
+
+
+def getFileLogHandler(fileName: str):
+    fileHandler = logging.FileHandler(fileName)
+    fileHandler.setFormatter(customFormatterDEBUG())
+    return fileHandler
 
 
 def _getLogger(name: str) -> logging.Logger:
     import sys
-
-    class customFormatter(logging.Formatter):
-        grey = "\x1b[38;21m"
-        yellow = "\x1b[33m"
-        red = "\x1b[31m"
-        bold_red = "\x1b[31;1m"
-        reset = "\x1b[0m"
-
-        FORMATS = {
-            logging.DEBUG:
-            grey + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
-            logging.INFO:
-            # grey + '# %(message)s' + reset,
-            grey + '%(funcName)s: %(message)s' + reset,
-            logging.WARNING:
-            yellow + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
-            logging.ERROR:
-            red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
-            logging.CRITICAL:
-            bold_red + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset
-        }
-
-        def format(self, record):
-            log_fmt = self.FORMATS.get(record.levelno)
-            formatter = logging.Formatter(log_fmt)
-            return formatter.format(record)
-
     loggingStreamHandler = logging.StreamHandler(sys.stdout)
-    loggingStreamHandler.setFormatter(customFormatter())
+    loggingStreamHandler.setFormatter(customFormatterINFO())
 
     logging.basicConfig(level=logging.WARNING,
                         datefmt="%Y-%m-%d %H:%M:%S",
@@ -39,49 +77,55 @@ def _getLogger(name: str) -> logging.Logger:
                         force=False)
 
     logger = logging.getLogger(name)
+    logger.addHandler(logging.NullHandler())
+    # logger.propagate = False
 
     return logger
 
 
-def _loggerDecorator(func):
+def loggerDecorator(func):
     import functools
     import inspect
 
     @functools.wraps(func)
     def decorator(*args, **kwargs):
-        # from fredtools._logger import *
         import fredtools as ft
-        from fredtools import LOG_LEVEL
-        global LOG_LEVEL
-
+        # actions before the function call
         logger = ft._getLogger(func.__module__)
-        # logger.setLevel(LOG_LEVEL)
-        loggerLevel = logger.getEffectiveLevel()
-
+        loggerLevelCaller = logger.getEffectiveLevel()
         bindArgs = inspect.signature(func).bind(*args, **kwargs).arguments
         # print(bindArgs)
-        if "displayInfo" in bindArgs.keys() and bindArgs["displayInfo"]:
+        # print(loggerLevelCaller)
 
-            # print("decorator: ", func.__module__)
-            # logger.warning("Something is happening before the function is called.")
-            # print("Something is happening before the function is called.")
+        displayInfo = ("displayInfo" in bindArgs.keys() and bindArgs["displayInfo"] == True) or "displayImageInfo" == func.__name__
+        # print(displayInfo)
 
+        if displayInfo and loggerLevelCaller > ft._logger.logging.INFO:
+            # print("changing level to info")
             logger.setLevel(ft._logger.logging.INFO)
 
-            print("effective loging level: ", ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
-
+        # function call
         funcOut = func(*args, **kwargs)
 
-        if "displayInfo" in bindArgs.keys() and bindArgs["displayInfo"]:
-            # print("Something is happening after the function is called.")
-            logger.setLevel(loggerLevel)
-            # print(ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
-            del logger
+        # actions after the function call
+        logger.setLevel(loggerLevelCaller)
+        # print(ft._logger.logging.getLevelName(logger.getEffectiveLevel()))
+        del logger
 
         return funcOut
     return decorator
 
 
-# # print("XXXXXXXXXXXXXXXXXXXXXXXXX")
-# logger = _getLogger(__name__)
-# logger.info(f"fredtools version: {ft.__version__}")
+def configureLogging(level: int = logging.WARNING) -> None:
+    import sys
+
+    loggingStreamHandler = logging.StreamHandler(sys.stdout)
+    if level <= logging.DEBUG:
+        loggingStreamHandler.setFormatter(customFormatterDEBUG())
+    else:
+        loggingStreamHandler.setFormatter(customFormatterINFO())
+
+    logging.basicConfig(level=level,
+                        datefmt="%Y-%m-%d %H:%M:%S",
+                        handlers=[loggingStreamHandler],
+                        force=True)

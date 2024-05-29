@@ -1,4 +1,4 @@
-def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=False, displayInfo=False):
+def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=False, displayInfo: bool = False):
     """Create a folder structure for each field in the treatment plan.
 
     The function creates a folder structure in a given `folderPath` for each field separately.
@@ -73,7 +73,7 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=F
     return simFolder
 
 
-def readFREDStat(fileNameLogOut, displayInfo=False):
+def readFREDStat(fileNameLogOut, displayInfo: bool = False):
     """Read FRED simulation statistics information from the log file.
 
     The function reads some statistics information from a FRED run.out logfile.
@@ -302,7 +302,7 @@ def getFREDVersion(version=""):
     return stdout.split("\n")[0]
 
 
-def runFRED(fredInpFileName, version="", params=[], displayInfo=False):
+def runFRED(fredInpFileName, version="", params=[], displayInfo: bool = False):
     """Run FRED simulation.
 
     The function runs FRED simulation defined by

@@ -122,7 +122,7 @@ def _getRNBeamSequence(dicomVar):
         raise TypeError(f"Cannot recognise the dicom as 'RT Plan Storage' nor 'RT Ion Plan Storage'.")
 
 
-def sortDicoms(searchFolder, recursive=False, displayInfo=False):
+def sortDicoms(searchFolder, recursive=False, displayInfo: bool = False):
     """Sort dicom file names found in the search folder for CT, RS, RN, RD and Unknown.
 
     The function sorts file names found in the `searchFolder`
@@ -284,7 +284,7 @@ def _getReferencedBeamDatasetForFieldNumber(fileName, beamNumber):
     return None
 
 
-def getRNMachineName(fileName, displayInfo=False):
+def getRNMachineName(fileName, displayInfo: bool = False):
     """Get the machine name defined in the RN plan.
 
     The function retrieves the machine name defined in the RN dicom file.
@@ -346,7 +346,7 @@ def getRNMachineName(fileName, displayInfo=False):
     return treatmentMachineName[0]
 
 
-def getRNIsocenter(fileName, displayInfo=False):
+def getRNIsocenter(fileName, displayInfo: bool = False):
     """Get the isocenter position defined in the RN plan.
 
     The function retrieves the isocenter position defined in the RN dicom file.
@@ -417,7 +417,7 @@ def getRNIsocenter(fileName, displayInfo=False):
     return isocenterPosition.tolist()
 
 
-def getRNSpots(fileName, displayInfo=False):
+def getRNSpots(fileName, displayInfo: bool = False):
     """Get the parameters of each spot defined in the RN file.
 
     The function retrieves information for each spot defined in the RN dicom file.
@@ -551,7 +551,7 @@ def getRNSpots(fileName, displayInfo=False):
     return spotsInfo
 
 
-def getRNFields(fileName, raiseWarning=True, displayInfo=False):
+def getRNFields(fileName, raiseWarning=True, displayInfo: bool = False):
     """Get the parameters of each field defined in the RN file.
 
     The function retrieves information for each field defined in the RN dicom file.
@@ -665,7 +665,7 @@ def getRNFields(fileName, raiseWarning=True, displayInfo=False):
     return fieldsInfo
 
 
-def getRNInfo(fileName, displayInfo=False):
+def getRNInfo(fileName, displayInfo: bool = False):
     """Get some information from the RN plan.
 
     The function retrieves some useful information from a RN dicom of a treatment plan.
@@ -799,7 +799,7 @@ def getRNInfo(fileName, displayInfo=False):
     return planInfo
 
 
-def getRSInfo(fileName, displayInfo=False):
+def getRSInfo(fileName, displayInfo: bool = False):
     """Get some information from the RS structures from the RS dicom file.
 
     The function retrieves some basic information about structures from an RS dicom file.
@@ -871,7 +871,7 @@ def getRSInfo(fileName, displayInfo=False):
     return ROITable
 
 
-def getExternalName(fileName, displayInfo=False):
+def getExternalName(fileName, displayInfo: bool = False):
     """Get the name of the EXTERNAL structure from RS dicom file.
 
     The function retrieves the name of the structure of type EXTERNAL from an RS dicom file.
@@ -914,7 +914,7 @@ def getExternalName(fileName, displayInfo=False):
     return externalName
 
 
-def getCT(fileNames, displayInfo=False):
+def getCT(fileNames, displayInfo: bool = False):
     """Get a CT image from dicom series.
 
     The function reads a series of dicom files containing a CT scan
@@ -1005,7 +1005,7 @@ def getCT(fileNames, displayInfo=False):
     return img
 
 
-def getPET(fileNames, SUV=True, displayInfo=False):
+def getPET(fileNames, SUV=True, displayInfo: bool = False):
     """Get a PET image from dicom series.
 
     The function reads a series of dicom files containing a PET scan
@@ -1109,7 +1109,7 @@ def getPET(fileNames, SUV=True, displayInfo=False):
     return img
 
 
-def getRD(fileNames, displayInfo=False):
+def getRD(fileNames, displayInfo: bool = False):
     """Get an image from dicom.
 
     The function reads a single dicom file or an iterable of dicom files
@@ -1234,7 +1234,7 @@ def _getStructureContoursByName(RSfileName, structName):
     return StructureContours, ROIinfo
 
 
-def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
+def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo: bool = False):
     """Get the file name of the RD dose dicom of for the given field number.
 
     The function searches for the RD dose dicom file for a given
@@ -1281,7 +1281,7 @@ def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo=False):
     return fileName
 
 
-def anonymizeDicoms(fileNames, removePrivateTags=False, displayInfo=False):
+def anonymizeDicoms(fileNames, removePrivateTags=False, displayInfo: bool = False):
     """Anonymize dicom files.
 
     The function anonymizes dicom files given as an iterable of file paths.

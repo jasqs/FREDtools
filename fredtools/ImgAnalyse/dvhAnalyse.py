@@ -1,4 +1,4 @@
-def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=False):
+def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo: bool = False):
     """Calculate DVH for the mask.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
@@ -86,7 +86,7 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo=Fal
     return dvhMask
 
 
-def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, CPUNo="auto", displayInfo=False):
+def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, CPUNo="auto", displayInfo: bool = False):
     """Calculate DVH for the structure.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside

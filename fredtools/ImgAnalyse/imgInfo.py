@@ -1,4 +1,8 @@
-def _generateSpatialCentresString(pixelCentres):
+from SimpleITK import Image as SITKImage
+from fredtools._logger import logging
+
+
+def _generateSpatialCentresString(pixelCentres: tuple[float]) -> str:
     """Generate voxels' centres string
 
     The function generates a formatted string with voxels' centres in one direction.
@@ -14,6 +18,7 @@ def _generateSpatialCentresString(pixelCentres):
     string
         Formatted string
     """
+
     if len(pixelCentres) > 4:
         spatialCentresString = "[ {:12f}, {:12f}, ..., {:12f}, {:12f} ]".format(pixelCentres[0], pixelCentres[1], pixelCentres[-2], pixelCentres[-1])
     elif len(pixelCentres) == 4:
@@ -27,7 +32,7 @@ def _generateSpatialCentresString(pixelCentres):
     return spatialCentresString
 
 
-def _generateExtentString(axisExtent):
+def _generateExtentString(axisExtent: tuple[float, float]) -> str:
     """Generate image extent string
 
     The function generates a formatted string with the extent in one direction.
@@ -44,14 +49,18 @@ def _generateExtentString(axisExtent):
         Formatted string
     """
     import numpy as np
+    from fredtools import _getLogger
+    logger = _getLogger(__name__)
 
     if not len(axisExtent) == 2:
-        raise ValueError(f"Extent of a single axis must be of length 2 and is {len(axisExtent)}.")
+        error = ValueError(f"Extent of a single axis must be of length 2 and is {len(axisExtent)}.")
+        logger.error(error)
+        raise error
     extentString = "[ {:12f} , {:12f} ] => {:12f}".format(axisExtent[0], axisExtent[1], np.abs(np.diff(axisExtent)[0]))
     return extentString
 
 
-def _displayImageInfo(img):
+def _displayImageInfo(img: SITKImage, logLevel: int = logging.WARNING) -> str:
     """Display some information about the image without the name of the function.
 
     The function displays information about an image given as a SimpleITK image object.
@@ -66,20 +75,14 @@ def _displayImageInfo(img):
     import numpy as np
     import fredtools as ft
 
+    # skip processing if not suitable for info logging level
+    if logLevel > ft._logger.logging.INFO:
+        return f"Image info called by {ft._helper.currentFuncName(1)} but skipped because the {logLevel=} ({ft._logger.logging.getLevelName(logLevel)})."
+
     imageInfo = []
     # imageInfo.append(f"Image info called by {ft._helper.currentFuncName(1)}:")
+    # print(f"Image info called by {ft._helper.currentFuncName(1)}")
     imageInfo.append(f"Image info:")
-
-    # import inspect
-    # print("%%%%%%%%")
-    # print(__name__)
-    # print(inspect.getmodule(inspect.stack()[0][0]))
-    # print(ft._helper.currentFuncName(1))
-    # print(inspect.getmodule(inspect.stack()[1][0]).__name__)
-    # logger = ft._getLogger(inspect.getmodule(inspect.stack()[1][0]).__name__)
-    # print("%%%%%%%%")
-    # logger = ft._getLogger(__name__)
-    # logger = ft._getLogger(inspect.getmodule(inspect.stack()[1][0]).__name__)
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
@@ -165,11 +168,10 @@ def _displayImageInfo(img):
             if "UNKNOWN_PRINT_CHARACTERISTICS" in img.GetMetaData(key):
                 continue
             imageInfo.append(f"{key.ljust(keyLen)} : {img.GetMetaData(key)}")
-    return "\n\t".join(imageInfo)
-    # return imageInfo
+    return "\n   ".join(imageInfo)
 
 
-def displayImageInfo(img):
+def displayImageInfo(img: SITKImage) -> None:
     """Display some image information.
 
     The function displays information about an image given as a SimpleITK image object.
@@ -232,9 +234,8 @@ def displayImageInfo(img):
     """
     import fredtools as ft
     logger = ft._getLogger(__name__)
+    logger.setLevel(ft._logger.logging.INFO)
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    logger.info(ft._helper.currentFuncName())
-    _displayImageInfo(img)
-    # logger.info("#" * len(f"### {ft._helper.currentFuncName()} ###"))
+    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))

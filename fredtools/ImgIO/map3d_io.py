@@ -1,4 +1,4 @@
-def writeMap3D(img, filePath, displayInfo=False):
+def writeMap3D(img, filePath, displayInfo: bool = False):
     """Write image to Map3D file format.
 
     The function writes a SimpleITK image object to Map3D file. This format is
@@ -68,7 +68,7 @@ def writeMap3D(img, filePath, displayInfo=False):
         print("#" * len(f"### {ft.currentFuncName()} ###"))
 
 
-def readMap3D(filePath, displayInfo=False):
+def readMap3D(filePath, displayInfo: bool = False):
     """Read image from Map3D file format.
 
     The function reads a Map3D file to a SimpleITK image object. The Map3D file

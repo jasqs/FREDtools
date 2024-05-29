@@ -1,4 +1,4 @@
-def readOPG(fileName, depth=0, displayInfo=False):
+def readOPG(fileName, depth=0, displayInfo: bool = False):
     """Read OPG files from OmniPro software.
 
     The function reads a single OPG file exported from OmniPro software (IBA)

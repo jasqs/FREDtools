@@ -149,7 +149,7 @@ def readGATE_PSActor(fileName):
     return psActor
 
 
-def readGATEStat(fileNameLogOut, displayInfo=False):
+def readGATEStat(fileNameLogOut, displayInfo: bool = False):
     """Read GATE simulation statistics information from Simulation Statistic Actor.
 
     The function reads some statistics information from the
