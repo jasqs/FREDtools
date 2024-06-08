@@ -1,5 +1,4 @@
 from SimpleITK import Image as SITKImage
-from fredtools._logger import logging
 
 
 def _generateSpatialCentresString(pixelCentres: tuple[float]) -> str:
@@ -49,8 +48,8 @@ def _generateExtentString(axisExtent: tuple[float, float]) -> str:
         Formatted string
     """
     import numpy as np
-    from fredtools import _getLogger
-    logger = _getLogger(__name__)
+    import fredtools as ft
+    logger = ft.getLogger(__name__)
 
     if not len(axisExtent) == 2:
         error = ValueError(f"Extent of a single axis must be of length 2 and is {len(axisExtent)}.")
@@ -60,7 +59,7 @@ def _generateExtentString(axisExtent: tuple[float, float]) -> str:
     return extentString
 
 
-def _displayImageInfo(img: SITKImage, logLevel: int = logging.WARNING) -> str:
+def _displayImageInfo(img: SITKImage) -> str:
     """Display some information about the image without the name of the function.
 
     The function displays information about an image given as a SimpleITK image object.
@@ -75,13 +74,7 @@ def _displayImageInfo(img: SITKImage, logLevel: int = logging.WARNING) -> str:
     import numpy as np
     import fredtools as ft
 
-    # skip processing if not suitable for info logging level
-    if logLevel > ft._logger.logging.INFO:
-        return f"Image info called by {ft._helper.currentFuncName(1)} but skipped because the {logLevel=} ({ft._logger.logging.getLevelName(logLevel)})."
-
     imageInfo = []
-    # imageInfo.append(f"Image info called by {ft._helper.currentFuncName(1)}:")
-    # print(f"Image info called by {ft._helper.currentFuncName(1)}")
     imageInfo.append(f"Image info:")
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
@@ -89,7 +82,7 @@ def _displayImageInfo(img: SITKImage, logLevel: int = logging.WARNING) -> str:
     extent_mm = ft.getExtent(img)
     size_mm = ft.getSize(img)
     axesNames = ["x", "y", "z", "t"]
-    arr = sitk.GetArrayFromImage(img)
+    arr = sitk.GetArrayViewFromImage(img)
     voxelCentres = ft.getVoxelCentres(img)
     isVector = ft._imgTypeChecker.isSITK_vector(img)
     isMask = ft._imgTypeChecker.isSITK_mask(img)
@@ -108,7 +101,7 @@ def _displayImageInfo(img: SITKImage, logLevel: int = logging.WARNING) -> str:
         imageInfo.append("{:d}D{:s} image describing a time volume (4D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
 
     if not isIdentity:
-        imageInfo.append("# The image direction is not identity")
+        imageInfo.append("The image direction is not identity")
 
     imageInfo.append(f"dims ({''.join(axesNames[: img.GetDimension()])})      = {np.array(img.GetSize())}")
     imageInfo.append(f"voxel size [mm] = {np.array(img.GetSpacing())}")
@@ -138,9 +131,9 @@ def _displayImageInfo(img: SITKImage, logLevel: int = logging.WARNING) -> str:
     elif ft._imgTypeChecker.isSITK_timevolume(img):
         imageInfo.append("voxel time volume = {:.2f} mm³*s  =>  {:.2f} ul*s".format(np.prod(realVoxelSize), np.prod(realVoxelSize)))
 
-    imageInfo.append(f"data type: {img.GetPixelIDTypeAsString()}" + ("with NaN values" if np.any(np.isnan(arr)) else ""))
+    imageInfo.append(f"data type: {img.GetPixelIDTypeAsString()}" + (" with NaN values" if np.any(np.isnan(arr)) else ""))
     imageInfo.append(f"range: from {np.nanmin(arr)} to {np.nanmax(arr)}" + (" (sum of vectors)" if isVector else ""))
-    imageInfo.append(f"sum = {np.nansum(arr)}, mean = {np.nanmean(arr)} ({np.nanstd(arr)})" + ("(sum of vectors)" if isVector else ""))
+    imageInfo.append(f"sum = {np.nansum(arr)}, mean = {np.nanmean(arr)} ({np.nanstd(arr)})" + (" (sum of vectors)" if isVector else ""))
 
     nonZeroVoxels = (arr[~np.isnan(arr)] != 0).sum()
     nonAirVoxels = (arr[~np.isnan(arr)] > -1000).sum()
@@ -233,9 +226,9 @@ def displayImageInfo(img: SITKImage) -> None:
     ###############
     """
     import fredtools as ft
-    logger = ft._getLogger(__name__)
+    logger = ft.getLogger(__name__)
     logger.setLevel(ft._logger.logging.INFO)
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))
+    logger.info(_displayImageInfo(img))

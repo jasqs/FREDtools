@@ -1,42 +1,7 @@
-from fredtools._logger import loggerDecorator, _getLogger
 from SimpleITK import Image as SITKImage
 from typing import Any
-logger = _getLogger(__name__)
-
-# def _getExtent(img: SITKImage) -> tuple[tuple[float, float], ...]:
-#     """Get the extent of an image.
-
-#     The function gets the extent of an image defined as a SimpleITK image object.
-#     Extent means the coordinates of most side voxels' borders
-#     in each direction. It is assumed that the coordinate system is in [mm].
-
-#     Parameters
-#     ----------
-#     img : SimpleITK Image
-#         An object of a SimpleITK image.
-
-#     Returns
-#     -------
-#     tuple
-#         A tuple of extent values in form ((xmin,xmax),(ymin,ymax),...)
-#     """
-#     import numpy as np
-#     import fredtools as ft
-
-#     ft._imgTypeChecker.isSITK(img, raiseError=True)
-
-#     cornerLow = img.TransformContinuousIndexToPhysicalPoint(np.zeros(img.GetDimension(), dtype="float64") - 0.5)
-#     cornerHigh = img.TransformContinuousIndexToPhysicalPoint(np.array(img.GetSize(), dtype="float64") - 1 + 0.5)
-
-#     cornerLow = np.dot(np.abs(_getDirectionArray(img)).T, cornerLow)
-#     cornerHigh = np.dot(np.abs(_getDirectionArray(img)).T, cornerHigh)
-
-#     extent = tuple(zip(cornerLow, cornerHigh))
-
-#     return extent
 
 
-@loggerDecorator
 def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, float], ...]:
     """Get the extent of an image.
 
@@ -62,29 +27,25 @@ def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, f
     """
     import numpy as np
     import fredtools as ft
-    # logger = ft._getLogger(__name__)
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     cornerLow = img.TransformContinuousIndexToPhysicalPoint(np.zeros(img.GetDimension(), dtype="float64") - 0.5)
     cornerHigh = img.TransformContinuousIndexToPhysicalPoint(np.array(img.GetSize(), dtype="float64") - 1 + 0.5)
 
-    cornerLow = np.dot(np.abs(_getDirectionArray(img)).T, cornerLow)
-    cornerHigh = np.dot(np.abs(_getDirectionArray(img)).T, cornerHigh)
-
     extent = tuple(zip(cornerLow, cornerHigh))
 
-    # if displayInfo:
-    axesNames = ["x", "y", "z", "t"]
-    extentLog = []
-    for ext, axisName in zip(extent, axesNames):
-        extentLog.append(f"   {axisName}-spatial extent [mm] = " + ft.ImgAnalyse.imgInfo._generateExtentString(ext))
-    logger.info("Image extent:\n" + "\n".join(extentLog))
+    if displayInfo:
+        axesNames = ["x", "y", "z", "t"]
+        extentLog = []
+        for ext, axisName in zip(extent, axesNames):
+            extentLog.append(f"   {axisName}-spatial extent [mm] = " + ft.ImgAnalyse.imgInfo._generateExtentString(ext))
+        logger.info("Image extent:\n" + "\n".join(extentLog))
 
     return extent
 
 
-@loggerDecorator
 def getSize(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     """Get the size of an image.
 
@@ -110,23 +71,23 @@ def getSize(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     """
     import numpy as np
     import fredtools as ft
-    # logger = ft._getLogger(__name__)
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     size = tuple(np.abs(np.diff(getExtent(img))).squeeze())
 
-    # if displayInfo:
-    axesNames = ["x", "y", "z", "t"]
-    sizeLog = []
-    for siz, axisName in zip(size, axesNames):
-        sizeLog.append(f"   {axisName}-spatial size [mm] = " + str(siz))
-    logger.info("Image size:\n" + "\n".join(sizeLog))
+    if displayInfo:
+        axesNames = ["x", "y", "z", "t"]
+        sizeLog = []
+        for siz, axisName in zip(size, axesNames):
+            sizeLog.append(f"   {axisName}-spatial size [mm] = " + str(siz))
+        logger.info("Image size:\n" + "\n".join(sizeLog))
 
     return size
 
 
-def getImageCenter(img: SITKImage, displayInfo: bool = False):
+def getImageCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     """Get the centre of an image.
 
     The function calculates the centre of an image defined as a SimpleITK image object
@@ -152,26 +113,28 @@ def getImageCenter(img: SITKImage, displayInfo: bool = False):
     """
     import numpy as np
     import fredtools as ft
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     imageCentre = tuple(np.mean(np.array(getExtent(img)), 1))
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
         axesNames = ["x", "y", "z", "t"]
+        centLog = []
         for cent, axisName in zip(imageCentre, axesNames):
-            print("# {:s}-spatial image centre [mm] = ".format(axisName), cent)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            centLog.append(f"   {axisName}-spatial image centre [mm] = " + str(cent))
+        logger.info("Image centre:\n" + "\n".join(centLog))
+
     return imageCentre
 
 
-def getMassCenter(img: SITKImage, displayInfo: bool = False):
-    """Get the centre of mass of an image.
+def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
+    """Get the center of mass of an image.
 
-    The function calculates the centre of mass of an image defined as
+    The function calculates the center of mass of an image defined as
     a SimpleITK image object in each direction. It is assumed that
-    the coordinate system is in [mm].
+    the coordinate system is in [mm]. Any NaN values are replaced with zeros.
 
     Parameters
     ----------
@@ -183,7 +146,7 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False):
     Returns
     -------
     tuple
-        A tuple of image centre of mass coordinates in form (xMassCenter,yMassCenter,...)
+        A tuple of image center of mass coordinates in form (xMassCenter,yMassCenter,...)
 
     See Also
     --------
@@ -195,33 +158,42 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False):
     import itk
     import SimpleITK as sitk
     import fredtools as ft
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    # check if are nan values in the image and replace them with zeros
-    arr = sitk.GetArrayFromImage(img)
-    if np.any(np.isnan(arr)):
-        imgOrg = img
-        arr[np.isnan(arr)] = 0
-        img = sitk.GetImageFromArray(arr)
-        img.CopyInformation(imgOrg)
+    if ft._imgTypeChecker.isSITK_vector(img, raiseError=False):
+        logger.error("Cannot compute mass centre of a multicomponent (vector) image.")
+        return tuple([np.nan]*img.GetDimension())
 
-    imgITK = ft.SITK2ITK(img)
-    moments = itk.ImageMomentsCalculator.New(imgITK)
-    moments.Compute()
-    massCentre = np.dot(np.abs(_getDirectionArray(img)).T, moments.GetCenterOfGravity())
-    massCentre = tuple(massCentre)
+    # check if there are nan values in the image and replace them with zeros
+    if np.any(np.isnan(sitk.GetArrayViewFromImage(img))):
+        logger.debug("Found NaN values in the image. Replacing them with zeros.")
+        imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(img)).astype("uint8"))
+        imgMaskNaN.CopyInformation(img)
+        img = sitk.Mask(img, imgMaskNaN, outsideValue=0, maskingValue=1)
+
+    # check if the image is filled with zeros only
+    if np.all(sitk.GetArrayViewFromImage(img) == 0):
+        logger.debug("Total mass of the image is zero (image filled with zeros). Returning image center as the mass center.")
+        massCentre = getImageCenter(img)
+    else:
+        imgITK = ft.SITK2ITK(img)
+        moments = itk.ImageMomentsCalculator.New(imgITK)
+        moments.Compute()
+        massCentre = tuple(moments.GetCenterOfGravity())
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
         axesNames = ["x", "y", "z", "t"]
+        centLog = []
         for cent, axisName in zip(massCentre, axesNames):
-            print("# {:s}-spatial mass centre [mm] = ".format(axisName), cent)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            centLog.append(f"   {axisName}-spatial mass center [mm] = " + str(cent))
+        logger.info("Mass center:\n" + "\n".join(centLog))
+
     return massCentre
 
 
-def getMaxPosition(img: SITKImage, displayInfo: bool = False):
+def getMaxPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     """Get the maximum position of an image.
 
     The function calculates the position of the maximum voxel of
@@ -249,26 +221,28 @@ def getMaxPosition(img: SITKImage, displayInfo: bool = False):
     import numpy as np
     import fredtools as ft
     import warnings
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    # convert image to array
-    arr = ft.arr(img)
+    maxPosition = ft.getVoxelPhysicalPoints(img == ft.getStatistics(img).GetMaximum(), insideMask=True)
 
-    # check if only one maximum value exists and raise warning
-    if (arr == np.nanmax(arr)).sum() > 1:
-        warnings.warn("Warning: more than one maximum value was found. The first one was returned.")
+    # check if only one maximum value exists and raise a warning
+    if maxPosition.shape[0] != 1:
+        logger.warning("More than one maximum value were found. The first one was returned.")
 
+    maxPosition = maxPosition[0]
+    maxPosition = tuple(maxPosition)
     # get maximum position
-    maxPosition = np.unravel_index(np.nanargmax(arr), arr.shape[::-1], order="F")
-    maxPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in maxPosition])
+    # maxPosition = np.unravel_index(np.nanargmax(arr), arr.shape[::-1], order="F")
+    # maxPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in maxPosition])
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
         axesNames = ["x", "y", "z", "t"]
+        centLog = []
         for cent, axisName in zip(maxPosition, axesNames):
-            print("# {:s}-spatial max position [mm] = ".format(axisName), cent)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            centLog.append(f"   {axisName}-spatial max position [mm] = " + str(cent))
+        logger.info("Maximum position:\n" + "\n".join(centLog))
 
     return maxPosition
 

@@ -1,4 +1,4 @@
-from ._logger import (_getLogger, configureLogging)
+from ._logger import configureLogging, getLogger
 
 from . import _helper
 
@@ -8,7 +8,7 @@ from .ImgAnalyse.dvhAnalyse import (getDVHMask, getDVHStruct)
 from .ImgAnalyse.imgAnalyse import (getExtent, getSize, getImageCenter, getMassCenter, getMaxPosition, getMinPosition, getVoxelCentres, getVoxelEdges, getVoxelPhysicalPoints, getExtMpl, pos, arr, vec, isPointInside, getStatistics, compareImgFoR)
 from .ImgAnalyse.imgDisplay import (showSlice, showSlices)
 from .ImgAnalyse.imgInfo import (displayImageInfo)
-from .ImgAnalyse.imgTransform import (transformIndexToPhysicalPoint, transformContinuousIndexToPhysicalPoint, transformPhysicalPointToIndex, transformPhysicalPointToContinuousIndex)
+from .ImgAnalyse.imgTransformCoordinates import (transformIndexToPhysicalPoint, transformContinuousIndexToPhysicalPoint, transformPhysicalPointToIndex, transformPhysicalPointToContinuousIndex)
 from .ImgAnalyse.spotAnalyse import (fitSpotProfile)
 
 
@@ -42,6 +42,11 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-
 _version = [0, 8, 2]
 __version__ = ".".join(map(str, _version))
+
+# configure logging if no root logger configured
+configureLogging(_logger.logging.INFO, force=False)
+
+# log FREDtools version in DEBUG mode
+getLogger(__name__).debug(f"Loaded FREDtools version {__version__}")
