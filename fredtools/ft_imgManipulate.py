@@ -1465,6 +1465,7 @@ def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, 
 
     # add gaussian margin
     imgMaskConstMarginGauss = sitk.Exp(-(imgMaskDist-marginConstantEdgeDist)**2/(2*gaussSigma**2))
+    imgMaskConstMarginGauss = sitk.Cast(imgMaskConstMarginGauss, sitk.sitkFloat64)
     imgMaskConstMarginGauss = sitk.Mask(imgMaskConstMarginGauss, imgMaskConstMargin, maskingValue=1, outsideValue=1)
 
     # validate floating Mask
@@ -1529,6 +1530,7 @@ def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo=False):
 
     # add gaussian margin
     imgMaskConstMarginExp = sitk.ExpNegative(exponent*(imgMaskDist-edgeDist))
+    imgMaskConstMarginExp = sitk.Cast(imgMaskConstMarginExp, sitk.sitkFloat64)
     imgMaskConstMarginExp = sitk.Mask(imgMaskConstMarginExp, imgMaskConstMargin, maskingValue=1, outsideValue=1)
 
     # validate floating Mask
