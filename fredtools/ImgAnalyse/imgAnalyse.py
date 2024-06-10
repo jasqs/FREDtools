@@ -1,5 +1,4 @@
-from SimpleITK import Image as SITKImage
-from typing import Any
+from fredtools._typing import *
 
 
 def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, float], ...]:
@@ -40,8 +39,8 @@ def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, f
         axesNames = ["x", "y", "z", "t"]
         extentLog = []
         for ext, axisName in zip(extent, axesNames):
-            extentLog.append(f"   {axisName}-spatial extent [mm] = " + ft.ImgAnalyse.imgInfo._generateExtentString(ext))
-        logger.info("Image extent:\n" + "\n".join(extentLog))
+            extentLog.append(f"{axisName}-spatial extent [mm] = " + ft.ImgAnalyse.imgInfo._generateExtentString(ext))
+        logger.info("Image extent:\n" + "\n   ".join(extentLog))
 
     return extent
 
@@ -78,11 +77,7 @@ def getSize(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     size = tuple(np.abs(np.diff(getExtent(img))).squeeze())
 
     if displayInfo:
-        axesNames = ["x", "y", "z", "t"]
-        sizeLog = []
-        for siz, axisName in zip(size, axesNames):
-            sizeLog.append(f"   {axisName}-spatial size [mm] = " + str(siz))
-        logger.info("Image size:\n" + "\n".join(sizeLog))
+        logger.info("Image size:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(size, "size"))
 
     return size
 
@@ -117,16 +112,12 @@ def getImageCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    imageCentre = tuple(np.mean(np.array(getExtent(img)), 1))
+    imgCenter = tuple(np.mean(np.array(getExtent(img)), 1))
 
     if displayInfo:
-        axesNames = ["x", "y", "z", "t"]
-        centLog = []
-        for cent, axisName in zip(imageCentre, axesNames):
-            centLog.append(f"   {axisName}-spatial image centre [mm] = " + str(cent))
-        logger.info("Image centre:\n" + "\n".join(centLog))
+        logger.info("Image center:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(imgCenter, "center"))
 
-    return imageCentre
+    return imgCenter
 
 
 def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
@@ -176,21 +167,17 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...
     # check if the image is filled with zeros only
     if np.all(sitk.GetArrayViewFromImage(img) == 0):
         logger.debug("Total mass of the image is zero (image filled with zeros). Returning image center as the mass center.")
-        massCentre = getImageCenter(img)
+        massCenter = getImageCenter(img)
     else:
         imgITK = ft.SITK2ITK(img)
         moments = itk.ImageMomentsCalculator.New(imgITK)
         moments.Compute()
-        massCentre = tuple(moments.GetCenterOfGravity())
+        massCenter = tuple(moments.GetCenterOfGravity())
 
     if displayInfo:
-        axesNames = ["x", "y", "z", "t"]
-        centLog = []
-        for cent, axisName in zip(massCentre, axesNames):
-            centLog.append(f"   {axisName}-spatial mass center [mm] = " + str(cent))
-        logger.info("Mass center:\n" + "\n".join(centLog))
+        logger.info("Image mass center:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(massCenter, "mass center"))
 
-    return massCentre
+    return massCenter
 
 
 def getMaxPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
@@ -218,9 +205,7 @@ def getMaxPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     getMassCenter : get the centre of mass of an image.
     getMinPosition : get the position of an image minimum.
     """
-    import numpy as np
     import fredtools as ft
-    import warnings
     logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
@@ -238,16 +223,12 @@ def getMaxPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     # maxPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in maxPosition])
 
     if displayInfo:
-        axesNames = ["x", "y", "z", "t"]
-        centLog = []
-        for cent, axisName in zip(maxPosition, axesNames):
-            centLog.append(f"   {axisName}-spatial max position [mm] = " + str(cent))
-        logger.info("Maximum position:\n" + "\n".join(centLog))
+        logger.info("Image maximum position:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(maxPosition, "max position"))
 
     return maxPosition
 
 
-def getMinPosition(img: SITKImage, displayInfo: bool = False):
+def getMinPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     """Get the minimum position of an image.
 
     The function calculates the position of the minimum voxel of
@@ -272,36 +253,30 @@ def getMinPosition(img: SITKImage, displayInfo: bool = False):
     getMassCenter : get the centre of mass of an image.
     getMaxPosition : get the position of an image maximum.
     """
-    import numpy as np
-    import itk
-    import SimpleITK as sitk
     import fredtools as ft
-    import warnings
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    # convert image to array
-    arr = ft.arr(img)
+    minPosition = ft.getVoxelPhysicalPoints(img == ft.getStatistics(img).GetMinimum(), insideMask=True)
 
-    # check if only one minimum value exists and raise warning
-    if (arr == np.nanmin(arr)).sum() > 1:
-        warnings.warn("Warning: more than one minimum value was found. The first one was returned.")
+    # check if only one maximum value exists and raise a warning
+    if minPosition.shape[0] != 1:
+        logger.warning("More than one minimum value were found. The first one was returned.")
 
-    # get minimum position
-    minPosition = np.unravel_index(np.nanargmin(arr), arr.shape[::-1], order="F")
-    minPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in minPosition])
+    minPosition = minPosition[0]
+    minPosition = tuple(minPosition)
+    # get maximum position
+    # minPosition = np.unravel_index(np.nanargmax(arr), arr.shape[::-1], order="F")
+    # minPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in minPosition])
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        axesNames = ["x", "y", "z", "t"]
-        for cent, axisName in zip(minPosition, axesNames):
-            print("# {:s}-spatial min position [mm] = ".format(axisName), cent)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        logger.info("Image maximum position:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(minPosition, "max position"))
 
     return minPosition
 
 
-def getVoxelCentres(img: SITKImage, displayInfo: bool = False):
+def getVoxelCentres(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, ...], ...]:
     """Get voxel centres.
 
     The function gets voxels' centres in each direction of an image
@@ -327,6 +302,7 @@ def getVoxelCentres(img: SITKImage, displayInfo: bool = False):
     """
     import numpy as np
     import fredtools as ft
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
@@ -338,15 +314,16 @@ def getVoxelCentres(img: SITKImage, displayInfo: bool = False):
         voxelCentres.append(tuple(voxelCentresAxis[:, axis]))
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
         axesNames = ["x", "y", "z", "t"]
+        centersLog = []
         for vox, axisName in zip(voxelCentres, axesNames):
-            print("# {:s}-spatial voxel centre [mm] = ".format(axisName), _generateSpatialCentresString(vox))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            centersLog.append(f"{axisName}-spatial voxel centers [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
+        logger.info("Image voxel centers:\n" + "\n   ".join(centersLog))
+
     return tuple(voxelCentres)
 
 
-def getVoxelEdges(img: SITKImage, displayInfo: bool = False):
+def getVoxelEdges(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, ...], ...]:
     """Get voxel edges.
 
     The function gets voxels' edges in each direction of an image
@@ -373,6 +350,8 @@ def getVoxelEdges(img: SITKImage, displayInfo: bool = False):
     import fredtools as ft
     import numpy as np
 
+    logger = ft.getLogger()
+
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     voxelEdges = []
@@ -383,15 +362,16 @@ def getVoxelEdges(img: SITKImage, displayInfo: bool = False):
         voxelEdges.append(tuple(voxelEdgesAxis[:, axis]))
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
         axesNames = ["x", "y", "z", "t"]
+        edgesLog = []
         for vox, axisName in zip(voxelEdges, axesNames):
-            print("# {:s}-spatial voxel edge [mm] = ".format(axisName), _generateSpatialCentresString(vox))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            edgesLog.append(f"{axisName}-spatial voxel edges [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
+        logger.info("Image voxel edges:\n" + "\n   ".join(edgesLog))
+
     return tuple(voxelEdges)
 
 
-def getVoxelPhysicalPoints(img: SITKImage, insideMask=False, displayInfo: bool = False):
+def getVoxelPhysicalPoints(img: SITKImage, insideMask=False, displayInfo: bool = False) -> NDArray:
     """Get physical positions of voxels.
 
     The function gets voxels' physical positions of an image
@@ -423,6 +403,7 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask=False, displayInfo: bool =
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
@@ -446,13 +427,12 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask=False, displayInfo: bool =
     voxelsPos = arrMaskPhysPos[voxelsIdx]
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"Voxel positions returned/all: {voxelsPos.shape[0]}/{np.prod(imgMask.GetSize())} ")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        logger.info(f"Voxel positions returned/all: {voxelsPos.shape[0]}/{np.prod(imgMask.GetSize())}")
+
     return voxelsPos
 
 
-def _getAxesVectorNotUnity(img: SITKImage):
+def _getAxesVectorNotUnity(img: SITKImage) -> tuple[int, ...]:
     """Get a boolean vector of axes size unitary.
 
     The function calculates a boolean vector of size equal to the image dimension,
@@ -484,7 +464,7 @@ def _getAxesVectorNotUnity(img: SITKImage):
     return tuple(axesVectorNotUnity)
 
 
-def _getAxesNumberNotUnity(img: SITKImage):
+def _getAxesNumberNotUnity(img: SITKImage) -> tuple[int, ...]:
     """Get axis indexes for the axes of size different than one.
 
     The function calculates the indexes of the axes for which the size is more than one.
@@ -515,7 +495,7 @@ def _getAxesNumberNotUnity(img: SITKImage):
     return tuple(axesNumberNotUnity)
 
 
-def _getAxesNumberUnity(img: SITKImage):
+def _getAxesNumberUnity(img: SITKImage) -> tuple[int, ...]:
     """Get axis indexes for the axes of size equal to one.
 
     The function calculates the indexes of the axes for which the size is equal to one.
@@ -546,7 +526,7 @@ def _getAxesNumberUnity(img: SITKImage):
     return tuple(axesNumberUnity)
 
 
-def _getDirectionArray(img: SITKImage):
+def _getDirectionArray(img: SITKImage) -> NDArray:
     """Get direction in the form of a 2D array.
 
     The function converts direction from an image defined as a SimpleITK image
@@ -571,7 +551,7 @@ def _getDirectionArray(img: SITKImage):
     return np.array(img.GetDirection()).reshape(img.GetDimension(), img.GetDimension())
 
 
-def _checkIdentity(img: SITKImage):
+def _checkIdentity(img: SITKImage) -> bool:
     """Check image identity.
 
     The function checks if the image direction represents the identity matrix
@@ -583,7 +563,7 @@ def _checkIdentity(img: SITKImage):
         An object of a SimpleITK image.
 
     Returns
-    -------
+    -------(
     bool
         Is it an identity or not.
     """
@@ -592,10 +572,10 @@ def _checkIdentity(img: SITKImage):
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    return np.all(np.identity(img.GetDimension(), dtype="int").flatten() == img.GetDirection())
+    return bool(np.all(np.identity(img.GetDimension(), dtype="int").flatten() == img.GetDirection()))
 
 
-def getExtMpl(img: SITKImage):
+def getExtMpl(img: SITKImage) -> tuple[float, ...]:
     """Get the extent of a slice in a format consistent with imshow of matplotlib module.
 
     The function gets the extent of an image defined as a SimpleITK image object
@@ -633,14 +613,14 @@ def getExtMpl(img: SITKImage):
 
     ft._imgTypeChecker.isSITK_slice(img, raiseError=True)
 
-    extent = [extent for axis_idx, extent in enumerate(ft.getExtent(img)) if axis_idx in _getAxesNumberNotUnity(img)]
+    extent = [list(extent) for axis_idx, extent in enumerate(ft.getExtent(img)) if axis_idx in _getAxesNumberNotUnity(img)]
     extent[1] = extent[1][::-1]
     extent = [inner for outer in extent for inner in outer]
 
     return tuple(extent)
 
 
-def pos(img: SITKImage):
+def pos(img: SITKImage) -> tuple[float, ...] | tuple[tuple[float, ...], ...]:
     """Get voxels' centres for axes of the size different than one.
 
     The function calculates the voxels' centres of an image defined
@@ -686,7 +666,7 @@ def pos(img: SITKImage):
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     pos = ft.getVoxelCentres(img)
-    pos = [pos[i] for i in range(img.GetDimension()) if not img.GetSize()[i] == 1]
+    pos = tuple([pos[i] for i in range(img.GetDimension()) if not img.GetSize()[i] == 1])
 
     if len(pos) == 1:
         pos = pos[0]
@@ -694,7 +674,7 @@ def pos(img: SITKImage):
     return pos
 
 
-def arr(img: SITKImage):
+def arr(img: SITKImage) -> NDArray:
     """Get squeezed array from image.
 
     The function gets a squeezed array (with no unitary dimensions) from
@@ -733,7 +713,7 @@ def arr(img: SITKImage):
     return arr
 
 
-def vec(img: SITKImage):
+def vec(img: SITKImage) -> NDArray:
     """Get 1D array from image describing a profile.
 
     The function gets a squeezed (with no unitary dimensions), 1D array from
@@ -772,7 +752,7 @@ def vec(img: SITKImage):
     return arr
 
 
-def isPointInside(img: SITKImage, point, displayInfo: bool = False):
+def isPointInside(img: SITKImage, point: Iterable[float] | Iterable[Iterable[float]], displayInfo: bool = False) -> bool | tuple[bool, ...]:
     """Check if a point is inside the image extent.
 
     The function checks if a point or list of points are inside
@@ -821,6 +801,7 @@ def isPointInside(img: SITKImage, point, displayInfo: bool = False):
     """
     import numpy as np
     import fredtools as ft
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
@@ -842,17 +823,15 @@ def isPointInside(img: SITKImage, point, displayInfo: bool = False):
     isIns = list(np.array(isIns).all(axis=0))
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
         if all(isIns):
-            print("# All points are inside the image")
+            logger.info("All points are inside the image.")
         else:
-            print("# Not all points are inside the image")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            logger.info("Not all points are inside the image.")
 
     return isIns[0] if len(isIns) == 1 else tuple(isIns)
 
 
-def getStatistics(img: SITKImage, displayInfo: bool = False):
+def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageFilter:
     """Get statistics of image
 
     The function gets basic statistics of an image defined as
@@ -891,29 +870,27 @@ def getStatistics(img: SITKImage, displayInfo: bool = False):
     """
     import SimpleITK as sitk
     import fredtools as ft
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    isVector = False
     if ft._imgTypeChecker.isSITK_vector(img):
+        logger.warning("The input image is a vector image. Statistics returned for the sum of vectors.")
         img = ft.sumVectorImg(img)
-        isVector = True
 
     stat = sitk.StatisticsImageFilter()
     stat.Execute(img)
+
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        if isVector:
-            print("# Warning: The input image is a vector image. Statistics shown for the sum of vectors.")
-        print("# Image mean/std: ", stat.GetMean(), "/", stat.GetSigma())
-        print("# Image min/max: ", stat.GetMinimum(), "/", stat.GetMaximum())
-        print("# Image sum: ", stat.GetSum())
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        statLog = [f"Image mean/std: {stat.GetMean()}/{stat.GetSigma()}",
+                   f"Image min/max: {stat.GetMinimum()}/{stat.GetMaximum()}",
+                   f"Image sum: {stat.GetSum()}"]
+        logger.info("Image statistics:\n" + "\n   ".join(statLog))
 
     return stat
 
 
-def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: bool = False):
+def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: bool = False) -> bool:
     """Compare two images frame of reference
 
     The function gets two images defined as instances of a SimpleITK image
@@ -944,6 +921,7 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: boo
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img1, raiseError=True)
     ft._imgTypeChecker.isSITK(img2, raiseError=True)
@@ -972,13 +950,14 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: boo
         valuesMatch = False
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Dimension matching:      ", dimensionMatch)
-        print("# Size matching:           ", sizeMatch)
-        print("# Origin matching:         ", originMatch, f"({decimals} decimals tolerance)")
-        print("# Spacing matching:        ", spacingMatch, f"({decimals} decimals tolerance)")
-        print("# Direction matching:      ", directionMatch)
-        print("# Pixel-to-pixel matching: ", valuesMatch, f"({decimals} decimals tolerance)")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        matchLog = [
+            f"Dimension matching:       {dimensionMatch}",
+            f"Size matching:            {sizeMatch}",
+            f"Origin matching:          {originMatch} ({decimals} decimals tolerance)",
+            f"Spacing matching:         {spacingMatch} ({decimals} decimals tolerance)",
+            f"Direction matching:       {directionMatch}",
+            f"Pixel-to-pixel matching:  {valuesMatch} ({decimals} decimals tolerance)",
+        ]
+        logger.info("FoRs matching:\n" + "\n   ".join(matchLog))
 
     return bool(match)

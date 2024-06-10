@@ -1,3 +1,4 @@
+from fredtools._typing import *
 re_number = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
 
 
@@ -315,7 +316,7 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
     return lineIdx, lineString
 
 
-def getCPUNo(CPUNo="auto") -> int | None:
+def getCPUNo(CPUNo: Literal["auto"] | NonNegativeInt = "auto") -> NonNegativeInt:
     """Get a number of CPU cores.
 
     The function returns the number of CPU cores. Usually, it is used in functions utilizing
@@ -323,9 +324,8 @@ def getCPUNo(CPUNo="auto") -> int | None:
 
     Parameters
     ----------
-    CPUNo : {'auto', 'one'} or integer, optional
-        A string of 'auto' or "one" for all the available CPU cores or a single one, respectively,
-        or a positive integer showing the number of CPU cores. (def. 'auto')
+    CPUNo : {'auto'} or integer, optional
+        A string of 'auto' for all the available CPU cores, or a positive integer showing the number of CPU cores. (def. 'auto')
 
     Returns
     -------
@@ -333,18 +333,22 @@ def getCPUNo(CPUNo="auto") -> int | None:
         Number of CPU cores.
     """
     from os import cpu_count
-    from numpy import isscalar
+    import fredtools as ft
+    logger = ft.getLogger()
 
-    if not CPUNo:
-        return 1
-    elif isinstance(CPUNo, str):
-        if CPUNo.lower() in ["none", "non", "single", "one"]:
-            return 1
-        elif CPUNo.lower() in ["auto"]:
-            return cpu_count()
+    if isinstance(CPUNo, str) and CPUNo.lower() in ["auto"]:
+        CPUNumber = cpu_count()
+        if not CPUNumber:
+            error = ValueError(f"Could not get the number of CPUs with os.cpu_count() routine.")
+            logger.error(error)
+            raise error
         else:
-            raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognized. Only a scalar number or 'auto' or 'none' are possible.")
-    elif isscalar(CPUNo):
+            return CPUNumber
+
+    elif isinstance(CPUNo, int) and CPUNo > 0:
         return CPUNo
+
     else:
-        raise ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognized. Only a scalar number or 'auto' or 'none' are possible.")
+        error = ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognized. Only a positive integer or 'auto' are possible.")
+        logger.error(error)
+        raise error

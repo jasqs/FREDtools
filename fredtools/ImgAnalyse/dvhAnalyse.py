@@ -1,4 +1,7 @@
-def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo: bool = False):
+from fredtools._typing import *
+
+
+def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: float, doseLevelStep: float = 0.01, displayInfo: bool = False) -> DVH:
     """Calculate DVH for the mask.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
@@ -38,6 +41,7 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo: bo
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
     ft._imgTypeChecker.isSITK3D(imgMask, raiseError=True)
@@ -45,7 +49,9 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo: bo
 
     # check FoR matching of img and mask
     if not ft.compareImgFoR(img, imgMask, displayInfo=False):
-        raise AttributeError("Both input images, 'img' and 'imgMask' must have the same FoR.")
+        error = TypeError("Both input images, 'img' and 'imgMask' must have the same FoR.")
+        logger.error(error)
+        raise error
 
     # convert images to vectors
     arrImg = sitk.GetArrayViewFromImage(img)
@@ -71,22 +77,21 @@ def getDVHMask(img, imgMask, dosePrescribed, doseLevelStep=0.01, displayInfo: bo
     dvhMask = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=maskName, color=maskColor, dvh_type="differential").cumulative
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# Structure name: '{dvhMask.name}'")
-        print(f"# Prescribed dose: {dosePrescribed:.3f} Gy")
-        print(f"# Volume: {dvhMask.volume:.3f} {dvhMask.volume_units}")
-        print(f"# Dose max/min: {dvhMask.max:.3f}/{dvhMask.min:.3f} {dvhMask.dose_units}")
-        print(f"# Dose mean: {dvhMask.mean:.3f} {dvhMask.dose_units}")
-        print(f"# Absolute HI (D02-D98): {dvhMask.statistic('D02').value-dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}")
-        print(f"# D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}")
-        print(f"# D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}")
-        print(f"# D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
-
+        dvhStatLog = [
+            f"Prescribed dose: {dosePrescribed:.3f} Gy",
+            f"Volume: {dvhMask.volume:.3f} {dvhMask.volume_units}",
+            f"Dose max/min: {dvhMask.max:.3f}/{dvhMask.min:.3f} {dvhMask.dose_units}",
+            f"Dose mean: {dvhMask.mean:.3f} {dvhMask.dose_units}",
+            f"Absolute HI (D02-D98): {dvhMask.statistic('D02').value-dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",
+            f"D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",
+            f"D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}",
+            f"D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}",
+        ]
+        logger.info(f"DVH statistics for '{dvhMask.name}' structure:\n" + "\n   ".join(dvhStatLog))
     return dvhMask
 
 
-def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01, resampleImg=None, CPUNo="auto", displayInfo: bool = False):
+def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribed: float, doseLevelStep: float = 0.01, resampleImg: float | Iterable[float] | None = None, CPUNo: Literal["auto"] | int = "auto", displayInfo: bool = False) -> DVH:
     """Calculate DVH for the structure.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
@@ -141,17 +146,20 @@ def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01
     """
     import fredtools as ft
     import numpy as np
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
-    if not ft.ft_imgIO.dicom_io._isDicomRS(RSfileName):
-        raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
+    if not ft.ImgIO.dicom_io._isDicomRS(RSfileName):
+        error = ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
+        logger.error(error)
+        raise error
 
     # get structure info
     structList = ft.getRSInfo(RSfileName)
     if structName not in list(structList.ROIName):
-        raise ValueError(f"Cannot find the structure '{structName}' in {RSfileName} dicom file with structures.")
-    else:
-        struct = structList.loc[structList.ROIName == structName]
+        error = ValueError(f"Cannot find the structure '{structName}' in {RSfileName} dicom file with structures.")
+        logger.error(error)
+        raise error
 
     # get the number of CPUs to be used for computation
     CPUNo = ft.getCPUNo(CPUNo)
@@ -159,13 +167,14 @@ def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01
     # resample image if requested
     if resampleImg:
         # check if rescaleImg is in the proper format
-        if np.isscalar(resampleImg):
+        if not isinstance(resampleImg, Iterable):
             resampleImg = [resampleImg] * img.GetDimension()
         else:
             resampleImg = list(resampleImg)
-
-        if not len(resampleImg) == img.GetDimension():
-            raise ValueError(f"Shape of 'spacing' is {resampleImg} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
+            if not len(resampleImg) == img.GetDimension():
+                error = ValueError(f"Shape of 'spacing' is {resampleImg} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
+                logger.error(error)
+                raise error
 
         # resample image
         img = ft.resampleImg(img=img, spacing=resampleImg)
@@ -176,15 +185,16 @@ def getDVHStruct(img, RSfileName, structName, dosePrescribed, doseLevelStep=0.01
     dvhROI = getDVHMask(img, imgROI, dosePrescribed=dosePrescribed, doseLevelStep=doseLevelStep)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# Structure name: '{dvhROI.name}'")
-        print(f"# Prescribed dose: {dosePrescribed:.3f} Gy")
-        print(f"# Volume: {dvhROI.volume:.3f} {dvhROI.volume_units}")
-        print(f"# Dose max/min: {dvhROI.max:.3f}/{dvhROI.min:.3f} {dvhROI.dose_units}")
-        print(f"# Dose mean: {dvhROI.mean:.3f} {dvhROI.dose_units}")
-        print(f"# Absolute HI (D02-D98): {dvhROI.statistic('D02').value-dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}")
-        print(f"# D98: {dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}")
-        print(f"# D50: {dvhROI.statistic('D50').value:.3f} {dvhROI.dose_units}")
-        print(f"# D02: {dvhROI.statistic('D02').value:.3f} {dvhROI.dose_units}")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        dvhStatLog = [
+            f"Prescribed dose: {dosePrescribed:.3f} Gy",
+            f"Volume: {dvhROI.volume:.3f} {dvhROI.volume_units}",
+            f"Dose max/min: {dvhROI.max:.3f}/{dvhROI.min:.3f} {dvhROI.dose_units}",
+            f"Dose mean: {dvhROI.mean:.3f} {dvhROI.dose_units}",
+            f"Absolute HI (D02-D98): {dvhROI.statistic('D02').value-dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",
+            f"D98: {dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",
+            f"D50: {dvhROI.statistic('D50').value:.3f} {dvhROI.dose_units}",
+            f"D02: {dvhROI.statistic('D02').value:.3f} {dvhROI.dose_units}",
+        ]
+        logger.info(f"DVH statistics for '{dvhROI.name}' structure:\n" + "\n   ".join(dvhStatLog))
+
     return dvhROI

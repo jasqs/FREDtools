@@ -1,13 +1,12 @@
-from itk import Image as ITKImage
-from SimpleITK import Image as SITKImage
-from SimpleITK import Transform as SITKTransform
-from fredtools._logger import getLogger
+from fredtools._typing import *
+from fredtools import getLogger
+
 #### ITK Image checkers ####
 
 
 def isITK2D(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 2D itk.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isITK(img, raiseError=raiseError) and img.ndim == 2:
         return True
@@ -23,7 +22,7 @@ def isITK2D(img: ITKImage, raiseError: bool = False) -> bool:
 
 def isITK3D(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 3D itk.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isITK(img, raiseError=raiseError) and img.ndim == 3:
         return True
@@ -39,7 +38,7 @@ def isITK3D(img: ITKImage, raiseError: bool = False) -> bool:
 
 def isITK4D(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 4D itk.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isITK(img, raiseError=raiseError) and img.ndim == 4:
         return True
@@ -55,7 +54,7 @@ def isITK4D(img: ITKImage, raiseError: bool = False) -> bool:
 
 def isITK(img: ITKImage, raiseError: bool = False) -> bool:
     """Check if input is an itk.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isinstance(img, ITKImage):
         return True
@@ -73,7 +72,7 @@ def isITK(img: ITKImage, raiseError: bool = False) -> bool:
 
 def isSITK2D(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 2D SimpleITK.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetDimension() == 2:
         return True
@@ -89,7 +88,7 @@ def isSITK2D(img: SITKImage, raiseError: bool = False) -> bool:
 
 def isSITK3D(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 3D SimpleITK.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetDimension() == 3:
         return True
@@ -105,7 +104,7 @@ def isSITK3D(img: SITKImage, raiseError: bool = False) -> bool:
 
 def isSITK4D(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is a 4D SimpleITK.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetDimension() == 4:
         return True
@@ -121,7 +120,7 @@ def isSITK4D(img: SITKImage, raiseError: bool = False) -> bool:
 
 def isSITK(img: SITKImage, raiseError: bool = False) -> bool:
     """Check if input is an SimpleITK.Image object and raise error if requested."""
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isinstance(img, SITKImage):
         return True
@@ -136,7 +135,7 @@ def isSITK(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_point(img: SITKImage, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 0):
         return True
@@ -151,7 +150,7 @@ def isSITK_point(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_profile(img: SITKImage, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 1):
         return True
@@ -166,7 +165,7 @@ def isSITK_profile(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_slice(img: SITKImage, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 2):
         return True
@@ -181,7 +180,7 @@ def isSITK_slice(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_volume(img: SITKImage, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 3):
         return True
@@ -196,7 +195,7 @@ def isSITK_volume(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_timevolume(img: SITKImage, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 4):
         return True
@@ -211,7 +210,7 @@ def isSITK_timevolume(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_vector(img: SITKImage, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and "vector" in img.GetPixelIDTypeAsString():
         return True
@@ -226,7 +225,7 @@ def isSITK_vector(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_transform(img: SITKTransform, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isinstance(img, SITKTransform):
         return True
@@ -245,7 +244,7 @@ def isSITK_transform(img: SITKTransform, raiseError: bool = False) -> bool:
 def isSITK_maskBinary(img: SITKImage, raiseError: bool = False) -> bool:
     import fredtools as ft
     from SimpleITK import sitkUInt8
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     stat = ft.getStatistics(img)
 
@@ -264,7 +263,7 @@ def isSITK_maskBinary(img: SITKImage, raiseError: bool = False) -> bool:
 def isSITK_maskFloating(img: SITKImage, raiseError: bool = False) -> bool:
     import fredtools as ft
     from SimpleITK import sitkFloat32, sitkFloat64
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     stat = ft.getStatistics(img)
 
@@ -281,7 +280,7 @@ def isSITK_maskFloating(img: SITKImage, raiseError: bool = False) -> bool:
 
 
 def isSITK_mask(img: SITKImage, raiseError: bool = False) -> bool:
-    logger = getLogger(__name__)
+    logger = getLogger()
 
     if isSITK(img, raiseError=raiseError) and ((isSITK_maskBinary(img) or isSITK_maskFloating(img))):
         return True
@@ -295,8 +294,8 @@ def isSITK_mask(img: SITKImage, raiseError: bool = False) -> bool:
             return False
 
 
-def getMaskType(img: SITKImage):
-    logger = getLogger(__name__)
+def getMaskType(img: SITKImage) -> str:
+    logger = getLogger()
 
     isSITK(img, raiseError=True)
     isSITK_mask(img, raiseError=True)

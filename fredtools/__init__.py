@@ -1,5 +1,6 @@
 from ._logger import configureLogging, getLogger
 
+from . import _typing
 from . import _helper
 
 from . import ImgAnalyse

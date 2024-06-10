@@ -1,4 +1,7 @@
-def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0.5, CPUNo="auto", displayInfo: bool = False):
+from fredtools._typing import *
+
+
+def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask: bool = False, areaFraction: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5, CPUNo: Literal["auto"] | int = "auto", displayInfo: bool = False) -> SITKImage:  # type: ignore
     """Map structure to image and create a mask.
 
     The function reads a `structName` structure from the RS dicom file and maps it to
@@ -65,11 +68,12 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     import SimpleITK as sitk
     import warnings
     from multiprocessing import Pool
+    logger = ft.getLogger()
 
     if not ft._imgTypeChecker.isSITK3D(img, raiseError=True):
         raise ValueError(f"The image is a SimpleITK image of dimension {img.GetDimension()}. Only mapping ROI to 3D images are supported now.")
 
-    if not ft.ft_imgIO.dicom_io._isDicomRS(RSfileName):
+    if not ft.ImgIO.dicom_io._isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
     # set the number of CPUs to be used
@@ -77,15 +81,19 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     # check if fraction area is correct
     if binaryMask:
-        if not np.isscalar(areaFraction) or areaFraction < 0 or areaFraction > 1:
-            raise ValueError(f"The parameter 'areaFraction' must be a scalar larger or equal to 0 and less or equal to 1.")
+        if not isinstance(areaFraction, float) or areaFraction < 0 or areaFraction > 1:
+            error = ValueError(f"The parameter 'areaFraction' must be a scalar larger or equal to 0 and less or equal to 1.")
+            logger.error(error)
+            raise error
 
     # check if the structName is in the RS dicom
     if not structName in ft.getRSInfo(RSfileName).ROIName.tolist():
-        raise ValueError(f"The structure '{structName}' can not be found in the dicom RS file {RSfileName}")
+        error = ValueError(f"The structure '{structName}' can not be found in the dicom RS file {RSfileName}")
+        logger.error(error)
+        raise error
 
     # get structure contour and structure info
-    StructureContours, StructInfo = ft.dicom_io._getStructureContoursByName(RSfileName, structName)
+    StructureContours, StructInfo = ft.ImgIO.dicom_io._getStructureContoursByName(RSfileName, structName)
 
     # check if the StructureContours is empty and return an empty mask (filled with 0) if true
     if len(StructureContours) == 0:
@@ -100,12 +108,12 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
         imgMask.SetMetaData("ROIType", StructInfo["Type"])
 
         if displayInfo:
-            print(f"### {ft.currentFuncName()} ###")
-            print("# Warning: no 'StructureContours' was defined for this structure and an empty mask was returned")
-            print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
-            print("# Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3))
-            ft.ft_imgAnalyse._displayImageInfo(imgMask)
-            print("#" * len(f"### {ft.currentFuncName()} ###"))
+            logger.warning("# Warning: no 'StructureContours' was defined for this structure and an empty mask was returned")
+            logStr = ["Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]),
+                      "Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3)]
+            logStr = "\n\t".join(logStr)
+
+            logger.info(logStr + "\n" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
 
         return imgMask
 
@@ -115,7 +123,9 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
     # check if all Z positions are the same for each contour
     for StructureContour in StructureContours:
         if not len(np.unique(StructureContour[:, 2])) == 1:
-            raise ValueError(f"Not all Z (depth) position in controur are the same.")
+            error = ValueError(f"Not all Z (depth) position in controur are the same.")
+            logger.error(error)
+            raise error
 
     # get depth for each contour and sort the depths
     StructureContoursDepths = np.array([StructureContour[0, 2] for StructureContour in StructureContours])
@@ -648,7 +658,7 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     return imgRes
 
 
-def sumImg(imgs, displayInfo: bool = False):
+def sumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
     """Sum list of images.
 
     The function sums an iterable (list, tuple, etc.) of images
@@ -956,7 +966,7 @@ def createCylinderMask(img, startPoint, endPoint, radious, displayInfo: bool = F
     return imgMask
 
 
-def sumVectorImg(img, displayInfo: bool = False):
+def sumVectorImg(img: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Sum vector image.
 
     The function sums all elements of a vector in a vector image
@@ -978,6 +988,7 @@ def sumVectorImg(img, displayInfo: bool = False):
     """
     import fredtools as ft
     import SimpleITK as sitk
+    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK_vector(img, raiseError=True)
 
@@ -988,9 +999,8 @@ def sumVectorImg(img, displayInfo: bool = False):
     imgSum = ft.sumImg(imgs)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgSum)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgSum))
+
     return imgSum
 
 
