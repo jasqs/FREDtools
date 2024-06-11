@@ -147,10 +147,11 @@ def mapStructToImg(img, RSfileName, structName, binaryMask=False, areaFraction=0
 
     # validate if all contour vertices are defined inside the image extent
     StructureContoursExtent = np.stack((np.min(np.concatenate(StructureContours, axis=0), axis=0), np.max(np.concatenate(StructureContours, axis=0), axis=0)))
-    if not all(ft.isPointInside(img, StructureContoursExtent)):
-        warnings.warn(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
-                      f"The image extent is {ft.getExtent(img)}\n" +
-                      f"and the contour extent is {StructureContoursExtent.T.tolist()}.")
+    if displayInfo:
+        if not all(ft.isPointInside(img, StructureContoursExtent)):
+            warnings.warn(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
+                          f"The image extent is {ft.getExtent(img)}\n" +
+                          f"and the contour extent is {StructureContoursExtent.T.tolist()}.")
 
     # calculate mask size
     arrMaskSize = np.array([len(MaskDepths), img.GetSize()[1], img.GetSize()[0]])
