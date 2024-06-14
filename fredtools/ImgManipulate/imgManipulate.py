@@ -157,7 +157,7 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
 
     # validate if all contour vertices are defined inside the image extent
     StructureContoursExtent = np.stack((np.min(np.concatenate(StructureContours, axis=0), axis=0), np.max(np.concatenate(StructureContours, axis=0), axis=0)))
-    if not all(ft.isPointInside(img, StructureContoursExtent)):
+    if not all(tuple([ft.isPointInside(img, StructureContoursExtent)])):
         warnings.warn(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
                       f"The image extent is {ft.getExtent(img)}\n" +
                       f"and the contour extent is {StructureContoursExtent.T.tolist()}.")
@@ -227,7 +227,7 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
 
     # interpolate mask to input image
     imgMask = sitk.Resample(
-        imgMask, img, interpolator=ft.ft_imgGetSubimg.setSITKInterpolator(interpolation="linear"))
+        imgMask, img, interpolator=ft._helper.setSITKInterpolator(interpolation="linear"))
 
     # prepare binary mask if requested, with fraction area threshold
     if binaryMask:
@@ -361,7 +361,9 @@ def _getStructureContourArray(StructureContourPx):
     arr[StructureContourBorderPixels[:, 1], StructureContourBorderPixels[:, 0]] = 1
 
     # fill pixels inside the contour
-    arr = ndimage.binary_fill_holes(arr.astype("bool")).astype("float")
+    arr = ndimage.binary_fill_holes(arr.astype("bool"))
+    if arr:
+        arr = arr.astype("float")
 
     # calculate the contour pixels area inside the contour
     StructureContourBorderPixelsArea = [StructureContourBorderPixelsPolygon.intersection(StructureContourPxPolygon).area for StructureContourBorderPixelsPolygon in StructureContourBorderPixelsPolygons]

@@ -2,28 +2,29 @@ from fredtools._typing import *
 
 
 def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, float], ...]:
-    """Get the extent of an image.
+    """
+    Get the extent of an image.
 
-    The function gets the extent of an image defined as a SimpleITK image object.
-    Extent means the coordinates of most side voxels' borders
-    in each direction. It is assumed that the coordinate system is in [mm].
+    The function calculates the extent of an image, which is defined as the coordinates of the most side voxels' borders
+    in each direction. The extent is assumed to be in millimeters.
 
     Parameters
     ----------
     img : SimpleITK Image
         An object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
+        If True, a summary of the function results will be displayed. (default: False)
 
     Returns
     -------
     tuple
-        A tuple of extent values in form ((xmin,xmax),(ymin,ymax),...)
+        A tuple of extent values in the form ((xmin, xmax), (ymin, ymax), ...)
 
     See Also
     --------
-    getExtMpl : get the extent of a SimpleITK image object describing a slice in matplotlib format.
+    getExtMpl : Get the extent of a SimpleITK image object describing a slice in matplotlib format.
     """
+
     import numpy as np
     import fredtools as ft
     logger = ft.getLogger()
@@ -37,10 +38,10 @@ def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, f
 
     if displayInfo:
         axesNames = ["x", "y", "z", "t"]
-        extentLog = []
+        strLog = []
         for ext, axisName in zip(extent, axesNames):
-            extentLog.append(f"{axisName}-spatial extent [mm] = " + ft.ImgAnalyse.imgInfo._generateExtentString(ext))
-        logger.info("Image extent:\n" + "\n   ".join(extentLog))
+            strLog.append(f"{axisName}-spatial extent [mm] = " + ft.ImgAnalyse.imgInfo._generateExtentString(ext))
+        logger.info("Image extent:\n" + "\n   ".join(strLog))
 
     return extent
 
@@ -48,25 +49,24 @@ def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, f
 def getSize(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     """Get the size of an image.
 
-    The function gets the size of an image defined as a SimpleITK image object
-    in each direction. The size is defined as the absolute difference of
-    the image extent. It is assumed that the coordinate system is in [mm].
+    This function calculates the size of an image in each direction. The size is defined as the absolute difference of
+    the image extent. It is assumed that the coordinate system is in millimeters.
 
     Parameters
     ----------
     img : SimpleITK Image
         An object of a SimpleITK image.
     displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
+        If True, displays a summary of the function results. (default: False)
 
     Returns
     -------
     tuple
-        A Tuple of sizes in each direction in form (xSize,ySize,...)
+        A tuple of sizes in each direction in the form (xSize, ySize, ...)
 
     See Also
     --------
-    getExtent : get the extent of an image.
+    getExtent : Get the extent of an image.
     """
     import numpy as np
     import fredtools as ft
@@ -170,7 +170,7 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...
         massCenter = getImageCenter(img)
     else:
         imgITK = ft.SITK2ITK(img)
-        moments = itk.ImageMomentsCalculator.New(imgITK)
+        moments = itk.ImageMomentsCalculator.New(imgITK)  # type: ignore
         moments.Compute()
         massCenter = tuple(moments.GetCenterOfGravity())
 
@@ -315,10 +315,10 @@ def getVoxelCentres(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[fl
 
     if displayInfo:
         axesNames = ["x", "y", "z", "t"]
-        centersLog = []
+        strLog = []
         for vox, axisName in zip(voxelCentres, axesNames):
-            centersLog.append(f"{axisName}-spatial voxel centers [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
-        logger.info("Image voxel centers:\n" + "\n   ".join(centersLog))
+            strLog.append(f"{axisName}-spatial voxel centers [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
+        logger.info("Image voxel centers:\n" + "\n   ".join(strLog))
 
     return tuple(voxelCentres)
 
@@ -363,10 +363,10 @@ def getVoxelEdges(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[floa
 
     if displayInfo:
         axesNames = ["x", "y", "z", "t"]
-        edgesLog = []
+        strLog = []
         for vox, axisName in zip(voxelEdges, axesNames):
-            edgesLog.append(f"{axisName}-spatial voxel edges [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
-        logger.info("Image voxel edges:\n" + "\n   ".join(edgesLog))
+            strLog.append(f"{axisName}-spatial voxel edges [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
+        logger.info("Image voxel edges:\n" + "\n   ".join(strLog))
 
     return tuple(voxelEdges)
 
@@ -753,32 +753,31 @@ def vec(img: SITKImage) -> NDArray:
 
 
 def isPointInside(img: SITKImage, point: Iterable[float] | Iterable[Iterable[float]], displayInfo: bool = False) -> bool | tuple[bool, ...]:
-    """Check if a point is inside the image extent.
+    """Check if a point or a list of points is inside the extent of an image.
 
-    The function checks if a point or list of points are inside
-    the extent of an image defined as a SimpleITK image object
-    The dimension of points must match the dimension of the img.
-    The points at the border of the image (equal to the image extent)
-    are considered to be inside the image.
+    This function checks if a point or a list of points are inside the extent
+    of an image defined as a SimpleITK image object. The points at the border
+    of the image (equal to the image extent) are considered to be inside the image.
 
     Parameters
     ----------
     img : SimpleITK Image
         An object of a SimpleITK image.
-    point : NxD array_like
+    point : Iterable[float] | Iterable[Iterable[float]]
         An iterable (numpy array, list of lists, etc) of N points.
         Every point must be of the image dimension size.
     displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
+        Displays a summary of the function results. (default: False)
 
     Returns
     -------
-    single or tuple
-        A single or a tuple of boolean values.
+    bool | tuple[bool, ...]
+        A single boolean value if a single point is provided,
+        or a tuple of boolean values if a list of points is provided.
 
     See Also
     --------
-        getExtent : get the extent of the image in each direction.
+    getExtent : Get the extent of the image in each direction.
 
     Examples
     --------
@@ -789,8 +788,8 @@ def isPointInside(img: SITKImage, point: Iterable[float] | Iterable[Iterable[flo
      (-354.6, -70.9),
      (-786.2, -524.6))
 
-    It means that the `img` expands from -175.0 to 174.3, from -354.6 to-70.9
-    and from -786.2 to -524.6 in X,Y and Z directions, respectively. Let's check
+    It means that the `img` expands from -175.0 to 174.3, from -354.6 to -70.9,
+    and from -786.2 to -524.6 in the X, Y, and Z directions, respectively. Let's check
     if the point [0,0,0] and a list of points [[0,0,0],[0,-100,-600],[-175,-354.6,-786.2]]
     are inside the image extent:
 
@@ -882,10 +881,10 @@ def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageF
     stat.Execute(img)
 
     if displayInfo:
-        statLog = [f"Image mean/std: {stat.GetMean()}/{stat.GetSigma()}",
-                   f"Image min/max: {stat.GetMinimum()}/{stat.GetMaximum()}",
-                   f"Image sum: {stat.GetSum()}"]
-        logger.info("Image statistics:\n" + "\n   ".join(statLog))
+        strLog = [f"Image mean/std: {stat.GetMean()}/{stat.GetSigma()}",
+                  f"Image min/max: {stat.GetMinimum()}/{stat.GetMaximum()}",
+                  f"Image sum: {stat.GetSum()}"]
+        logger.info("Image statistics:\n" + "\n   ".join(strLog))
 
     return stat
 
@@ -950,7 +949,7 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: boo
         valuesMatch = False
 
     if displayInfo:
-        matchLog = [
+        strLog = [
             f"Dimension matching:       {dimensionMatch}",
             f"Size matching:            {sizeMatch}",
             f"Origin matching:          {originMatch} ({decimals} decimals tolerance)",
@@ -958,6 +957,6 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: boo
             f"Direction matching:       {directionMatch}",
             f"Pixel-to-pixel matching:  {valuesMatch} ({decimals} decimals tolerance)",
         ]
-        logger.info("FoRs matching:\n" + "\n   ".join(matchLog))
+        logger.info("FoRs matching:\n" + "\n   ".join(strLog))
 
     return bool(match)

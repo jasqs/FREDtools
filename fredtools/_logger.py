@@ -3,7 +3,14 @@ import logging
 
 
 class customFormatterINFO(logging.Formatter):
+    """
+    This class is a subclass of logging.Formatter and it is used to format the log messages in a customised way.
 
+    The class defines a method format that returns a formatted string based on the level of the log message.
+    The formatting is done using ANSI escape sequences. The class defines a dictionary FORMATS that contains
+    the formatting string for different log levels. The method format returns the formatted string based on the
+    level of the log message.
+    """
     grey = "\x1b[38;21m"
     yellow = "\x1b[33m"
     red = "\x1b[31m"
@@ -30,7 +37,14 @@ class customFormatterINFO(logging.Formatter):
 
 
 class customFormatterDEBUG(logging.Formatter):
+    """
+    This class is a subclass of logging.Formatter and it is used to format the log messages in a customised way.
 
+    The class defines a method format that returns a formatted string based on the level of the log message.
+    The formatting is done using ANSI escape sequences. The class defines a dictionary FORMATS that contains
+    the formatting string for different log levels. The method format returns the formatted string based on the
+    level of the log message.
+    """
     grey = "\x1b[38;21m"
     yellow = "\x1b[33m"
     red = "\x1b[31m"
@@ -57,26 +71,51 @@ class customFormatterDEBUG(logging.Formatter):
 
 
 def getConsoleLogHandler() -> logging.Handler:
+    """
+    Returns a console log handler that directs log messages to the standard output.
+
+    Returns:
+        logging.Handler: The console log handler.
+    """
     import sys
     consoleHandler = logging.StreamHandler(sys.stdout)
     return consoleHandler
 
 
 def getFileLogHandler(fileName: str) -> logging.Handler:
+    """
+    Returns a file log handler for the specified file name.
+
+    Parameters
+    ----------
+    fileName : str
+        The name of the file to log to.
+
+    Returns
+    -------
+    logging.Handler
+        The file log handler.
+    """
     fileHandler = logging.FileHandler(fileName)
     # fileHandler.setFormatter(customFormatterDEBUG())
     return fileHandler
 
 
 def getLogger(name: str | None = None) -> logging.Logger:
-    """Get logger of a given name.
+    """Get a logger with a NullHandler attached.
 
-    The function is a wrapper for `logging.getLogger(name)` with a NullHandler added to handlers.
+    The function returns a logger with a NullHandler attached. The NullHandler is attached to the logger
+    to suppress any logging messages if no handler is attached to the logger.
 
     Parameters
     ----------
     name : str or None, optional
-        Name of the logger. If not providef or None, then the caller function name will be used. (def. None)
+        Name of the logger. If not provided, the name of the calling function is used. (def. None)
+
+    Returns
+    -------
+    logger : logging.Logger
+        Logger object with a NullHandler attached.
     """
     from fredtools._helper import currentFuncName
     if not name:
