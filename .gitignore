@@ -127,26 +127,13 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# other FREDtools-related ingnores
 test/
 
 *.code-workspace
 .vscode/
 
 examples/exampleData/
-
-fredtools/.vscode/
-
-examples/CT.mhd
-
-examples/CTCrop.mhd
-
-examples/CTRes.mhd
-
-examples/ROI_External.mhd
-
-examples/ROI_Mix.mhd
-
-examples/ROI_Sphere.mhd
 
 docs/doctrees/
 
