@@ -159,7 +159,8 @@ def readFREDStat(fileNameLogOut, displayInfo=False):
     simInfo["primarySimulated"] = float(matchData(r"Number of primary particles", rf"Number of primary particles:\W+({ft.re_number})"))
     simInfo["primarySimulated"] = int(simInfo["primarySimulated"]) if not np.isnan(simInfo["primarySimulated"]) else np.nan
 
-    simInfo["trackingRate_prim_s"] = float(matchData(r"Tracking rate", rf"Tracking rate:\W+({ft.re_number})"))
+    lineFromFile = ft.getLineFromFile('Tracking rate:', fileNameLogOut, kind="first")
+    simInfo["trackingRate_prim_s"] = float(re.search(r"Tracking rate:\s+([0-9.eE+-]+)\s+primary/s", lineFromFile[1]).group(1))
     simInfo["trackingRate_prim_s"] = int(simInfo["trackingRate_prim_s"]) if not np.isnan(simInfo["trackingRate_prim_s"]) else np.nan
 
     simInfo["trackTimePerPrimary_us"] = float(matchData(r"Track time per primary", rf"Track time per primary:\W+({ft.re_number})"))
