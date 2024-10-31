@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def readBeamModel(fileName: PathLike) -> DottedDict:
+def readBeamModel(fileName: PathLike) -> dict:
     """Read beam model from a YAML file.
 
     The function reads the beam model parameters from a YAML beam model file.
@@ -53,7 +53,7 @@ def readBeamModel(fileName: PathLike) -> DottedDict:
                 beamModel[key] = beamModel[key].map(numpyArray)  # map data in square brackets to numpy
                 beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first cloumn as index
 
-    return DottedDict(beamModel)
+    return beamModel
 
 
 def writeBeamModel(beamModel: dict, fileName: PathLike) -> None:
