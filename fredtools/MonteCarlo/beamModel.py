@@ -1,4 +1,9 @@
-def readBeamModel(fileName):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def readBeamModel(fileName: PathLike) -> DottedDict:
     """Read beam model from a YAML file.
 
     The function reads the beam model parameters from a YAML beam model file.
@@ -36,7 +41,7 @@ def readBeamModel(fileName):
         """Convert all items in dataFrame-like list in square brackets to numpy arrays"""
         if not isinstance(item, str):
             return item
-        if itemArray := re.findall('\[(.*)\]', item):
+        if itemArray := re.findall(r'\[(.*)\]', item):
             return np.fromstring(itemArray[0], sep=",")
         else:
             return item
@@ -44,14 +49,14 @@ def readBeamModel(fileName):
     for key in beamModel.keys():
         if isinstance(beamModel[key], list):
             if ("row" in beamModel[key][-1]) and ("column" in beamModel[key][-1]):  # the key is a pandas DataFrame
-                beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), sep='\s+(?![^\[]*[\]])', engine="python")
+                beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), sep=r'\s+(?![^\[]*[\]])', engine="python")
                 beamModel[key] = beamModel[key].map(numpyArray)  # map data in square brackets to numpy
                 beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first cloumn as index
 
-    return beamModel
+    return DottedDict(beamModel)
 
 
-def writeBeamModel(beamModel, fileName):
+def writeBeamModel(beamModel: dict, fileName: PathLike) -> None:
     """Write beam model to YAML.
 
     The function writes the beam model parameters in YAML format for a beam model file.
@@ -100,7 +105,7 @@ def writeBeamModel(beamModel, fileName):
         yaml.dump(beamModelSave, yaml_file, sort_keys=False, width=2000, default_flow_style=False, allow_unicode=True)
 
 
-def interpolateBeamModel(beamModel, nomEnergy, interpolation="linear", splineOrder=3):
+def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numberic | Iterable[Numberic], interpolation: Literal["linear", "spline", "nearest"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3) -> DataFrame:
     """Interpolate beam model for a given nominal energy.
 
     The function interpolates all the beam model parameters for a given nominal energies
@@ -133,37 +138,43 @@ def interpolateBeamModel(beamModel, nomEnergy, interpolation="linear", splineOrd
     import numpy as np
 
     # validate nominal energy
-    if np.isscalar(nomEnergy):
+    if isinstance(nomEnergy, Numberic):
         nomEnergy = [nomEnergy]
 
     # validate the interpolation method
     if not interpolation.lower() in ["linear", "nearest", "spline"]:
-        raise ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+        error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+        _logger.error(error)
+        raise error
 
-    interpolation = interpolation.lower()
+    interp = interpolation.lower()
 
     # set the proper interpolation method for spline
-    if interpolation == "spline":
+    if interp == "spline":
         if splineOrder > 5 or splineOrder < 0:
-            raise ValueError(f"Spline order must be in range 0-5.")
+            error = ValueError(f"Spline order must be in range 0-5.")
+            _logger.error(error)
+            raise error
         else:
-            interpolation = splineOrder
+            interp = splineOrder
 
     # check if all given nomEnergy are in range of the beam model
     if np.array(nomEnergy).min() < beamModel.index.min() or np.array(nomEnergy).max() > beamModel.index.max():
-        raise ValueError(f"The range of nominal energies for interpolation is {np.array(nomEnergy).min()}-{np.array(nomEnergy).max()} and it is outside the beam model nominal energy range {beamModel.index.min()}-{beamModel.index.max()}.")
+        error = ValueError(f"The range of nominal energies for interpolation is {np.array(nomEnergy).min()}-{np.array(nomEnergy).max()} and it is outside the beam model nominal energy range {beamModel.index.min()}-{beamModel.index.max()}.")
+        _logger.error(error)
+        raise error
 
     # interpolate each parameter of the beam model with a given interpolation method
     beamModelEnergyInterp = {}
     beamModelEnergyInterp["nomEnergy"] = nomEnergy
     for key in beamModel.keys():
-        beamModelEnergyInterp[key] = interp1d(beamModel.index, beamModel[key], kind=interpolation)(nomEnergy).tolist()
+        beamModelEnergyInterp[key] = interp1d(beamModel.index, beamModel[key], kind=interp)(nomEnergy).tolist()  # type: ignore
     beamModelEnergyInterp = pd.DataFrame(beamModelEnergyInterp)
 
     return beamModelEnergyInterp
 
 
-def calcRaysVectors(targetPoint, SAD):
+def calcRaysVectors(targetPoint: Iterable[Numberic] | Iterable[Iterable[Numberic]], SAD: Iterable[Numberic]) -> Tuple[NDArray, NDArray]:
     """Calculate rays positions and direction versors.
 
     The function calculates the ray position and direction versor from the target position.
@@ -194,13 +205,18 @@ def calcRaysVectors(targetPoint, SAD):
         raysTarget = np.expand_dims(raysTarget, 0)
 
     if raysTarget.shape[1] != 3 or raysTarget.ndim != 2:
-        raise AttributeError("The targetPoint parameter must be an iterable of shape Nx3.")
+        error = AttributeError("The targetPoint parameter must be an iterable of shape Nx3.")
+        _logger.error(error)
+        raise error
 
     # validate SAD
-    if not isinstance(SAD, Iterable) or len(SAD) != 2:
-        raise AttributeError("The SAD parameterm must be an iterable with two elements.")
+    if not isinstance(SAD, Iterable) or len(list(SAD)) != 2:
+        error = AttributeError("The SAD parameterm must be an iterable with two elements.")
+        _logger.error(error)
+        raise error
 
     raysPosition = np.zeros((raysTarget.shape[0], 3), dtype=np.float64)
+    SAD = list(SAD)
 
     if SAD[0] > SAD[1]:  # diverging first in X and then in Y directions, i.e. SAD[0] is upstream and SAD[1] is downstream
         raysPosition[:, 0] = (SAD[0] - SAD[1]) * raysTarget[:, 0] / (raysTarget[:, 2] + SAD[0])

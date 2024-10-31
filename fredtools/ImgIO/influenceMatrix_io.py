@@ -1,4 +1,9 @@
-def getInmFREDBaseImg(fileName, dtype=float, displayInfo: bool = False):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo: bool = False) -> SITKImage:
     """Get base image defined in FRED influence matrix.
 
     The function reads an influence matrix file produced by the FRED Monte Carlo
@@ -29,7 +34,6 @@ def getInmFREDBaseImg(fileName, dtype=float, displayInfo: bool = False):
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
-    import pandas as pd
     import struct
 
     with open(fileName, "rb") as file_h:
@@ -47,14 +51,12 @@ def getInmFREDBaseImg(fileName, dtype=float, displayInfo: bool = False):
         imgBase.SetSpacing(spacing)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgBase)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        ft.ImgAnalyse.imgInfo._displayImageInfo(imgBase)
 
     return imgBase
 
 
-def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, displayInfo: bool = False):
+def getInmFREDSumImage(fileName: PathLike, inmInfo: DataFrame | PDSeries | None = None, threshold: Numberic | Sequence[Numberic] | None = None, dtype: DTypeLike = float, displayInfo: bool = False) -> SITKImage:
     """Read the FRED influence matrix to sum up the SimpleITK image object.
 
     The function reads an influence matrix file produced by
@@ -111,16 +113,18 @@ def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, disp
 
     # validate threshold
     if threshold:
-        if np.isscalar(threshold):
+        if isinstance(threshold, Numberic):
             threshold = tuple([threshold])
         else:
             threshold = tuple(threshold)
 
         if len(threshold) != componentNo:
-            raise AttributeError(f"The influence matrix describes {componentNo} components but threshold is {threshold}. The size of threshold must be the same as the number of components.")
+            error = AttributeError(f"The influence matrix describes {componentNo} components but threshold is {threshold}. The size of threshold must be the same as the number of components.")
+            _logger.error(error)
+            raise error
 
     # get requested pencil beams info
-    inmInfoRequested = ft.ft_imgIO.influenceMatrix_io._mergeInmInfo(inmInfo, fileName)
+    inmInfoRequested = _mergeInmInfo(inmInfo, fileName)
 
     # create empty vector
     arrVec = [np.zeros(size, dtype="float64") for _ in range(componentNo)]
@@ -145,7 +149,7 @@ def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, disp
                 voxelValuesComponent = voxelValues[component::componentNo]
                 # filter values if requested
                 """The filterring is done for values above or equal to a given fraction of the maximum value, defined with the threshold for a given component"""
-                if threshold:
+                if isinstance(threshold, Tuple):
                     voxelsFilter = np.where(voxelValuesComponent >= (np.max(voxelValuesComponent)*threshold[component]))
                     voxelValuesComponent = voxelValuesComponent[voxelsFilter]
                     voxelIndices = voxelIndices[voxelsFilter]
@@ -167,17 +171,15 @@ def getInmFREDSumImage(fileName, inmInfo=None, threshold=None, dtype=float, disp
     img.SetSpacing(spacing)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Number of PBs: ", len(inmInfoRequested))
-        print("# Number of fields: ", len(inmInfoRequested.FID.unique()))
-        print("# Number of components: ", componentNo)
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        strLog = [f"Number of PBs: {len(inmInfoRequested)}",
+                  f"Number of fields: {len(inmInfoRequested.FID.unique())}",
+                  f"Number of components: {componentNo}"]
+        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(img))
 
     return img
 
 
-def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="linear", raiseMemError=True, displayInfo: bool = False):
+def getInmFREDPoint(fileName: PathLike, point: PointLike, inmInfo: DataFrame | PDSeries | None = None, dtype: DTypeLike = float, interpolation: Literal['linear', 'nearest', 'cubic'] = "linear", raiseMemError: bool = True, displayInfo: bool = False) -> NDArray:
     """Get vector of interpolated values in a point from FRED influence matrix.
 
     The function reads an influence matrix file produced by the FRED Monte Carlo
@@ -234,7 +236,7 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
     .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.RegularGridInterpolator.html
 
     Notes
-    -----
+    -----type
     The output array is a 3-dimensional array showing the signal for each component, each pencil beam, and each point. 
     The following examples help with understanding the order of dimensions:
 
@@ -261,12 +263,16 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
     if points.ndim == 1:
         points = np.expand_dims(points, 0)
     if points.ndim != 2 or points.shape[1] != 3:
-        raise TypeError("Parameter 'point' must be a 3-element iterable (for a single point) or an N-element iterable of 3 elements iterables (for N points).")
+        error = TypeError("Parameter 'point' must typebe a 3-element iterable (for a single point) or an N-element iterable of 3 elements iterables (for N points).")
+        _logger.error(error)
+        raise error
     pointsNo = points.shape[0]
 
     # check interpolation
     if interpolation.lower() not in ["nearest", "linear", "cubic"]:
-        raise ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'cubic' are supported.")
+        error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'cubic' are supported.")
+        _logger.error(error)
+        raise error
 
     # get number of PBs and FoR saved to Inm
     with open(fileName, "rb") as file_h:
@@ -281,7 +287,9 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
     if raiseMemError:
         expectedMemorySize = componentNo * pencilBeamNo * pointsNo * np.array(1, dtype=dtype).nbytes  # bytes
         if psutil.virtual_memory().available < (componentNo * pencilBeamNo * pointsNo * np.array(1, dtype=dtype).nbytes):
-            raise MemoryError(f"Requested to calculate signal of type {dtype} in {pointsNo} points for {pencilBeamNo} pencil beams for {componentNo} components which is expected to use {(expectedMemorySize/1024**3):.2f} GB of RAM but only {psutil.virtual_memory().available/1024**3:.2f} GB is available.")
+            error = MemoryError(f"Requested to calculate signal of type {dtype} in {pointsNo} points for {pencilBeamNo} pencil beams for {componentNo} components which is expected to use {(expectedMemorySize/1024**3):.2f} GB of RAM but only {psutil.virtual_memory().available/1024**3:.2f} GB is available.")
+            _logger.error(error)
+            raise error
 
     # get requested pencil beams info
     inmInfoRequested = _mergeInmInfo(inmInfo, fileName)
@@ -320,19 +328,18 @@ def getInmFREDPoint(fileName, point, inmInfo=None, dtype=float, interpolation="l
     pointValues = np.stack(pointValues, axis=1)  # [component, pb, point]
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Number of points: ", pointsNo)
-        print("# Number of PBs: ", len(inmInfoRequested))
-        print("# Number of fields: ", len(inmInfoRequested.FID.unique()))
-        print("# Number of components: ", componentNo)
-        print(f"# Number of no-signal points: {(pointValues.sum(axis=0).sum(axis=0)==0).sum()} ({((pointValues.sum(axis=0).sum(axis=0)==0).sum()/pointsNo)*100:.2f}%)")  # no signal in any component
-        print(f"# Memory used: {(pencilBeamNo*pointsNo*4/1024**3):.2f} GB")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        strLog = [f"Number of points: {pointsNo}",
+                  f"Number of PBs: {len(inmInfoRequested)}",
+                  f"Number of fields: {len(inmInfoRequested.FID.unique())}",
+                  f"Number of components: {componentNo}",
+                  f"Number of no-signal points: {(pointValues.sum(axis=0).sum(axis=0)==0).sum()} ({((pointValues.sum(axis=0).sum(axis=0)==0).sum()/pointsNo)*100:.2f}%)",
+                  f"Memory used: {(pencilBeamNo*pointsNo*4/1024**3):.2f} GB"]
+        _logger.info("\n\t".join(strLog))
 
     return pointValues
 
 
-def getInmFREDInfo(fileName, displayInfo: bool = False):
+def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     """Read basic information from FRED influence matrix.
 
     The function reads an influence matrix file produced by the FRED Monte Carlo
@@ -389,26 +396,26 @@ def getInmFREDInfo(fileName, displayInfo: bool = False):
 
                 file_h.seek(voxelsNo * 4 * (componentNo+1), 1)  # jump to the next PB
         except:
-            raise TypeError('Could not parse the whole structure of the influence matrix.')
+            error = TypeError('Could not parse the whole structure of the influence matrix.')
+            _logger.error(error)
+            raise error
 
     InmInfo = pd.DataFrame({"PBID": PBIDs, "FID": FIDs, "voxelsNo": voxelsNos})
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Influence file version: ", fileVersion/10)
-        print("# Number of PBs: ", InmInfo.PBID.size)
-        print("# Number of fields: ", InmInfo.FID.unique().size)
-        print("# Number of components: ", componentNo)
-        print(f"# Number of voxels (min/max/mean): {InmInfo.voxelsNo.min()}/{InmInfo.voxelsNo.max()}/{InmInfo.voxelsNo.mean():.0f}")
-        print(f"# Percent of voxels (min/max/mean): {InmInfo.voxelsNo.min()/size*100:.2f}%/{InmInfo.voxelsNo.max()/size*100:.2f}%/{InmInfo.voxelsNo.mean()/size*100:.2f}%")
-        print("# FoR of the image:")
-        ft.ft_imgAnalyse._displayImageInfo(imgBase)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        strLog = [f"Influence file version: {fileVersion/10}",
+                  f"Number of PBs: {InmInfo.PBID.size}",
+                  f"Number of fields: {InmInfo.FID.unique().size}",
+                  f"Number of components: {componentNo}",
+                  f"Number of voxels (min/max/mean): {InmInfo.voxelsNo.min()}/{InmInfo.voxelsNo.max()}/{InmInfo.voxelsNo.mean():.0f}",
+                  f"Percent of voxels (min/max/mean): {InmInfo.voxelsNo.min()/size*100:.2f}%/{InmInfo.voxelsNo.max()/size*100:.2f}%/{InmInfo.voxelsNo.mean()/size*100:.2f}%",
+                  "FoR of the image:"]
+        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgBase))
 
     return InmInfo
 
 
-def _getInmFREDPBfileTarget(fileName):
+def _getInmFREDPBfileTarget(fileName: PathLike) -> Tuple:
     """Read target in FRED influence matrix for each pencil beam.
 
     The function reads the file target for each pencil beam (PB) produced by the FRED 
@@ -441,12 +448,14 @@ def _getInmFREDPBfileTarget(fileName):
                 PBfileTarget.append(file_h.tell())
                 file_h.seek(voxelsNo * 4 * (componentNo+1), 1)  # jump to the next PB
         except:
-            raise TypeError('Could not parse the whole structure of the influence matrix.')
+            error = TypeError('Could not parse the whole structure of the influence matrix.')
+            _logger.error(error)
+            raise error
 
     return tuple(PBfileTarget)
 
 
-def _mergeInmInfo(inmInfo, fileName):
+def _mergeInmInfo(inmInfo: DataFrame | PDSeries | None, fileName: PathLike) -> DataFrame:
     """Merge inmInfo with the influence matrix info.
 
     The function merges the field and pencil beam IDs from the inmInfo defined as a pandas DataFrame
@@ -481,20 +490,24 @@ def _mergeInmInfo(inmInfo, fileName):
 
     # merge influence matrix info for all PBs with the influence matrix provided
     if inmInfo is not None:
-        inmInfoInput = copy.copy(inmInfo)
+        inmInfoInput = copy.deepcopy(inmInfo)
 
         # convert to DataFrame if Series
-        if isinstance(inmInfo, pd.Series):
+        if isinstance(inmInfoInput, PDSeries):
             inmInfoInput = inmInfoInput.to_frame().T
 
         # validate if required columns exist in inmInfoInput
         if not {"PBID", "FID"}.issubset(inmInfoInput.columns):
-            raise ValueError(f"Missing columns or wrong column names of 'inmInfo'. Must include at least 'PBID' and 'FID'")
+            error = ValueError(f"Missing columns or wrong column names of 'inmInfo'. Must include at least 'PBID' and 'FID'")
+            _logger.error(error)
+            raise error
 
         inmInfoInput.set_index(["FID", "PBID"], inplace=True)
 
         if not np.all(inmInfoInput.index.isin(inmInfoAll.index)):
-            raise ValueError(f"Not all pencil beam or field IDs are present in the influence matrix file.")
+            error = ValueError(f"Not all pencil beam or field IDs are present in the influence matrix file.")
+            _logger.error(error)
+            raise error
 
         if "weight" in inmInfoInput.columns:
             inmInfoAll = pd.concat([inmInfoAll, inmInfoInput["weight"]], axis=1)

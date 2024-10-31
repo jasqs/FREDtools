@@ -1,4 +1,9 @@
-def setSITKInterpolator(interpolation="linear", splineOrder=3):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3) -> int:
     """Set SimpleITK interpolator for interpolation method.
 
     The function is setting a specific interpolation method for
@@ -19,48 +24,63 @@ def setSITKInterpolator(interpolation="linear", splineOrder=3):
     import SimpleITK as sitk
 
     # set interpolation method
-    if interpolation.lower() == "linear":
-        return sitk.sitkLinear
-    elif interpolation.lower() == "nearest":
-        return sitk.sitkNearestNeighbor
-    elif interpolation.lower() == "spline":
-        if splineOrder > 5 or splineOrder < 0:
-            raise ValueError(f"Spline order must be in range 0-5.")
-        if splineOrder == 0:
-            return sitk.sitkBSplineResampler
-        elif splineOrder == 1:
-            return sitk.sitkBSplineResamplerOrder1
-        elif splineOrder == 2:
-            return sitk.sitkBSplineResamplerOrder2
-        elif splineOrder == 3:
-            return sitk.sitkBSplineResamplerOrder3
-        elif splineOrder == 4:
-            return sitk.sitkBSplineResamplerOrder4
-        elif splineOrder == 5:
-            return sitk.sitkBSplineResamplerOrder5
-    else:
-        raise ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+    match interpolation.lower():
+        case "linear":
+            interpolator = sitk.sitkLinear
+        case "nearest":
+            interpolator = sitk.sitkNearestNeighbor
+        case "spline":
+            if splineOrder > 5 or splineOrder < 0:
+                error = ValueError(f"Spline order must be in range 0-5.")
+                _logger.error(error)
+                raise error
+            match splineOrder:
+                case 0:
+                    interpolator = sitk.sitkBSplineResampler
+                case 1:
+                    interpolator = sitk.sitkBSplineResamplerOrder1
+                case 2:
+                    interpolator = sitk.sitkBSplineResamplerOrder2
+                case 3:
+                    interpolator = sitk.sitkBSplineResamplerOrder3
+                case 4:
+                    interpolator = sitk.sitkBSplineResamplerOrder4
+                case 5:
+                    interpolator = sitk.sitkBSplineResamplerOrder5
+        case _:
+            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            _logger.error(error)
+            raise error
+
+    _logger.debug(f"Setting SimpleITK interpolation method to '{interpolation}'" + (f" with spline order {splineOrder}." if interpolation is "spline" else "."))
+    return interpolator
 
 
-def copyImgMetaData(imgSrc, imgDes):
+def copyImgMetaData(imgSrc: SITKImage, imgDes: SITKImage) -> SITKImage:
     """Copy meta data to the image source to the image destination"""
-    isSITK(imgSrc, raiseError=True)
-    isSITK(imgDes, raiseError=True)
+    import fredtools as ft
+
+    ft._imgTypeChecker.isSITK(imgSrc, raiseError=True)
+    ft._imgTypeChecker.isSITK(imgDes, raiseError=True)
     for key in imgSrc.GetMetaDataKeys():
         imgDes.SetMetaData(key, imgSrc.GetMetaData(key))
+
     return imgDes
 
 
-def checkJupyterMode():
+def checkJupyterMode() -> bool:
     """Check if the FREDtools was loaded from jupyter"""
+    from IPython.core.getipython import get_ipython
     try:
-        if get_ipython().config["IPKernelApp"]:
+        ipython = get_ipython()
+        if ipython and ipython.config["IPKernelApp"]:
             return True
     except:
-        return False
+        pass
+    return False
 
 
-def checkMatplotlibBackend():
+def checkMatplotlibBackend() -> str:
     import matplotlib
 
     if "inline" in matplotlib.get_backend():
@@ -69,11 +89,3 @@ def checkMatplotlibBackend():
         return "ipympl"
     else:
         return "unknown"
-
-
-def currentFuncName(n=0):
-    """Get name of the function where the currentFuncName() is called.
-    currentFuncName(1) get the name of the caller.
-    """
-    import sys
-    return sys._getframe(n + 1).f_code.co_name

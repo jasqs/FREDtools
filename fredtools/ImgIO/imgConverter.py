@@ -1,4 +1,9 @@
-def SITK2ITK(imgSITK):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def SITK2ITK(imgSITK: SITKImage) -> ITKImage:
     """Convert image from SimpleITK.Image object to ITK.Image object."""
     import numpy as np
     import itk
@@ -13,13 +18,13 @@ def SITK2ITK(imgSITK):
     return imgITK
 
 
-def ITK2SITK(imgITK):
+def ITK2SITK(imgITK: ITKImage) -> SITKImage:
     """Convert image from ITK.Image object to SimpleITK.Image object."""
     import SimpleITK as sitk
     import fredtools as ft
     import itk
 
-    ft.isITK(imgITK, raiseError=True)
+    ft._imgTypeChecker.isITK(imgITK, raiseError=True)
     imgSITK = sitk.GetImageFromArray(itk.GetArrayFromImage(imgITK), isVector=imgITK.GetNumberOfComponentsPerPixel() > 1)
     imgSITK.SetOrigin(list(imgITK.GetOrigin()))
     imgSITK.SetSpacing(list(imgITK.GetSpacing()))

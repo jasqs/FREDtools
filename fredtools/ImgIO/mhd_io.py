@@ -1,14 +1,14 @@
-# from fredtools._logger import loggerDecorator
-from SimpleITK import Image as SITKImage
-from typing import Iterable, Literal, Union
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
 
 
-def writeMHD(img: SITKImage, filePath: str, singleFile: bool = True, overwrite: bool = True, useCompression: bool = False, compressionLevel: int = 5, displayInfo: bool = False) -> None:
+def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwrite: bool = True, useCompression: bool = False, compressionLevel: int = 5, displayInfo: bool = False) -> None:
     """Write image to MetaImage format.
 
     The function writes a SimpleITK image object to the MetaImage file. The function
     extends the functionality of SimpleITK.WriteImage() to write a single file
-    MetaImage instead of standard two-files MHD+RAW. It is recommended to use \*.mhd
+    MetaImage instead of standard two-files MHD+RAW. It is recommended to use .mhd
     extension when saving MetaImage.
 
     Parameters
@@ -38,21 +38,22 @@ def writeMHD(img: SITKImage, filePath: str, singleFile: bool = True, overwrite: 
     import fileinput
     import fredtools as ft
     import SimpleITK as sitk
-    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     if os.path.exists(filePath) and not overwrite:
-        raise ValueError("Warning: {:s} file already exists.".format(filePath))
+        raise ValueError(f"Warning: {filePath} file already exists.")
 
     # remove empty metadata keys (empty metadata keys raise a warning of SimpleITK)
     for MetaDataKey in img.GetMetaDataKeys():
         if not img.GetMetaData(MetaDataKey):
             img.EraseMetaData(MetaDataKey)
 
-    sitk.WriteImage(img, filePath, useCompression=useCompression, compressionLevel=compressionLevel)
+    _logger.debug(f"Writing image to {os.path.abspath(filePath)}.")
+    sitk.WriteImage(img, str(filePath), useCompression=useCompression, compressionLevel=compressionLevel)
 
     if singleFile:
+        _logger.debug(f"Converting {filePath} to a single file MHD.")
         # get the original raw/zraw file name and change ElementDataFile to LOCAL
         with fileinput.FileInput(filePath, inplace=True) as file:
             for line in file:
@@ -67,14 +68,24 @@ def writeMHD(img: SITKImage, filePath: str, singleFile: bool = True, overwrite: 
                 fout.write(rawFileContent)
             # remove raw/zraw file
             os.remove(rawFileName)
-        except:
-            logger.error(f"IO error: cannot save voxel map to file: {filePath}")
+        except IOError:
+            error = IOError(f"Cannot save voxel map to file {filePath}.")
+            _logger.error(error)
+            raise error
 
-    logger.debug(f"Writing image to {os.path.abspath(filePath)}")
-    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
 
 
-def readMHD(fileNames: str | Iterable[str], displayInfo: bool = False) -> SITKImage | tuple[SITKImage]:
+@overload
+def readMHD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...
+
+
+@overload
+def readMHD(fileNames: Sequence[PathLike], displayInfo: bool = False) -> tuple[SITKImage, ...]: ...
+
+
+def readMHD(fileNames: Sequence[PathLike] | PathLike, displayInfo: bool = False) -> SITKImage | tuple[SITKImage, ...]:
     """Read MetaImage image to SimpleITK image object.
 
     The function reads a single MetaImage file or an iterable of MetaImage files
@@ -99,28 +110,28 @@ def readMHD(fileNames: str | Iterable[str], displayInfo: bool = False) -> SITKIm
     """
     import fredtools as ft
     import SimpleITK as sitk
-    logger = ft.getLogger()
 
     # if fileName is a single string then make it a single element list
-    if isinstance(fileNames, str):
+    if isinstance(fileNames, PathLike):
         fileNames = [fileNames]
 
     img = []
     for fileName in fileNames:
-        img.append(sitk.ReadImage(fileName, imageIO="MetaImageIO"))
+        img.append(sitk.ReadImage(str(fileName), imageIO="MetaImageIO"))
 
-    logger.debug(f"Read {len(img)} {'file' if len(img)==1 else 'files'} from:\n" + "\n".join(fileNames))
+    _logger.debug(f"Read {len(img)} {'file' if len(img)==1 else 'files'} from:\n" + "\n".join(map(str, fileNames)))
 
-    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0], logger.getEffectiveLevel()))
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0]))
 
     return img[0] if len(img) == 1 else tuple(img)
 
 
-def convertMHDtoSingleFile(fileName: str, displayInfo: bool = False) -> None:
+def convertMHDtoSingleFile(fileName: PathLike, displayInfo: bool = False) -> None:
     """Convert two-files MetaImage to two-files.
 
     The function reads a MetaImage file (two- or single-file) and saves it as
-    a single file MetaImage (only \*.mhd) with the same file name.
+    a single file MetaImage (MHD) with the same file name.
 
     Parameters
     ----------
@@ -135,23 +146,22 @@ def convertMHDtoSingleFile(fileName: str, displayInfo: bool = False) -> None:
     writeMHD : writing MetaImage file.
     """
     import fredtools as ft
-    logger = ft.getLogger()
+    _logger = ft.getLogger()
 
     img = ft.readMHD(fileName)
-    if isinstance(img, tuple):
-        img = img[0]
 
     ft.writeMHD(img, fileName, singleFile=True, overwrite=True)
-    logger.debug(f"Converted file {fileName} to a single file MHD")
+    _logger.debug(f"Converted file {fileName} to a single file MHD")
 
-    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
 
 
-def convertMHDtoDoubleFiles(fileName: str, displayInfo: bool = False):
+def convertMHDtoDoubleFiles(fileName: PathLike, displayInfo: bool = False) -> None:
     """Convert single file MetaImage to double- file.
 
     The function reads a MetaImage file (two- or single-file) and saves it as
-    a two-file file MetaImage (\*.mhd+\*.raw) with the same file name.
+    a two-file file MetaImage (mhd/raw) with the same file name.
 
     Parameters
     ----------
@@ -166,13 +176,12 @@ def convertMHDtoDoubleFiles(fileName: str, displayInfo: bool = False):
     writeMHD : writing MetaImage file.
     """
     import fredtools as ft
-    logger = ft.getLogger()
+    _logger = ft.getLogger()
 
     img = ft.readMHD(fileName)
-    if isinstance(img, tuple):
-        img = img[0]
+
     ft.writeMHD(img, fileName, singleFile=False, overwrite=True)
 
-    logger.debug(f"Converted file {fileName} to a double files MHD")
-
-    logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img, logger.getEffectiveLevel()))
+    _logger.debug(f"Converted file {fileName} to a double files MHD")
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))

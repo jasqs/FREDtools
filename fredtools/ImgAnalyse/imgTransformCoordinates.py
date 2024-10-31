@@ -1,4 +1,9 @@
-def transformIndexToPhysicalPoint(img, indices):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[int]) -> Tuple[Tuple[float], ...]:
     """Transform indices to physical points.
 
     The function transforms an iterable of indices into a tuple of
@@ -42,16 +47,20 @@ def transformIndexToPhysicalPoint(img, indices):
 
     # check if type of indices is correct
     if not np.issubdtype(indices.dtype, np.integer):
-        raise AttributeError(f"The 'indices' parameter must of any integer type (int64, uint16, etc.).")
+        error = AttributeError(f"The 'indices' parameter must of any integer type (int64, uint16, etc.).")
+        _logger.error(error)
+        raise error
 
     # check if shape of indices is correct
     if indices.ndim != 2 or indices.shape[1] != img.GetDimension():
-        raise AttributeError(f"The 'indices' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image.")
+        error = AttributeError(f"The 'indices' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image.")
+        _logger.error(error)
+        raise error
 
     return tuple(map(img.TransformIndexToPhysicalPoint, indices.tolist()))
 
 
-def transformContinuousIndexToPhysicalPoint(img, indices):
+def transformContinuousIndexToPhysicalPoint(img: SITKImage, indices: Iterable[Numberic]) -> Tuple[Tuple[float], ...]:
     """Transform indices to physical points.
 
     The function transforms an iterable of indices into a tuple of
@@ -94,12 +103,14 @@ def transformContinuousIndexToPhysicalPoint(img, indices):
 
     # check if shape of indices is correct
     if indices.ndim != 2 or indices.shape[1] != img.GetDimension():
-        raise AttributeError(f"The 'indices' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image.")
+        error = AttributeError(f"The 'indices' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image.")
+        _logger.error(error)
+        raise error
 
     return tuple(map(img.TransformContinuousIndexToPhysicalPoint, indices.tolist()))
 
 
-def transformPhysicalPointToIndex(img, points):
+def transformPhysicalPointToIndex(img: SITKImage, points: Iterable[Numberic]) -> Tuple[Tuple[int], ...]:
     """Transform physical points to indices.
 
     The function transforms an iterable of points into a tuple of
@@ -141,12 +152,14 @@ def transformPhysicalPointToIndex(img, points):
 
     # check if shape of points is correct
     if points.ndim != 2 or points.shape[1] != img.GetDimension():
-        raise AttributeError(f"The 'points' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image.")
+        error = AttributeError(f"The 'points' parameter must be an iterable of Nx{img.GetDimension()} shape for {img.GetDimension()}D image.")
+        _logger.error(error)
+        raise error
 
     return tuple(map(img.TransformPhysicalPointToIndex, points.tolist()))
 
 
-def transformPhysicalPointToContinuousIndex(img, points):
+def transformPhysicalPointToContinuousIndex(img: SITKImage, points: Iterable[Numberic]) -> Tuple[Tuple[float], ...]:
     """Transform physical points to continuous indices.
 
     The function transforms an iterable of points into a tuple of

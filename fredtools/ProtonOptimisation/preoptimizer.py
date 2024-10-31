@@ -71,7 +71,7 @@ def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
     return imgWER
 
 
-def calcWETfromWER(imgWER, SAD, imgMask=None, CPUNo="auto", displayInfo: bool = False):
+def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     """Calculate WET image from WER image for point-like source.
 
     The function calculates Water-Equivalent Thickness (WET) for each voxel of 
@@ -93,11 +93,6 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, CPUNo="auto", displayInfo: bool = 
     imgMask : SimpleITK Image or None, optional
         An object of a SimpleITK image describing a binary mask, or None, 
         then all voxel positions will be calculated (def. None)
-    CPUNo : {'auto', 'none'}, scalar or None, optional
-        Define whether multiprocessing should be used and how many cores should
-        be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
-        a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cores to be used (def. 'auto').        
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -132,7 +127,7 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, CPUNo="auto", displayInfo: bool = 
         raise AttributeError("The 'SAD' parameter must be a 2-element iterable.")
 
     # get the number of CPUs to be used for computation
-    CPUNo = ft.getCPUNo(CPUNo)
+    CPUNo = ft.getCPUNo(ft.CPUNO)
 
     # def linePlaneIntersectionPoint(rayPosition, rayTarget, planesPosition, planeNormal):
     #     """General-purpose version"""

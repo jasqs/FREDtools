@@ -1,4 +1,9 @@
-def getDicomTypeName(dicomVar):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def getDicomTypeName(dicomVar: PathLike | DicomDataset) -> str:
     r"""Check the type of the dicom given as a path or tags.
 
     The function return the name of the SOP Class UID tag of a dicom
@@ -9,7 +14,7 @@ def getDicomTypeName(dicomVar):
     ----------
     dicomVar : path or tags
         A string of path to a dicom file or a dicom tag structure read
-        by pydicom.read_file.
+        by pydicom.dcmread.
 
     Returns
     -------
@@ -27,102 +32,129 @@ def getDicomTypeName(dicomVar):
     import pydicom as dicom
 
     # if the input is a string then get the dicom tags
-    if isinstance(dicomVar, str):
-        dicomVar = dicom.read_file(dicomVar, specific_tags=["SOPClassUID"], stop_before_pixels=True)
+    if isinstance(dicomVar, PathLike):
+        dicomVar = dicom.dcmread(dicomVar, specific_tags=["SOPClassUID"], stop_before_pixels=True)
 
     # check if the tags are dicom dataset
-    if not isinstance(dicomVar, dicom.dataset.FileDataset):
-        raise TypeError(f"The tags is not an instance of dicom.dataset.FileDataset.")
+    if not isinstance(dicomVar, dicom.Dataset):
+        error = TypeError(f"The tags is not an instance of dicom.dataset.FileDataset.")
+        _logger.error(error)
+        raise error
 
     # check if SOPClassUID exists in the tags
     if not "SOPClassUID" in dicomVar:
-        raise ValueError("Cannot find tag 'SOPClassUID' in the dicom tags.")
+        error = ValueError(f"Cannot find tag 'SOPClassUID' in the dicom tags.")
+        _logger.error(error)
+        raise error
 
     return dicomVar.SOPClassUID.name
 
 
-def _isDicomCT(dicomVar, raiseError=False):
+def _isDicomCT(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of CT type and raise an error if requested."""
 
     instanceBool = "CT Image Storage" in getDicomTypeName(dicomVar)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The dicom is not a CT type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a CT type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        _logger.error(error)
+        raise error
+
     return instanceBool
 
 
-def _isDicomRS(dicomVar, raiseError=False):
+def _isDicomRS(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of RS type and raise an error if requested."""
 
     instanceBool = "Structure Set Storage" in getDicomTypeName(dicomVar)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The dicom is not a RS type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a RS type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        _logger.error(error)
+        raise error
+
     return instanceBool
 
 
-def _isDicomRN(dicomVar, raiseError=False):
+def _isDicomRN(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of RN type and raise an error if requested."""
 
     instanceBool = "Plan Storage" in getDicomTypeName(dicomVar)  # ("RT Plan Storage" or "RT Ion Plan Storage")
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The dicom is not a RN type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a RN type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        _logger.error(error)
+        raise error
+
     return instanceBool
 
 
-def _isDicomRD(dicomVar, raiseError=False):
+def _isDicomRD(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of RD type and raise an error if requested."""
 
     instanceBool = "Dose Storage" in getDicomTypeName(dicomVar)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The dicom is not a RD type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a RD type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        _logger.error(error)
+        raise error
+
     return instanceBool
 
 
-def _isDicomPET(dicomVar, raiseError=False):
+def _isDicomPET(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of PET type and raise an error if requested."""
 
     instanceBool = "Positron Emission Tomography Image Storage" in getDicomTypeName(dicomVar)
 
     if raiseError and not instanceBool:
-        raise TypeError(f"The dicom is not a PET type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a PET type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        _logger.error(error)
+        raise error
+
     return instanceBool
 
 
-def _getRNBeamSequence(dicomVar):
+def _getRNBeamSequence(dicomVar: PathLike | DicomDataset) -> DataElement:
     r"""Get beam sequence ('IonBeamSequence' or 'BeamSequence') from dicom."""
     import pydicom as dicom
 
     # check if it is a RN dicom
-    _isDicomRN(dicomVar)
+    _isDicomRN(dicomVar, raiseError=True)
 
     # if the input is a string then get the dicom tags
-    if isinstance(dicomVar, str):
-        dicomVar = dicom.read_file(dicomVar, stop_before_pixels=True)
+    if isinstance(dicomVar, PathLike):
+        dicomVar = dicom.dcmread(dicomVar, stop_before_pixels=True)
 
     # check if the tags are dicom dataset
-    if not isinstance(dicomVar, dicom.dataset.FileDataset):
-        raise TypeError(f"The tags is not an instance of dicom.dataset.FileDataset.")
+    if not isinstance(dicomVar, dicom.Dataset):
+        error = TypeError(f"The tags is not an instance of dicom.dataset.FileDataset.")
+        _logger.error(error)
+        raise error
 
     # get name of the SOP Class UID
     dicomTypeName = getDicomTypeName(dicomVar)
     if dicomTypeName == "RT Ion Plan Storage":
         if not "IonBeamSequence" in dicomVar:
-            raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+            error = ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+            _logger.error(error)
+            raise error
         else:
             return dicomVar["IonBeamSequence"]
     elif dicomTypeName == "RT Plan Storage":
         if not "BeamSequence" in dicomVar:
-            raise ValueError(f"Can not find 'BeamSequence' in the dicom.")
+            error = ValueError(f"Can not find 'BeamSequence' in the dicom.")
+            _logger.error(error)
+            raise error
         else:
             return dicomVar["BeamSequence"]
     else:
-        raise TypeError(f"Cannot recognise the dicom as 'RT Plan Storage' nor 'RT Ion Plan Storage'.")
+        error = TypeError(f"Cannot recognise the dicom as 'RT Plan Storage' nor 'RT Ion Plan Storage'.")
+        _logger.error(error)
+        raise error
 
 
-def sortDicoms(searchFolder, recursive=False, displayInfo: bool = False):
+def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: bool = False) -> DottedDict:
     """Sort dicom file names found in the search folder for CT, RS, RN, RD and Unknown.
 
     The function sorts file names found in the `searchFolder`
@@ -133,7 +165,7 @@ def sortDicoms(searchFolder, recursive=False, displayInfo: bool = False):
         -  RN - dicom files of RT Plan Storage ("RT Plan Storage" or "RT Ion Plan Storage")
         -  RD - dicom files of 1D/2D/3D RT Dose Storage (for instance dose distribution)
         -  PET - dicom files of PET Image Storage ("Positron Emission Tomography Image Storage")
-        -  Unknown - files with \*.dcm extension that were not recognized.
+        -  Unknown - files with *.dcm extension that were not recognized.
 
     Parameters
     ----------
@@ -151,7 +183,9 @@ def sortDicoms(searchFolder, recursive=False, displayInfo: bool = False):
     """
     import glob
     import os
-    import fredtools as ft
+    from dotted_dict import DottedDict
+
+    _logger.debug(f"Searching for dicoms in folder: {searchFolder}" + (" recursively." if recursive else "."))
 
     if recursive:
         dicomFileNames = glob.glob(os.path.join(searchFolder, "**/*.dcm"), recursive=True)
@@ -177,24 +211,29 @@ def sortDicoms(searchFolder, recursive=False, displayInfo: bool = False):
             PETfileNames.append(dicomFileName)
         else:
             UnknownfileNames.append(dicomFileName)  # unrecognized dicoms
+
+    fileNamesNo = len(CTfileNames) + len(RSfileNames) + len(RNfileNames) + len(RDfileNames) + len(PETfileNames) + len(UnknownfileNames)
+    if fileNamesNo == 0:
+        _logger.warning(f"No dicoms found in the folder: {searchFolder}")
+
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(
-            "# Found dicoms: {:d} x CT, {:d} x RS, {:d} x RN, {:d} x RD, {:d} x PET, {:d} x unknown".format(
-                len(CTfileNames), len(RSfileNames), len(RNfileNames), len(RDfileNames), len(PETfileNames), len(UnknownfileNames)
-            )
-        )
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(f"Found {fileNamesNo:d} dicoms:" +
+                     (f"\n\t{len(CTfileNames):d} x CT" if len(CTfileNames) > 0 else "") +
+                     (f"\n\t{len(RSfileNames):d} x RS" if len(RSfileNames) > 0 else "") +
+                     (f"\n\t{len(RNfileNames):d} x RN" if len(RNfileNames) > 0 else "") +
+                     (f"\n\t{len(RDfileNames):d} x RD" if len(RDfileNames) > 0 else "") +
+                     (f"\n\t{len(PETfileNames):d} x PET" if len(PETfileNames) > 0 else "") +
+                     (f"\n\t{len(UnknownfileNames):d} x unknown" if len(UnknownfileNames) > 0 else ""))
 
-    dicomTypes = {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "PETfileNames": PETfileNames, "Unknown": UnknownfileNames}
-    for dicomType, dicomName in dicomTypes.items():
+    dicomFiles = {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "PETfileNames": PETfileNames, "Unknown": UnknownfileNames}
+    for dicomType, dicomName in dicomFiles.items():
         if isinstance(dicomName, list) and len(dicomName) == 1:
-            dicomTypes[dicomType] = dicomName[0]
+            dicomFiles[dicomType] = dicomName[0]
 
-    return dicomTypes
+    return DottedDict(dicomFiles)
 
 
-def _getIonBeamDatasetForFieldNumber(fileName, beamNumber):
+def _getIonBeamDatasetForFieldNumber(fileName: PathLike, beamNumber: int) -> DicomDataset | None:
     """Get IonBeamDataset for field number.
 
     The function reads a dicom with an RN plan and returns the IonBeamDataset from
@@ -221,23 +260,28 @@ def _getIonBeamDatasetForFieldNumber(fileName, beamNumber):
     _isDicomRN(fileName, raiseError=True)
 
     # check if the beamNumber is an integer scalar
-    if not np.isscalar(beamNumber) or not isinstance(beamNumber, int):
-        raise TypeError(f"The value of 'beamNumber' must be a scalar integer.")
+    if not isinstance(beamNumber, int):
+        error = TypeError(f"The value of 'beamNumber' must be an integer.")
+        _logger.error(error)
+        raise error
 
     # read dicom
-    dicomTags = dicom.read_file(fileName)
+    dicomTags = dicom.dcmread(fileName)
 
     # get beam sequence (BeamSequence or IonBeamSequence)
     if not "IonBeamSequence" in dicomTags:
-        raise ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+        error = ValueError(f"Can not find 'IonBeamSequence' in the dicom.")
+        _logger.error(error)
+        raise error
 
     for IonBeamDataset in dicomTags.IonBeamSequence:
         if int(IonBeamDataset.BeamNumber) == int(beamNumber):
             return IonBeamDataset
+
     return None
 
 
-def _getReferencedBeamDatasetForFieldNumber(fileName, beamNumber):
+def _getReferencedBeamDatasetForFieldNumber(fileName: PathLike, beamNumber: int) -> DicomDataset | None:
     """Get ReferencedBeamDataset for field number.
 
     The function reads a dicom with an RN plan and returns the ReferencedBeamDataset from
@@ -268,33 +312,31 @@ def _getReferencedBeamDatasetForFieldNumber(fileName, beamNumber):
         raise TypeError(f"The value of 'beamNumber' must be a scalar integer.")
 
     # read dicom
-    dicomTags = dicom.read_file(fileName)
+    dicomTags = dicom.dcmread(fileName)
 
     # check if FractionGroupSequence exists
     if not "FractionGroupSequence" in dicomTags:
-        raise ValueError(f"Can not find 'FractionGroupSequence' in the dicom.")
+        error = ValueError(f"Can not find 'FractionGroupSequence' in the dicom.")
+        _logger.error(error)
+        raise error
 
     # check if ReferencedBeamSequence exists
     if not "ReferencedBeamSequence" in dicomTags.FractionGroupSequence[0]:
-        raise ValueError(f"Can not find 'ReferencedBeamSequence' in the dicom.")
+        error = ValueError(f"Can not find 'ReferencedBeamSequence' in the dicom.")
+        _logger.error(error)
+        raise error
 
     for ReferencedBeamDataset in dicomTags.FractionGroupSequence[0].ReferencedBeamSequence:
         if int(ReferencedBeamDataset.ReferencedBeamNumber) == int(beamNumber):
             return ReferencedBeamDataset
+
     return None
 
 
-def getRNMachineName(fileName, displayInfo: bool = False):
+def getRNMachineName(fileName: PathLike, displayInfo: bool = False) -> str:
     """Get the machine name defined in the RN plan.
 
-    The function retrieves the machine name defined in the RN dicom file.
-
-    Parameters
-    ----------
-    fileName : path
-        Path to RN dicom file.
-    displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
+    The function retrieves the machine name defined in the RN dicom fdicomVar["IonBeamSequence"]
 
     Returns
     -------
@@ -311,10 +353,10 @@ def getRNMachineName(fileName, displayInfo: bool = False):
     import pydicom as dicom
 
     # check if dicom is RN
-    ft.ft_imgIO.dicom_io._isDicomRN(fileName, raiseError=True)
+    _isDicomRN(fileName, raiseError=True)
 
     # read dicom
-    dicomTags = dicom.read_file(fileName)
+    dicomTags = dicom.dcmread(fileName)
 
     # get beam sequence (BeamSequence or IonBeamSequence)
     beamSequence = _getRNBeamSequence(dicomTags)
@@ -330,23 +372,19 @@ def getRNMachineName(fileName, displayInfo: bool = False):
         else:
             continue
 
-    # check if any value was found
-    if len(set(treatmentMachineName)) == 0:
-        raise ValueError(f"Could not find Treatment Machine Name. There is no 'TreatmentMachineName' tags in 'IonBeamSequence' or the Treatment Delivery Type is not 'TREATMENT' for any field.")
-
     # check if all values are the same
     if not len(set(treatmentMachineName)) == 1:
-        raise ValueError(f"Not all 'TreatmentMachineName' tags in 'IonBeamSequence' are the same but are: {treatmentMachineName}.")
+        error = ValueError(f"Not all 'TreatmentMachineName' tags in 'IonBeamSequence' are the same but are: {treatmentMachineName}.")
+        _logger.error(error)
+        raise error
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Machine name: '{:s}'".format(treatmentMachineName[0]))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info("Machine name: '{:s}'".format(treatmentMachineName[0]))
 
     return treatmentMachineName[0]
 
 
-def getRNIsocenter(fileName, displayInfo: bool = False):
+def getRNIsocenter(fileName: PathLike, displayInfo: bool = False) -> tuple:
     """Get the isocenter position defined in the RN plan.
 
     The function retrieves the isocenter position defined in the RN dicom file.
@@ -355,7 +393,7 @@ def getRNIsocenter(fileName, displayInfo: bool = False):
     center is returned.
 
     Parameters
-    ----------
+    ----------dicomVar["IonBeamSequence"]
     fileName : path
         Path to RN dicom file.
     displayInfo : bool, optional
@@ -363,7 +401,7 @@ def getRNIsocenter(fileName, displayInfo: bool = False):
 
     Returns
     -------
-    list
+    tuple
         3-elements list of XYZ isocenter coordinates
 
     See Also
@@ -372,19 +410,17 @@ def getRNIsocenter(fileName, displayInfo: bool = False):
     getRNSpots : get a summary of parameters for each spot defined in the RN plan.
     getRNInfo : get some basic information from the RN plan.
     """
-    import fredtools as ft
     import pydicom as dicom
-    import warnings
     import numpy as np
 
     # check if dicom is RN
-    ft.ft_imgIO.dicom_io._isDicomRN(fileName, raiseError=True)
+    _isDicomRN(fileName, raiseError=True)
 
     # read dicom
-    dicomTags = dicom.read_file(fileName)
+    dicomTags = dicom.dcmread(fileName)
 
     # get beam sequence (BeamSequence or IonBeamSequence)
-    beamSequence = ft.ft_imgIO.dicom_io._getRNBeamSequence(dicomTags)
+    beamSequence = _getRNBeamSequence(dicomTags)
 
     isocenterPosition = []
     for beamDataset in beamSequence:
@@ -398,26 +434,24 @@ def getRNIsocenter(fileName, displayInfo: bool = False):
 
     # check if any value was found
     if isocenterPosition.shape[0] == 0:
-        raise ValueError(
-            f"Could not find any isocenter position. There is no 'IsocenterPosition' tag in 'IonControlPointSequence[0]' of 'beamDataset' or the Treatment Delivery Type is not 'TREATMENT' for any field."
-        )
+        error = ValueError(f"Could not find any isocenter position. There is no 'IsocenterPosition' tag in 'IonControlPointSequence[0]' of 'beamDataset' or the Treatment Delivery Type is not 'TREATMENT' for any field.")
+        _logger.error(error)
+        raise error
 
     # check if all values are the same
     if not isocenterPosition.shape[0] == 1:
-        warnings.warn(f"Not all isocenter positions are the same. Found isocenter positions:\n {isocenterPosition} \nThe geometrical centre will be returned.")
+        _logger.warning(f"Not all isocenter positions are the same. Found isocenter positions:\n {isocenterPosition} \nThe geometrical centre will be returned.")
         isocenterPosition = np.mean(isocenterPosition, axis=0)
     else:
         isocenterPosition = isocenterPosition[0]
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Isocenter position [mm]: ", isocenterPosition)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info("Isocenter position [mm]: ", isocenterPosition)
 
-    return isocenterPosition.tolist()
+    return tuple(isocenterPosition)
 
 
-def getRNSpots(fileName, displayInfo: bool = False):
+def getRNSpots(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     """Get the parameters of each spot defined in the RN file.
 
     The function retrieves information for each spot defined in the RN dicom file.
@@ -441,7 +475,6 @@ def getRNSpots(fileName, displayInfo: bool = False):
     getRNInfo : get some basic information from the RN plan.
     """
     import pandas as pd
-    import fredtools as ft
     import pydicom as dicom
     import numpy as np
 
@@ -450,10 +483,12 @@ def getRNSpots(fileName, displayInfo: bool = False):
 
     # check if dicom is "RT Ion Plan Storage"
     if not "RT Ion Plan Storage" == getDicomTypeName(fileName):
-        raise TypeError(f"The dicom is not of 'RT Ion Plan Storage' type but SOP class UID name is '{getDicomTypeName(fileName)}'")
+        error = TypeError(f"The dicom is not of 'RT Ion Plan Storage' type but SOP class UID name is '{getDicomTypeName(fileName)}'")
+        _logger.error(error)
+        raise error
 
     # read dicom
-    dicomTags = dicom.read_file(fileName)
+    dicomTags = dicom.dcmread(fileName)
 
     # get RN spots parameters in order of delivery
     spotsInfo = []
@@ -482,7 +517,10 @@ def getRNSpots(fileName, displayInfo: bool = False):
             fieldMagDist = np.nan
 
         # get ReferencedBeamDataset
-        ReferencedBeamDataset = ft.ft_imgIO.dicom_io._getReferencedBeamDatasetForFieldNumber(fileName, fieldNo)
+        ReferencedBeamDataset = _getReferencedBeamDatasetForFieldNumber(fileName, fieldNo)
+        if not ReferencedBeamDataset:
+            _logger.debug("Could not find ReferencedBeamDataset for field number {:d}.".format(fieldNo))
+            continue
 
         # get fieldDose and field cumulative Meterset Weight
         fieldDose = ReferencedBeamDataset.BeamMeterset
@@ -539,19 +577,19 @@ def getRNSpots(fileName, displayInfo: bool = False):
     spotsInfo.ffill(inplace=True)
 
     # reset index
-    spotsInfo.index = range(1, len(spotsInfo) + 1)
+    spotsInfo.reset_index(drop=True, inplace=True)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# Fields No:  {spotsInfo.FNo.nunique()}")
-        print(f"# Rows No:    {len(spotsInfo)}")
-        print(f"# Spots No:   {len(spotsInfo.loc[spotsInfo.PBMU!=0])}")
-        print(f"# Total MU:   {spotsInfo.PBMU.sum():.2f}")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        strLog = [f"Fields No:  {spotsInfo.FNo.nunique()}",
+                  f"Rows No:    {len(spotsInfo)}",
+                  f"Spots No:   {len(spotsInfo.loc[spotsInfo.PBMU != 0])}",
+                  f"Total MU:   {spotsInfo.PBMU.sum():.2f}"]
+        _logger.info("Spots statistics:\n" + "\n\t".join(strLog))
+
     return spotsInfo
 
 
-def getRNFields(fileName, raiseWarning=True, displayInfo: bool = False):
+def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False) -> DataFrame:
     """Get the parameters of each field defined in the RN file.
 
     The function retrieves information for each field defined in the RN dicom file.
@@ -578,17 +616,17 @@ def getRNFields(fileName, raiseWarning=True, displayInfo: bool = False):
     getRNInfo : get some basic information from the RN plan.
     """
     import pandas as pd
-    import fredtools as ft
     import pydicom as dicom
     import numpy as np
-    import warnings
 
     # check if dicom is RN
     _isDicomRN(fileName, raiseError=True)
 
     # check if dicom is "RT Ion Plan Storage"
     if not "RT Ion Plan Storage" == getDicomTypeName(fileName):
-        raise TypeError(f"The dicom is not of 'RT Ion Plan Storage' type but SOP class UID name is '{getDicomTypeName(fileName)}'")
+        error = TypeError(f"The dicom is not of 'RT Ion Plan Storage' type but SOP class UID name is '{getDicomTypeName(fileName)}'")
+        _logger.error(error)
+        raise error
 
     # get spots info
     spotsInfo = getRNSpots(fileName)
@@ -597,7 +635,7 @@ def getRNFields(fileName, raiseWarning=True, displayInfo: bool = False):
     spotsInfo = spotsInfo[spotsInfo.PBMsW > 0]
 
     # read dicom
-    dicomTags = dicom.read_file(fileName)
+    dicomTags = dicom.dcmread(fileName)
 
     def uniqueValue(groupByDataSet):
         """Get the unique values for the grouped datasets. If no unique value then `var` is returned."""
@@ -625,47 +663,46 @@ def getRNFields(fileName, raiseWarning=True, displayInfo: bool = False):
     fieldsInfo["FDosePos"] = np.nan
     fieldsInfo["FDosePos"] = fieldsInfo["FDosePos"].astype("object")
     for FDeliveryNo, fieldInfo in fieldsInfo.iterrows():
-        ReferencedBeamDataset = ft.ft_imgIO.dicom_io._getReferencedBeamDatasetForFieldNumber(fileName, fieldInfo.FNo)
+        ReferencedBeamDataset = _getReferencedBeamDatasetForFieldNumber(fileName, fieldInfo.FNo)
+        if not ReferencedBeamDataset:
+            _logger.debug("Could not find ReferencedBeamDataset for field number {:d}.".format(fieldInfo.FNo))
+            continue
 
-        fieldsInfo.loc[FDeliveryNo, "FDose"] = ReferencedBeamDataset.BeamDose.real if "BeamDose" in ReferencedBeamDataset else np.NaN
+        fieldsInfo.at[FDeliveryNo, "FDose"] = ReferencedBeamDataset.BeamDose.real if "BeamDose" in ReferencedBeamDataset else np.NaN
         fieldsInfo.at[FDeliveryNo, "FDosePos"] = np.array(ReferencedBeamDataset.BeamDoseSpecificationPoint).tolist() if "BeamDoseSpecificationPoint" in ReferencedBeamDataset else np.NaN
-        fieldsInfo.loc[FDeliveryNo, "FMU"] = ReferencedBeamDataset.BeamMeterset.real if "BeamMeterset" in ReferencedBeamDataset else np.NaN
+        fieldsInfo.at[FDeliveryNo, "FMU"] = ReferencedBeamDataset.BeamMeterset.real if "BeamMeterset" in ReferencedBeamDataset else np.NaN
 
     fieldsInfo["FMagDist"] = np.nan
     fieldsInfo["FMagDist"] = fieldsInfo["FMagDist"].astype("object")
     fieldsInfo["FsupportID"] = "unknown"
     for FDeliveryNo, fieldInfo in fieldsInfo.iterrows():
-        IonBeamDataset = ft.ft_imgIO.dicom_io._getIonBeamDatasetForFieldNumber(fileName, fieldInfo.FNo)
+        IonBeamDataset = _getIonBeamDatasetForFieldNumber(fileName, fieldInfo.FNo)
+        if not IonBeamDataset:
+            _logger.debug("Could not find IonBeamDataset for field number {:d}.".format(fieldInfo.FNo))
+            continue
 
-        fieldsInfo.loc[FDeliveryNo, "FCumMsW"] = IonBeamDataset.FinalCumulativeMetersetWeight.real if "FinalCumulativeMetersetWeight" in IonBeamDataset else np.NaN  # Final Cumulative Meterset Weight
-        fieldsInfo.loc[FDeliveryNo, "FnomRange"] = IonBeamDataset[(0x300B, 0x1004)].value if (0x300B, 0x1004) in IonBeamDataset else np.NaN
-        fieldsInfo.loc[FDeliveryNo, "FnomSOBPWidth"] = IonBeamDataset[(0x300B, 0x100E)].value if (0x300B, 0x100E) in IonBeamDataset else np.NaN
-        fieldsInfo.loc[FDeliveryNo, "FsupportID"] = IonBeamDataset.PatientSupportID if "PatientSupportID" in IonBeamDataset else "unknown"
+        fieldsInfo.at[FDeliveryNo, "FCumMsW"] = IonBeamDataset.FinalCumulativeMetersetWeight.real if "FinalCumulativeMetersetWeight" in IonBeamDataset else np.NaN  # Final Cumulative Meterset Weight
+        fieldsInfo.at[FDeliveryNo, "FnomRange"] = IonBeamDataset[(0x300B, 0x1004)].value if (0x300B, 0x1004) in IonBeamDataset else np.NaN
+        fieldsInfo.at[FDeliveryNo, "FnomSOBPWidth"] = IonBeamDataset[(0x300B, 0x100E)].value if (0x300B, 0x100E) in IonBeamDataset else np.NaN
+        fieldsInfo.at[FDeliveryNo, "FsupportID"] = IonBeamDataset.PatientSupportID if "PatientSupportID" in IonBeamDataset else "unknown"
         fieldsInfo.at[FDeliveryNo, "FMagDist"] = IonBeamDataset.VirtualSourceAxisDistances if "VirtualSourceAxisDistances" in IonBeamDataset else np.NaN  # Virtual Source-Axis Distances
 
     # make consistency check and raise warning if raiseWarning==True
     if raiseWarning:
         # check if the 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' for each field is similar to the sum of 'ScanSpotMetersetWeights' for each pencil beam in the field
         if any(np.abs(spotsInfo.groupby("FDeliveryNo").PBMsW.sum() / fieldsInfo.FCumMsW - 1) > 0.005):  # accuracy 0.5%
-            warnings.warn(
-                "Warning: At least for one field the 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is different from the sum of 'ScanSpotMetersetWeights' for each pencil beam.\n\tThe 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is in the output."
-            )
+            _logger.warning("Warning: At least for one field the 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is different from the sum of 'ScanSpotMetersetWeights' for each pencil beam.\n\tThe 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is in the output.")
 
     # drop columns with all NaN values
     fieldsInfo.dropna(axis="columns", how="all", inplace=True)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        if ft.checkJupyterMode():
-            display(fieldsInfo)
-        else:
-            print(fieldsInfo)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info("\n" + fieldsInfo.to_string(col_space=10))
 
     return fieldsInfo
 
 
-def getRNInfo(fileName, displayInfo: bool = False):
+def getRNInfo(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
     """Get some information from the RN plan.
 
     The function retrieves some useful information from a RN dicom of a treatment plan.
@@ -680,17 +717,7 @@ def getRNInfo(fileName, displayInfo: bool = False):
         -  *planTime* : time of the plan creation (can be empty for anonymized DICOM).
         -  *patientName* : name of the patient (can be empty for anonymized DICOM).
         -  *patientBirthDate* : birth date of the patient (can be empty for anonymized DICOM).
-        -  *patientID* : ID of the patient (can be empty for anonymized DICOM).
-        -  *manufacturer* : manufacturer of the treatment planning system.
-        -  *softwareVersions* : version of the treatment planning system.
-        -  *stationName* : name of the station on which the plan has been prepared.
-        -  *machineName* : name of the treatment machine for which the plan was prepared.
-        -  *totalFieldsNumber* : total number of fields including setup, treatment and other fields.
-        -  *treatmentFieldsNumber* : total number of treatment fields.
-        -  *setupFieldsNumber* : total number of setup fields.
-        -  *otherFieldsNumber* : total number of other fields.
-
-    Parameters
+        -  *patientID* : ID of the patient (can be emptyDottedDict
     ----------
     fileName : path
         Path to RN dicom file.
@@ -717,12 +744,13 @@ def getRNInfo(fileName, displayInfo: bool = False):
     import fredtools as ft
     import pydicom as dicom
     import os
+    from collections import namedtuple
 
     # check if dicom is RN
-    ft.ft_imgIO.dicom_io._isDicomRN(fileName, raiseError=True)
+    _isDicomRN(fileName, raiseError=True)
 
     # read dicom
-    dicomTags = dicom.read_file(fileName)
+    dicomTags = dicom.dcmread(fileName)
 
     # prepare plan info
     planInfo = {}
@@ -768,7 +796,7 @@ def getRNInfo(fileName, displayInfo: bool = False):
     planInfo["machineName"] = ft.getRNMachineName(fileName)
 
     # get beam sequence (BeamSequence or IonBeamSequence)
-    beamSequence = ft.ft_imgIO.dicom_io._getRNBeamSequence(dicomTags)
+    beamSequence = _getRNBeamSequence(dicomTags)
 
     # count fields' type and treatment machine name
     planInfo["totalFieldsNumber"] = int(dicomTags.FractionGroupSequence[0].NumberOfBeams)
@@ -784,22 +812,24 @@ def getRNInfo(fileName, displayInfo: bool = False):
             planInfo["otherFieldsNumber"] += 1
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Patient name:     '{:s}'".format(planInfo["patientName"].replace("^", " ")))
-        print("# Plan label:       '{:s}'".format(planInfo["planLabel"]))
-        print("# Plan date:        '{:s}'".format(planInfo["planDate"]))
-        print("# Machine name:     '{:s}'".format(planInfo["machineName"]))
-        print("# Target structure: '{:s}'".format(planInfo["targetStructName"]))
-        print("# Number of fractions: {:d}".format(planInfo["fractionNo"]))
-        print("# Dose pres. (all fractions):    {:.3f} Gy RBE".format(np.round(planInfo["dosePrescribed"], 3)))
-        print("# Dose pres. (single fraction):  {:.3f} Gy RBE".format(np.round(planInfo["dosePrescribed"] / planInfo["fractionNo"], 3)))
-        print("# Number of treatment fields: {:d}".format(planInfo["treatmentFieldsNumber"]))
-        print("# Number of setup fields:     {:d}".format(planInfo["setupFieldsNumber"]))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
-    return planInfo
+        strLog = ["RN dicom file Info:",
+                  "\tPatient name:                  '{:s}'".format(planInfo["patientName"].replace("^", " ")),
+                  "\tPlan label:                    '{:s}'".format(planInfo["planLabel"]),
+                  "\tPlan date:                     '{:s}'".format(planInfo["planDate"]),
+                  "\tMachine name:                  '{:s}'".format(planInfo["machineName"]),
+                  "\tTarget structure:              '{:s}'".format(planInfo["targetStructName"]),
+                  "\tNumber of fractions:           {:d}".format(planInfo["fractionNo"]),
+                  "\tDose pres. (all fractions):    {:.3f} Gy (RBE)".format(np.round(planInfo["dosePrescribed"], 3)),
+                  "\tDose pres. (single fraction):  {:.3f} Gy (RBE)".format(np.round(planInfo["dosePrescribed"] / planInfo["fractionNo"], 3)),
+                  "\tNumber of treatment fields:    {:d}".format(planInfo["treatmentFieldsNumber"]),
+                  "\tNumber of setup fields:        {:d}".format(planInfo["setupFieldsNumber"]),
+                  ]
+        _logger.info("\n".join(strLog))
+
+    return DottedDict(planInfo)
 
 
-def getRSInfo(fileName, displayInfo: bool = False):
+def getRSInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     """Get some information from the RS structures from the RS dicom file.
 
     The function retrieves some basic information about structures from an RS dicom file.
@@ -817,61 +847,76 @@ def getRSInfo(fileName, displayInfo: bool = False):
         Pandas DataFrame with structures and properties.
     """
     import pandas as pd
-    from dicompylercore import dicomparser
-    import fredtools as ft
     import pydicom as dicom
     import numpy as np
 
-    rtss = dicomparser.DicomParser(fileName)
-    structs = rtss.GetStructures()
-    dicomTags = dicom.read_file(fileName)
+    _isDicomRS(fileName, raiseError=True)
 
-    ROITable = pd.DataFrame()
+    dicomTags = dicom.dcmread(fileName)
 
-    for struct in structs:
-        ROIinstance = pd.DataFrame(
-            {
-                "ID": structs[struct]["id"],
-                "ROIType": "unclasified" if not structs[struct]["type"] else structs[struct]["type"],
-                "ROIName": structs[struct]["name"],
-                "ROIColor": [structs[struct]["color"]],
-            }
-        )
+    # check if all required sequences are present in the dicom
+    if not "StructureSetROISequence" in dicomTags:
+        error = ImportError("No 'StructureSetROISequence' found in the dicom file.")
+        _logger.error(error)
+        raise error
+    if not "ROIContourSequence" in dicomTags:
+        error = ImportError("No 'ROIContourSequence' found in the dicom file.")
+        _logger.error(error)
+        raise error
+    if not "RTROIObservationsSequence" in dicomTags:
+        error = ImportError("No 'RTROIObservationsSequence' found in the dicom file.")
+        _logger.error(error)
+        raise error
 
-        ROITable = pd.concat([ROITable, ROIinstance], ignore_index=True)
+    # fill the ROI infor table
+    ROITable = pd.DataFrame(columns=["ROIID", "ROIType", "ROIName", "ROIColor", "ROIPhysicalProperty", "ROIPhysicalPropertyValue"])
 
-    # get Physical property for ROI if defined
-    ROITable["ROIPhysicalProperty"] = None
-    ROITable["ROIPhysicalPropertyValue"] = np.nan
-    if "RTROIObservationsSequence" in dicomTags:
-        for index, ROIinstance in ROITable.iterrows():
-            # get RTROIObservationSequence for the ROIInstance
-            for RTROIObservationSequence in dicomTags.RTROIObservationsSequence:
-                if RTROIObservationSequence.ReferencedROINumber == ROIinstance.ID:
-                    break
+    for StructureSetROI in dicomTags["StructureSetROISequence"]:
 
-            if not "ROIPhysicalPropertiesSequence" in RTROIObservationSequence:
-                continue
-            else:
-                ROIPhysicalProperties = RTROIObservationSequence.ROIPhysicalPropertiesSequence[0]
+        ROIID = int(StructureSetROI.ROINumber)
+        ROIName = StructureSetROI.ROIName
 
-            if "ROIPhysicalProperty" in ROIPhysicalProperties:
-                ROITable.loc[index, "ROIPhysicalProperty"] = ROIPhysicalProperties.ROIPhysicalProperty
-            if "ROIPhysicalPropertyValue" in ROIPhysicalProperties:
-                ROITable.loc[index, "ROIPhysicalPropertyValue"] = ROIPhysicalProperties.ROIPhysicalPropertyValue
+        for RTROIObservations in dicomTags["RTROIObservationsSequence"]:
+            if int(RTROIObservations.ReferencedROINumber) == ROIID:
+                ROIType = RTROIObservations.RTROIInterpretedType
 
-    ROITable = ROITable.set_index("ID")
+                ROIPhysicalProperty = None
+                ROIPhysicalPropertyValue = np.nan
+                if "ROIPhysicalPropertiesSequence" in RTROIObservations:
+                    ROIPhysicalProperties = RTROIObservations.ROIPhysicalPropertiesSequence[0]
+
+                    if "ROIPhysicalProperty" in ROIPhysicalProperties:
+                        ROIPhysicalProperty = ROIPhysicalProperties.ROIPhysicalProperty
+                    if "ROIPhysicalPropertyValue" in ROIPhysicalProperties:
+                        ROIPhysicalPropertyValue = ROIPhysicalProperties.ROIPhysicalPropertyValue
+
+                break
+
+        for ROIContour in dicomTags["ROIContourSequence"]:
+            if int(ROIContour.ReferencedROINumber) == ROIID:
+                ROIColor = ROIContour.ROIDisplayColor
+                break
+
+        ROIinstance = pd.Series({
+                                "ROIID": ROIID,
+                                "ROIType": ROIType,
+                                "ROIName": ROIName,
+                                "ROIColor": ROIColor,
+                                "ROIPhysicalProperty": ROIPhysicalProperty,
+                                "ROIPhysicalPropertyValue": ROIPhysicalPropertyValue
+                                })
+
+        ROITable = pd.concat([ROITable, ROIinstance.to_frame().T], ignore_index=True)
+
+    ROITable = ROITable.set_index("ROIID")
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Found {:d} structures:".format(ROITable.shape[0]))
-        print("#", ROITable.groupby("ROIType")["ROIType"].count())
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info("Found {:d} structures:".format(ROITable.shape[0]) + "\n\t" + "\n\t".join(ROITable.groupby("ROIType")["ROIType"].count().to_string().split("\n")))
 
     return ROITable
 
 
-def getExternalName(fileName, displayInfo: bool = False):
+def getExternalName(fileName: PathLike, displayInfo: bool = False) -> str:
     """Get the name of the EXTERNAL structure from RS dicom file.
 
     The function retrieves the name of the structure of type EXTERNAL from an RS dicom file.
@@ -893,28 +938,27 @@ def getExternalName(fileName, displayInfo: bool = False):
     --------
     getRSInfo : getting information about all structures on the RS dicom file.
     """
-    import warnings
     import fredtools as ft
 
     ROIinfo = getRSInfo(fileName)
     externalName = ROIinfo.loc[ROIinfo.ROIType == "EXTERNAL"].ROIName.values
 
     if len(externalName) == 0:
-        raise ValueError(f"No structure of type EXTERNAL is defined in {fileName}")
+        error = ValueError(f"No structure of type EXTERNAL is defined in {fileName}")
+        _logger.error(error)
+        raise error
     elif len(externalName) > 1:
-        warnings.warn(f"More than one structure of type EXTERNAL is defined in {fileName}. The first one was returned.")
+        _logger.warning(f"More than one structure of type EXTERNAL is defined in {fileName}. The first one was returned.")
 
     externalName = externalName[0]
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# ROI name of type EXTERNAL: '{externalName}'")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(f"ROI name of type EXTERNAL: '{externalName}'")
 
     return externalName
 
 
-def getCT(fileNames, displayInfo: bool = False):
+def getCT(fileNames: Sequence[PathLike], displayInfo: bool = False) -> SITKImage:
     """Get a CT image from dicom series.
 
     The function reads a series of dicom files containing a CT scan
@@ -940,45 +984,54 @@ def getCT(fileNames, displayInfo: bool = False):
     import numpy as np
     import fredtools as ft
     import pydicom as dicom
-    import warnings
     import SimpleITK as sitk
 
     # check if all files are CT type
     for fileName in fileNames:
         if not _isDicomCT(fileName):
-            raise ValueError(f"File {fileName} is not a CT dicom.")
+            error = ValueError(f"File {fileName} is not a CT dicom.")
+            _logger.error(error)
+            raise error
 
     # read dicoms' tags
     dicomSeries = []
     for fileName in fileNames:
-        dicomSeries.append(dicom.read_file(fileName))
+        dicomSeries.append(dicom.dcmread(fileName))
 
     # check if all dicoms have Frame of Reference UID tag
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if "FrameOfReferenceUID" not in dicomSimple:
-            raise TypeError(f"No 'FrameOfReferenceUID' tag in {fileName}.")
+            error = TypeError(f"No 'FrameOfReferenceUID' tag in {fileName}.")
+            _logger.error(error)
+            raise error
 
     # check if Frame of Reference UID is the same for all dicoms
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if dicomSimple.FrameOfReferenceUID != dicomSeries[0].FrameOfReferenceUID:
-            raise TypeError(f"Frame of Reference UID for dicom {fileName} is different than for {fileNames[0]}.")
+            error = TypeError(f"Frame of Reference UID for dicom {fileName} is different than for {fileNames[0]}.")
+            _logger.error(error)
+            raise error
 
     # check if all dicoms have Series Instance UID tag
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if "SeriesInstanceUID" not in dicomSimple:
-            raise TypeError(f"No 'SeriesInstanceUID' tag in {fileName}.")
+            error = TypeError(f"No 'SeriesInstanceUID' tag in {fileName}.")
+            _logger.error(error)
+            raise error
 
     # check if Series Instance UID is the same for all dicoms
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if dicomSimple.SeriesInstanceUID != dicomSeries[0].SeriesInstanceUID:
-            raise TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
+            error = TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
+            _logger.error(error)
+            raise error
 
     # check if all dicoms have Slice Location tag
     sliceLosationPresent = []
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         sliceLosationPresent.append("SliceLocation" in dicomSimple)
     if not all(sliceLosationPresent):
-        warnings.warn("Warning: All dicom files are of CT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
+        _logger.warning("Warning: All dicom files are of CT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
 
     # get slice location
     if not all(sliceLosationPresent):
@@ -992,20 +1045,21 @@ def getCT(fileNames, displayInfo: bool = False):
     # check if slice location spacing is constant
     slicesLocationSpacingTolerance = 4  # decimal points (4 means 0.0001 tolerance)
     if np.unique(np.round(np.diff(np.array(slicesLocationSorted)), decimals=slicesLocationSpacingTolerance)).size != 1:
-        raise ValueError(f"Slice location spacing is not constant with tolerance {10**-slicesLocationSpacingTolerance:.0E}")
+        error = ValueError(f"Slice location spacing is not constant with tolerance {10**-slicesLocationSpacingTolerance:.0E}")
+        _logger.error(error)
+        raise error
 
     # read dicom series
     img = sitk.ReadImage(fileNamesSorted, outputPixelType=sitk.sitkInt16)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.debug(f"Read {len(fileNames):d} dicom file" + ("s" if len(fileNames) > 1 else "") + ".")
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
 
     return img
 
 
-def getPET(fileNames, SUV=True, displayInfo: bool = False):
+def getPET(fileNames: Sequence[PathLike], SUV: bool = True, displayInfo: bool = False) -> SITKImage:
     """Get a PET image from dicom series.
 
     The function reads a series of dicom files containing a PET scan
@@ -1034,46 +1088,54 @@ def getPET(fileNames, SUV=True, displayInfo: bool = False):
     import numpy as np
     import fredtools as ft
     import pydicom as dicom
-    import warnings
     import SimpleITK as sitk
-    import math
 
     # check if all files are PT type
     for fileName in fileNames:
         if not _isDicomPET(fileName):
-            raise ValueError(f"File {fileName} is not a PT dicom.")
+            error = ValueError(f"File {fileName} is not a PET dicom.")
+            _logger.error(error)
+            raise error
 
     # read dicoms' tags
     dicomSeries = []
     for fileName in fileNames:
-        dicomSeries.append(dicom.read_file(fileName))
+        dicomSeries.append(dicom.dcmread(fileName))
 
     # check if all dicoms have Frame of Reference UID tag
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if "FrameOfReferenceUID" not in dicomSimple:
-            raise TypeError(f"No 'FrameOfReferenceUID' tag in {fileName}.")
+            error = TypeError(f"No 'FrameOfReferenceUID' tag in {fileName}.")
+            _logger.error(error)
+            raise error
 
     # check if Frame of Reference UID is the same for all dicoms
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if dicomSimple.FrameOfReferenceUID != dicomSeries[0].FrameOfReferenceUID:
-            raise TypeError(f"Frame of Reference UID for dicom {fileName} is different than for {fileNames[0]}.")
+            error = TypeError(f"Frame of Reference UID for dicom {fileName} is different than for {fileNames[0]}.")
+            _logger.error(error)
+            raise error
 
     # check if all dicoms have Series Instance UID tag
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if "SeriesInstanceUID" not in dicomSimple:
-            raise TypeError(f"No 'SeriesInstanceUID' tag in {fileName}.")
+            error = TypeError(f"No 'SeriesInstanceUID' tag in {fileName}.")
+            _logger.error(error)
+            raise error
 
     # check if Series Instance UID is the same for all dicoms
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         if dicomSimple.SeriesInstanceUID != dicomSeries[0].SeriesInstanceUID:
-            raise TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
+            error = TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
+            _logger.error(error)
+            raise error
 
     # check if all dicoms have Slice Location tag
     sliceLosationPresent = []
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         sliceLosationPresent.append("SliceLocation" in dicomSimple)
     if not all(sliceLosationPresent):
-        warnings.warn("Warning: All dicom files are of PT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
+        _logger.warning("Warning: All dicom files are of PT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
 
     # get slice location
     if not all(sliceLosationPresent):
@@ -1085,9 +1147,11 @@ def getPET(fileNames, SUV=True, displayInfo: bool = False):
     slicesLocationSorted, fileNamesSorted = zip(*sorted(zip(slicesLocation, fileNames)))
 
     # check if slice location spacing is constant
-    slicesLocationSpacingTolerance = 1  # decimal points (4 means 0.0001 tolerance)
+    slicesLocationSpacingTolerance = 4  # decimal points (4 means 0.0001 tolerance)
     if np.unique(np.round(np.diff(np.array(slicesLocationSorted)), decimals=slicesLocationSpacingTolerance)).size != 1:
-        raise ValueError(f"Slice location spacing is not constant with tolerance {10**-slicesLocationSpacingTolerance:.0E}")
+        error = ValueError(f"Slice location spacing is not constant with tolerance {10**-slicesLocationSpacingTolerance:.0E}")
+        _logger.error(error)
+        raise error
 
     # read dicom series
     img = sitk.ReadImage(fileNamesSorted, outputPixelType=sitk.sitkFloat32)
@@ -1096,20 +1160,27 @@ def getPET(fileNames, SUV=True, displayInfo: bool = False):
     if SUV:
         delta_time = (float(dicomSimple.AcquisitionTime) - float(dicomSimple.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)) / 100  # [min]
         half_life = dicomSimple.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife / 60  # [min]
-        corrected_dose = dicomSimple.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose * math.exp(-delta_time * math.log(2) / half_life)  # [Bq]
+        corrected_dose = dicomSimple.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose * np.exp(-delta_time * np.log(2) / half_life)  # [Bq]
         SUV_factor = (dicomSimple.RescaleSlope * float(dicomSimple.PatientWeight) * 1000) / (corrected_dose)  # [g/Bq] = [] * [Kg]* 1000[g/kg] / [Bq]
         # Create SUV image
         img = img * float(SUV_factor)  # [g/ml] = [Bq/ml] * [g/Bq]
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.debug(f"Read {len(fileNames):d} dicom file" + ("s" if len(fileNames) > 1 else "") + ".")
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
 
     return img
 
 
-def getRD(fileNames, displayInfo: bool = False):
+@overload
+def getRD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...
+
+
+@overload
+def getRD(fileNames: Sequence[PathLike], displayInfo: bool = False) -> tuple[SITKImage]: ...
+
+
+def getRD(fileNames: Sequence[PathLike] | PathLike, displayInfo: bool = False) -> SITKImage | tuple[SITKImage]:
     """Get an image from dicom.
 
     The function reads a single dicom file or an iterable of dicom files
@@ -1136,35 +1207,36 @@ def getRD(fileNames, displayInfo: bool = False):
     import fredtools as ft
 
     # if fileName is a single string then make it a single element list
-    if isinstance(fileNames, str):
+    if isinstance(fileNames, PathLike):
         fileNames = [fileNames]
 
     imgOut = []
     for fileName in fileNames:
         # read dicom tags
-        dicomTag = dicom.read_file(fileName)
+        dicomTag = dicom.dcmread(fileName)
 
         # find dose scaling
-        scaling = 1
         if "DoseGridScaling" in dicomTag:
             scaling = dicomTag.DoseGridScaling
+        else:
+            scaling = 1
 
-        img = sitk.ReadImage(fileName, outputPixelType=sitk.sitkFloat64)
+        img = sitk.ReadImage(str(fileName), outputPixelType=sitk.sitkFloat64)
 
         # scale image values
         img *= scaling
 
         imgOut.append(img)
 
-        if displayInfo:
-            print(f"### {ft.currentFuncName()} ###")
-            ft.ft_imgAnalyse._displayImageInfo(img)
-            print("#" * len(f"### {ft.currentFuncName()} ###"))
+    if displayInfo:
+        _logger.debug(f"Read {len(imgOut):d} dicom file" + ("s" if len(imgOut) > 1 else "") + ".")
+        for img in imgOut:
+            _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
 
     return imgOut[0] if len(imgOut) == 1 else tuple(imgOut)
 
 
-def _getStructureContoursByName(RSfileName, structName):
+def _getStructureContoursByName(RSfileName: PathLike, structName: str) -> tuple:
     """Get structure contour and info.
 
     The function reads a dicom with RS structures and returns the contours
@@ -1188,13 +1260,13 @@ def _getStructureContoursByName(RSfileName, structName):
     """
     import pydicom as dicom
     import numpy as np
-    import fredtools as ft
-    import warnings
 
     if not _isDicomRS(RSfileName):
-        raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
+        error = TypeError(f"The file {RSfileName} is not a proper dicom describing structures.")
+        _logger.error(error)
+        raise error
 
-    dicomRS = dicom.read_file(RSfileName)
+    dicomRS = dicom.dcmread(RSfileName)
 
     for StructureSetROISequence in dicomRS.StructureSetROISequence:
         if StructureSetROISequence.ROIName == structName:
@@ -1211,7 +1283,9 @@ def _getStructureContoursByName(RSfileName, structName):
 
     # raise an error if no structName is found
     if ROINumber is None:
-        raise ValueError(f"The structure named '{structName}' is not in the {RSfileName}.")
+        error = ValueError(f"The structure named '{structName}' is not in the {RSfileName}.")
+        _logger.error(error)
+        raise error
 
     ROIinfo = {"Number": int(ROINumber), "Name": structName, "GenerationAlgorithm": GenerationAlgorithm}
 
@@ -1226,15 +1300,16 @@ def _getStructureContoursByName(RSfileName, structName):
             if "ContourSequence" in ROIContourSequence:
                 ContourSequence = ROIContourSequence.ContourSequence
             else:
-                warnings.warn("Warning: No 'ContourSequence' defined in 'ROIContourSequence' for the structure '{:s}'. An empty StructureContours will be returned.".format(ROIinfo["Name"]))
+                _logger.warning("No 'ContourSequence' defined in 'ROIContourSequence' for the structure '{:s}'. An empty StructureContours will be returned.".format(ROIinfo["Name"]))
                 ContourSequence = []
+
     # get contour as a list of Nx3 numpy array for each contour
     StructureContours = [np.reshape(Contour.ContourData, [len(Contour.ContourData) // 3, 3]) for Contour in ContourSequence]
 
     return StructureContours, ROIinfo
 
 
-def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo: bool = False):
+def getRDFileNameForFieldNumber(fileNames: Sequence[PathLike], fieldNumber: int, displayInfo: bool = False) -> PathLike | None:
     """Get the file name of the RD dose dicom of for the given field number.
 
     The function searches for the RD dose dicom file for a given
@@ -1255,33 +1330,28 @@ def getRDFileNameForFieldNumber(fileNames, fieldNumber, displayInfo: bool = Fals
         Path to the RD dose file for the given beam number.
     """
     import pydicom as dicom
-    import warnings
-    import fredtools as ft
 
     for fileName in fileNames:
         if not _isDicomRD(fileName):
-            warnings.warn(f"File {fileName} is not a RD dicom.")
+            _logger.warning(f"File {fileName} is not a RD dicom.")
             continue
 
-        dicomRD = dicom.read_file(fileName)
+        dicomRD = dicom.dcmread(fileName)
         if fieldNumber == int(dicomRD.ReferencedRTPlanSequence[0].ReferencedFractionGroupSequence[0].ReferencedBeamSequence[0].ReferencedBeamNumber):
             break
         else:
-            fileName = ""
+            fileName = None
 
     if not fileName:
-        warnings.warn(f"Warning: could not find RD dose dicom file for the field number {fieldNumber}.")
+        _logger.warning(f"Warning: could not find RD dose dicom file for the field number {fieldNumber}.")
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# Path to the RD dose dicom with the field number {fieldNumber}:")
-        print(f"# {fileName}")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(f"Path to the RD dose dicom with the field number {fieldNumber}: {fileName}")
 
     return fileName
 
 
-def anonymizeDicoms(fileNames, removePrivateTags=False, displayInfo: bool = False):
+def anonymizeDicoms(fileNames: Sequence[PathLike] | PathLike, removePrivateTags: bool = False, displayInfo: bool = False) -> None:
     """Anonymize dicom files.
 
     The function anonymizes dicom files given as an iterable of file paths.
@@ -1297,14 +1367,13 @@ def anonymizeDicoms(fileNames, removePrivateTags=False, displayInfo: bool = Fals
         Displays a summary of the function results. (def. False)
     """
     import pydicom as dicom
-    import fredtools as ft
 
     # if fileName is a single string then make it a single element list
-    if isinstance(fileNames, str):
+    if isinstance(fileNames, PathLike):
         fileNames = [fileNames]
 
     for fileName in fileNames:
-        dicomTags = dicom.read_file(fileName)
+        dicomTags = dicom.dcmread(fileName)
         if "PatientName" in dicomTags:
             dicomTags.PatientName = ""
         if "PatientBirthDate" in dicomTags:
@@ -1329,9 +1398,7 @@ def anonymizeDicoms(fileNames, removePrivateTags=False, displayInfo: bool = Fals
         if removePrivateTags:
             dicomTags.remove_private_tags()
 
-        dicom.write_file(fileName, dicomTags, write_like_original=True)
+        dicom.dcmwrite(fileName, dicomTags, enforce_file_format=True)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# Anonymized files: {len(fileNames)}")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(f"Anonymized {len(fileNames)} file" + ("s" if len(fileNames) > 1 else "") + ".")

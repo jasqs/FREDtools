@@ -1,8 +1,12 @@
 from fredtools._typing import *
-re_number = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+re_number: str = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
+'''Regular expression for a number in almost any notation inlcuding the scientific notation.'''
 
 
-def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo: bool = False):
+def mergePDF(PDFFileNames: Iterable[str], mergedPDFFileName: str, removeSource: bool = False, displayInfo: bool = False) -> str:
     """Merge multiple PDF files to a single PDF.
 
     The function merges multiple PDF files given as a list of
@@ -36,7 +40,9 @@ def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo: b
     # check if all files to be merged exist
     for PDFFileName in PDFFileNames:
         if not os.path.exists(PDFFileName):
-            raise FileNotFoundError(f"The file {PDFFileName} dose not exist.")
+            error = FileNotFoundError(f"The file {PDFFileName} dose not exist.")
+            _logger.error(error)
+            raise error
 
     mergedPDF = fitz.open()
 
@@ -51,17 +57,15 @@ def mergePDF(PDFFileNames, mergedPDFFileName, removeSource=False, displayInfo: b
     mergedPDF.save(mergedPDFFileName)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# Merged PDF files:\n# " + "\n# ".join(PDFFileNames))
-        print(f"# Saved merged PDF to: ", mergedPDFFileName)
+        _logger.info(f"# Merged PDF files:\n# " + "\n# ".join(PDFFileNames))
+        _logger.info(f"# Saved merged PDF to: ", mergedPDFFileName)
         if removeSource:
-            print(f"# Removed the source PDF files")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            _logger.info(f"# Removed the source PDF files")
 
     return os.path.abspath(mergedPDFFileName)
 
 
-def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=True):
+def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = None, bins: Iterable[Numberic] | None = None, kind: str = "mean", returnBinCenters: bool = True) -> tuple[NDArray, NDArray]:
     """Get histogram or differential histogram.
 
     The function creates a histogram data from a given dataX iterable in the defined bins.
@@ -104,9 +108,13 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
     from collections.abc import Iterable
 
     if not isinstance(dataX, Iterable):
-        raise TypeError(f"The variable 'dataX' is not an iterable. It must be a 1D iterable.")
+        error = TypeError(f"The variable 'dataX' is not an iterable. It must be a 1D iterable.")
+        _logger.error(error)
+        raise error
     if dataY is not None and not isinstance(dataY, Iterable):
-        raise TypeError(f"The variable 'dataY' is not an iterable. It must be a 1D iterable.")
+        error = TypeError(f"The variable 'dataY' is not an iterable. It must be a 1D iterable.")
+        _logger.error(error)
+        raise error
 
     # convert dataX to ndarray if needed
     if not isinstance(dataX, np.ndarray):
@@ -114,7 +122,9 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
 
     # check if dataX is 1D array
     if dataX.ndim != 1:
-        raise ValueError(f"The parameter 'dataX' must be a 1D iterable, e.g. a single column pandas DataFrame, 1D list or tuple, etc.")
+        error = ValueError(f"The parameter 'dataX' must be a 1D iterable, e.g. a single column pandas DataFrame, 1D list or tuple, etc.")
+        _logger.error(error)
+        raise error
 
     # convert dataY to ndarray if needed
     if dataY is not None and not isinstance(dataY, np.ndarray):
@@ -122,31 +132,34 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
 
     # check if dataY is 1D array
     if dataY is not None and dataY.ndim != 1:
-        raise ValueError(f"The parameter 'dataY' must be a 1D iterable, e.g. a single column pandas DataFrame, 1D list or tuple, etc.")
+        error = ValueError(f"The parameter 'dataY' must be a 1D iterable, e.g. a single column pandas DataFrame, 1D list or tuple, etc.")
+        _logger.error(error)
+        raise error
 
     # check if dataY is of the same length as dataX
     if dataY is not None and len(dataX) != len(dataY):
-        raise ValueError(f"The length of the 'dataY' iterable must be the same as the length of the 'dataX' iterable but they have {len(dataY)} and {len(dataX)} lengths, respectively.")
+        error = ValueError(f"The length of the 'dataY' iterable must be the same as the length of the 'dataX' iterable but they have {len(dataY)} and {len(dataX)} lengths, respectively.")
+        _logger.error(error)
+        raise error
 
     # create bins if not given
     if bins is None:
         bins = np.linspace(np.nanmin(dataX), np.nanmax(dataX), 100)
 
     # validate kind parameter
-    if dataY is not None and kind not in [
-        "sum",
-        "mean",
-        "std",
-        "median",
-        "min",
-        "max",
-        "mean-std",
-        "mean+std",
-    ]:
-        raise ValueError(f"The value of 'kind' parameter must be 'sum', 'mean', 'std', 'median', 'mean-std', 'mean+std', 'min' or 'max' but '{kind}' was given.")
+    if dataY is not None and kind not in ["sum", "mean", "std", "median", "min", "max", "mean-std", "mean+std"]:
+        error = ValueError(f"The value of 'kind' parameter must be 'sum', 'mean', 'std', 'median', 'mean-std', 'mean+std', 'min' or 'max' but '{kind}' was given.")
+        _logger.error(error)
+        raise error
+
+    # make shure that bins is iterable
+    if not isinstance(bins, Iterable):
+        error = TypeError(f"The variable 'bins' is not an iterable. It must be a 1D iterable.")
+        _logger.error(error)
+        raise error
 
     # creates a histogram for dataX
-    hist = list(np.histogram(dataX, bins=bins))[::-1]
+    hist = list(np.histogram(dataX, bins=np.asarray(bins)))[::-1]
     hist[0] = hist[0].astype("float")
 
     # creates a differential histogram if dataY is given
@@ -158,22 +171,23 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
             if not len(histEntry):
                 histEntry = np.nan
             else:
-                if kind == "sum":
-                    histEntry = histEntry.sum()
-                elif kind == "mean":
-                    histEntry = histEntry.mean()
-                elif kind == "std":
-                    histEntry = histEntry.std()
-                elif kind == "median":
-                    histEntry = histEntry.median()
-                elif kind == "min":
-                    histEntry = histEntry.min()
-                elif kind == "max":
-                    histEntry = histEntry.max()
-                elif kind == "mean-std":
-                    histEntry = histEntry.mean() - histEntry.std()
-                elif kind == "mean+std":
-                    histEntry = histEntry.mean() + histEntry.std()
+                match kind:
+                    case "sum":
+                        histEntry = histEntry.sum()
+                    case "mean":
+                        histEntry = histEntry.mean()
+                    case "std":
+                        histEntry = histEntry.std()
+                    case "median":
+                        histEntry = np.median(histEntry)
+                    case "min":
+                        histEntry = histEntry.min()
+                    case "max":
+                        histEntry = histEntry.max()
+                    case "mean-std":
+                        histEntry = histEntry.mean() - histEntry.std()
+                    case "mean+std":
+                        histEntry = histEntry.mean() + histEntry.std()
             hist[1][i] = histEntry
 
     # calculate bin centres instead of bin edges if requested
@@ -183,10 +197,10 @@ def getHistogram(dataX, dataY=None, bins=None, kind="mean", returnBinCenters=Tru
     # convert hist[1] to float (useful for postprocessing normalistion)
     hist[1] = hist[1].astype("float")
 
-    return hist
+    return hist[0], hist[1]
 
 
-def sigma2fwhm(sigma):
+def sigma2fwhm(sigma: Numberic) -> float:
     """Convert sigma to FWHM.
 
     The function recalculates the sigma parameter of a Gaussian distribution
@@ -211,7 +225,7 @@ def sigma2fwhm(sigma):
     return 2 * sqrt(2 * log(2)) * sigma
 
 
-def fwhm2sigma(fwhm):
+def fwhm2sigma(fwhm: Numberic) -> float:
     """Convert FWHM to sigma.
 
     The function recalculates full width at half maximum (FWHM)
@@ -236,7 +250,19 @@ def fwhm2sigma(fwhm):
     return fwhm / (2 * sqrt(2 * log(2)))
 
 
-def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, comment="#"):
+@overload
+def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all'] = "all", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[tuple[int, ...], tuple[str, ...]] | None: ...
+
+
+@overload
+def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['first'] = "first", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[int, str] | None: ...
+
+
+@overload
+def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['last'] = "last", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[int, str] | None: ...
+
+
+def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'first', 'last'] = "all", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[int, str] | tuple[tuple[int, ...], tuple[str, ...]] | None:
     """Read the line and line number from an ASCI file.
 
     The function searches an ASCI file for lines matching a pattern and returns
@@ -301,19 +327,18 @@ def getLineFromFile(pattern, fileName, kind="all", startLine=1, removeEoL=True, 
     if not lineIdx:
         return None
 
-    if kind.lower() == "first":
-        lineIdx = lineIdx[0]
-        lineString = lineString[0]
-    elif kind.lower() == "last":
-        lineIdx = lineIdx[-1]
-        lineString = lineString[-1]
-    elif kind.lower() == "all":
-        lineIdx = tuple(lineIdx)
-        lineString = tuple(lineString)
-    else:
-        raise AttributeError(f"Unrecognized kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
-
-    return lineIdx, lineString
+    match kind.lower():
+        case "first":
+            output = (int(lineIdx[0]), str(lineString[0]))
+            return output
+        case "last":
+            return lineIdx[-1], lineString[-1]
+        case "all":
+            return tuple(lineIdx), tuple(lineString)
+        case _:
+            error = AttributeError(f"Unrecognized kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
+            _logger.error(error)
+            raise error
 
 
 def getCPUNo(CPUNo: Literal["auto"] | NonNegativeInt = "auto") -> NonNegativeInt:

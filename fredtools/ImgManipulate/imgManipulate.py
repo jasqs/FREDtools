@@ -1,7 +1,9 @@
 from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
 
 
-def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask: bool = False, areaFraction: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5, CPUNo: Literal["auto"] | int = "auto", displayInfo: bool = False) -> SITKImage:  # type: ignore
+def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binaryMask: bool = False, areaFraction: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5, displayInfo: bool = False) -> SITKImage:
     """Map structure to image and create a mask.
 
     The function reads a `structName` structure from the RS dicom file and maps it to
@@ -28,11 +30,6 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
     areaFraction : scalar, optional
         Fraction of pixel area occupancy to calculate binary mask.
         Used only if binaryMask==True. (def. 0.5)
-    CPUNo : {'auto', 'none'}, scalar or None, optional
-        Define if the multiprocessing should be used and how many cores should
-        be exploited. It can be None, and then no multiprocessing will be used,
-        a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cores to be used. (def. 'auto')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -66,9 +63,7 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
-    import warnings
     from multiprocessing import Pool
-    logger = ft.getLogger()
 
     if not ft._imgTypeChecker.isSITK3D(img, raiseError=True):
         raise ValueError(f"The image is a SimpleITK image of dimension {img.GetDimension()}. Only mapping ROI to 3D images are supported now.")
@@ -77,19 +72,19 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
     # set the number of CPUs to be used
-    CPUNo = ft.getCPUNo(CPUNo)
+    CPUNo = ft.getCPUNo(ft.CPUNO)
 
     # check if fraction area is correct
     if binaryMask:
         if not isinstance(areaFraction, float) or areaFraction < 0 or areaFraction > 1:
             error = ValueError(f"The parameter 'areaFraction' must be a scalar larger or equal to 0 and less or equal to 1.")
-            logger.error(error)
+            _logger.error(error)
             raise error
 
     # check if the structName is in the RS dicom
     if not structName in ft.getRSInfo(RSfileName).ROIName.tolist():
         error = ValueError(f"The structure '{structName}' can not be found in the dicom RS file {RSfileName}")
-        logger.error(error)
+        _logger.error(error)
         raise error
 
     # get structure contour and structure info
@@ -108,12 +103,10 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
         imgMask.SetMetaData("ROIType", StructInfo["Type"])
 
         if displayInfo:
-            logger.warning("# Warning: no 'StructureContours' was defined for this structure and an empty mask was returned")
-            logStr = ["Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]),
+            _logger.warning("No 'StructureContours' was defined for this structure and an empty mask was returned.")
+            logStr = ["Mapping structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]),
                       "Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3)]
-            logStr = "\n\t".join(logStr)
-
-            logger.info(logStr + "\n" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
+            _logger.info("\n\t".join(logStr) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
 
         return imgMask
 
@@ -124,7 +117,7 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
     for StructureContour in StructureContours:
         if not len(np.unique(StructureContour[:, 2])) == 1:
             error = ValueError(f"Not all Z (depth) position in controur are the same.")
-            logger.error(error)
+            _logger.error(error)
             raise error
 
     # get depth for each contour and sort the depths
@@ -158,7 +151,7 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
     # validate if all contour vertices are defined inside the image extent
     StructureContoursExtent = np.stack((np.min(np.concatenate(StructureContours, axis=0), axis=0), np.max(np.concatenate(StructureContours, axis=0), axis=0)))
     if not all(tuple([ft.isPointInside(img, StructureContoursExtent)])):
-        warnings.warn(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
+        _logger.debug(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
                       f"The image extent is {ft.getExtent(img)}\n" +
                       f"and the contour extent is {StructureContoursExtent.T.tolist()}.")
 
@@ -226,22 +219,25 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
     imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
 
     # interpolate mask to input image
-    imgMask = sitk.Resample(
-        imgMask, img, interpolator=ft._helper.setSITKInterpolator(interpolation="linear"))
+    imgMask = sitk.Resample(imgMask, img, interpolator=ft._helper.setSITKInterpolator(interpolation="linear"))
 
     # prepare binary mask if requested, with fraction area threshold
     if binaryMask:
         try:
             imgMask = ft.floatingToBinaryMask(imgMask, threshold=areaFraction)
         except TypeError:
-            raise RuntimeError("The structure was mapped but the binary mask is incorrect.")
+            error = RuntimeError("The structure was mapped but the binary mask is incorrect.")
+            _logger.error(error)
+            raise error
     else:
         imgMask = sitk.Cast(imgMask, sitk.sitkFloat64)
         # make sure the image is a floating mask
         try:
             ft._imgTypeChecker.isSITK_maskFloating(imgMask, raiseError=True)
         except TypeError:
-            raise RuntimeError("The structure was mapped but the floating mask is incorrect.")
+            error = RuntimeError("The structure was mapped but the floating mask is incorrect.")
+            _logger.error(error)
+            raise error
 
     # set additional metadata
     imgMask.SetMetaData("ROIColor", str(StructInfo["Color"]))
@@ -251,26 +247,24 @@ def mapStructToImg(img: SITKImage, RSfileName: str, structName: str, binaryMask:
     imgMask.SetMetaData("ROIType", StructInfo["Type"])
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]))
-        print("# Structure volume: {:.3f} cm3".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3))
-        ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        logStr = ["Mapping structure name (type): '{:s}' ({:s})".format(StructInfo["Name"], StructInfo["Type"]),
+                  "Structure volume: {:.3f} cm³".format(ft.arr(imgMask).sum() * np.prod(np.array(imgMask.GetSpacing())) / 1e3)]
+        _logger.info("\n\t".join(logStr) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
 
     return imgMask
 
 
-def _checkContourCWDirection(contour):
+def _checkContourCWDirection(contour: NDArray) -> bool:
     import numpy as np
 
     """Check if the contour has CW (True) or CCW (False) direction. 
     The CW (True) contour direction usually means that it is a filled polygon
     and the CCW (False) contour direction that it is a hole in the filled polygon."""
     result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
-    return result < 0
+    return bool(result < 0)
 
 
-def _getLineSegmentPixels(lineSegmentStart, lineSegmentEnd):
+def _getLineSegmentPixels(lineSegmentStart: NDArray, lineSegmentEnd: NDArray) -> NDArray:
     """
     Uses Xiaolin Wu's line algorithm to interpolate all of the pixels along a
     straight line segment, given two points lineSegmentStart and lineSegmentEnd.
@@ -317,7 +311,7 @@ def _getLineSegmentPixels(lineSegmentStart, lineSegmentEnd):
     return xycoords
 
 
-def _getStructureContourBorderPixels(StructureContourPx):
+def _getStructureContourBorderPixels(StructureContourPx: NDArray) -> NDArray:
     """
     Calculates all pixels along a polygon.
     """
@@ -332,7 +326,7 @@ def _getStructureContourBorderPixels(StructureContourPx):
     return StructureContourBorderPixels
 
 
-def _getStructureContourArray(StructureContourPx):
+def _getStructureContourArray(StructureContourPx: NDArray) -> NDArray:
     """
     Calculates array with unit values inside the structure polygon and
     floating values in the range 0-1 at the contour border, describing
@@ -355,14 +349,14 @@ def _getStructureContourArray(StructureContourPx):
     StructureContourBorderPixelsPolygons = np.array(StructureContourBorderPixelsPolygons)[StructureContourBorderPixelsPolygonsIntersects].tolist()
 
     # generate contour slice
-    arr = np.zeros(StructureContourBorderPixels.max(axis=0)[::-1] + 1)
+    arr = np.zeros(StructureContourBorderPixels.max(axis=0)[::-1] + 1, dtype="float")
 
     # set pixels at the contour border to 1
     arr[StructureContourBorderPixels[:, 1], StructureContourBorderPixels[:, 0]] = 1
 
     # fill pixels inside the contour
     arr = ndimage.binary_fill_holes(arr.astype("bool"))
-    if arr:
+    if arr is not None:
         arr = arr.astype("float")
 
     # calculate the contour pixels area inside the contour
@@ -374,7 +368,7 @@ def _getStructureContourArray(StructureContourPx):
     return arr
 
 
-def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayInfo: bool = False):
+def floatingToBinaryMask(imgMask: SITKImage, threshold: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5, thresholdEqual: bool = False, displayInfo: bool = False) -> SITKImage:
     """Convert floating mask to binary mask.
 
     The function converts an image defined as an instance of a SimpleITK
@@ -409,37 +403,44 @@ def floatingToBinaryMask(imgMask, threshold=0.5, thresholdEqual=False, displayIn
     ft._imgTypeChecker.isSITK_maskFloating(imgMask, raiseError=True)
 
     # check if the threshold is correct
-    if not np.isscalar(threshold):
-        raise AttributeError(f"The parameter 'threshold' must be a scalar.")
+    if not isinstance(threshold, Numberic):
+        error = TypeError(f"The parameter 'threshold' must be a scalar.")
+        _logger.error(error)
+        raise error
+
     if thresholdEqual:
         if threshold <= 0 or threshold > 1:
-            raise ValueError(f"If thresholdEqual=True, then the parameter 'threshold' must be a scalar larger than 0 and less or equal to 1.")
+            error = ValueError(f"If thresholdEqual=True, then the parameter 'threshold' must be a scalar larger than 0 and less or equal to 1.")
+            _logger.error(error)
+            raise error
     else:
         if threshold < 0 or threshold > 1:
-            raise ValueError(f"If thresholdEqual=False, then the parameter 'threshold' must be a scalar larger or equal to 0 and less or equal to 1.")
+            error = ValueError(f"If thresholdEqual=False, then the parameter 'threshold' must be a scalar larger or equal to 0 and less or equal to 1.")
+            _logger.error(error)
+            raise error
 
     if thresholdEqual:
         imgMaskBinary = imgMask >= threshold
     else:
         imgMaskBinary = imgMask > threshold
 
-    imgMaskBinary = ft.copyImgMetaData(imgMask, imgMaskBinary)
+    imgMaskBinary = ft._helper.copyImgMetaData(imgMask, imgMaskBinary)
 
     # make sure the image is a binary mask
     try:
         ft._imgTypeChecker.isSITK_maskBinary(imgMaskBinary, raiseError=True)
     except TypeError:
-        raise RuntimeError("The the input image is a floating mask but the binary mask is incorrect.")
+        error = RuntimeError("The the input image is a floating mask but the binary mask is incorrect.")
+        _logger.error(error)
+        raise error
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgMaskBinary)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMaskBinary))
 
     return imgMaskBinary
 
 
-def cropImgToMask(img, imgMask, displayInfo: bool = False):
+def cropImgToMask(img: SITKImage, imgMask: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Crop image to mask boundary.
 
     The function calculates the boundaries of the `imgMask` defined
@@ -477,7 +478,9 @@ def cropImgToMask(img, imgMask, displayInfo: bool = False):
 
     # check FoR of the image and the mask
     if not ft.compareImgFoR(img, imgMask):
-        raise ValueError(f"FoR of the 'img' {img.GetSize()} must be the same as the FoR of the 'imgMask' {imgMask.GetSize()}.")
+        error = ValueError(f"FoR of the 'img' {img.GetSize()} must be the same as the FoR of the 'imgMask' {imgMask.GetSize()}.")
+        _logger.error(error)
+        raise error
 
     # convert the floating mask to binary with a minimum threshold larger than 0
     if ft._imgTypeChecker.isSITK_maskFloating(imgMask):
@@ -491,15 +494,14 @@ def cropImgToMask(img, imgMask, displayInfo: bool = False):
     lowerBoundaryCropSize = boundingBox[0::2]
     upperBoundaryCropSize = np.array(img.GetSize()) - np.array(boundingBox[1::2]) - 1
     imgCrop = sitk.Crop(img, lowerBoundaryCropSize=lowerBoundaryCropSize, upperBoundaryCropSize=[int(i) for i in upperBoundaryCropSize])
+
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgCrop)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgCrop))
 
     return imgCrop
 
 
-def setValueMask(img, imgMask, value, outside=True, displayInfo: bool = False):
+def setValueMask(img: SITKImage, imgMask: SITKImage, value: int, outside: bool = True, displayInfo: bool = False) -> SITKImage:
     """Set value inside/outside mask.
 
     The function sets the values of the `img` defined as an instance of
@@ -559,13 +561,12 @@ def setValueMask(img, imgMask, value, outside=True, displayInfo: bool = False):
     imgMasked = sitk.Mask(img, imgMask, outsideValue=value, maskingValue=maskingValue)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgMasked)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMasked))
+
     return imgMasked
 
 
-def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo: bool = False):
+def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
     """Resample image to other voxel spacing.
 
     The function resamples an image defined as an instance of a
@@ -602,27 +603,29 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     if ft._imgTypeChecker.isSITK_point(img):
-        raise ValueError(
-            f"The 'img' is an instance of SimleITK image but describes a single point (size of 'img' is {img.GetSize()}). Interpolation cannot be performed on images describing a single point."
-        )
+        error = ValueError(f"The 'img' is an instance of SimleITK image but describes a single point (size of 'img' is {img.GetSize()}). Interpolation cannot be performed on images describing a single point.")
+        _logger.error(error)
+        raise error
 
     # convert spacing to numpy
     spacing = np.array(spacing)
 
     # check if point dimension matches the img dim.
-    if (spacing.size != img.GetDimension()) and spacing.size != len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img)):
-        raise ValueError(f"Shape of 'spacing' is {spacing} but must match the dimension of 'img' {img.GetDimension()} or number of nonunity axes {len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))}.")
-    if spacing.size == len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img)):
+    if (spacing.size != img.GetDimension()) and spacing.size != len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img)):
+        error = ValueError(f"Shape of 'spacing' is {spacing} but must match the dimension of 'img' {img.GetDimension()} or number of nonunity axes {len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))}.")
+        _logger.error(error)
+        raise error
+    if spacing.size == len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img)):
         spacingCorr = np.array(img.GetSpacing())
-        spacingCorr[np.array(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))] = spacing
+        spacingCorr[np.array(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))] = spacing
     else:
         spacingCorr = spacing
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # correct spacing according to image direction
-    spacingCorr = np.dot(ft.ft_imgAnalyse._getDirectionArray(img).T, spacingCorr)
+    spacingCorr = np.dot(ft.ImgAnalyse.imgAnalyse._getDirectionArray(img).T, spacingCorr)
 
     # calculate new size
     newSize = np.array(ft.getSize(img)) / np.abs(spacingCorr)
@@ -642,25 +645,23 @@ def resampleImg(img, spacing, interpolation="linear", splineOrder=3, displayInfo
     valueOutside = ft.getStatistics(img).GetMinimum()
 
     # Execute interpolation
-    imgRes = sitk.Resample(
-        img,
-        size=[int(i) for i in newSize],
-        outputOrigin=[i for i in newOrigin],
-        outputSpacing=[i for i in np.abs(spacingCorr)],
-        outputDirection=img.GetDirection(),
-        defaultPixelValue=valueOutside,
-        interpolator=interpolator,
-        useNearestNeighborExtrapolator=False,
-    )
+    imgRes = sitk.Resample(img,
+                           size=[int(i) for i in newSize],  # type: ignore
+                           outputOrigin=[i for i in newOrigin],
+                           outputSpacing=[i for i in np.abs(spacingCorr)],
+                           outputDirection=img.GetDirection(),
+                           defaultPixelValue=valueOutside,
+                           interpolator=interpolator,
+                           useNearestNeighborExtrapolator=False,
+                           )
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgRes)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgRes))
+
     return imgRes
 
 
-def sumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
+def sumImg(imgs: Sequence[SITKImage], displayInfo: bool = False) -> SITKImage:
     """Sum list of images.
 
     The function sums an iterable (list, tuple, etc.) of images
@@ -680,25 +681,34 @@ def sumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
         An object of a SimpleITK image.
     """
     import fredtools as ft
+    import SimpleITK as sitk
+
+    # check if the input iterable is not empty
+    if not imgs:
+        error = ValueError("The input iterable 'imgs' is empty.")
+        _logger.error(error)
+        raise error
 
     # check if all images have the same FoR
     for img in imgs:
         ft._imgTypeChecker.isSITK(img, raiseError=True)
         if not ft.compareImgFoR(img, imgs[0]):
-            raise ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            _logger.error(error)
+            raise error
 
     # sum images
-    img = sum(imgs)
+    img: SITKImage = imgs[0]
+    for i in range(1, len(imgs)):
+        img = sitk.Add(img, imgs[i])
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
 
     return img
 
 
-def imgDivide(imgNum, imgDen, displayInfo: bool = False):
+def imgDivide(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Divide two images.
 
     The function divides two images images defined as instances 
@@ -732,7 +742,9 @@ def imgDivide(imgNum, imgDen, displayInfo: bool = False):
 
     # check if numerator and denominator images have the same FoR
     if not ft.compareImgFoR(imgNum, imgDen):
-        raise ValueError(f"The numerator and denominator images must have the same field of reference.")
+        error = ValueError(f"The numerator and denominator images must have the same field of reference.")
+        _logger.error(error)
+        raise error
 
     arrNum = sitk.GetArrayViewFromImage(imgNum)
     arrDen = sitk.GetArrayViewFromImage(imgDen)
@@ -746,226 +758,9 @@ def imgDivide(imgNum, imgDen, displayInfo: bool = False):
     imgDiv.CopyInformation(imgNum)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgDiv)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgDiv))
 
     return imgDiv
-
-
-def createEllipseMask(img, point, radii, displayInfo: bool = False):
-    """Create an Ellipse mask in the image field of reference.
-
-    The function creates an ellipse mask, defined with the center and radii
-    in the frame of references of an image defined as a SimpleITK image 
-    object. Any dimension, i.e. 2D-4D, of the image is supported.
-
-    Parameters
-    ----------
-    img : SimpleITK Image
-        An object of a SimpleITK image.
-    point : array_like
-        A point describing the position of the center of the ellipse. The dimension must match the image dimension.
-    radii : scalar or array_like
-        Radii of the ellipse for each dimension. It might be a scalar, then the same radii will be used in each direction.
-    displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
-
-    Returns
-    -------
-    SimpleITK Image
-        An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
-
-    See Also
-    --------
-        mapStructToImg : mapping a structure to an image to create a mask.
-        setValueMask : setting values of the image inside/outside a mask.
-        cropImgToMask : crop an image to mask.
-        createCylinderMask: create a cylinder mask.
-        createConeMask : create a cone mask.
-    """
-    import itk
-    import fredtools as ft
-    from collections.abc import Iterable
-    import numpy as np
-
-    ft._imgTypeChecker.isSITK(img, raiseError=True)
-
-    # convert image to ITK
-    imgITK = ft.SITK2ITK(img)
-
-    # check radii and point parameters
-    if isinstance(radii, Iterable):
-        radii = list(radii)
-    if np.isscalar(radii):
-        radii = [radii]*img.GetDimension()
-    if len(radii) != img.GetDimension():
-        raise ValueError(f"The `radii` parameter must be an iterable of the same length as the image dimension. Image dimension is {img.GetDimension()} but radii {radii} was used.")
-    if len(point) != img.GetDimension():
-        raise ValueError(f"The `point` parameter must be an iterable of the same length as the image dimension. Image dimension is {img.GetDimension()} but point {point} was used.")
-
-    # create ellipse and mapping objects
-    EllipseSpatialObject = itk.EllipseSpatialObject[img.GetDimension()].New()
-    SpatialObjectToImage = itk.SpatialObjectToImageFilter[itk.SpatialObject[img.GetDimension()], itk.Image[itk.UC, img.GetDimension()]].New()
-
-    EllipseSpatialObject.SetCenterInObjectSpace(point)
-    EllipseSpatialObject.SetRadiusInObjectSpace(radii)
-
-    # map spatial object to image FoR
-    SpatialObjectToImage.SetInsideValue(1)
-    SpatialObjectToImage.SetOutsideValue(0)
-    SpatialObjectToImage.SetInput(EllipseSpatialObject)
-    SpatialObjectToImage.SetSize(imgITK.GetLargestPossibleRegion().GetSize())
-    SpatialObjectToImage.SetDirection(imgITK.GetDirection())
-    SpatialObjectToImage.SetOrigin(imgITK.GetOrigin())
-    SpatialObjectToImage.SetSpacing(imgITK.GetSpacing())
-    SpatialObjectToImage.Update()
-    imgMask = SpatialObjectToImage.GetOutput()
-
-    imgMask = ft.ITK2SITK(imgMask)
-
-    if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
-
-    return imgMask
-
-
-def createConeMask(img, startPoint, endPoint, startRadius, endRadius, displayInfo: bool = False):
-    """Create a cone mask in the image field of reference.
-
-    The function creates a cone mask, defined with starting and ending points and radii 
-    in the frame of references of an image defined as a SimpleITK image object describing a 3D image.
-    Only 3D images are supported.
-
-    Parameters
-    ----------
-    img : SimpleITK Image
-        Object of a SimpleITK 3D image.
-    startPoint : array_like
-        3-element point describing the position of the center of the first cone base.
-    endPoint : array_like
-        3-element point describing the position of the center of the second cone base.
-    startRadius : scalar
-        Radious of the first cone base.
-    endRadius : scalar
-        Radious of the second cone base.
-    displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
-
-    Returns
-    -------
-    SimpleITK Image
-        An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
-
-    See Also
-    --------
-        mapStructToImg : mapping a structure to an image to create a mask.
-        setValueMask : setting values of the image inside/outside a mask.
-        cropImgToMask : crop an image to mask.
-        createCylinderMask: create a cylinder mask.
-        createEllipseMask : create an ellipse mask.
-    """
-    import itk
-    import fredtools as ft
-
-    ft._imgTypeChecker.isSITK3D(img, raiseError=True)
-
-    # convert image to ITK
-    imgITK = ft.SITK2ITK(img)
-
-    if not isinstance(startPoint, list):
-        startPoint = list(startPoint)
-    if not isinstance(endPoint, list):
-        endPoint = list(endPoint)
-
-    # define tube spatial object woth two points
-    TubeSpatialObject = itk.TubeSpatialObject[3].New()
-
-    TubeSpatialObjectPoints = [itk.TubeSpatialObjectPoint[3](),
-                               itk.TubeSpatialObjectPoint[3]()]
-
-    TubeSpatialObjectPoints[0].SetPositionInObjectSpace(startPoint)
-    TubeSpatialObjectPoints[0].SetRadiusInObjectSpace(startRadius)
-    TubeSpatialObjectPoints[1].SetPositionInObjectSpace(endPoint)
-    TubeSpatialObjectPoints[1].SetRadiusInObjectSpace(endRadius)
-
-    TubeSpatialObject.SetPoints(TubeSpatialObjectPoints)
-    TubeSpatialObject.SetEndRounded(False)
-    TubeSpatialObject.Update()
-
-    # map spatial object to image FoR
-    SpatialObjectToImage = itk.SpatialObjectToImageFilter[itk.SpatialObject[3], itk.Image[itk.UC, 3]].New()
-
-    SpatialObjectToImage.SetInsideValue(1)
-    SpatialObjectToImage.SetOutsideValue(0)
-    SpatialObjectToImage.SetInput(TubeSpatialObject)
-    SpatialObjectToImage.SetSize(imgITK.GetLargestPossibleRegion().GetSize())
-    SpatialObjectToImage.SetDirection(imgITK.GetDirection())
-    SpatialObjectToImage.SetOrigin(imgITK.GetOrigin())
-    SpatialObjectToImage.SetSpacing(imgITK.GetSpacing())
-    SpatialObjectToImage.Update()
-    imgMask = SpatialObjectToImage.GetOutput()
-
-    imgMask = ft.ITK2SITK(imgMask)
-
-    if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
-
-    return imgMask
-
-
-def createCylinderMask(img, startPoint, endPoint, radious, displayInfo: bool = False):
-    """Create a cylindrical Mask in the image field of reference
-
-    The function creates a cylindrical mask with a given radious and height
-    calculated from the starting and ending points of the cylinder in the frame of
-    references of an image defined as a SimpleITK image object describing a 3D image.
-    Only 3D images are supported. For instance, the routine might help make
-    a geometrical acceptance correction of a chamber used for Bragg peak measurements.
-    The routine was adapted from a GitHub repository: https://github.com/heydude1337/SimplePhantomToolkit/.
-
-    Parameters
-    ----------
-    img : SimpleITK Image
-        Object of a SimpleITK 3D image.
-    startPoint : array_like
-        3-element point describing the position of the center of the first cylinder base.
-    endPoint : array_like
-        3-element point describing the position of the center of the second cylinder base.
-    radious : scalar
-        Radious of the cylinder.
-    displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
-
-    Returns
-    -------
-    SimpleITK Image
-        An instance of a SimpleITK image object describing a mask (i.e. type 'uint8' with 0/1 values).
-
-    See Also
-    --------
-        mapStructToImg : mapping a structure to an image to create a mask.
-        setValueMask : setting values of the image inside/outside a mask.
-        cropImgToMask : crop an image to mask.
-        createConeMask: create a cone mask.
-        createEllipseMask : create an ellipse mask.
-    """
-    import SimpleITK as sitk
-    import fredtools as ft
-    import numpy as np
-
-    imgMask = ft.createConeMask(img, startPoint, endPoint, radious, radious)
-
-    if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgMask)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
-
-    return imgMask
 
 
 def sumVectorImg(img: SITKImage, displayInfo: bool = False) -> SITKImage:
@@ -990,23 +785,22 @@ def sumVectorImg(img: SITKImage, displayInfo: bool = False) -> SITKImage:
     """
     import fredtools as ft
     import SimpleITK as sitk
-    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK_vector(img, raiseError=True)
 
-    imgs = []
+    imgs: list[SITKImage] = []
     for componentIdx in range(img.GetNumberOfComponentsPerPixel()):
         imgs.append(sitk.VectorIndexSelectionCast(img, componentIdx))
 
     imgSum = ft.sumImg(imgs)
 
     if displayInfo:
-        logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgSum))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgSum))
 
     return imgSum
 
 
-def _getFORTransformed(img, transform):
+def _getFORTransformed(img: SITKImage, transform: SITKTransform) -> tuple:
     """Calculate image FOR after transformation.
 
     The function calculates a new Field of Reference (FOR) for an image defined
@@ -1053,7 +847,7 @@ def _getFORTransformed(img, transform):
     return sizePX, originRW, spacingRW, directionIdentity
 
 
-def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue="auto", interpolation="linear", splineOrder=3, displayInfo: bool = False):
+def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numberic], 3], gantryAngle: Numberic, couchAngle: Numberic, defaultPixelValue: Numberic | Literal["auto"] = "auto", interpolation:  Literal["linear", "nearest", "spline"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
     """Transform an image to Beam's Eye View (BEV).
 
     The function transforms a 3D image defined as a SimpleITK 3D image object to
@@ -1113,7 +907,7 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
 
     # set interpolator
-    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
+    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
 
     # check if isocentrePosition dimension matches the img dim.
     if len(isocentrePosition) != img.GetDimension():
@@ -1131,11 +925,11 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
 
     # define gantry rotation around the zero position
     eulerTransformGantry = sitk.Euler3DTransform()
-    eulerTransformGantry.SetRotation(angleX=0, angleY=0, angleZ=np.deg2rad(gantryAngle))
+    eulerTransformGantry.SetRotation(angleX=0, angleY=0, angleZ=np.deg2rad(float(gantryAngle)))
 
     # define couch rotation around the zero position
     eulerTransformCouch = sitk.Euler3DTransform()
-    eulerTransformCouch.SetRotation(angleX=0, angleY=np.deg2rad(couchAngle), angleZ=0)
+    eulerTransformCouch.SetRotation(angleX=0, angleY=np.deg2rad(float(couchAngle)), angleZ=0)
 
     # define rotation and flipping to get BEV (Z+ along the field) and to be consistent with FRED coordinate system of PB
     rotateBEVTransform = sitk.Euler3DTransform()
@@ -1153,39 +947,35 @@ def getImgBEV(img, isocentrePosition, gantryAngle, couchAngle, defaultPixelValue
     compositTransform.AddTransform(compositTransformBEV)
 
     # calculate new FOR for a new, not cropped image
-    size, origin, spacing, direction = ft.ft_imgManipulate._getFORTransformed(img, compositTransform.GetInverse())
+    size, origin, spacing, direction = _getFORTransformed(img, compositTransform.GetInverse())
 
     # transform with resampling
-    imgBEV = sitk.Resample(
-        img, transform=compositTransform, size=size, outputOrigin=origin, outputSpacing=spacing, interpolator=interpolator, outputDirection=direction, defaultPixelValue=defaultPixelValue  # type: ignore
-    )
+    imgBEV = sitk.Resample(img,
+                           transform=compositTransform,
+                           size=size,
+                           outputOrigin=origin,
+                           outputSpacing=spacing,
+                           interpolator=interpolator,
+                           outputDirection=direction,
+                           defaultPixelValue=defaultPixelValue
+                           )
 
     # copy metadata if they exist
-    imgBEV = ft.copyImgMetaData(img, imgBEV)
+    imgBEV = ft._helper.copyImgMetaData(img, imgBEV)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Isocentre position [mm]: ", np.array(isocentrePosition))
-        print("# Gantry angle [deg]: {:.1f}".format(gantryAngle))
-        print("# Couch angle [deg]: {:.1f}".format(couchAngle))
-        ft.ft_imgAnalyse._displayImageInfo(imgBEV)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        logStr = ["Isocentre position [mm]: ", np.array(isocentrePosition),
+                  "Gantry angle [deg]: {:.1f}".format(gantryAngle),
+                  "Couch angle [deg]: {:.1f}".format(couchAngle)]
+        _logger.info("\n\t".join(logStr) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgBEV))
 
     return imgBEV
 
 
-def overwriteCTPhysicalProperties(
-    img,
-    RSfileName,
-    areaFraction=0.5,
-    CPUNo="auto",
-    relElecDensCalib=[
-        [-1024, -1000, -777.82, -495.34, -64.96, -34.39, -3.87, 51.92, 56.99, 226.05, 857.65, 1313, 8513, 12668, 25332],
-        [0, 0, 0.190, 0.489, 0.949, 0.976, 1, 1.043, 1.053, 1.117, 1.456, 1.696, 3.76, 6.58, 9.09],
-    ],
-    HUrange=[-2000, 50000],
-    displayInfo=False,
-):
+def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFraction: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5, CPUNo: Literal["auto"] | int = "auto",
+                                  relElecDensCalib: Annotated[ArrayLike, Literal["N", 2]] = [[-1024, -1000, -777.82, -495.34, -64.96, -34.39, -3.87, 51.92, 56.99, 226.05, 857.65, 1313, 8513, 12668, 25332],
+                                                                                             [0, 0, 0.190, 0.489, 0.949, 0.976, 1, 1.043, 1.053, 1.117, 1.456, 1.696, 3.76, 6.58, 9.09]],
+                                  HUrange: Annotated[Iterable[Numberic], 2] = [-2000, 50000], displayInfo: bool = False) -> SITKImage:
     """Overwrite HU values in a CT image based on structures' physical properties.
 
     The function searches in a structure RS dicom file for structures with
@@ -1243,57 +1033,59 @@ def overwriteCTPhysicalProperties(
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
 
     # check if dicom is RN
-    ft.ft_imgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
+    ft.ImgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
 
     # check HURange
+    HUrange = list(HUrange)
     if not len(HUrange) == 2 or not HUrange[0] <= HUrange[1]:
-        raise ValueError(f"The 'HUrange' parameter must be a 2-element iterable were the first element is less or equal to the second.")
+        error = ValueError(f"The 'HUrange' parameter must be a 2-element iterable were the first element is less or equal to the second.")
+        _logger.error(error)
+        raise error
     # get structures' info
     structsInfo = ft.getRSInfo(RSfileName)
     structsInfo.dropna(inplace=True)
 
     # prepare calibration from Rel. Electronic Density to HU
-    relElecDensCalib = np.array(relElecDensCalib)
-    relElecDensCalib = interp1d(relElecDensCalib[1], relElecDensCalib[0], bounds_error=True)
+    relElecDensCalib = np.array(relElecDensCalib, dtype=float)
+    relElecDensCalibInterp = interp1d(relElecDensCalib[1], relElecDensCalib[0], bounds_error=True)
 
     # check if all Rel. Electronic Density are withing the calibration
-    if not structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalib.x.min(), relElecDensCalib.x.max()).all():
-        warnings.warn(f"Warning: some of the structure physical property values are not within the calibration range [{relElecDensCalib.x.min()}, {relElecDensCalib.x.max()}]. They will be skipped.")
-        structsInfo = structsInfo[structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalib.x.min(), relElecDensCalib.x.max())]
+    if not structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalibInterp.x.min(), relElecDensCalibInterp.x.max()).all():
+        _logger.warning(f"Warning: some of the structure physical property values are not within the calibration range [{relElecDensCalibInterp.x.min()}, {relElecDensCalibInterp.x.max()}]. They will be skipped.")
+        structsInfo = structsInfo[structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalibInterp.x.min(), relElecDensCalibInterp.x.max())]
 
     # check if all ROIPhysicalProperty are ["REL_ELEC_DENSITY"] (only REL_ELEC_DENSITY is supported for now).
     if not all(structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])):
-        warnings.warn(f"Warning: some of the structure physical property are not in the supported list ['REL_ELEC_DENSITY']. They will be skipped.")
+        _logger.warning(f"Warning: some of the structure physical property are not in the supported list ['REL_ELEC_DENSITY']. They will be skipped.")
         structsInfo = structsInfo.loc[structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])]
 
     # calculate HU from Rel. Electronic Density
-    structsInfo["ROIPhysicalHUValue"] = np.round(relElecDensCalib(structsInfo.ROIPhysicalPropertyValue))
+    structsInfo["ROIPhysicalHUValue"] = np.round(relElecDensCalibInterp(structsInfo.ROIPhysicalPropertyValue))
     structsInfo = structsInfo.astype({"ROIPhysicalHUValue": "int"})
 
-    # remove mapped structures outside the HU range
-    structsInfo = structsInfo[structsInfo.ROIPhysicalHUValue.between(HUrange[0], HUrange[1])]
+    # remove mapped structures outs,  HU range
+    structsInfo = structsInfo[structsInfo.ROIPhysicalHUValue.between(float(HUrange[0]), float(HUrange[1]))]
 
     for _, structInfo in structsInfo.iterrows():
         # map structure to img
-        roiStruct = ft.mapStructToImg(img, RSfileName=RSfileName, structName=structInfo.ROIName, binaryMask=True, areaFraction=areaFraction, CPUNo=CPUNo)
+        roiStruct = ft.mapStructToImg(img, RSfileName=RSfileName, structName=structInfo.ROIName, binaryMask=True, areaFraction=areaFraction)
 
         # set HU values inside the structure
         img = ft.setValueMask(img, roiStruct, value=structInfo.ROIPhysicalHUValue, outside=False)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
         if len(structsInfo) > 0:
-            print(f"# Overwritten HU values for {len(structsInfo)}", "structure" if len(structsInfo) <= 1 else "structures:")
+            logStr = [f"Overwritten HU values for {len(structsInfo)}", "structure" if len(structsInfo) <= 1 else "structures:"]
             for ID, structInfo in structsInfo.iterrows():
-                print(f"# Structure '{structInfo.ROIName}' (ID: {ID}) with HU={structInfo.ROIPhysicalHUValue} (Rel. Elec. Dens. {structInfo.ROIPhysicalPropertyValue})")
+                logStr.append(f"Structure '{structInfo.ROIName}' (ID: {ID}) with HU={structInfo.ROIPhysicalHUValue} (Rel. Elec. Dens. {structInfo.ROIPhysicalPropertyValue})")
         else:
-            print(f"# No structures found to overwrite HU values.")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            logStr = [f"No structures found to overwrite HU values."]
+        _logger.info("\n\t".join(logStr))
 
     return img
 
 
-def setIdentityDirection(img, displayInfo: bool = False):
+def setIdentityDirection(img: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Set an identity direction for the image.
 
     The function sets an identity direction of an image defined as an instance of a
@@ -1319,14 +1111,11 @@ def setIdentityDirection(img, displayInfo: bool = False):
     img.SetDirection(np.identity(img.GetDimension()).flatten())
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(img)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
-
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
     return img
 
 
-def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, lateralKernelType="circular", displayInfo: bool = False):
+def addMarginToMask(imgMask: SITKImage, marginLateral: Numberic, marginProximal: Numberic, marginDistal: Numberic, lateralKernelType: Literal['circular', 'box', 'cross'] = "circular", displayInfo: bool = False) -> SITKImage:
     """Add lateral, proximal and distal margins to mask.
 
     The function adds lateral, proximal and/or distal margins to a binary mask defined as an
@@ -1368,17 +1157,20 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     ft._imgTypeChecker.isSITK_maskBinary(imgMask, raiseError=True)
 
     # set kernel type
-    if lateralKernelType.lower() == "circular":
-        lateralKernelTypeEnum = sitk.sitkBall
-    elif lateralKernelType.lower() == "box":
-        lateralKernelTypeEnum = sitk.sitkBox
-    elif lateralKernelType.lower() == "cross":
-        lateralKernelTypeEnum = sitk.sitkCross
-    else:
-        raise ValueError(f"Lateral Kernel Type type '{lateralKernelType}' cannot be recognized. Only 'circular', 'box' and 'cross' are supported.")
+    match lateralKernelType.lower():
+        case "circular":
+            lateralKernelTypeEnum = sitk.sitkBall
+        case "box":
+            lateralKernelTypeEnum = sitk.sitkBox
+        case "cross":
+            lateralKernelTypeEnum = sitk.sitkCross
+        case _:
+            error = ValueError(f"Lateral Kernel Type type '{lateralKernelType}' cannot be recognized. Only 'circular', 'box' and 'cross' are supported.")
+            _logger.error(error)
+            raise error
 
     # get an interpolator suitable for mask interpolation
-    interpolator = ft.ft_imgGetSubimg.setSITKInterpolator(interpolation="linear")
+    interpolator = ft._helper.setSITKInterpolator(interpolation="linear")
 
     # get pixel spacing
     pixelSpacing = imgMask.GetSpacing()
@@ -1420,22 +1212,20 @@ def addMarginToMask(imgMask, marginLateral, marginProximal, marginDistal, latera
     imgExt = sitk.Crop(imgExt, [0, 0, marginDistalPixel], [0, 0, marginProximalPixel])
 
     # copy and modify information about the mask
-    ft.copyImgMetaData(imgMask, imgExt)
+    ft._helper.copyImgMetaData(imgMask, imgExt)
     if "ROIName" in imgExt.GetMetaDataKeys():
         imgExt.SetMetaData("ROIName", imgExt.GetMetaData("ROIName") + " Margin")
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# Added lateral (X/Y) margins: {marginLateral} mm of {lateralKernelType.lower()} type")
-        print(f"# Added distal (+Z) margin: {marginDistal} mm")
-        print(f"# Added proximal (-Z) margin: {marginProximal} mm")
-        ft.ft_imgAnalyse._displayImageInfo(imgExt)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        logStr = [f"# Added lateral (X/Y) margins: {marginLateral} mm of {lateralKernelType.lower()} type",
+                  f"# Added distal (+Z) margin: {marginDistal} mm",
+                  f"# Added proximal (-Z) margin: {marginProximal} mm"]
+        _logger.info("\n\t".join(logStr) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgExt))
 
     return imgExt
 
 
-def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, displayInfo: bool = False):
+def addGaussMarginToMask(imgMask: SITKImage, gaussSigma: Numberic = 6, fractionAtEdge: Numberic = 0.9, edgeDist: Numberic = 4, displayInfo: bool = False) -> SITKImage:
     """Add Gaussian margin to mask.
 
     The function adds a Gaussian margin to a binary mask defined as an instance of a SimpleITK 
@@ -1493,14 +1283,12 @@ def addGaussMarginToMask(imgMask, gaussSigma=6, fractionAtEdge=0.9, edgeDist=4, 
     ft._imgTypeChecker.isSITK_maskFloating(imgMaskConstMarginGauss, raiseError=True)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgMaskConstMarginGauss)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMaskConstMarginGauss))
 
     return imgMaskConstMarginGauss
 
 
-def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo: bool = False):
+def addExpMarginToMask(imgMask: SITKImage, exponent: Numberic = 0.25, edgeDist: Numberic = 4, displayInfo: bool = False) -> SITKImage:
     """Add exponential margin to mask.
 
     The function adds an exponential fall-off margin to a binary mask defined as an instance of a SimpleITK 
@@ -1547,7 +1335,7 @@ def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo: bool = F
     imgMaskDist = sitk.SignedDanielssonDistanceMap(imgMask, useImageSpacing=True)
 
     # add constant margin
-    imgMaskConstMargin = sitk.BinaryThreshold(imgMaskDist, lowerThreshold=ft.getStatistics(imgMaskDist).GetMinimum(), upperThreshold=edgeDist)
+    imgMaskConstMargin = sitk.BinaryThreshold(imgMaskDist, lowerThreshold=ft.getStatistics(imgMaskDist).GetMinimum(), upperThreshold=float(edgeDist))
 
     # add gaussian margin
     imgMaskConstMarginExp = sitk.ExpNegative(exponent*(imgMaskDist-edgeDist))
@@ -1557,8 +1345,6 @@ def addExpMarginToMask(imgMask, exponent=0.25, edgeDist=4, displayInfo: bool = F
     ft._imgTypeChecker.isSITK_maskFloating(imgMaskConstMarginExp, raiseError=True)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgMaskConstMarginExp)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMaskConstMarginExp))
 
     return imgMaskConstMarginExp

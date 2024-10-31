@@ -1,4 +1,9 @@
-def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=False, displayInfo: bool = False):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def setFieldsFolderStruct(folderPath: PathLike, RNfileName: PathLike, folderName: str = "FRED", overwrite: bool = False, displayInfo: bool = False) -> PathLike:
     """Create a folder structure for each field in the treatment plan.
 
     The function creates a folder structure in a given `folderPath` for each field separately.
@@ -67,13 +72,12 @@ def setFieldsFolderStruct(folderPath, RNfileName, folderName="FRED", overwrite=F
         os.mkdir(os.path.join(simFolder, f"{fieldInfo.FDeliveryNo:d}_Field{fieldInfo.FNo:d}"))
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Created {:d} field folders in {:s}".format(len(fieldsInfo), simFolder))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info("Created {:d} field folders in {:s}".format(len(fieldsInfo), simFolder))
+
     return simFolder
 
 
-def readFREDStat(fileNameLogOut, displayInfo: bool = False):
+def readFREDStat(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
     """Read FRED simulation statistics information from the log file.
 
     The function reads some statistics information from a FRED run.out logfile.
@@ -81,7 +85,7 @@ def readFREDStat(fileNameLogOut, displayInfo: bool = False):
 
     Parameters
     ----------
-    fileNameLogOut : string
+    fileName : string
         A string path to FRED output logfile (usually in out/log/run.out)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -96,20 +100,21 @@ def readFREDStat(fileNameLogOut, displayInfo: bool = False):
     import numpy as np
     import fredtools as ft
 
-    def scaleUnit(unit):
-        if unit == "ns":
-            return 1e9
-        if unit == "us":
-            return 1e6
-        if unit == "ms":
-            return 1e3
-        if unit == "s":
-            return 1
-        else:
-            return np.nan
+    def scaleUnit(unit: str) -> Numberic:
+        match unit:
+            case "ns":
+                return 1e9
+            case "us":
+                return 1e6
+            case "ms":
+                return 1e3
+            case "s":
+                return 1
+            case _:
+                return np.nan
 
     def matchData(lineInclude, matching, startLine=1):
-        lineFromFile = ft.getLineFromFile(lineInclude, fileNameLogOut, kind="first", startLine=startLine)
+        lineFromFile = ft.getLineFromFile(lineInclude, fileName, kind="first", startLine=startLine)
         if not lineFromFile:
             return "NaN"
         value = re.findall(matching, lineFromFile[1])
@@ -118,31 +123,32 @@ def readFREDStat(fileNameLogOut, displayInfo: bool = False):
         return value[0]
 
     # check if file exists
-    if not os.path.isfile(fileNameLogOut):
-        raise ValueError(f"The file {fileNameLogOut} dose not exist.")
+    if not os.path.isfile(fileName):
+        error = FileNotFoundError(f"The file {fileName} dose not exist.")
+        _logger.error(error)
+        raise error
 
-    simInfo = {
-        "fredVersion": "NaN",
-        "fredVersionDate": "NaN",
-        "runConfig": np.nan,
-        "runWallclockTime_s": np.nan,
-        "primarySimulated": np.nan,
-        "trackingRate_prim_s": np.nan,
-        "trackTimePerPrimary_us": np.nan,
-        "timingInitialization_s": np.nan,
-        "timingPrimaryList_s": np.nan,
-        "timingDeliveryChecking_s": np.nan,
-        "timingGeometryChecking_s": np.nan,
-        "timingTracking_s": np.nan,
-        "timingWritingOutput_s": np.nan,
-        "timingOther_s": np.nan,
-    }
+    simInfo = DottedDict({"fredVersion": "NaN",
+                          "fredVersionDate": "NaN",
+                          "runConfig": "NaN",
+                          "runWallclockTime_s": np.nan,
+                          "primarySimulated": np.nan,
+                          "trackingRate_prim_s": np.nan,
+                          "trackTimePerPrimary_us": np.nan,
+                          "timingInitialization_s": np.nan,
+                          "timingPrimaryList_s": np.nan,
+                          "timingDeliveryChecking_s": np.nan,
+                          "timingGeometryChecking_s": np.nan,
+                          "timingTracking_s": np.nan,
+                          "timingWritingOutput_s": np.nan,
+                          "timingOther_s": np.nan,
+                          })
 
-    simInfo["fredVersion"] = matchData(r"Version", r"Version\W+([\S+.]+)")
-    simInfo["fredVersionDate"] = matchData(r"Version", r"Version.*([0-9]{4}\/[0-9]{2}\/[0-9]{2})")
+    simInfo.fredVersion = matchData(r"Version", r"Version\W+([\S+.]+)")
+    simInfo.fredVersionDate = matchData(r"Version", r"Version.*([0-9]{4}\/[0-9]{2}\/[0-9]{2})")
 
     # check run config
-    runningConfigLine = ft.getLineFromFile(r"Running config", fileNameLogOut, kind="first")
+    runningConfigLine = ft.getLineFromFile(r"Running config", fileName, kind="first")
     if runningConfigLine:
         runningConfigTypes = re.findall(r"\w+", re.findall(r"Running config.*\((.*)\)", runningConfigLine[1])[0])
         runningConfigValues = re.findall(r"\d+", re.findall(r"Running config.*:(.*)", runningConfigLine[1])[0])
@@ -166,7 +172,7 @@ def readFREDStat(fileNameLogOut, displayInfo: bool = False):
     simInfo["trackTimePerPrimary_us"] /= scaleUnit(matchData(r"Track time per primary", rf"Track time per primary\W+{ft.re_number}\W*(\w+)"))
     simInfo["trackTimePerPrimary_us"] *= 1E6
 
-    timingSummaryStartLine = ft.getLineFromFile(r"^Timing summary", fileNameLogOut, kind="first")
+    timingSummaryStartLine = ft.getLineFromFile(r"^Timing summary", fileName, kind="first")
     if timingSummaryStartLine:
         simInfo["timingInitialization_s"] = float(matchData(r"initialization", rf"initialization\W+({ft.re_number})", startLine=timingSummaryStartLine[0]))
         simInfo["timingInitialization_s"] /= scaleUnit(matchData(r"initialization", rf"initialization\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
@@ -190,24 +196,24 @@ def readFREDStat(fileNameLogOut, displayInfo: bool = False):
         simInfo["timingOther_s"] /= scaleUnit(matchData(r"other", rf"other\W+{ft.re_number}\W*(\w+)", startLine=timingSummaryStartLine[0]))
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# FRED Version: {:s}".format(simInfo["fredVersion"]))
-        print("# FRED Version Date: {:s}".format(simInfo["fredVersionDate"]))
+        strLog = ["FRED simulation logging:"]
+        strLog.append("FRED Version:                   {:s}".format(simInfo["fredVersion"]))
+        strLog.append("FRED Version Date:              {:s}".format(simInfo["fredVersionDate"]))
         runConfigKeys = [key for key in simInfo.keys() if re.search("runConfig.+", key)]
         if runConfigKeys:
             runConfigValues = [simInfo[runConfigKey] for runConfigKey in runConfigKeys]
             runConfigKeys = [runConfigKey.replace("runConfig", "") for runConfigKey in runConfigKeys]
-            print(f"# Run Config ({','.join(runConfigKeys)}): {str(runConfigValues).replace('[','').replace(']','')}")
-        print("# Run Config: {}".format(simInfo["runConfig"]))
-        print("# Run Wall clock Time: {:.2f} s".format(simInfo["runWallclockTime_s"]))
-        print("# Average Track Time Per Primary: {:5f} us".format(simInfo["trackTimePerPrimary_us"]))
-        print("# Average Tracking Rate: {:.3E} prim/s".format(simInfo["trackingRate_prim_s"]))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            strLog.append(f"Run Config ({','.join(runConfigKeys)}):      {str(runConfigValues).replace('[','').replace(']','')}")
+        strLog.append("Run Config:                     {}".format(simInfo["runConfig"]))
+        strLog.append("Run Wall clock Time:            {:.2f} s".format(simInfo["runWallclockTime_s"]))
+        strLog.append("Average Track Time Per Primary: {:5f} us".format(simInfo["trackTimePerPrimary_us"]))
+        strLog.append("Average Tracking Rate:          {:.3E} prim/s".format(simInfo["trackingRate_prim_s"]))
+        _logger.info("\n\t".join(strLog))
 
     return simInfo
 
 
-def getFREDVersions():
+def getFREDVersions() -> List[str]:
     """List the installed FRED varions.
 
     The function lists the FRED versions installed on the machine.
@@ -233,7 +239,7 @@ def getFREDVersions():
     return [x.strip() for x in stdout.split("\n") if re.findall(r"\d.\d+.\d+", x)]
 
 
-def checkFREDVersion(version):
+def checkFREDVersion(version: str) -> bool:
     """Check if the FRED version is installed.
 
     The function validates if the version of FRED, given by the parameter
@@ -257,13 +263,15 @@ def checkFREDVersion(version):
     import fredtools as ft
 
     if not isinstance(version, str) or not re.findall(r"\d.\d+.\d+", version):
-        raise ValueError(f"The version must be a string in format #.#.#, for instance '3.58.4'")
+        error = ValueError(f"The version must be a string in format #.#.#, for instance '3.71.0'")
+        _logger.error(error)
+        raise error
     fredVersions = ft.getFREDVersions()
 
     return any([version in fredVersion for fredVersion in fredVersions])
 
 
-def getFREDVersion(version=""):
+def getFREDVersion(version: str = "") -> str:
     """Get the full FRED version name.
 
     The function checks if the `version` of FRED is installed
@@ -287,7 +295,9 @@ def getFREDVersion(version=""):
     import fredtools as ft
 
     if version and not ft.checkFREDVersion(version):
-        raise ValueError(f"No FRED v. {version} installed on the machine.\nAvailable FRED versions:\n" + "\n".join(ft.getFREDVersions()))
+        error = ValueError(f"No FRED v. {version} installed on the machine.\nAvailable FRED versions:\n" + "\n".join(ft.getFREDVersions()))
+        _logger.error(error)
+        raise error
 
     if version:
         FREDrunCommand = ["fred", f"-useVers {version}", "-v"]
@@ -302,7 +312,7 @@ def getFREDVersion(version=""):
     return stdout.split("\n")[0]
 
 
-def runFRED(fredInpFileName, version="", params=[], displayInfo: bool = False):
+def runFRED(fileName: PathLike, version: str = "", params: Iterable[str] = [], displayInfo: bool = False) -> List[str]:
     """Run FRED simulation.
 
     The function runs FRED simulation defined by
@@ -310,7 +320,7 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo: bool = False):
 
     Parameters
     ----------
-    fredInpFileName : path
+    fileName : path
         Path string to FRED input file. Usually, it is called `fred.inp`.
     version : str, optional
         Version of FRED in format #.#.#. If no version is given
@@ -345,13 +355,13 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo: bool = False):
     fredVersName = ft.getFREDVersion(version).replace("fred", "FRED")
 
     # check if the fred.inp exists
-    if not os.path.exists(fredInpFileName):
-        raise ValueError(f"The file '{fredInpFileName}' dose not exist.")
+    if not os.path.exists(fileName):
+        raise ValueError(f"The file '{fileName}' dose not exist.")
 
     # get absolute folder name sim. file name
-    fredInpFileName = os.path.abspath(fredInpFileName)
-    simFolderName = os.path.dirname(fredInpFileName)
-    fredInpFileName = os.path.basename(fredInpFileName)
+    fileName = os.path.abspath(fileName)
+    simFolderName = os.path.dirname(fileName)
+    fileName = os.path.basename(fileName)
 
     # run fred sim
     FREDrunCommand = ["fred"]
@@ -359,14 +369,12 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo: bool = False):
     FREDrunCommand.append(f"-useVers {version}") if version else None
     params = [params] if isinstance(params, str) else params
     FREDrunCommand.extend(params) if params else None
-    FREDrunCommand.append(f"-f {fredInpFileName}")
+    FREDrunCommand.append(f"-f {fileName}")
     FREDrunCommand = r" ".join(FREDrunCommand)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print(f"# {fredVersName}")
-        print(f"# Running FRED sim. in folder {simFolderName}")
-        print(f"# FRED command: {FREDrunCommand}")
+        _logger.info(f"Running FRED sim. in folder {simFolderName}")
+        _logger.debug(f"{fredVersName}")
 
     runFredProc = subprocess.Popen(FREDrunCommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8", cwd=simFolderName + os.sep, universal_newlines=True)
     stdout, stderr = runFredProc.communicate()
@@ -376,8 +384,8 @@ def runFRED(fredInpFileName, version="", params=[], displayInfo: bool = False):
         # check fred sim
         if "Run wallclock time" in stdout:
             FREDSimStat = ft.readFREDStat(os.path.join(simFolderName, "out/log/run.out"))
-            print("# FRED sim. done in {:.0f} s with {:.2E} prim/s".format(FREDSimStat["runWallclockTime_s"], FREDSimStat["trackingRate_prim_s"]))
+            _logger.info("FRED sim. done in {:.0f} s with {:.2E} prim/s".format(FREDSimStat["runWallclockTime_s"], FREDSimStat["trackingRate_prim_s"]))
         else:
-            print(f"# ERROR in FRED sim. Check {simFolderName}/out/log/run.out")
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+            _logger.error(f"ERROR in FRED sim. Check {simFolderName}/out/log/run.out")
+
     return stdout.splitlines()

@@ -1,0 +1,1068 @@
+
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       8888888888                   888                       |
+|                       888                          888                       |
+|                       888                          888                       |
+|                       8888888 88 d888 .d88b.   .d88888                       |
+|                       888     888P   d8P  Y8b d88' 888                       |
+|                       888     888    88888888 888  888                       |
+|                       888     888    Y8b.     Y88b 888                       |
+|                       888     888     'Y8888   'Y88888                       |
+|                                                                              |
++------------------------------------------------------------------------------+
+|                               www.fred-mc.org                                |
++------------------------------------------------------------------------------+
+|                                                                              |
+|                                  A.Schiavi                                   |
+|                                                                              |
+|                    Version 3.71.0  (bd7887c) - 2024/07/22                    |
++------------------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------+
+|                                                                              |
+|                         Development Team for this release                    |
+|                            A. Schiavi, J. Gajewski                           |
+|                                                                              |
++------------------------------------------------------------------------------+
+|                                                                              |
+|                               Contributors                                   |
+|                                                                              |
+|    2022 J.Gajewski : spectra scorers for LET and other quantities            |
+|    2021 K.McNamara : nuclear activation package for proton beams             |
+|    2019 M.Pacitti : elastic nuclear interaction for protons with ions        |
+|    2018 G.Acciaro : validation of MCS for light ions                         |
+|    2017 A.Mazzini : data-driven nuclear fragmentation model for 12C          |
+|    2017 I.Rinaldi : RBE models for protons                                   |
+|    2016 M.Senzacqua : Energy straggling model                                |
+|    2015 V.Patera : Nuclear Inelastic Interactions model                      |
+|    2015 M.Senzacqua : Multiple Coulomb Scattering model                      |
+|    2014 S.Pioli : stepper and optimizer GPU kernels                          |
+|    2013 E.Gioscio : ripple filter                                            |
++------------------------------------------------------------------------------+
+
+Input  directory:  .
+Output directory:  out
+Main input file :  ./fred.inp
+
+Communication Manager:
+	single node execution
+	number of available processors: 1
+	mypid: 0
+	masterpid: 0
+
+	POSIX-threads execution activated
+	max num of concurrent threads: 16
+
+
+
+Fred search path = /usr/local/fred/invoke_scripts
+
+--------------------------------------------------------------------------------
+PluginManager init:
+================================
+================================
+--------------------------------------------------------------------------------
+
+================================
+Looking for FRED GPU Engine:
+	/usr/local/fred/fred_3.71.0_Linux_gcc_8.5.0/libFredGPU.so
+	[0;32m[FOUND][0m
+	[0;32mloaded FGE function: gpuSetup[0m
+	fgeOptions = 
+	selectedPlatform = 0
+	preselected gpulist = 0 
+	using constant workload for all GPU devices
+	tracking workload = 1 
+	number of tracking queues for device = 6
+	max number of primary particles per batch = 100000
+	secondary particle multiplication factor = 1
+		Device[0]: NVIDIA GeForce MX550; version: OpenCL 3.0 CUDA
+	Num of available GPU devices: 1
+	gpu tracking load 0 1
+
+	running on following devices:
+		Device: NVIDIA GeForce MX550 [100%]
+num selected devices: 1
+	numActiveGPU: 1
+[0;32mFredGPUEngine activated with num of available GPU devices: 1[0m
+--------------------------------------------------------------------------------
+==> init
+
+                                                                                           
+              |[0;32m     ID     [0m|[0;32m q  [0m|[0;32m Z [0m|[0;32m A  [0m|[0;32m  m (amu)   [0m|[0;32m m (MeV/c^2) [0m|[0;32m       aliases       [0m 
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mGEORAY       [0m|     99     | 0  | 0 | 0  |     0      |      0      |       Georay         
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mPROTON       [0m|    2212    | 1  | 1 | 1  |  1.00727   |   938.266   |    p, proton, H1     
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mNEUTRON      [0m|    2112    | 0  | 0 | 1  |  1.00866   |   939.565   |     n, neutron       
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mELECTRON     [0m|     11     | -1 | 0 | 0  | 0.00054858 |  0.510999   | e-, electron, beta-  
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mPOSITRON     [0m|    -11     | 1  | 0 | 0  | 0.00054858 |  0.510999   | e+, positron, beta+  
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mPHOTON       [0m|     22     | 0  | 0 | 0  |     0      |      0      |    photon, gamma     
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mDEUTERON     [0m| 1000010020 | 1  | 1 | 2  |   2.0141   |   1876.12   |        D, H2         
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mTRITON       [0m| 1000010030 | 1  | 1 | 3  |  3.01605   |   2809.43   |        T, H3         
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mHELIUM4      [0m| 1000020040 | 2  | 2 | 4  |   4.0026   |   3728.4    |     alpha, He4       
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mHELIUM3      [0m| 1000020030 | 2  | 2 | 3  |  3.01603   |   2809.41   |         He3          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mHELIUM6      [0m| 1000020060 | 2  | 2 | 6  |  6.01889   |   5606.56   |         He6          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mLITHIUM6     [0m| 1000030060 | 3  | 3 | 6  |  6.01512   |   5603.05   |         Li6          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mLITHIUM7     [0m| 1000030070 | 3  | 3 | 7  |   7.016    |   6535.37   |         Li7          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mLITHIUM8     [0m| 1000030080 | 3  | 3 | 8  |  8.02249   |   7472.9    |         Li8          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mLITHIUM9     [0m| 1000030090 | 3  | 3 | 9  |  9.02679   |   8408.4    |         Li9          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mBERYLLIUM7   [0m| 1000040070 | 4  | 4 | 7  |  7.01693   |   6536.23   |         Be7          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mBERYLLIUM9   [0m| 1000040090 | 4  | 4 | 9  |  9.01218   |   8394.79   |         Be9          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mBERYLLIUM10  [0m| 1000040100 | 4  | 4 | 10 |  10.0135   |   9327.55   |        Be10          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mBORON8       [0m| 1000050080 | 5  | 5 | 8  |  8.02461   |   7474.87   |         B8           
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mBORON9       [0m| 1000050090 | 5  | 5 | 9  |  9.01333   |   8395.86   |         B9           
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mBORON10      [0m| 1000050100 | 5  | 5 | 10 |  10.0129   |   9326.99   |         B10          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mBORON11      [0m| 1000050110 | 5  | 5 | 11 |  11.0093   |   10255.1   |         B11          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mCARBON9      [0m| 1000060090 | 6  | 6 | 9  |  9.03104   |   8412.36   |         C9           
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mCARBON10     [0m| 1000060100 | 6  | 6 | 10 |  10.0169   |   9330.64   |         C10          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mCARBON11     [0m| 1000060110 | 6  | 6 | 11 |  11.0114   |   10257.1   |         C11          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mCARBON12     [0m| 1000060120 | 6  | 6 | 12 |     12     |   11177.9   |         C12          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mOXYGEN16     [0m| 1000080160 | 8  | 8 | 16 |  15.9949   |   14899.2   |         O16          
+ =============+============+====+===+====+============+=============+===================== 
+ [0;32mZORK         [0m|     81     | 0  | 0 | 0  |     0      |      0      |        Zork          
+                                                                                           
+
+--------------------------------------------------------------------------------
+[0;32mID:	[0mparticle numeric identifier (PDG code)
+[0;32mq:	[0mparticle electric charge in elementary charge units
+[0;32mZ:	[0mproton number of an ion (num of protons)
+[0;32mA:	[0mmass number of an ion (protons + neutrons)
+[0;32mm:	[0mparticle mass in amu and in MeV/c^2 units
+--------------------------------------------------------------------------------
+[0;35mParsing main input: [0m
+==> readinput
+<== readinput
+
+
+Settings requests:
+Rand seed initialisation:
+Input randSeedRoot=0: using system clock for initial seed
+randSeedRoot=6434503110942759810
+
+[0;35mGeometry definitions: [0m
+Loading regions from input file:
+	no user defined regions found
+[0;32mOK[0m
+
+Loading fields:
+	no other fields found -> using the default field 0
+[0;35m
+No phantom region defined => using old-style legacy input:
+[0m	Origin = -2 -2 0
+	Pivot  = 0 0 0
+	Legacy L  = [4,4,10]
+
+
+[0;35mRegions:[0m
+Region: [0;32mRoom[0m
+
+	ireg: 0
+
+
+	type: Box
+	Origin: [0,0,0] cm (global coordinates)
+	Extent: [1000,1000,1000] cm
+	Pivot: [0.5,0.5,0.5] (local normal coordinates)
+
+	Orthonormal basis: 
+		x axis: [1,0,0]
+		y axis: [0,1,0]
+		z axis: [0,0,1]
+
+	Extent in global coordinates: 
+		x range: [-500,500] cm
+		y range: [-500,500] cm
+		z range: [-500,500] cm
+
+	Global to Normal coordinates transformation:
+		+1.000e-03 +0.000e+00 +0.000e+00 +5.000e-01 
+		+0.000e+00 +1.000e-03 +0.000e+00 +5.000e-01 
+		+0.000e+00 +0.000e+00 +1.000e-03 +5.000e-01 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+	Normal to Global coordinates transformation:
+		+1.000e+03 +0.000e+00 +0.000e+00 -5.000e+02 
+		+0.000e+00 +1.000e+03 +0.000e+00 -5.000e+02 
+		+0.000e+00 +0.000e+00 +1.000e+03 -5.000e+02 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+	Volume: 1e+09 cm^3
+	Subdivisions : none, i.e. single volume
+
+
+	Local to Global coordinates transformation:
+		+1.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +1.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +1.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+
+	Global to Local coordinates transformation:
+		+1.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +1.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +1.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+	Local grid node coords: 
+	  x=[-500, 500]
+	  y=[-500, 500]
+	  z=[-500, 500]
+
+	Maximum step size : 10 cm
+	MCS lateral displacement: ON
+
+	Composition: region is homogeneous, filled with a single material = vacuum
+
+	Scorers: no scorers requested for this region.
+
+
+--------------------------------------------------------------------------------
+Region: [0;32mPhantom[0m
+
+	ireg: 1
+
+
+	type: Box
+	Origin: [-2,-2,0] cm (global coordinates)
+	Extent: [4,4,10] cm
+	Pivot: [0,0,0] (local normal coordinates)
+
+	Orthonormal basis with respect to global frame of reference: 
+		Left  vector: [1,0,0]
+		Up    vector: [0,1,0]
+		Front vector: [0,0,1]
+
+	Extent in local coordinates: 
+		Left  direction: [-0,4] cm
+		Up    direction: [-0,4] cm
+		Front direction: [-0,10] cm
+
+	Global to Normal coordinates transformation:
+		+2.500e-01 +0.000e+00 +0.000e+00 +5.000e-01 
+		+0.000e+00 +2.500e-01 +0.000e+00 +5.000e-01 
+		+0.000e+00 +0.000e+00 +1.000e-01 +0.000e+00 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+	Normal to Global coordinates transformation:
+		+4.000e+00 +0.000e+00 +0.000e+00 -2.000e+00 
+		+0.000e+00 +4.000e+00 +0.000e+00 -2.000e+00 
+		+0.000e+00 +0.000e+00 +1.000e+01 +0.000e+00 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+	Volume: 160 cm^3
+	Subdivisions : [41,41,400] = 672400 voxels
+	Voxel dimensions: [0.097561,0.097561,0.025] cm  => 0.000237954 cm^3
+
+
+	Local to Global coordinates transformation:
+		+1.000e+00 +0.000e+00 +0.000e+00 -2.000e+00 
+		+0.000e+00 +1.000e+00 +0.000e+00 -2.000e+00 
+		+0.000e+00 +0.000e+00 +1.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+
+	Global to Local coordinates transformation:
+		+1.000e+00 +0.000e+00 +0.000e+00 +2.000e+00 
+		+0.000e+00 +1.000e+00 +0.000e+00 +2.000e+00 
+		+0.000e+00 +0.000e+00 +1.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+	Local grid node coords: 
+	  x=[0, 0.097561, 0.195122, 0.292683, 0.390244, ..., 3.5122, 3.60976, 3.70732, 3.80488, 3.90244, 4]
+	  y=[0, 0.097561, 0.195122, 0.292683, 0.390244, ..., 3.5122, 3.60976, 3.70732, 3.80488, 3.90244, 4]
+	  z=[0, 0.025, 0.05, 0.075, 0.1, ..., 9.875, 9.9, 9.925, 9.95, 9.975, 10]
+
+	Maximum step size : 10 cm
+	MCS lateral displacement: OFF
+
+	Composition: region is homogeneous, filled with a single material = water
+
+	Scorers: 
+	   - Dose: deposited dose
+
+
+--------------------------------------------------------------------------------
+Region: [0;32mField_0[0m
+
+	ireg: 2
+
+
+	type: Box
+	Origin: [0,0,-50] cm (global coordinates)
+	Extent: [20,20,50] cm
+	Pivot: [0.5,0.5,0.2] (local normal coordinates)
+
+	Orthonormal basis with respect to global frame of reference: 
+		Left  vector: [1,0,0]
+		Up    vector: [0,1,0]
+		Front vector: [0,0,1]
+
+	Extent in local coordinates: 
+		Left  direction: [-10,10] cm
+		Up    direction: [-10,10] cm
+		Front direction: [-10,40] cm
+
+	Global to Normal coordinates transformation:
+		+5.000e-02 +0.000e+00 +0.000e+00 +5.000e-01 
+		+0.000e+00 +5.000e-02 +0.000e+00 +5.000e-01 
+		+0.000e+00 +0.000e+00 +2.000e-02 +1.200e+00 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+	Normal to Global coordinates transformation:
+		+2.000e+01 +0.000e+00 +0.000e+00 -1.000e+01 
+		+0.000e+00 +2.000e+01 +0.000e+00 -1.000e+01 
+		+0.000e+00 +0.000e+00 +5.000e+01 -6.000e+01 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+	Volume: 20000 cm^3
+	Subdivisions : none, i.e. single volume
+
+
+	Local to Global coordinates transformation:
+		+1.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +1.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +1.000e+00 -5.000e+01 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+
+	Global to Local coordinates transformation:
+		+1.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +1.000e+00 +0.000e+00 +0.000e+00 
+		+0.000e+00 +0.000e+00 +1.000e+00 +5.000e+01 
+		+0.000e+00 +0.000e+00 +0.000e+00 +1.000e+00 
+
+
+	Local grid node coords: 
+	  x=[-10, 10]
+	  y=[-10, 10]
+	  z=[-10, 40]
+
+	Maximum step size : 10 cm
+	MCS lateral displacement: ON
+
+	Composition: region is homogeneous, filled with a single material = vacuum
+
+	Scorers: no scorers requested for this region.
+
+
+--------------------------------------------------------------------------------
+
+[0;35mMaterial definitions: [0m
+loading elements and standard materials
+	elements = [H,He,Li,Be,B,C,N,O,F,Ne,Na,Mg,Al,Si,P,S,Cl,Ar,K,Ca,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Ga,Ge,As,Se,Br,Kr,Rb,Sr,Y,Zr,Nb,Mo,Ru,Rh,Pd,Ag,Cd,In,Sn,Sb,Te,I,Xe,Cs,Ba,La,Ce,Pr,Nd,Sm,Eu,Gd,Tb,Dy,Ho,Er,Tm,Yb,Lu,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi,Th,Pa,U]
+	standard materials = [Vacuum,BlackHole,Water,Air,PMMA,Al,Ti,Cu,Ni,Si,C,Graphite,Gammex,RW3,LEXAN]
+
+Loading materials from main input file
+Num of imported materials: 0
+Num of active materials: 3
+
+Num of active elements: 2
+ID => matID Room vacuum : Imat, rho = 0 0
+ID => matID Phantom water : Imat, rho = 2 1
+ID => matID Field_0 vacuum : Imat, rho = 0 0
+--------------------------------------------------------------------------------
+
+[0;35mActivation: [0m
+
+no activation was requested
+--------------------------------------------------------------------------------
+
+[0;35mSpectra scorer: [0m
+
+--------------------------------------------------------------------------------
+
+[0;35mIonization Detail: [0m
+
+IonizationDetail was requested
+--------------------------------------------------------------------------------
+
+[0;35mPlane Crossing Scorers: [0m
+
+Num of plane crossing scorers: 0
+
+Allocated memory buffer for one batch: 0 B = 0 GB
+Num scoring grains: 1000
+Num scoring elements per grain: 0
+
+--------------------------------------------------------------------------------
+
+[0;35mSources: [0m
+
+
+Number of fields: 1
+Field: [0;32mField_0[0m
+	name: 
+[0m	O=[0,0,-50] front=[0,0,1] up=[0,1,0] left=[1,0,0] 
+[0m
+=============================================================
+pb Legacy Definition: 
+	particle = proton; E = 100; Xsec = pin; 
+=============================================================
+particle = PROTON
+z = 1 ; A = 1
+P = [0,0,0] cm
+v = [0,0,1]
+
+Energy distribution = monoenergetic
+E = 100 MeV
+
+referenced field = Field_0
+
+Xsec = pin-like (FWHM=0)
+
+alpha = 0 deg (CCW rotation around field front vector)
+rmin,rmax [cm] = 0 , inf
+Num particles (fluence) = 1
+Num primary particles (MC histories) = 1000
+=============================================================
+
+Loading pencilbeam masters:
+
+PB master for field Field_0:
+	particle = PROTON
+	z = 1 ; A = 1
+	P = [0,0,0] cm
+	v = [0,0,1]
+
+	Energy distribution = monoenergetic
+	E = 100 MeV
+
+	referenced field = Field_0
+
+	Xsec = pin-like (FWHM=0)
+
+	alpha = 0 deg (CCW rotation around field front vector)
+	rmin,rmax [cm] = 0 , inf
+	Num particles (fluence) = 1
+	Num primary particles (MC histories) = 1000
+	column-mode input variables order = P.x P.y P.z T v.x v.y v.z N nprim FWHM 
+
+Loading pencilbeams:
+Num of penbeams: 0
+	no pencilbeams defined => a single central pb for each field
+	adding pb: 1 0 ;
+
+List of defined pencil beams:
+PB: 1 Field_0
+	particle = PROTON
+	z = 1 ; A = 1
+	P = [0,0,0] cm
+	v = [0,0,1]
+
+	Energy distribution = monoenergetic
+	E = 100 MeV
+
+	referenced field = Field_0
+
+	Xsec = pin-like (FWHM=0)
+
+	alpha = 0 deg (CCW rotation around field front vector)
+	rmin,rmax [cm] = 0 , inf
+	Num particles (fluence) = 1
+	Num primary particles (MC histories) = 100000000
+
+Number of pencil beams: 1
+Total number of particles: 1
+
+
+[0;36mThis is a proton-therapy run.[0m
+[0;35mI've not found any delivering directive => appending default directive [0;32mdeliver: all[0m
+	[0;32m[OK][0m
+--------------------------------------------------------------------------------
+
+[0;35mPhysics packages: [0m
+
+[0;35mInit Energy loss and Stopping power package:[0m
+Number of built-in stopping power tables: 92
+Tracking energy cut-off based on residual particle pathlength of 50 um
+Energy step limiter: max allowed energy loss per step DTmax = 7 %
+Setting ionization potential of water: 75 eV
+Building stopping power tables: 4
+[38;5;166m
+Lookup tables parameters: [0m
+
+                                                                      
+                                                                      
+   |[0;32m Mat [0m|[0;32m  Part  [0m|[0;32m Tmin  [0m|[0;32m Tmax  [0m|[0;32mTcutoff[0m|[0;32mminResRange[0m|[0;32mdEdx(100 MeV)[0m  
+  =+=====+========+=======+=======+=======+===========+=============  
+  [0;31m [0m|     |        |  keV  |  GeV  |  keV  |    um     |   MeV/cm      
+  =+=====+========+=======+=======+=======+===========+=============  
+  [0;31m0[0m|     | GEORAY |   0   |   0   |   0   |    inf    |      0        
+  =+=====+========+=======+=======+=======+===========+=============  
+  [0;31m1[0m|Water| PROTON |   1   |  10   |1556.1 |    50     |    7.289      
+  =+=====+========+=======+=======+=======+===========+=============  
+  [0;31m2[0m|Water|DEUTERON|1.99956|19.9956|2016.16|    50     |   12.4506     
+  =+=====+========+=======+=======+=======+===========+=============  
+  [0;31m3[0m|Water|HELIUM4 |   1   |   1   |6020.75|    50     |   86.4901     
+                                                                      
+                                                                      
+SPT consolidate tables timing: 0.00128007
+
+
+Matrix of material-particle stopping power look-up tables:
+
+[0;35m	(imat,jpart) -> SPTable[0m
+
+                                                                        
+            |[0;32m Georay [0m|[0;32m p [0m|[0;32m n [0m|[0;32m e- [0m|[0;32m e+ [0m|[0;32m photon [0m|[0;32m D [0m|[0;32m T  [0m|[0;32m alpha [0m|[0;32m He3 [0m 
+ ===========+========+===+===+====+====+========+===+====+=======+===== 
+ [0;32m  Vacuum   [0m|   0    | 0 | 0 | 0  | 0  |   0    | 0 | 0  |   0   |  0   
+ ===========+========+===+===+====+====+========+===+====+=======+===== 
+ [0;32m BlackHole [0m|   0    | 0 | 0 | 0  | 0  |   0    | 0 | 0  |   0   |  0   
+ ===========+========+===+===+====+====+========+===+====+=======+===== 
+ [0;32m   Water   [0m|   0    | 1 | 0 |[0;31m NA [0m|[0;31m NA [0m|   0    | 2 |[0;31m NA [0m|   3   |[0;31m NA  [0m 
+                                                                        
+
+                                                                        
+            |[0;32m He6 [0m|[0;32m Li6 [0m|[0;32m Li7 [0m|[0;32m Li8 [0m|[0;32m Li9 [0m|[0;32m Be7 [0m|[0;32m Be9 [0m|[0;32m Be10 [0m|[0;32m B8 [0m|[0;32m B9 [0m 
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m  Vacuum   [0m|  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0   | 0  | 0   
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m BlackHole [0m|  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0   | 0  | 0   
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m  NA  [0m|[0;31m NA [0m|[0;31m NA [0m 
+                                                                        
+
+                                                                
+            |[0;32m B10 [0m|[0;32m B11 [0m|[0;32m C9 [0m|[0;32m C10 [0m|[0;32m C11 [0m|[0;32m C12 [0m|[0;32m O16 [0m|[0;32m Zork [0m|[0;32m  [0m 
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m  Vacuum   [0m|  0  |  0  | 0  |  0  |  0  |  0  |  0  |  0   |   
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m BlackHole [0m|  0  |  0  | 0  |  0  |  0  |  0  |  0  |  0   |   
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|  0   |   
+                                                                
+
+[0;35m	(imat,jpart) -> Tcutoff (keV) for minimum Residual Pathlength: 50 um[0m
+
+                                                                                     
+            |[0;32m Georay [0m|[0;32m   p    [0m|[0;32m n [0m|[0;32m e- [0m|[0;32m e+ [0m|[0;32m photon [0m|[0;32m    D    [0m|[0;32m T  [0m|[0;32m  alpha  [0m|[0;32m He3 [0m 
+ ===========+========+========+===+====+====+========+=========+====+=========+===== 
+ [0;32m  Vacuum   [0m|   0    |   0    | 0 | 0  | 0  |   0    |    0    | 0  |    0    |  0   
+ ===========+========+========+===+====+====+========+=========+====+=========+===== 
+ [0;32m BlackHole [0m|[0;36m   0    [0m|[0;36m   0    [0m|[0;36m 0 [0m|[0;36m 0  [0m|[0;36m 0  [0m|[0;36m   0    [0m|[0;36m    0    [0m|[0;36m 0  [0m|[0;36m    0    [0m|[0;36m  0  [0m 
+ ===========+========+========+===+====+====+========+=========+====+=========+===== 
+ [0;32m   Water   [0m|[0;36m   0    [0m| 1556.1 |[0;36m 0 [0m|[0;31m NA [0m|[0;31m NA [0m|[0;36m   0    [0m|[0;31m 2016.16 [0m|[0;31m NA [0m|[0;31m 6020.75 [0m|[0;31m NA  [0m 
+                                                                                     
+
+                                                                        
+            |[0;32m He6 [0m|[0;32m Li6 [0m|[0;32m Li7 [0m|[0;32m Li8 [0m|[0;32m Li9 [0m|[0;32m Be7 [0m|[0;32m Be9 [0m|[0;32m Be10 [0m|[0;32m B8 [0m|[0;32m B9 [0m 
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m  Vacuum   [0m|  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0   | 0  | 0   
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m BlackHole [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0   [0m|[0;36m 0  [0m|[0;36m 0  [0m 
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m  NA  [0m|[0;31m NA [0m|[0;31m NA [0m 
+                                                                        
+
+                                                                
+            |[0;32m B10 [0m|[0;32m B11 [0m|[0;32m C9 [0m|[0;32m C10 [0m|[0;32m C11 [0m|[0;32m C12 [0m|[0;32m O16 [0m|[0;32m Zork [0m|[0;32m  [0m 
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m  Vacuum   [0m|  0  |  0  | 0  |  0  |  0  |  0  |  0  |  0   |   
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m BlackHole [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m 0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0  [0m|[0;36m  0   [0m|[0;36m  [0m 
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;36m  0   [0m|[0;36m  [0m 
+                                                                
+
+[0;35m	(imat,jpart) -> dEdx (MeV/cm) for T = 100 MeV[0m
+
+                                                                                    
+            |[0;32m Georay [0m|[0;32m   p   [0m|[0;32m n [0m|[0;32m e- [0m|[0;32m e+ [0m|[0;32m photon [0m|[0;32m    D    [0m|[0;32m T  [0m|[0;32m  alpha  [0m|[0;32m He3 [0m 
+ ===========+========+=======+===+====+====+========+=========+====+=========+===== 
+ [0;32m  Vacuum   [0m|   0    |   0   | 0 | 0  | 0  |   0    |    0    | 0  |    0    |  0   
+ ===========+========+=======+===+====+====+========+=========+====+=========+===== 
+ [0;32m BlackHole [0m|   0    |   0   | 0 | 0  | 0  |   0    |    0    | 0  |    0    |  0   
+ ===========+========+=======+===+====+====+========+=========+====+=========+===== 
+ [0;32m   Water   [0m|   0    | 7.289 | 0 |[0;31m NA [0m|[0;31m NA [0m|   0    | 12.4506 |[0;31m NA [0m| 86.4901 |[0;31m NA  [0m 
+                                                                                    
+
+                                                                        
+            |[0;32m He6 [0m|[0;32m Li6 [0m|[0;32m Li7 [0m|[0;32m Li8 [0m|[0;32m Li9 [0m|[0;32m Be7 [0m|[0;32m Be9 [0m|[0;32m Be10 [0m|[0;32m B8 [0m|[0;32m B9 [0m 
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m  Vacuum   [0m|  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0   | 0  | 0   
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m BlackHole [0m|  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0   | 0  | 0   
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m  NA  [0m|[0;31m NA [0m|[0;31m NA [0m 
+                                                                        
+
+                                                                
+            |[0;32m B10 [0m|[0;32m B11 [0m|[0;32m C9 [0m|[0;32m C10 [0m|[0;32m C11 [0m|[0;32m C12 [0m|[0;32m O16 [0m|[0;32m Zork [0m|[0;32m  [0m 
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m  Vacuum   [0m|  0  |  0  | 0  |  0  |  0  |  0  |  0  |  0   |   
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m BlackHole [0m|  0  |  0  | 0  |  0  |  0  |  0  |  0  |  0   |   
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|  0   |   
+                                                                
+
+[0;35m	(imat,jpart) -> dEds (MeV*cm^2/g) for T = 100 MeV[0m
+
+                                                                                    
+            |[0;32m Georay [0m|[0;32m   p   [0m|[0;32m n [0m|[0;32m e- [0m|[0;32m e+ [0m|[0;32m photon [0m|[0;32m    D    [0m|[0;32m T  [0m|[0;32m  alpha  [0m|[0;32m He3 [0m 
+ ===========+========+=======+===+====+====+========+=========+====+=========+===== 
+ [0;32m  Vacuum   [0m|   0    |   0   | 0 | 0  | 0  |   0    |    0    | 0  |    0    |  0   
+ ===========+========+=======+===+====+====+========+=========+====+=========+===== 
+ [0;32m BlackHole [0m|   0    |   0   | 0 | 0  | 0  |   0    |    0    | 0  |    0    |  0   
+ ===========+========+=======+===+====+====+========+=========+====+=========+===== 
+ [0;32m   Water   [0m|   0    | 7.289 |[0;31m 0 [0m|[0;31m NA [0m|[0;31m NA [0m|   0    |[0;31m 12.4506 [0m|[0;31m NA [0m|[0;31m 86.4901 [0m|[0;31m NA  [0m 
+                                                                                    
+
+                                                                        
+            |[0;32m He6 [0m|[0;32m Li6 [0m|[0;32m Li7 [0m|[0;32m Li8 [0m|[0;32m Li9 [0m|[0;32m Be7 [0m|[0;32m Be9 [0m|[0;32m Be10 [0m|[0;32m B8 [0m|[0;32m B9 [0m 
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m  Vacuum   [0m|  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0   | 0  | 0   
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m BlackHole [0m|  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0   | 0  | 0   
+ ===========+=====+=====+=====+=====+=====+=====+=====+======+====+==== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m  NA  [0m|[0;31m NA [0m|[0;31m NA [0m 
+                                                                        
+
+                                                                
+            |[0;32m B10 [0m|[0;32m B11 [0m|[0;32m C9 [0m|[0;32m C10 [0m|[0;32m C11 [0m|[0;32m C12 [0m|[0;32m O16 [0m|[0;32m Zork [0m|[0;32m  [0m 
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m  Vacuum   [0m|  0  |  0  | 0  |  0  |  0  |  0  |  0  |  0   |   
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m BlackHole [0m|  0  |  0  | 0  |  0  |  0  |  0  |  0  |  0   |   
+ ===========+=====+=====+====+=====+=====+=====+=====+======+== 
+ [0;32m   Water   [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|[0;31m NA  [0m|  0   |   
+                                                                
+
+Checking stopping power tables for used materials:
+	required particles: PROTON DEUTERON 
+	used materials: Vacuum Water 
+	--> all necessary stopping power tables have been found.
+	[0;32m[OK][0m
+
+[0;35mInit Energy Fluctuation package:[0m
+	[0;32m[OK][0m
+
+[0;35mInit Multiple Coulomb Scattering package: [0m
+MCS mode for protons: 6
+	single gaussian: Rossi-Greisen formula + correction a' la Fippel (1G-RGF)
+MCS mode for other charged particles: 0 (Highland's formula)
+	[0;32m[OK][0m
+
+[0;35mInit inelastic nuclear interaction package: [0m
+	[0;32m[OK][0m
+
+[0;35mBuilding and merging MAC lookup tables: [0m
+precomputing MAC timing: 0.00135398
+--------------------------------------------------------------------------------
+
+[0;35mInit Variance Reduction: [0m
+--------------------------------------------------------------------------------
+
+[0;35mRadiobiology: [0m
+
+Init RBE models:
+
+RBE Manager:
+	number of activated RBE models: 0
+
+Setting up GPU devices:
+Num dev = 1 1
+Setting up device: 0 with ID: 0x15537d0
+	Name: NVIDIA GeForce MX550
+	Vendor: NVIDIA Corporation
+	Driver version: 550.107.02
+	Device version: OpenCL 3.0 CUDA
+	Image support: 1
+	Image2D max width: 32768
+	Image2D max height: 32768
+	Image3D max width: 16384
+	Image3D max height: 16384
+	Image3D max depth: 16384
+[0;32m	OK[0m
+--------------------------------------------------------------------------------
+
+[0;35mVerify complete parsing of input file: [0m
+
+	detect unknown or invalid symbols: [0;32m	OK[0m
+	checked unparsed parameters: [0;32m	OK[0m
+	checked unknown input lines: [0;32m	OK[0m
+	checked unparsed sections: [0;32m	OK[0m
+<== init
+
+Reg idx 0
+Reg idx 1
+		scorer [0,2]: 
+		type ncomp nel scoreij DOSE 0 672400 0
+		scorer [1,2]: 
+		type ncomp nel scoreij EDEP 1 672400 0
+scorel 672400
+Reg idx 2
+influenceMatrix --->
+influenceMatrix <---
+scorerAccumulators --->
+region: 1
+	scorer[1]: EDEP	 ni = 672400 ncomp= 1
+now dmap sum = 0
+scorerAccumulators <---
+numTotBuffersScoringIJ = 0
+--------------------------------------------------------------------------------
+
+[0;35mDelivery sequence: [0m
+
+[0;32mparsing delivery step no. 1[0m
+[0;32mdeliveryManager => deliver :  all[0m
+[0;35mDelivery phases report:[0m
+[0;32mPhase 0[0m
+	phEl	igeom	isource	[nprim,nqueued]	ibatch	iprimstart
+	0 : 0 0 [100000000,0]	-1	0	
+--------------------
+Splitting delivery in batches with size: 40000000 = 7.15 GB 
+[0;35mDelivery phases report:[0m
+[0;32mPhase 0[0m
+	phEl	igeom	isource	[nprim,nqueued]	ibatch	iprimstart
+	0 : 0 0 [100000000,40000000]	0	0	
+	1 : 0 0 [60000000,40000000]	1	40000000	
+	2 : 0 0 [20000000,20000000]	2	80000000	<---end-of-phase---
+--------------------
+
+[0;35mGeometry checking: [0m
+
+Geometry setups to check: 1
+[0;32m	all setups were successfully checked: OK[0m
+Num of primaries to deliver: 100000000
+[0;35mTracking particles: [0m
+[0;32mdelivering batch no. 1/3[0m
+Num of phase elements for this batch: 1
+	0 0 [100000000,40000000]	0
+[0;32mpbtag = 1[0m
+Num of primaries for this batch: 40000000
+iprim 40000000
+Time for primary seed generation: 0.497912 s
+Primary seed generation rate: 8.03355e+07 #/s
+Start tracking now:
+	tracking particles on the GPU
+Num of phase elements for this batch: 1
+	0 0 [60000000,40000000]	1
+[0;32mpbtag = 1[0m
+Num of primaries for this batch: 40000000
+
+Num of primary particles in primaryList: 40000000
+Num primary   tot:     40000000
+tracking   0.2 %
+tracking   1.7 %  ETA = 3 m : 26 s 
+tracking   3.2 %  ETA = 3 m : 28 s 
+tracking   4.7 %  ETA = 3 m : 16 s 
+tracking   6.2 %  ETA = 3 m : 25 s 
+iprim 40000000
+Time for primary seed generation: 1.01089 s
+Primary seed generation rate: 3.95693e+07 #/s
+tracking   7.7 %  ETA = 3 m : 23 s 
+tracking   9.1 %  ETA = 3 m : 21 s 
+tracking  10.6 %  ETA = 3 m : 21 s 
+tracking  12.1 %  ETA = 3 m : 21 s 
+tracking  13.5 %  ETA = 3 m : 19 s 
+tracking  15.0 %  ETA = 3 m : 18 s 
+tracking  16.4 %  ETA = 3 m : 17 s 
+tracking  17.8 %  ETA = 3 m : 16 s 
+tracking  19.3 %  ETA = 3 m : 16 s 
+tracking  20.7 %  ETA = 3 m : 15 s 
+tracking  22.1 %  ETA = 3 m : 14 s 
+tracking  23.5 %  ETA = 3 m : 13 s 
+tracking  24.9 %  ETA = 3 m : 12 s 
+tracking  26.3 %  ETA = 3 m : 10 s 
+tracking  27.7 %  ETA = 3 m : 7 s 
+tracking  29.1 %  ETA = 3 m : 8 s 
+tracking  30.5 %  ETA = 3 m : 6 s 
+tracking  31.8 %  ETA = 3 m : 6 s 
+tracking  33.2 %  ETA = 3 m : 5 s 
+tracking  34.6 %  ETA = 3 m : 3 s 
+tracking  35.9 %  ETA = 3 m : 1 s 
+tracking  37.3 %  ETA = 3 m : 1 s 
+tracking  38.6 %  ETA = 3 m : 1 s 
+tracking  40.0 %  ETA = 2 m : 59 s 
+tracking  41.3 %  ETA = 2 m : 58 s 
+tracking  42.6 %  ETA = 2 m : 58 s 
+tracking  44.0 %  ETA = 2 m : 55 s 
+tracking  45.3 %  ETA = 2 m : 54 s 
+tracking  46.6 %  ETA = 2 m : 54 s 
+tracking  47.9 %  ETA = 2 m : 55 s 
+tracking  49.2 %  ETA = 2 m : 52 s 
+tracking  50.5 %  ETA = 2 m : 52 s 
+tracking  51.8 %  ETA = 2 m : 51 s 
+tracking  53.1 %  ETA = 2 m : 49 s 
+tracking  54.4 %  ETA = 2 m : 47 s 
+tracking  55.7 %  ETA = 2 m : 46 s 
+tracking  57.0 %  ETA = 2 m : 45 s 
+tracking  58.2 %  ETA = 2 m : 44 s 
+tracking  59.5 %  ETA = 2 m : 44 s 
+tracking  60.8 %  ETA = 2 m : 43 s 
+tracking  62.0 %  ETA = 2 m : 41 s 
+tracking  63.3 %  ETA = 2 m : 40 s 
+tracking  64.5 %  ETA = 2 m : 39 s 
+tracking  65.8 %  ETA = 2 m : 39 s 
+tracking  67.0 %  ETA = 2 m : 38 s 
+tracking  68.2 %  ETA = 2 m : 36 s 
+tracking  69.5 %  ETA = 2 m : 35 s 
+tracking  70.7 %  ETA = 2 m : 34 s 
+tracking  71.9 %  ETA = 2 m : 33 s 
+tracking  73.1 %  ETA = 2 m : 32 s 
+tracking  74.3 %  ETA = 2 m : 30 s 
+tracking  75.5 %  ETA = 2 m : 29 s 
+tracking  76.7 %  ETA = 2 m : 29 s 
+tracking  77.9 %  ETA = 2 m : 27 s 
+tracking  79.1 %  ETA = 2 m : 27 s 
+tracking  80.3 %  ETA = 2 m : 25 s 
+tracking  81.5 %  ETA = 2 m : 23 s 
+tracking  82.7 %  ETA = 2 m : 24 s 
+tracking  83.9 %  ETA = 2 m : 22 s 
+tracking  85.0 %  ETA = 2 m : 22 s 
+tracking  86.2 %  ETA = 2 m : 20 s 
+tracking  87.4 %  ETA = 2 m : 17 s 
+tracking  88.5 %  ETA = 2 m : 18 s 
+tracking  89.7 %  ETA = 2 m : 15 s 
+tracking  90.8 %  ETA = 2 m : 16 s 
+tracking  92.0 %  ETA = 2 m : 15 s 
+tracking  93.1 %  ETA = 2 m : 13 s 
+tracking  94.2 %  ETA = 2 m : 12 s 
+tracking  95.4 %  ETA = 2 m : 11 s 
+tracking  96.5 %  ETA = 2 m : 10 s 
+tracking  97.6 %  ETA = 2 m : 9 s 
+tracking  98.7 %  ETA = 2 m : 9 s 
+tracking  99.9 %  ETA = 2 m : 8 s 
+tracking 100.0 %
+
+Num traced    tot:     46459137
+Num secondary tot:      6459137
+Average secondary multiplicity 16.1478 %
+Tracking rate 472394 primary/s
+[0;32mdelivering batch no. 2/3[0m
+Start tracking now:
+	tracking particles on the GPU
+Num of phase elements for this batch: 1
+	0 0 [20000000,20000000]	2
+[0;32mpbtag = 1[0m
+Num of primaries for this batch: 20000000
+
+Num of primary particles in primaryList: 40000000
+Num primary   tot:     40000000
+tracking   0.2 %
+tracking   1.7 %  ETA = 42.4 s 
+tracking   3.2 %  ETA = 2 m : 5 s 
+iprim 20000000
+Time for primary seed generation: 0.410494 s
+Primary seed generation rate: 4.87218e+07 #/s
+tracking   4.7 %  ETA = 2 m : 2 s 
+tracking   6.2 %  ETA = 2 m : 3 s 
+tracking   7.7 %  ETA = 2 m : 0 s 
+tracking   9.1 %  ETA = 2 m : 0 s 
+tracking  10.6 %  ETA = 1 m : 59 s 
+tracking  12.1 %  ETA = 1 m : 58 s 
+tracking  13.5 %  ETA = 1 m : 56 s 
+tracking  15.0 %  ETA = 1 m : 55 s 
+tracking  16.4 %  ETA = 1 m : 54 s 
+tracking  17.8 %  ETA = 1 m : 53 s 
+tracking  19.3 %  ETA = 1 m : 52 s 
+tracking  20.7 %  ETA = 1 m : 51 s 
+tracking  22.1 %  ETA = 1 m : 50 s 
+tracking  23.5 %  ETA = 1 m : 49 s 
+tracking  24.9 %  ETA = 1 m : 48 s 
+tracking  26.3 %  ETA = 1 m : 47 s 
+tracking  27.7 %  ETA = 1 m : 45 s 
+tracking  29.1 %  ETA = 1 m : 45 s 
+tracking  30.5 %  ETA = 1 m : 44 s 
+tracking  31.8 %  ETA = 1 m : 42 s 
+tracking  33.2 %  ETA = 1 m : 42 s 
+tracking  34.6 %  ETA = 1 m : 40 s 
+tracking  35.9 %  ETA = 1 m : 38 s 
+tracking  37.3 %  ETA = 1 m : 38 s 
+tracking  38.6 %  ETA = 1 m : 38 s 
+tracking  40.0 %  ETA = 1 m : 35 s 
+tracking  41.3 %  ETA = 1 m : 35 s 
+tracking  42.6 %  ETA = 1 m : 34 s 
+tracking  44.0 %  ETA = 1 m : 32 s 
+tracking  45.3 %  ETA = 1 m : 32 s 
+tracking  46.6 %  ETA = 1 m : 30 s 
+tracking  47.9 %  ETA = 1 m : 30 s 
+tracking  49.2 %  ETA = 1 m : 29 s 
+tracking  50.5 %  ETA = 1 m : 28 s 
+tracking  51.8 %  ETA = 1 m : 26 s 
+tracking  53.1 %  ETA = 1 m : 25 s 
+tracking  54.4 %  ETA = 1 m : 23 s 
+tracking  55.7 %  ETA = 1 m : 22 s 
+tracking  57.0 %  ETA = 1 m : 21 s 
+tracking  58.2 %  ETA = 1 m : 21 s 
+tracking  59.5 %  ETA = 1 m : 20 s 
+tracking  60.8 %  ETA = 1 m : 19 s 
+tracking  62.0 %  ETA = 1 m : 17 s 
+tracking  63.3 %  ETA = 1 m : 16 s 
+tracking  64.5 %  ETA = 1 m : 14 s 
+tracking  65.8 %  ETA = 1 m : 14 s 
+tracking  67.0 %  ETA = 1 m : 13 s 
+tracking  68.2 %  ETA = 1 m : 12 s 
+tracking  69.5 %  ETA = 1 m : 10 s 
+tracking  70.7 %  ETA = 1 m : 9 s 
+tracking  71.9 %  ETA = 1 m : 8 s 
+tracking  73.1 %  ETA = 1 m : 7 s 
+tracking  74.3 %  ETA = 1 m : 6 s 
+tracking  75.5 %  ETA = 1 m : 6 s 
+tracking  76.7 %  ETA = 1 m : 4 s 
+tracking  77.9 %  ETA = 1 m : 3 s 
+tracking  79.1 %  ETA = 1 m : 2 s 
+tracking  80.3 %  ETA = 1 m : 0 s 
+tracking  81.5 %  ETA = 1 m : 0 s 
+tracking  82.7 %  ETA = 59.5 s 
+tracking  83.9 %  ETA = 57.6 s 
+tracking  85.0 %  ETA = 56.7 s 
+tracking  86.2 %  ETA = 55.8 s 
+tracking  87.4 %  ETA = 54.6 s 
+tracking  88.5 %  ETA = 53.7 s 
+tracking  89.7 %  ETA = 52.3 s 
+tracking  90.8 %  ETA = 51.1 s 
+tracking  92.0 %  ETA = 50.3 s 
+tracking  93.1 %  ETA = 49.4 s 
+tracking  94.2 %  ETA = 48.1 s 
+tracking  95.4 %  ETA = 47.1 s 
+tracking  96.5 %  ETA = 46.1 s 
+tracking  97.6 %  ETA = 49.9 s 
+tracking  98.7 %  ETA = 43.3 s 
+tracking  99.9 %  ETA = 43.0 s 
+tracking 100.0 %
+
+Num traced    tot:     46459137
+Num secondary tot:      6459137
+Average secondary multiplicity 16.1478 %
+Tracking rate 469794 primary/s
+[0;32mdelivering batch no. 3/3[0m
+Start tracking now:
+	tracking particles on the GPU
+
+Num of primary particles in primaryList: 20000000
+Num primary   tot:     20000000
+tracking   0.5 %
+tracking   3.5 %  ETA = 36.4 s 
+tracking   6.5 %  ETA = 40.2 s 
+tracking   9.4 %  ETA = 38.7 s 
+tracking  12.3 %  ETA = 37.7 s 
+tracking  15.2 %  ETA = 36.5 s 
+tracking  18.1 %  ETA = 35.6 s 
+tracking  21.0 %  ETA = 34.4 s 
+tracking  23.8 %  ETA = 39.8 s 
+tracking  26.6 %  ETA = 32.5 s 
+tracking  29.4 %  ETA = 31.3 s 
+tracking  32.1 %  ETA = 30.3 s 
+tracking  34.9 %  ETA = 29.0 s 
+tracking  37.6 %  ETA = 27.9 s 
+tracking  40.3 %  ETA = 25.2 s 
+tracking  42.9 %  ETA = 25.4 s 
+tracking  45.6 %  ETA = 24.3 s 
+tracking  48.2 %  ETA = 23.6 s 
+tracking  50.8 %  ETA = 22.4 s 
+tracking  53.4 %  ETA = 21.2 s 
+tracking  56.0 %  ETA = 19.5 s 
+tracking  58.6 %  ETA = 21.0 s 
+tracking  61.1 %  ETA = 18.0 s 
+tracking  63.6 %  ETA = 16.9 s 
+tracking  66.1 %  ETA = 15.7 s 
+tracking  68.6 %  ETA = 14.8 s 
+tracking  71.0 %  ETA = 13.6 s 
+tracking  73.5 %  ETA = 12.6 s 
+tracking  75.9 %  ETA = 11.4 s 
+tracking  78.3 %  ETA = 10.4 s 
+tracking  80.7 %  ETA = 9.3 s 
+tracking  83.0 %  ETA = 8.2 s 
+tracking  85.4 %  ETA = 7.1 s 
+tracking  87.7 %  ETA = 5.9 s 
+tracking  90.0 %  ETA = 4.8 s 
+tracking  92.3 %  ETA = 3.7 s 
+tracking  94.6 %  ETA = 2.6 s 
+tracking  96.9 %  ETA = 1.5 s 
+tracking  99.1 %  ETA = 0.4 s 
+tracking 100.0 %
+
+Num traced    tot:     23225616
+Num secondary tot:      3225616
+Average secondary multiplicity 16.1281 %
+Tracking rate 468964 primary/s
+[0;35mThis is the last batch of current phase!!![0m
+Processing end of phase: 0
+
+Wallclock tracking time (s): 212.47
+Average tracking rate  470655  primary/s
+Average track time per primary    2.1247 us
+update scorerAccumulators --->
+region: 1
+	scorer[1]: EDEP
+brf dmap sum = 0
+[1,1] : ni = 672400 ncomp = 1
+aft dmap sum = 97.1677
+update scorerAccumulators <---
+
+[0;35mWriting output: [0m[0;32mPhantom	Total Edep = 97.1445 MeV
+[0m[0;32mPhantom	Dose range= 0,1.32675e-07 Gy
+[0m
+--------------------------------------------------------------------------------
+[0;35mRBE models: [0m
+
+Calculating RBE and biological dose for the activated RBE models:
+###############    CALCULATE RBE    ###############
+
+
+
+###############    CALCULATE RBE    ###############
+
+
+--------------------------------------------------------------------------------
+
+################################################################################
+Running config (PTHREADS,GPU): 16,1
+    Num of CPU threads = 16
+    GPU[0] = NVIDIA GeForce MX550
+################################################################################
+Timing summary:
+      initialization    0.58 s   0.3%
+        primary list    3.19 s   1.5%
+   delivery checking    0.00 s   0.0%
+   geometry checking    0.00 s   0.0%
+            tracking  212.47 s  97.9%
+      writing output    0.10 s   0.0%
+               other    0.72 s   0.3%
+################################################################################
+Number of primary particles:   1.00e+08
+Tracking rate:   4.71e+05 primary/s
+Track time per primary:     2.1 us
+################################################################################
+Run with [0;32mfred Version 3.71.0  (bd7887c) - 2024/07/22
+[0m################################################################################
+Run wallclock time: 217 s =   3.6 min

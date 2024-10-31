@@ -1,4 +1,9 @@
-def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=None, stepSize=10, fractionalStepSize=True, mode="gamma", CPUNo="auto", displayInfo: bool = False):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic, Field(strict=True, ge=0, le=100)], DTA: Numberic, DCO: Annotated[Numberic, Field(strict=True, ge=0, le=1)], DDType: Literal["local", "global"] = "local", globalNorm: Numberic | None = None, stepSize: Numberic = 10, fractionalStepSize: bool = True, mode: Literal["gamma", "pass-rate"] = "gamma", displayInfo: bool = False) -> SITKImage:
     """Calculate gamma index map.
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
@@ -49,11 +54,6 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
             -  'gamma': each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.
             -  'pass-rate': each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
-    CPUNo : {'auto', 'none'}, scalar or None, optional
-        Define if the multiprocessing should be used and how many cores should
-        be exploited. Can be None, then no multiprocessing will be used,
-        a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cores to be used. (def. 'auto')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -110,35 +110,53 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
     # validate imgRef
     ft._imgTypeChecker.isSITK(imgRef, raiseError=True)
     if not ft._imgTypeChecker.isSITK_slice(imgRef, raiseError=False) and not ft._imgTypeChecker.isSITK_volume(imgRef, raiseError=False):
-        raise TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
+        error = TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
+        _logger.error(error)
+        raise error
 
     # validate imgEval
     ft._imgTypeChecker.isSITK(imgEval, raiseError=True)
     if not ft._imgTypeChecker.isSITK_slice(imgEval, raiseError=False) and not ft._imgTypeChecker.isSITK_volume(imgEval, raiseError=False):
-        raise TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
+        error = TypeError(f"The evaluation image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
+        _logger.error(error)
+        raise error
 
     # validate DTA, DD, DDType, DCO and globalNorm
-    if not np.isscalar(DTA) or DTA <= 0:
-        raise ValueError(f"The value od DTA {DTA} is not correct. It must be a positive scalar.")
-    if not np.isscalar(DD) or DD <= 0 or DD >= 100:
-        raise ValueError(f"The value of DD {DD} is not correct. It must be a positive scalar between 0 and 100.")
+    if not isinstance(DTA, Numberic) or DTA <= 0:
+        error = ValueError(f"The value od DTA {DTA} is not correct. It must be a positive scalar.")
+        _logger.error(error)
+        raise error
+    if not isinstance(DD, Numberic) or DD <= 0 or DD >= 100:
+        error = ValueError(f"The value of DD {DD} is not correct. It must be a positive scalar between 0 and 100.")
+        _logger.error(error)
+        raise error
     if not isinstance(DDType, str) or DDType.lower() not in ["local", "global", "l", "g"]:
-        raise ValueError(f"Dose distance type must be a string and only 'local' or 'global' are supported.")
-    if not np.isscalar(DCO) or DCO <= 0 or DCO >= 1:
-        raise ValueError(f"The value of DCO {DCO} is not correct. It must be a positive scalar between 0 and 1.")
-    if not ((np.isscalar(globalNorm) and globalNorm > 0) or globalNorm is None):
-        raise ValueError(f"The value of globalNorm {globalNorm} is not correct. It must be a positive scalar or None.")
+        error = ValueError(f"Dose distance type must be a string and only 'local' or 'global' are supported.")
+        _logger.error(error)
+        raise error
+    if not isinstance(DCO, Numberic) or DCO <= 0 or DCO >= 1:
+        error = ValueError(f"The value of DCO {DCO} is not correct. It must be a positive scalar between 0 and 1.")
+        _logger.error(error)
+        raise error
+    if not ((isinstance(globalNorm, Numberic) and globalNorm > 0) or globalNorm is None):
+        error = ValueError(f"The value of globalNorm {globalNorm} is not correct. It must be a positive scalar or None.")
+        _logger.error(error)
+        raise error
 
     # validate stepSize
-    if not np.isscalar(stepSize) or stepSize <= 0:
-        raise ValueError(f"The value {stepSize} is not correct. It must be a positive scalar.")
+    if not isinstance(stepSize, Numberic) or stepSize <= 0:
+        error = ValueError(f"The value {stepSize} is not correct. It must be a positive scalar.")
+        _logger.error(error)
+        raise error
 
     # validate calculation mode
     if not isinstance(mode, str) or mode.lower() not in ["gamma", "pass-rate", "g", "pr", "p"]:
-        raise ValueError(f"Calculation mode must be a string and only 'gamma' or 'pass-rate' are supported.")
+        error = ValueError(f"Calculation mode must be a string and only 'gamma' or 'pass-rate' are supported.")
+        _logger.error(error)
+        raise error
 
     # validate CPUNo or get it automatically if requested
-    CPUNo = ft.getCPUNo(CPUNo)
+    CPUNo = ft.getCPUNo(ft.CPUNO)
 
     # load, init and reset shared library
     if sys.platform == "linux" or sys.platform == "linux2":
@@ -147,7 +165,9 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
         libFredGI = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), "./libFredGI.so"))
         libFredGI_h = libFredGI._handle
     elif sys.platform == "win32":
-        raise OSError("Windows version not implemented yet. Only the linux shared library is working now.")
+        error = OSError("Windows version not implemented yet. Only the linux shared library is working now.")
+        _logger.error(error)
+        raise error
         libFredGI = ctypes.WinDLL("./libFredGI.dll")
         libFredGI_h = libFredGI._handle
     libFredGI.fredGI_init()
@@ -164,8 +184,8 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
         libFredGI.fredGI_setInterpolation(ctypes.c_int(1))
 
         # set DTA, DD, DDType, DCO and globalNorm
-        libFredGI.fredGI_setDTA(ctypes.c_float(DTA))
-        libFredGI.fredGI_setDD(ctypes.c_float(DD))
+        libFredGI.fredGI_setDTA(ctypes.c_float(float(DTA)))
+        libFredGI.fredGI_setDD(ctypes.c_float(float(DD)))
         if DDType.lower() in ["local", "l"]:
             DDType = "local"
             libFredGI.fredGI_setDDCriterium(ctypes.c_int(2))  # 1 = GLOBAL, 2 = LOCAL
@@ -174,12 +194,12 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
             libFredGI.fredGI_setDDCriterium(ctypes.c_int(1))  # 1 = GLOBAL, 2 = LOCAL
         libFredGI.fredGI_setDCO(ctypes.c_float(DCO * 100))
         if globalNorm:
-            libFredGI.fredGI_setGlobalNormalization(ctypes.c_float(globalNorm))
+            libFredGI.fredGI_setGlobalNormalization(ctypes.c_float(float(globalNorm)))
 
         # set stepSize
         if fractionalStepSize:
             stepSize = DTA / stepSize
-        libFredGI.fredGI_setStepSize(ctypes.c_float(stepSize))
+        libFredGI.fredGI_setStepSize(ctypes.c_float(float(stepSize)))
 
         # set verbosity
         if displayInfo:
@@ -199,12 +219,11 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
         libFredGI.fredGI_setNumThreads(ctypes.c_int(CPUNo))
 
         # set imgRef
-        libFredGI.fredGI_setRef.argtypes = [
-            ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-            ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),
-        ]
+        libFredGI.fredGI_setRef.argtypes = [ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
+                                            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
+                                            ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),
+                                            ]
         nn = np.array(imgRef.GetSize()).astype(np.int32)
         hs = np.array(imgRef.GetSpacing()).astype(np.float32)
         x0 = np.array(ft.getExtent(imgRef))[:, 0].astype(np.float32)
@@ -213,12 +232,11 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
         libFredGI.fredGI_setRef(nn, hs, x0, arr)
 
         # set imgEval
-        libFredGI.fredGI_setEval.argtypes = [
-            ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-            ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),
-        ]
+        libFredGI.fredGI_setEval.argtypes = [ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                             ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
+                                             ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
+                                             ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),
+                                             ]
         nn = np.array(imgEval.GetSize()).astype(np.int32)
         hs = np.array(imgEval.GetSpacing()).astype(np.float32)
         x0 = np.array(ft.getExtent(imgEval))[:, 0].astype(np.float32)
@@ -229,7 +247,9 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
         # start computation
         computationStatus = libFredGI.fredGI_startComputation()
         if not computationStatus == 0:
-            raise RuntimeError(f"Gamma Index computation failed with the error code {computationStatus}. Refer to www.fredtools.ifj.edu.pl for more details.")
+            error = RuntimeError(f"Gamma Index computation failed with the error code {computationStatus}. Refer to www.fredtools.ifj.edu.pl for more details.")
+            _logger.error(error)
+            raise error
 
         # read results and convert to SimpleITK image
         arrGI = np.zeros(imgRef.GetSize(), dtype=np.float32, order="F")
@@ -261,20 +281,19 @@ def calcGammaIndex(imgRef, imgEval, DD, DTA, DCO, DDType="local", globalNorm=Non
             del libFredGI
             dlclose(libFredGI_h)
         elif sys.platform == "win32":
-            raise OSError("Windows version not implemented yet. Only the linux shared library is working now.")
+            error = OSError("Windows version not implemented yet. Only the linux shared library is working now.")
+            _logger.error(error)
+            raise error
             del libFredGI
             ctypes.windll.kernel32.FreeLibrary(libFredGI_h)
 
     if displayInfo:
-        print()
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgGI)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgGI))
 
     return imgGI
 
 
-def getGIstat(imgGI, displayInfo: bool = False):
+def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
     """Get statistics of Gamma Index.
 
     The function calculates Gamma Index statistics from an image defined
@@ -307,9 +326,9 @@ def getGIstat(imgGI, displayInfo: bool = False):
     GIstat = {}
     if np.issubdtype(arrGI.dtype, np.integer):
         if not set(np.unique(arrGI)).issubset(set([-1, 0, 1])):
-            raise ValueError(
-                f"The calculation mode was recognized as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0, 1] unique values and the uniques are {np.unique(arrGI)}"
-            )
+            error = ValueError(f"The calculation mode was recognized as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0, 1] unique values and the uniques are {np.unique(arrGI)}")
+            _logger.error(error)
+            raise error
         mode = "pass-rate"
         GIstat["passRate"] = (arrGI == 1).sum() / (arrGI >= 0).sum() * 100
         GIstat["mean"] = np.nan
@@ -327,16 +346,17 @@ def getGIstat(imgGI, displayInfo: bool = False):
         GIstat["max"] = np.nanmax(arrGI)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# GIPR: {:.2f}".format(GIstat["passRate"]))
+        strLog = [f"Gamma Index statistics for the image calculated in '{mode}' mode:",
+                  f"GIPR: {GIstat['passRate']:.2f}"]
         if mode == "gamma":
-            print("# mean/std: {:.2f} / {:.2f}".format(GIstat["mean"], GIstat["std"]))
-            print("# min/max: {:.2f} / {:.2f}".format(GIstat["min"], GIstat["max"]))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
-    return GIstat
+            strLog.append("mean/std: {:.2f} / {:.2f}".format(GIstat["mean"], GIstat["std"]))
+            strLog.append("min/max: {:.2f} / {:.2f}".format(GIstat["min"], GIstat["max"]))
+        _logger.info("\n\t".join(strLog))
+
+    return DottedDict(**GIstat)
 
 
-def getGIcmap(maxGI, N=256):
+def getGIcmap(maxGI: Numberic, N: NonNegativeInt = 256) -> LinearSegmentedColormap:
     """Get colormap for Gamma Index images.
 
     The function creates a colormap for Gamma Index (GI) images,
@@ -372,10 +392,9 @@ def getGIcmap(maxGI, N=256):
     """
     from matplotlib.colors import LinearSegmentedColormap
     import numpy as np
-    import warnings
 
     if maxGI < 1:
-        warnings.warn(f"Warning: the value of the parameter 'maxGI' cannot be less than 1 and a value {maxGI} was given. It was set to 1.")
+        _logger.warning(f"Warning: the value of the parameter 'maxGI' cannot be less than 1 and a value {maxGI} was given. It was set to 1.")
         maxGI = 1
 
     colorLowStart = np.array([1, 0, 128]) / 255
@@ -384,11 +403,17 @@ def getGIcmap(maxGI, N=256):
     colorHighEnd = np.array([255, 67, 66]) / 255
 
     cdict = {
-        "red": ((0.0, 0.0, colorLowStart[0]), (1 / maxGI, colorLowEnd[0], colorHighStart[0]), (1.0, colorHighEnd[0], 0.0)),
-        "green": ((0.0, 0.0, colorLowStart[1]), (1 / maxGI, colorLowEnd[1], colorHighStart[1]), (1.0, colorHighEnd[1], 0.0)),
-        "blue": ((0.0, 1.0, colorLowStart[2]), (1 / maxGI, colorLowEnd[2], colorHighStart[2]), (1.0, colorHighEnd[2], 0.0)),
+        "red":   ((0.0, 0.0, float(colorLowStart[0])),
+                  (1 / maxGI, float(colorLowEnd[0]), float(colorHighStart[0])),
+                  (1.0, float(colorHighEnd[0]), 0.0)),
+        "green": ((0.0, 0.0, float(colorLowStart[1])),
+                  (float(1 / maxGI), float(colorLowEnd[1]), float(colorHighStart[1])),
+                  (1.0, float(colorHighEnd[1]), 0.0)),
+        "blue":  ((0.0, 1.0, float(colorLowStart[2])),
+                  (1 / maxGI, float(colorLowEnd[2]), float(colorHighStart[2])),
+                  (1.0, float(colorHighEnd[2]), 0.0)),
     }
 
-    cmapGI = LinearSegmentedColormap(name="GIcmap", segmentdata=cdict, N=N)
+    cmapGI = LinearSegmentedColormap(name="GIcmap", segmentdata=cdict, N=N)  # type: ignore
 
     return cmapGI

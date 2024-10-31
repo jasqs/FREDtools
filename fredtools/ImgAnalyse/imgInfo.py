@@ -87,7 +87,7 @@ def _generateExtentString(axisExtent: tuple[float, float]) -> str:
     return extentString
 
 
-def _displayImageInfo(img: SITKImage) -> str:
+def _displayImageInfo(img: SITKImage, metadata: bool = True) -> str:
     """Display some information about the image without the name of the function.
 
     The function displays information about an image given as a SimpleITK image object.
@@ -96,7 +96,9 @@ def _displayImageInfo(img: SITKImage) -> str:
     Parameters
     ----------
     img : SimpleITK Image
-        An object of a SimpleITK image.
+        An object of a SimpleITK image.1
+    metadata : bool, optional
+        Display additional metadata. (def. True)
     """
     import SimpleITK as sitk
     import numpy as np
@@ -114,7 +116,7 @@ def _displayImageInfo(img: SITKImage) -> str:
     isVector = ft._imgTypeChecker.isSITK_vector(img)
     isMask = ft._imgTypeChecker.isSITK_mask(img)
     maskType = f"({ft._imgTypeChecker.getMaskType(img)} mask)" if isMask else ""
-    isIdentity = ft.ImgAnalyse.imgAnalyse._checkIdentity(img)
+    isIdentity = ft.ImgAnalyse.imgAnalyse._isDirectionIdentity(img)
 
     if ft._imgTypeChecker.isSITK_point(img):
         imageInfo.append("{:d}D{:s} image describing a point (0D) {:s}".format(img.GetDimension(), " vector" if isVector else "", maskType))
@@ -178,7 +180,7 @@ def _displayImageInfo(img: SITKImage) -> str:
         imageInfo.append("non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
         imageInfo.append("non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
 
-    if img.GetMetaDataKeys():
+    if img.GetMetaDataKeys() and metadata:
         imageInfo.append("Additional metadata:")
         keyLen = []
         for key in img.GetMetaDataKeys():
@@ -191,7 +193,7 @@ def _displayImageInfo(img: SITKImage) -> str:
     return "\n\t".join(imageInfo)
 
 
-def displayImageInfo(img: SITKImage) -> None:
+def displayImageInfo(img: SITKImage, metadata: bool = True) -> None:
     """Display some image information.
 
     The function displays information about an image given as a SimpleITK image object.
@@ -200,6 +202,8 @@ def displayImageInfo(img: SITKImage) -> None:
     ----------
     img : SimpleITK Image
         An object of a SimpleITK image.
+    metadata : bool, optional
+        Display additional metadata. (def. True)
 
     Examples
     --------
@@ -258,4 +262,4 @@ def displayImageInfo(img: SITKImage) -> None:
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    logger.info(_displayImageInfo(img))
+    logger.info(_displayImageInfo(img, metadata=metadata))

@@ -1,4 +1,3 @@
-# from typing import Literal
 import logging
 
 
@@ -12,6 +11,7 @@ class customFormatterINFO(logging.Formatter):
     level of the log message.
     """
     grey = "\x1b[38;21m"
+    blue = "\x1b[34m"
     yellow = "\x1b[33m"
     red = "\x1b[31m"
     bold_red = "\x1b[31;1m"
@@ -46,6 +46,7 @@ class customFormatterDEBUG(logging.Formatter):
     level of the log message.
     """
     grey = "\x1b[38;21m"
+    blue = "\x1b[34m"
     yellow = "\x1b[33m"
     red = "\x1b[31m"
     bold_red = "\x1b[31;1m"
@@ -53,7 +54,7 @@ class customFormatterDEBUG(logging.Formatter):
 
     FORMATS = {
         logging.DEBUG:
-        grey + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
+        blue + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
         logging.INFO:
         grey + '%(levelname)-8s: %(name)s.%(funcName)s:%(lineno)d: %(message)s' + reset,
         logging.WARNING:
@@ -117,7 +118,7 @@ def getLogger(name: str | None = None) -> logging.Logger:
     logger : logging.Logger
         Logger object with a NullHandler attached.
     """
-    from fredtools._helper import currentFuncName
+    # from fredtools._helper import currentFuncName
     if not name:
         name = currentFuncName(1)
 
@@ -168,3 +169,11 @@ def configureLogging(level: int = logging.WARNING, console: bool = True, fileNam
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=loggingHandlers,
                         force=force)
+
+
+def currentFuncName(n=0):
+    """Get name of the function where the currentFuncName() is called.
+    currentFuncName(1) get the name of the caller.
+    """
+    import sys
+    return sys._getframe(n + 1).f_code.co_name

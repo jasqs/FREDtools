@@ -1,4 +1,9 @@
-def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo: bool = False):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: bool = False, **kwargs) -> SITKImage:
     """Get 2D slice from image.
 
     The function calculates a 2D slice image through a specified
@@ -26,14 +31,15 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
         with the axes displayed with matplotlib.pyplot.imshow. For instance,
         plane `Z-X` will display Z-axis on X-axis in imshow and Y-axis of
         of imshow will be a reversed X-axis of the image. (def. 'XY')
-    interpolation : {'linear', 'nearest', 'spline'}, optional
-        Determine the interpolation method. (def. 'linear')
-    splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
-    raiseWarning : bool, optional
-        Raise warnings. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
+    **kwargs : interpolation type, optional
+        Determine the interpolation method. The following keyword arguments
+        are available:
+            interpolation : {'linear', 'nearest', 'spline'}
+                Determine the interpolation method. (def. 'linear')
+            splineOrder : int
+                Order of spline interpolation. Must be in range 0-5. (def. 3)
 
     Returns
     -------
@@ -99,28 +105,30 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     import fredtools as ft
     import numpy as np
 
-    logger = ft._getLogger(__name__)
-
     if not (ft._imgTypeChecker.isSITK3D(img) or ft._imgTypeChecker.isSITK4D(img)):
-        raise TypeError(f"The object '{type(img)}' is not an instance of a 3D or 4D SimpleITK image.")
+        error = TypeError(f"The object '{type(img)}' is not an instance of a 3D or 4D SimpleITK image.")
+        _logger.error(error)
+        raise error
 
     # check if point dimension matches the img dim.
-    if len(point) != img.GetDimension():
-        raise ValueError(f"Dimension of 'point' {point} does not match 'img' dimension {img.GetDimension()}.")
+    if len(list(point)) != img.GetDimension():
+        error = AttributeError(f"Dimension of 'point' {point} does not match 'img' dimension {img.GetDimension()}.")
+        _logger.error(error)
+        raise error
 
     # set interpolator
-    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
-
-    # check if point is inside the image
-    if not ft.isPointInside(img, point) and raiseWarning:
-        warnings.warn(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
+    interpolator = ft._helper.setSITKInterpolator(**kwargs)
 
     # check if plane is in proper format
     plane = plane.upper()
     if not {"X", "Y", "Z", "T", "-", "+"}.issuperset(plane):
-        raise ValueError(f"Plane parameter '{plane}' cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        error = AttributeError(f"Plane parameter '{plane}' cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        _logger.error(error)
+        raise error
     if len(plane) > 4:
-        raise ValueError(f"Plane parameter '{plane}' cannot be recognized. The length of the plane parameter should less or equal than 4.")
+        error = AttributeError(f"Plane parameter '{plane}' cannot be recognized. The length of the plane parameter should less or equal than 4.")
+        _logger.error(error)
+        raise error
 
     # remove all signs from the plane definition
     planeSimple = re.sub("[-+]", "", plane)
@@ -131,7 +139,9 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     # check if plane definition is correct for img dimension
     for planeSimpleAxis in planeSimple:
         if not planeSimpleAxis in axesNameAvailable:
-            raise ValueError(f"Axis '{planeSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only combination of {axesNameAvailable} is possible.")
+            error = AttributeError(f"Axis '{planeSimpleAxis}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+            _logger.error(error)
+            raise error
 
     # determine axes for slice
     axisNo = []
@@ -149,14 +159,13 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
     slOrigin3D[axisNo] = np.array(img.GetOrigin())[axisNo]
 
     # generate slice
-    sl = sitk.Resample(
-        img,
-        size=[int(x) for x in slSize],
-        outputSpacing=img.GetSpacing(),
-        outputDirection=img.GetDirection(),
-        outputOrigin=slOrigin3D,
-        interpolator=interpolator,
-    )
+    sl = sitk.Resample(img,
+                       size=[int(x) for x in slSize],  # type: ignore
+                       outputSpacing=img.GetSpacing(),
+                       outputDirection=img.GetDirection(),
+                       outputOrigin=slOrigin3D,
+                       interpolator=interpolator,
+                       )
 
     # swap axes if requested
     if axisNo != sorted(axisNo):
@@ -175,19 +184,14 @@ def getSlice(img, point, plane="XY", interpolation="linear", splineOrder=3, rais
         sl = sitk.Flip(sl, flipAxes=axesFlip)
 
     if displayInfo:
-        logger.info(f"{ft._helper.currentFuncName()}")
-        logger.info(f"Point: {np.array(point)}")
-        logger.info(f"Plane: '{plane}'")
-        ft.ImgAnalyse.imgInfo._displayImageInfo(img)
-        logger.info("#" * len(f"### {ft._helper.currentFuncName()} ###"))
+        if not ft.isPointInside(img, point):
+            _logger.warning(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
+        _logger.info(f"Getting {plane} slice through point {np.array(point)}" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(sl))
 
-        # print(f"### {ft.currentFuncName()} ###")
-        # ft.ft_imgAnalyse._displayImageInfo(sl)
-        # print("#" * len(f"### {ft.currentFuncName()} ###"))
     return sl
 
 
-def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo: bool = False):
+def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: bool = False, **kwargs) -> SITKImage:
     """Get 1D profile from image along an axis.
 
     The function calculates a 1D profile image through a specified
@@ -211,14 +215,15 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
         (if no sign is provided, then + is assumed). For instance, it can be:
         `X`,`Y`,`-Z`, etc. If the minus sign is found, then the
         image is flipped in the following direction.
-    interpolation : {'linear', 'nearest', 'spline'}, optional
-        Determine the interpolation method. (def. 'linear')
-    splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
-    raiseWarning : bool, optional
-        Raise warnings. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
+    **kwargs : interpolation type, optional
+        Determine the interpolation method. The following keyword arguments
+        are available:
+            interpolation : {'linear', 'nearest', 'spline'}
+                Determine the interpolation method. (def. 'linear')
+            splineOrder : int
+                Order of spline interpolation. Must be in range 0-5. (def. 3)
 
     Returns
     -------
@@ -288,33 +293,36 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
 
     # check if img is already a profile
     if ft._imgTypeChecker.isSITK_profile(img):
-        raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile.")
+        error = TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile.")
+        _logger.error(error)
+        raise error
 
     # check if point dimension matches the img dim.
-    if (len(point) != img.GetDimension()) and (len(point) != len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))):
-        raise ValueError(
-            f"Dimension of 'point' {point} is {len(point)}. The 'img' is of dimension {img.GetDimension()} but is describing a {len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))}D image. The 'point' should have dimension {len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))} or {img.GetDimension()}."
-        )
+    point = list(point)
+    if (len(point) != img.GetDimension()) and (len(point) != len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))):
+        error = AttributeError(f"Dimension of 'point' {point} is {len(point)}. The 'img' is of dimension {img.GetDimension()} but is describing a {len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))}D image. The 'point' should have dimension {len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))} or {img.GetDimension()}.")
+        _logger.error(error)
+        raise error
 
     # correct point is needed
     if len(point) < img.GetDimension():
         pointCorr = np.array(img.GetOrigin())
-        pointCorr[list(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))] = point
-        point = pointCorr
+        pointCorr[list(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))] = point
+        point = list(pointCorr)
 
     # set interpolator
-    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
-
-    # check if point is inside the image
-    if not ft.isPointInside(img, point) and raiseWarning:
-        warnings.warn(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
+    interpolator = ft._helper.setSITKInterpolator(**kwargs)
 
     # check if axis is in proper format
     axis = axis.upper()
     if not {"X", "Y", "Z", "T", "-", "+"}.issuperset(axis):
-        raise ValueError(f"Axis parameter {axis} cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        _logger.error(error)
+        raise error
     if len(axis) > 2:
-        raise ValueError(f"Axis parameter {axis} cannot be recognized. The length of the plane parameter should less or equal to 2.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should less or equal to 2.")
+        _logger.error(error)
+        raise error
 
     # remove all signs from the plane definition
     axisSimple = re.sub("[-+]", "", axis)
@@ -324,7 +332,9 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
-        raise ValueError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        _logger.error(error)
+        raise error
 
     # determine axis for profile
     axisNo = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if x][0]
@@ -340,14 +350,13 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
     prOrigin[axisNo] = img.GetOrigin()[axisNo]
 
     # generate profile
-    prof = sitk.Resample(
-        img,
-        size=[int(x) for x in prSize],
-        outputSpacing=img.GetSpacing(),
-        outputDirection=img.GetDirection(),
-        outputOrigin=prOrigin,
-        interpolator=interpolator,
-    )
+    prof = sitk.Resample(img,
+                         size=[int(x) for x in prSize],  # type: ignore
+                         outputSpacing=img.GetSpacing(),
+                         outputDirection=img.GetDirection(),
+                         outputOrigin=prOrigin,
+                         interpolator=interpolator,
+                         )
 
     # flip axes if requested
     if "-" in axis:
@@ -356,15 +365,14 @@ def getProfile(img, point, axis="X", interpolation="linear", splineOrder=3, rais
         prof = sitk.Flip(prof, flipAxes=axesFlip)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Point: ", np.array(point))
-        print("# Axis: '{:s}'".format(axis))
-        ft.ft_imgAnalyse._displayImageInfo(prof)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        if not ft.isPointInside(img, point):
+            _logger.warning(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
+        _logger.info(f"Getting {axis} profile through point {np.array(point)}" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(prof))
+
     return prof
 
 
-def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=True, displayInfo: bool = False):
+def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwargs):
     """Get point value from image.
 
     The function calculates a point value in a specified `point` from an
@@ -381,14 +389,15 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
         Point to generate the value. It should have the length of the image
         dimension. A warning will be generated if the point is not inside
         the image extent.
-    interpolation : {'linear', 'nearest', 'spline'}, optional
-        Determine the interpolation method. (def. 'linear')
-    splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
-    raiseWarning : bool, optional
-        Raise warnings. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
+    **kwargs : interpolation type, optional
+        Determine the interpolation method. The following keyword arguments
+        are available:
+            interpolation : {'linear', 'nearest', 'spline'}
+                Determine the interpolation method. (def. 'linear')
+            splineOrder : int
+                Order of spline interpolation. Must be in range 0-5. (def. 3)
 
     Returns
     -------
@@ -456,47 +465,44 @@ def getPoint(img, point, interpolation="linear", splineOrder=3, raiseWarning=Tru
 
     # check if img is already a point
     if ft._imgTypeChecker.isSITK_point(img):
-        raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a point.")
+        error = TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a point.")
+        _logger.error(error)
+        raise error
 
     # check if point dimension matches the img dim.
-    if (len(point) != img.GetDimension()) and (len(point) != len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))):
-        raise ValueError(
-            f"Dimension of 'point' {point} is {len(point)}. The 'img' is of dimension {img.GetDimension()} but is describing a {len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))}D image. The 'point' should have dimension {len(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))} or {img.GetDimension()}."
-        )
+    point = list(point)
+    if (len(point) != img.GetDimension()) and (len(point) != len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))):
+        error = AttributeError(f"Dimension of 'point' {point} is {len(point)}. The 'img' is of dimension {img.GetDimension()} but is describing a {len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))}D image. The 'point' should have dimension {len(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))} or {img.GetDimension()}.")
+        _logger.error(error)
+        raise error
 
     # correct point if needed
     if len(point) < img.GetDimension():
         pointCorr = np.array(img.GetOrigin(), dtype="float64")
-        pointCorr[list(ft.ft_imgAnalyse._getAxesNumberNotUnity(img))] = point
-        point = pointCorr
+        pointCorr[list(ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img))] = point
+        point = list(pointCorr)
 
     # set interpolator
-    interpolator = ft._helper.setSITKInterpolator(interpolation=interpolation, splineOrder=splineOrder)
-
-    # check if point is inside the image
-    if not ft.isPointInside(img, point) and raiseWarning:
-        warnings.warn(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
+    interpolator = ft._helper.setSITKInterpolator(**kwargs)
 
     # generate point value
-    pointVal = sitk.Resample(
-        img,
-        size=[1] * img.GetDimension(),
-        outputSpacing=img.GetSpacing(),
-        outputDirection=img.GetDirection(),
-        outputOrigin=[float(x) for x in point],
-        interpolator=interpolator,
-    )
+    pointVal = sitk.Resample(img,
+                             size=[1] * img.GetDimension(),
+                             outputSpacing=img.GetSpacing(),
+                             outputDirection=img.GetDirection(),
+                             outputOrigin=[float(x) for x in point],
+                             interpolator=interpolator,
+                             )
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Point: ", np.array(point))
-        print("# Value: ", ft.arr(pointVal))
-        ft.ft_imgAnalyse._displayImageInfo(pointVal)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        if not ft.isPointInside(img, point):
+            _logger.warning(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
+        _logger.info(f"Getting value at point {np.array(point)}: {ft.arr(pointVal)}" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(pointVal))
+
     return pointVal
 
 
-def getInteg(img, axis="X", displayInfo: bool = False):
+def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITKImage:
     """Get 1D integral profile from an image.
 
     The function calculates a 1D integral profile image along the specified `axis`
@@ -585,14 +591,20 @@ def getInteg(img, axis="X", displayInfo: bool = False):
 
     # check if img is already a profile or integral
     if ft._imgTypeChecker.isSITK_profile(img):
-        raise TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile or integral.")
+        error = TypeError(f"The object '{type(img)}' is already an instance SimpleITK image describing a profile or integral.")
+        _logger.error(error)
+        raise error
 
     # check if axis is in proper format
     axis = axis.upper()
     if not {"X", "Y", "Z", "T", "-", "+"}.issuperset(axis):
-        raise ValueError(f"Axis parameter {axis} cannot be recognized. Only letters 'X', 'Y', 'Z', 'T', '-', '+' are supported.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        _logger.error(error)
+        raise error
     if len(axis) > 2:
-        raise ValueError(f"Axis parameter {axis} cannot be recognized. The length of the plane parameter should less or equal to 2.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should less or equal to 2.")
+        _logger.error(error)
+        raise error
 
     # remove all signs from the plane definition
     axisSimple = re.sub("[-+]", "", axis)
@@ -602,11 +614,15 @@ def getInteg(img, axis="X", displayInfo: bool = False):
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
-        raise ValueError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        _logger.error(error)
+        raise error
 
     # determine axis to accumulate and axis of integral
     if not axisSimple in axesNameAvailable:
-        raise ValueError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        _logger.error(error)
+        raise error
     axesAcc = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if not x]
     axesInteg = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if x][0]
 
@@ -618,7 +634,7 @@ def getInteg(img, axis="X", displayInfo: bool = False):
 
     # determine and set new origin
     origin = list(ft.getImageCenter(img))
-    origin[ft.ft_imgAnalyse._getAxesNumberNotUnity(integ)[0]] = img.GetOrigin()[ft.ft_imgAnalyse._getAxesNumberNotUnity(integ)[0]]
+    origin[ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(integ)[0]] = img.GetOrigin()[ft.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(integ)[0]]
     integ.SetOrigin(origin)
 
     # flip axes if requested
@@ -628,14 +644,12 @@ def getInteg(img, axis="X", displayInfo: bool = False):
         integ = sitk.Flip(integ, flipAxes=axesFlip)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Axis: '{:s}'".format(axis))
-        ft.ft_imgAnalyse._displayImageInfo(integ)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(f"Getting integral profile along {axis} axis" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(integ))
+
     return integ
 
 
-def getCumSum(img, axis="X", displayInfo: bool = False):
+def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITKImage:
     """Get cumulative sum image.
 
     The function calculates a cumulative sum image along the specified `axis`
@@ -671,16 +685,22 @@ def getCumSum(img, axis="X", displayInfo: bool = False):
     # check if axis is in proper format
     axis = axis.upper()
     if not {"X", "Y", "Z", "T"}.issuperset(axis):
-        raise ValueError(f"Axis parameter {axis} cannot be recognized. Only letters 'X', 'Y', 'Z', 'T' are supported.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. Only letters 'X', 'Y', 'Z', 'T' are supported.")
+        _logger.error(error)
+        raise error
     if len(axis) > 1:
-        raise ValueError(f"Axis parameter {axis} cannot be recognized. The length of the plane parameter should less or equal to 1.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should less or equal to 1.")
+        _logger.error(error)
+        raise error
 
     # determine available axis names based on img dimension
     axesNameAvailable = ["X", "Y", "Z", "T"][0: img.GetDimension()]
 
     # check if the profile definition is correct for img dimension
     if not axis in axesNameAvailable:
-        raise ValueError(f"Axis '{axis}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axis}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        _logger.error(error)
+        raise error
 
     # determine axis along which to calculate the cumulative sum
     axisxyz = [i for i, x in enumerate([axis.upper() == i for i in axesNameAvailable]) if x][0]  # in xyz convention for simpleITK
@@ -691,12 +711,9 @@ def getCumSum(img, axis="X", displayInfo: bool = False):
     arrCumSum = np.cumsum(arr, axis=axisijk)
     imgCumSum = sitk.GetImageFromArray(arrCumSum)
     imgCumSum.CopyInformation(img)
-    ft.copyImgMetaData(img, imgCumSum)
+    ft._helper.copyImgMetaData(img, imgCumSum)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Axis: '{:s}'".format(axis))
-        ft.ft_imgAnalyse._displayImageInfo(imgCumSum)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(f"Getting cumulative sum along {axis} axis" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgCumSum))
 
     return imgCumSum

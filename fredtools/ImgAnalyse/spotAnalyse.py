@@ -1,10 +1,15 @@
-def _singleGaussModel(pos, amplitude, centre, sigma):
-    import numpy as np
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
 
+
+def _singleGaussModel(pos: ArrayLike, amplitude: Numberic, centre: Numberic, sigma: Numberic) -> NDArray:
+    import numpy as np
+    pos = np.array(pos)
     return amplitude * np.exp(-((pos - centre) ** 2) / (2 * sigma ** 2))
 
 
-def fitSpotProfile(pos, vec, cutLevel=0, fixAmplitude=False, fixCentreToZero=False, method="singleGauss"):
+def fitSpotProfile(pos: ArrayLike, vec: ArrayLike, cutLevel: NonNegativeFloat = 0, fixAmplitude: bool = False, fixCentreToZero: bool = False, method: Literal["singleGauss"] = "singleGauss") -> LMFitModelResult:
     """Fit a gaussian-like function to profile.
 
     The function fits a gaussian-like function defined by `method` to a profile
@@ -35,12 +40,18 @@ def fitSpotProfile(pos, vec, cutLevel=0, fixAmplitude=False, fixCentreToZero=Fal
     import numpy as np
 
     # check if pos and vec are both iterable, are vectors and have the same length
-    if not hasattr(pos, "__iter__") and not hasattr(vec, "__iter__"):
-        raise TypeError(f"The input `pos` and `vec` must be both iterable.")
+    if not isinstance(pos, Iterable) or not isinstance(vec, Iterable):
+        error = TypeError(f"The input `pos` and `vec` must be both iterable.")
+        _logger.error(error)
+        raise error
     if not np.array(pos).ndim == 1 and np.array(vec).ndim == 1:
-        raise TypeError(f"The input `pos` and `vec` must be both one-dimensional vectors.")
+        error = TypeError(f"The input `pos` and `vec` must be both one-dimensional vectors.")
+        _logger.error(error)
+        raise error
     if len(list(pos)) != len(list(vec)):
-        raise TypeError(f"The input `pos` and `vec` must be of the same length.")
+        error = TypeError(f"The input `pos` and `vec` must be of the same length.")
+        _logger.error(error)
+        raise error
 
     prof = [np.array(pos), np.array(vec)]
 
@@ -49,20 +60,23 @@ def fitSpotProfile(pos, vec, cutLevel=0, fixAmplitude=False, fixCentreToZero=Fal
     prof[0] = prof[0][cutConst]
     prof[1] = prof[1][cutConst]
 
-    if method == "singleGauss":
-        ### single gaussian fit to profile
-        # calculate initial params
-        initAmplitude = np.max(prof[1])
-        initCentre = np.mean(prof[0][np.where(prof[1] == initAmplitude)])
-        initSigma = np.ptp(prof[0][np.where(prof[1] >= (initAmplitude / 2))[0]] / 2.355)
+    match method.lower():
+        case "singlegauss":
+            # single gaussian fit to profile
+            # calculate initial params
+            initAmplitude = np.max(prof[1])
+            initCentre = np.mean(prof[0][np.where(prof[1] == initAmplitude)])
+            initSigma = np.ptp(prof[0][np.where(prof[1] >= (initAmplitude / 2))[0]] / 2.355)
 
-        if fixCentreToZero:
-            initCentre = 0
+            if fixCentreToZero:
+                initCentre = 0
 
-        gmodel = Model(_singleGaussModel)
-        gmodel.set_param_hint("amplitude", vary=not fixAmplitude)
-        gmodel.set_param_hint("centre", vary=not fixCentreToZero)
-        result = gmodel.fit(data=prof[1], pos=prof[0], amplitude=initAmplitude, centre=initCentre, sigma=initSigma)
-        return result
-    else:
-        raise ValueError(f"The method '{method}' can not be recognized. Only 'singleGauss' is available at the moment.")
+            gmodel = Model(_singleGaussModel)
+            gmodel.set_param_hint("amplitude", vary=not fixAmplitude)
+            gmodel.set_param_hint("centre", vary=not fixCentreToZero)
+            result = gmodel.fit(data=prof[1], pos=prof[0], amplitude=initAmplitude, centre=initCentre, sigma=initSigma)
+            return result
+        case _:
+            error = ValueError(f"The method '{method}' can not be recognized. Only 'singleGauss' is available at the moment.")
+            _logger.error(error)
+            raise error

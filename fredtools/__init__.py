@@ -18,16 +18,17 @@ from .ImgIO.dicom_io import (getDicomTypeName, sortDicoms, getRNMachineName, get
 from .ImgIO.imgConverter import (SITK2ITK, ITK2SITK)
 from .ImgIO.influenceMatrix_io import (getInmFREDBaseImg, getInmFREDSumImage, getInmFREDPoint, getInmFREDInfo)
 from .ImgIO.mhd_io import (writeMHD, readMHD, convertMHDtoSingleFile, convertMHDtoDoubleFiles)
-from .ImgIO.opg_io import (readOPG)
+from .ImgIO.OmniPro_io import (readOPG, readOPD)
 
 
 from . import ImgManipulate
 from .ImgManipulate.imgGetSubimg import (getSlice, getProfile, getPoint, getInteg, getCumSum)
-from .ImgManipulate.imgManipulate import (mapStructToImg, floatingToBinaryMask, cropImgToMask, setValueMask, resampleImg, sumImg, imgDivide, createEllipseMask, createConeMask, createCylinderMask, sumVectorImg, getImgBEV, overwriteCTPhysicalProperties, setIdentityDirection, addMarginToMask, addGaussMarginToMask, addExpMarginToMask)
+from .ImgManipulate.imgManipulate import (mapStructToImg, floatingToBinaryMask, cropImgToMask, setValueMask, resampleImg, sumImg, imgDivide, sumVectorImg, getImgBEV, overwriteCTPhysicalProperties, setIdentityDirection, addMarginToMask, addGaussMarginToMask, addExpMarginToMask)
+from .ImgManipulate.imgCreate import (createEllipseMask, createConeMask, createCylinderMask, createImg)
 
 from . import Miscellaneous
 from .Miscellaneous.landauVavilovGauss import (pdfLandau, pdfLandauGauss, fitLandau, fitLandauGauss, pdfVavilov, fitVavilov)
-from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fwhm2sigma, getLineFromFile, getCPUNo)
+from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fwhm2sigma, getLineFromFile, getCPUNo, re_number)
 
 
 from . import MonteCarlo
@@ -43,7 +44,7 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-_version = [0, 8, 2]
+_version = [0, 8, 4]
 __version__ = ".".join(map(str, _version))
 
 # configure logging if no root logger configured
@@ -51,3 +52,12 @@ configureLogging(_logger.logging.INFO, force=False)
 
 # log FREDtools version in DEBUG mode
 getLogger(__name__).debug(f"Loaded FREDtools version {__version__}")
+
+
+# global parameters
+CPUNO: _typing.Literal["auto"] | _typing.NonNegativeInt = "auto"
+'''CPU number to use for multiprocessing. If set to "auto", the number of CPUs will be determined automatically.'''
+
+"""
+The FREDtools is a library of packages collecting modules with functions. 
+"""
