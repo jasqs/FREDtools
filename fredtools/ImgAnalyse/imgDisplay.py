@@ -1,19 +1,9 @@
-def showSlice(
-    ax,
-    imgBack=None,
-    imgFront=None,
-    plane="XY",
-    point=None,
-    cmapBack="bone",
-    cmapFront="jet",
-    alphaFront=0.7,
-    imgROIs=None,
-    vmaxBack=None,
-    vmaxFront=None,
-    showLegend=True,
-    fontsize=8,
-    raiseWarning=True,
-):
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
+def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, plane: str = "XY", point: PointLike | None = None, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", alphaFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.7, imgROIs: Sequence[SITKImage] | None = None, vmaxBack: float | None = None, vmaxFront: float | None = None, showLegend: bool = True, fontsize: NonNegativeInt = 8) -> AxesImage:
     """Display image slice in front of another image slice including contours.
 
     The function displays on `ax` a `plane` going through `point`
@@ -61,8 +51,6 @@ def showSlice(
         Show legend of the ROI contour names if they exist. (def. True)
     fontsize : scalar, optional
         Basic font size to be used for ticks, labels, legend, etc. (def. 8)
-    raiseWarning : bool, optional
-        Raise warnings. (def. True)
 
     Returns
     -------
@@ -82,8 +70,8 @@ def showSlice(
     import fredtools as ft
     import numpy as np
     import matplotlib as mpl
+    import matplotlib.pyplot as plt
     import re
-    import warnings
     import SimpleITK as sitk
 
     # set background of the axis to black
@@ -91,65 +79,68 @@ def showSlice(
 
     # check if any of the image is given
     if not (imgBack or imgFront):
-        raise AttributeError(f"At least one image, imgBack or imgFront, must be given.")
+        error = AttributeError(f"At least one image, imgBack or imgFront, must be given.")
+        _logger.error(error)
+        raise error
 
     # determine point (def. mass centre of dose) if not given
     if point is None:
         if imgFront:
             point = ft.getMassCenter(imgFront)
-        else:
+        elif imgBack:
             point = ft.getMassCenter(imgBack)
+        else:
+            error = AttributeError(f"At least one image, imgBack or imgFront, must be given.")
+            _logger.error(error)
+            raise error
 
     # determine colormap
-    if isinstance(cmapBack, mpl.colors.LinearSegmentedColormap):
-        cmapBack = cmapBack
-    elif isinstance(cmapBack, str):
-        cmapBack = mpl.colormaps[cmapBack]
-    else:
-        raise ValueError(f"Cannot recognise cmapBack colormap {cmapBack}.")
-    if isinstance(cmapFront, mpl.colors.LinearSegmentedColormap):
-        cmapFront = cmapFront
-    elif isinstance(cmapFront, str):
-        cmapFront = mpl.colormaps[cmapFront]
-    else:
-        raise ValueError(f"Cannot recognise cmapFront colormap {cmapFront}.")
+    try:
+        cmapBackColormap = plt.get_cmap(cmapBack)
+    except ValueError as e:
+        _logger.error(f"Cannot recognise cmapBack colormap {cmapBack}.")
+        raise e
+    try:
+        cmapFrontColormap = plt.get_cmap(cmapFront)
+    except ValueError as e:
+        _logger.error(f"Cannot recognise cmapFront colormap {cmapFront}.")
+        raise e
 
     # determine vmax
     if imgBack and not vmaxBack:
-        vmaxBack = ft.getStatistics(imgBack).GetMaximum()
+        vmaxBack = float(ft.getStatistics(imgBack).GetMaximum())
     if imgFront and not vmaxFront:
-        vmaxFront = ft.getStatistics(imgFront).GetMaximum()
+        vmaxFront = float(ft.getStatistics(imgFront).GetMaximum())
 
     # show back slice image
     if imgBack:
         # check if imgBack is a 3D SimpleITK image
         ft._imgTypeChecker.isSITK_volume(imgBack)
 
-        slBack = ft.getSlice(imgBack, point=point, plane=plane, raiseWarning=raiseWarning)
-        axesImage = ax.imshow(sitk.GetArrayViewFromImage(slBack).squeeze(), cmap=cmapBack, extent=ft.getExtMpl(slBack), vmax=vmaxBack)
+        slBack = ft.getSlice(imgBack, point=point, plane=plane)
+        axesImage = ax.imshow(sitk.GetArrayViewFromImage(slBack).squeeze(), cmap=cmapBackColormap, extent=ft.getExtMpl(slBack), vmax=vmaxBack)
 
     # show front slice image
     if imgFront:
         # check if imgFront is a 3D SimpleITK image
         ft._imgTypeChecker.isSITK_volume(imgFront)
 
-        slFront = ft.getSlice(imgFront, point=point, plane=plane, raiseWarning=raiseWarning)
-        axesImage = ax.imshow(sitk.GetArrayViewFromImage(slFront).squeeze(), cmap=cmapFront, extent=ft.getExtMpl(slFront), alpha=alphaFront, vmin=0, vmax=vmaxFront)
+        slFront = ft.getSlice(imgFront, point=point, plane=plane)
+        axesImage = ax.imshow(sitk.GetArrayViewFromImage(slFront).squeeze(), cmap=cmapFrontColormap, extent=ft.getExtMpl(slFront), alpha=alphaFront, vmin=0, vmax=vmaxFront)
 
     # show ROIs slice
     if imgROIs:
-        for imgROI in imgROIs if isinstance(imgROIs, list) else [imgROIs]:
+        for imgROI in imgROIs if isinstance(imgROIs, Iterable) else [imgROIs]:
             ft._imgTypeChecker.isSITK_mask(imgROI, raiseError=True)
 
             # convert the floating mask to binary if needed
             if ft._imgTypeChecker.isSITK_maskFloating(imgROI):
                 imgROI = ft.floatingToBinaryMask(imgROI, threshold=0.5)
-                if raiseWarning:
-                    warnings.warn(f"Warning: The floating mask was converted to binary mask with threshold=0.5.")
+                _logger.debug(f"The floating mask for '" + (imgROI.GetMetaData("ROIName") if "ROIName" in imgROI.GetMetaDataKeys() else "unknown") + "' contour was converted to a binary mask with threshold=0.5.")
 
-            slROI = ft.getSlice(imgROI, point=point, plane=plane, raiseWarning=raiseWarning)
+            slROI = ft.getSlice(imgROI, point=point, plane=plane)
             if "ROIColor" in imgROI.GetMetaDataKeys():
-                color = np.array(re.findall("\d+", imgROI.GetMetaData("ROIColor")), dtype="int") / 255
+                color = np.array(re.findall(r"\d+", imgROI.GetMetaData("ROIColor")), dtype="int") / 255
             else:
                 color = np.array([0, 0, 1])
             if ft.getStatistics(slROI).GetMaximum() > 0:
@@ -216,23 +207,21 @@ class showSlices:
         Colormap to display the foreground image slice. (def. 'jet')
     figsize : 2-element list, optional
         Width and height of the figure in inches. (def. [15, 5])
-    interactive : bool, optional
-        Display in interactive mode using ipwidgets.
-        Works only in jupyter. (def. True)
-
+t
     Examples
     --------
     See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
     """
 
-    def __init__(self, imgBack=None, imgFront=None, imgROIs=None, point=None, DCOFront=0.1, cmapBack="bone", cmapFront="jet", figsize=[15, 5], interactive=True):
+    def __init__(self, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, imgROIs: Sequence[SITKImage] | None = None, point: PointLike | None = None, DCOFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.1, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", figsize: Iterable[Numberic] = (15, 5)):
         import ipywidgets as ipyw
-        import matplotlib as mpl
+        from matplotlib import colorbar, colors
         import matplotlib.pyplot as plt
+        from matplotlib import get_backend
         import fredtools as ft
         import SimpleITK as sitk
         import numpy as np
-        from IPython import get_ipython
+        from IPython.core.getipython import get_ipython
 
         self.imgBack = imgBack
         self.imgFront = imgFront
@@ -240,19 +229,25 @@ class showSlices:
 
         # check if any of the image is given
         if not (self.imgBack or self.imgFront):
-            raise AttributeError(f"At least one image, imgBack or imgFront, must be given.")
+            error = AttributeError(f"At least one image, imgBack or imgFront, must be given.")
+            _logger.error(error)
+            raise error
 
         # determine image slider
         if self.imgBack:
             self.imgSlider = self.imgBack
-        else:
+        elif self.imgFront:
             self.imgSlider = self.imgFront
+        else:
+            error = AttributeError(f"At least one image, imgBack or imgFront, must be given.")
+            _logger.error(error)
+            raise error
 
         # determine point
         if point is None:
-            if imgFront:
+            if self.imgFront:
                 self.point = list(ft.getMassCenter(self.imgFront))
-            else:
+            elif self.imgBack:
                 self.point = list(ft.getMassCenter(self.imgBack))
         else:
             self.point = list(point)
@@ -268,78 +263,62 @@ class showSlices:
         if self.imgBack:
             statBack = ft.getStatistics(self.imgBack)
 
-        # determine if interactive is possible (only jupyter)
-        if interactive and ft.checkJupyterMode():
-            ipython = get_ipython()
-            # ipython.run_line_magic("matplotlib widget")
-            ipython.run_line_magic("matplotlib", "widget")
-        elif not interactive and ft.checkJupyterMode():
-            ipython = get_ipython()
-            # ipython.run_line_magic("matplotlib inline")
-            ipython.run_line_magic("matplotlib", "inline")
+        # # determine if interactive is possible (only jupyter)
+        if get_backend() in ["widget", "ipympl"]:
+            interactive = True
         else:
             interactive = False
 
         # prepare figure
         self.fig, self.axs = plt.subplots(ncols=3, nrows=1, figsize=figsize, gridspec_kw={"wspace": 0.2})
         if interactive:
-            self.fig.canvas.toolbar_position = "bottom"
-            self.fig.canvas.header_visible = False
+            self.fig.canvas.toolbar_position = "bottom"  # type: ignore
+            self.fig.canvas.header_visible = False  # type: ignore
 
         # determine colormap
-        if isinstance(cmapBack, mpl.colors.LinearSegmentedColormap):
-            self.cmapBack = cmapBack
-        elif isinstance(cmapBack, str):
-            self.cmapBack = mpl.colormaps[cmapBack]
-        else:
-            raise ValueError(f"Cannot recognise cmapBack colormap {self.cmapBack}.")
-        if isinstance(cmapFront, mpl.colors.LinearSegmentedColormap):
-            self.cmapFront = cmapFront
-        elif isinstance(cmapFront, str):
-            self.cmapFront = mpl.colormaps[cmapFront]
-        else:
-            raise ValueError(f"Cannot recognise cmapFront colormap {self.cmapFront}.")
+        try:
+            self.cmapBack = plt.get_cmap(cmapBack)
+        except ValueError as e:
+            _logger.error(f"Cannot recognise cmapBack colormap {cmapBack}.")
+            raise e
+        try:
+            self.cmapFront = plt.get_cmap(cmapFront)
+        except ValueError as e:
+            _logger.error(f"Cannot recognise cmapFront colormap {cmapFront}.")
+            raise e
 
         # make colorbar
-        axCB = self.fig.add_axes(
-            [self.axs[2].get_position().x1 + self.axs[2].get_position().width * 0.1, self.axs[2].get_position().y0, self.axs[2].get_position().width * 0.05, self.axs[2].get_position().height]
-        )
+        axCB = self.fig.add_axes((self.axs[2].get_position().x1 + self.axs[2].get_position().width * 0.1, self.axs[2].get_position().y0, self.axs[2].get_position().width * 0.05, self.axs[2].get_position().height))
         if self.imgFront:
-            plCB = mpl.colorbar.ColorbarBase(axCB, cmap=self.cmapFront, norm=mpl.colors.Normalize(statFront.GetMinimum(), statFront.GetMaximum()))
+            plCB = colorbar.ColorbarBase(axCB, cmap=self.cmapFront, norm=colors.Normalize(statFront.GetMinimum(), statFront.GetMaximum()))
             plCB.set_label("Front signal", labelpad=20, rotation=-90, fontsize=9)
         elif imgBack:
-            plCB = mpl.colorbar.ColorbarBase(axCB, cmap=self.cmapBack, norm=mpl.colors.Normalize(statBack.GetMinimum(), statBack.GetMaximum()))
+            plCB = colorbar.ColorbarBase(axCB, cmap=self.cmapBack, norm=colors.Normalize(statBack.GetMinimum(), statBack.GetMaximum()))
             plCB.set_label("Back signal", labelpad=20, rotation=-90, fontsize=9)
         axCB.tick_params(labelsize=8)
 
         if interactive:
             # Call to select slice plane
-            self.sliderX = ipyw.FloatSlider(
-                value=self.point[0],
-                min=self.imgSlider.GetOrigin()[0],
-                max=self.imgSlider.GetOrigin()[0] + self.imgSlider.GetSpacing()[0] * self.imgSlider.GetSize()[0],
-                step=self.imgSlider.GetSpacing()[0],
-                continuous_update=False,
-                description="X [mm]:",
-            )
+            self.sliderX = ipyw.FloatSlider(value=self.point[0],
+                                            min=self.imgSlider.GetOrigin()[0],
+                                            max=self.imgSlider.GetOrigin()[0] + self.imgSlider.GetSpacing()[0] * self.imgSlider.GetSize()[0],
+                                            step=self.imgSlider.GetSpacing()[0],
+                                            continuous_update=False,
+                                            description="X [mm]:")
             ipyw.interact(self.showSliceAX1, X=self.sliderX)
-            self.sliderY = ipyw.FloatSlider(
-                value=self.point[1],
-                min=self.imgSlider.GetOrigin()[1],
-                max=self.imgSlider.GetOrigin()[1] + self.imgSlider.GetSpacing()[1] * self.imgSlider.GetSize()[1],
-                step=self.imgSlider.GetSpacing()[1],
-                continuous_update=False,
-                description="Y [mm]:",
-            )
+            self.sliderY = ipyw.FloatSlider(value=self.point[1],
+                                            min=self.imgSlider.GetOrigin()[1],
+                                            max=self.imgSlider.GetOrigin()[1] + self.imgSlider.GetSpacing()[1] * self.imgSlider.GetSize()[1],
+                                            step=self.imgSlider.GetSpacing()[1],
+                                            continuous_update=False,
+                                            description="Y [mm]:")
             ipyw.interact(self.showSliceAX2, Y=self.sliderY)
-            self.sliderZ = ipyw.FloatSlider(
-                value=self.point[2],
-                min=self.imgSlider.GetOrigin()[2],
-                max=self.imgSlider.GetOrigin()[2] + self.imgSlider.GetSpacing()[2] * self.imgSlider.GetSize()[2],
-                step=self.imgSlider.GetSpacing()[2],
-                continuous_update=False,
-                description="Z [mm]:",
-            )
+            self.sliderZ = ipyw.FloatSlider(value=self.point[2],
+                                            min=self.imgSlider.GetOrigin()[2],
+                                            max=self.imgSlider.GetOrigin()[2] + self.imgSlider.GetSpacing()[2] * self.imgSlider.GetSize()[2],
+                                            step=self.imgSlider.GetSpacing()[2],
+                                            continuous_update=False,
+                                            description="Z [mm]:")
             ipyw.interact(self.showSliceAX0, Z=self.sliderZ)
 
             # scroll event to move slices
@@ -413,19 +392,16 @@ class showSlices:
         self.point[2] = Z
         self.removeArtist(self.axs[0])
         self.axs[0].clear()
-        ft.showSlice(
-            self.axs[0],
-            plane="XY",
-            point=self.point,
-            imgBack=self.imgBack,
-            imgFront=self.imgFront,
-            imgROIs=self.imgROIs,
-            showLegend=True,
-            cmapFront=self.cmapFront,
-            cmapBack=self.cmapBack,
-            fontsize=8,
-            raiseWarning=False,
-        )
+        ft.showSlice(self.axs[0],
+                     plane="XY",
+                     point=self.point,
+                     imgBack=self.imgBack,
+                     imgFront=self.imgFront,
+                     imgROIs=self.imgROIs,
+                     showLegend=True,
+                     cmapFront=self.cmapFront,
+                     cmapBack=self.cmapBack,
+                     fontsize=8)
         self.replotPointLines()
         self.fig.canvas.draw()
 
@@ -435,19 +411,16 @@ class showSlices:
         self.point[0] = X
         self.removeArtist(self.axs[1])
         self.axs[1].clear()
-        ft.showSlice(
-            self.axs[1],
-            plane="ZY",
-            point=self.point,
-            imgBack=self.imgBack,
-            imgFront=self.imgFront,
-            imgROIs=self.imgROIs,
-            showLegend=True,
-            cmapFront=self.cmapFront,
-            cmapBack=self.cmapBack,
-            fontsize=8,
-            raiseWarning=False,
-        )
+        ft.showSlice(self.axs[1],
+                     plane="ZY",
+                     point=self.point,
+                     imgBack=self.imgBack,
+                     imgFront=self.imgFront,
+                     imgROIs=self.imgROIs,
+                     showLegend=True,
+                     cmapFront=self.cmapFront,
+                     cmapBack=self.cmapBack,
+                     fontsize=8)
         self.replotPointLines()
         self.fig.canvas.draw()
 
@@ -457,18 +430,15 @@ class showSlices:
         self.point[1] = Y
         self.removeArtist(self.axs[2])
         self.axs[2].clear()
-        ft.showSlice(
-            self.axs[2],
-            plane="X-Z",
-            point=self.point,
-            imgBack=self.imgBack,
-            imgFront=self.imgFront,
-            imgROIs=self.imgROIs,
-            showLegend=True,
-            cmapFront=self.cmapFront,
-            cmapBack=self.cmapBack,
-            fontsize=8,
-            raiseWarning=False,
-        )
+        ft.showSlice(self.axs[2],
+                     plane="X-Z",
+                     point=self.point,
+                     imgBack=self.imgBack,
+                     imgFront=self.imgFront,
+                     imgROIs=self.imgROIs,
+                     showLegend=True,
+                     cmapFront=self.cmapFront,
+                     cmapBack=self.cmapBack,
+                     fontsize=8)
         self.replotPointLines()
         self.fig.canvas.draw()

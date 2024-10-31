@@ -1,4 +1,6 @@
 from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
 
 
 def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: float, doseLevelStep: float = 0.01, displayInfo: bool = False) -> DVH:
@@ -37,11 +39,9 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: float, doseLe
         getDVHStruct : calculate DVH for structure.
     """
     from dicompylercore import dvh
-    from multiprocessing import Pool
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
-    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
     ft._imgTypeChecker.isSITK3D(imgMask, raiseError=True)
@@ -50,7 +50,7 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: float, doseLe
     # check FoR matching of img and mask
     if not ft.compareImgFoR(img, imgMask, displayInfo=False):
         error = TypeError("Both input images, 'img' and 'imgMask' must have the same FoR.")
-        logger.error(error)
+        _logger.error(error)
         raise error
 
     # convert images to vectors
@@ -77,21 +77,20 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: float, doseLe
     dvhMask = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=maskName, color=maskColor, dvh_type="differential").cumulative
 
     if displayInfo:
-        dvhStatLog = [
-            f"Prescribed dose: {dosePrescribed:.3f} Gy",
-            f"Volume: {dvhMask.volume:.3f} {dvhMask.volume_units}",
-            f"Dose max/min: {dvhMask.max:.3f}/{dvhMask.min:.3f} {dvhMask.dose_units}",
-            f"Dose mean: {dvhMask.mean:.3f} {dvhMask.dose_units}",
-            f"Absolute HI (D02-D98): {dvhMask.statistic('D02').value-dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",
-            f"D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",
-            f"D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}",
-            f"D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}",
-        ]
-        logger.info(f"DVH statistics for '{dvhMask.name}' structure:\n" + "\n   ".join(dvhStatLog))
+        dvhStatLog = [f"Prescribed dose: {dosePrescribed:.3f} Gy",
+                      f"Volume: {dvhMask.volume:.3f} {dvhMask.volume_units}",
+                      f"Dose max/min: {dvhMask.max:.3f}/{dvhMask.min:.3f} {dvhMask.dose_units}",
+                      f"Dose mean: {dvhMask.mean:.3f} {dvhMask.dose_units}",
+                      f"Absolute HI (D02-D98): {dvhMask.statistic('D02').value-dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",  # type: ignore
+                      f"D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",  # type: ignore
+                      f"D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}",  # type: ignore
+                      f"D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}"]  # type: ignore
+        _logger.info(f"DVH statistics for '{dvhMask.name}' structure:" + "\n\t" + "\n\t".join(dvhStatLog))
+
     return dvhMask
 
 
-def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribed: float, doseLevelStep: float = 0.01, resampleImg: float | Iterable[float] | None = None, CPUNo: Literal["auto"] | int = "auto", displayInfo: bool = False) -> DVH:
+def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribed: float, doseLevelStep: float = 0.01, resampleImg: float | Iterable[float] | None = None, displayInfo: bool = False) -> DVH:
     """Calculate DVH for the structure.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
@@ -118,11 +117,6 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
         Can be a scalar, then the same number will be used for each axis,
         3-element iterable defining the voxel size for each axis, or `None` meaning
         no interpolation. (def. None)
-    CPUNo : {'auto', 'none'}, scalar or None
-        Define if the multiprocessing should be used and how many cores should
-        be exploited (def. 'auto'). Can be None, then no multiprocessing will be used,
-        a string 'auto', then the number of cores will be determined by os.cpu_count(),
-        or a scalar defining the number of CPU cores to be used (def. 'auto').
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -146,23 +140,19 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
     """
     import fredtools as ft
     import numpy as np
-    logger = ft.getLogger()
 
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
     if not ft.ImgIO.dicom_io._isDicomRS(RSfileName):
         error = ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
-        logger.error(error)
+        _logger.error(error)
         raise error
 
     # get structure info
     structList = ft.getRSInfo(RSfileName)
     if structName not in list(structList.ROIName):
         error = ValueError(f"Cannot find the structure '{structName}' in {RSfileName} dicom file with structures.")
-        logger.error(error)
+        _logger.error(error)
         raise error
-
-    # get the number of CPUs to be used for computation
-    CPUNo = ft.getCPUNo(CPUNo)
 
     # resample image if requested
     if resampleImg:
@@ -173,28 +163,26 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
             resampleImg = list(resampleImg)
             if not len(resampleImg) == img.GetDimension():
                 error = ValueError(f"Shape of 'spacing' is {resampleImg} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
-                logger.error(error)
+                _logger.error(error)
                 raise error
 
         # resample image
-        img = ft.resampleImg(img=img, spacing=resampleImg)
+        img = ft.resampleImg(img=img, spacing=np.array(resampleImg))
 
     # map structure to resampled img generating a floating mask
-    imgROI = ft.mapStructToImg(img=img, RSfileName=RSfileName, structName=structName, binaryMask=False, CPUNo=CPUNo, displayInfo=False)
+    imgROI = ft.mapStructToImg(img=img, RSfileName=RSfileName, structName=structName, binaryMask=False, displayInfo=False)
 
     dvhROI = getDVHMask(img, imgROI, dosePrescribed=dosePrescribed, doseLevelStep=doseLevelStep)
 
     if displayInfo:
-        dvhStatLog = [
-            f"Prescribed dose: {dosePrescribed:.3f} Gy",
-            f"Volume: {dvhROI.volume:.3f} {dvhROI.volume_units}",
-            f"Dose max/min: {dvhROI.max:.3f}/{dvhROI.min:.3f} {dvhROI.dose_units}",
-            f"Dose mean: {dvhROI.mean:.3f} {dvhROI.dose_units}",
-            f"Absolute HI (D02-D98): {dvhROI.statistic('D02').value-dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",
-            f"D98: {dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",
-            f"D50: {dvhROI.statistic('D50').value:.3f} {dvhROI.dose_units}",
-            f"D02: {dvhROI.statistic('D02').value:.3f} {dvhROI.dose_units}",
-        ]
-        logger.info(f"DVH statistics for '{dvhROI.name}' structure:\n" + "\n   ".join(dvhStatLog))
+        dvhStatLog = [f"Prescribed dose: {dosePrescribed:.3f} Gy",
+                      f"Volume: {dvhROI.volume:.3f} {dvhROI.volume_units}",
+                      f"Dose max/min: {dvhROI.max:.3f}/{dvhROI.min:.3f} {dvhROI.dose_units}",
+                      f"Dose mean: {dvhROI.mean:.3f} {dvhROI.dose_units}",
+                      f"Absolute HI (D02-D98): {dvhROI.statistic('D02').value-dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",  # type: ignore
+                      f"D98: {dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",  # type: ignore
+                      f"D50: {dvhROI.statistic('D50').value:.3f} {dvhROI.dose_units}",  # type: ignore
+                      f"D02: {dvhROI.statistic('D02').value:.3f} {dvhROI.dose_units}"]  # type: ignore
+        _logger.info(f"DVH statistics for '{dvhROI.name}' structure:" + "\n\t" + "\n\t".join(dvhStatLog))
 
     return dvhROI

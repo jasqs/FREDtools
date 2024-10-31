@@ -1,0 +1,272 @@
+
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       8888888888                   888                       |
+|                       888                          888                       |
+|                       888                          888                       |
+|                       8888888 88 d888 .d88b.   .d88888                       |
+|                       888     888P   d8P  Y8b d88' 888                       |
+|                       888     888    88888888 888  888                       |
+|                       888     888    Y8b.     Y88b 888                       |
+|                       888     888     'Y8888   'Y88888                       |
+|                                                                              |
++------------------------------------------------------------------------------+
+|                               www.fred-mc.org                                |
++------------------------------------------------------------------------------+
+|                    Version 3.71.0  (bd7887c) - 2024/07/22                    |
++------------------------------------------------------------------------------+
+
+Input  directory:  .
+Output directory:  out
+Main input file :  ./fred.inp
+
+--------------------------------------------------------------------------------
+[0;35mParsing main input: [0m[0;32mOK[0m
+[0;35mGeometry definitions: [0m[0;32mOK[0m
+[0;35mMaterial definitions: [0m[0;32mOK[0m
+[0;35mActivation: [0m[0;32mOK[0m
+[0;35mSpectra scorer: [0m[0;32mOK[0m
+[0;35mIonization Detail: [0m[0;32mOK[0m
+[0;35mPlane Crossing Scorers: [0m[0;32mOK[0m
+[0;35mSources: [0m[0;32mOK[0m
+[0;35mPhysics packages: [0m[0;32mOK[0m
+[0;35mInit Variance Reduction: [0m[0;32mOK[0m
+[0;35mRadiobiology: [0m[0;32mOK[0m
+[0;35mVerify complete parsing of input file: [0m[0;32m	OK[0m
+[0;35mDelivery sequence: [0m[0;32mOK[0m
+[0;35mGeometry checking: [0m[0;32mOK[0m
+--------------------------------------------------------------------------------
+
+[0;35mTracking particles: [0m
+[0;32mdelivering batch no. 1/3[0m
+Start tracking now:
+
+tracking   0.2 %
+tracking   1.7 %  ETA = 3 m : 19 s 
+tracking   3.2 %  ETA = 3 m : 28 s 
+tracking   4.7 %  ETA = 3 m : 24 s 
+tracking   6.2 %  ETA = 3 m : 22 s 
+tracking   7.7 %  ETA = 3 m : 21 s 
+tracking   9.1 %  ETA = 3 m : 22 s 
+tracking  10.6 %  ETA = 3 m : 19 s 
+tracking  12.1 %  ETA = 3 m : 19 s 
+tracking  13.5 %  ETA = 3 m : 18 s 
+tracking  15.0 %  ETA = 3 m : 18 s 
+tracking  16.4 %  ETA = 3 m : 17 s 
+tracking  17.8 %  ETA = 3 m : 15 s 
+tracking  19.3 %  ETA = 3 m : 15 s 
+tracking  20.7 %  ETA = 3 m : 13 s 
+tracking  22.1 %  ETA = 3 m : 13 s 
+tracking  23.5 %  ETA = 3 m : 12 s 
+tracking  24.9 %  ETA = 3 m : 8 s 
+tracking  26.3 %  ETA = 3 m : 9 s 
+tracking  27.7 %  ETA = 3 m : 9 s 
+tracking  29.1 %  ETA = 3 m : 7 s 
+tracking  30.5 %  ETA = 3 m : 7 s 
+tracking  31.8 %  ETA = 3 m : 5 s 
+tracking  33.2 %  ETA = 3 m : 4 s 
+tracking  34.6 %  ETA = 3 m : 4 s 
+tracking  35.9 %  ETA = 3 m : 1 s 
+tracking  37.3 %  ETA = 3 m : 1 s 
+tracking  38.6 %  ETA = 3 m : 0 s 
+tracking  40.0 %  ETA = 2 m : 59 s 
+tracking  41.3 %  ETA = 2 m : 57 s 
+tracking  42.6 %  ETA = 2 m : 58 s 
+tracking  44.0 %  ETA = 2 m : 55 s 
+tracking  45.3 %  ETA = 2 m : 54 s 
+tracking  46.6 %  ETA = 2 m : 54 s 
+tracking  47.9 %  ETA = 2 m : 53 s 
+tracking  49.2 %  ETA = 2 m : 52 s 
+tracking  50.5 %  ETA = 2 m : 50 s 
+tracking  51.8 %  ETA = 2 m : 49 s 
+tracking  53.1 %  ETA = 2 m : 47 s 
+tracking  54.4 %  ETA = 2 m : 47 s 
+tracking  55.7 %  ETA = 2 m : 46 s 
+tracking  57.0 %  ETA = 2 m : 45 s 
+tracking  58.2 %  ETA = 2 m : 43 s 
+tracking  59.5 %  ETA = 2 m : 44 s 
+tracking  60.8 %  ETA = 2 m : 41 s 
+tracking  62.0 %  ETA = 2 m : 42 s 
+tracking  63.3 %  ETA = 2 m : 40 s 
+tracking  64.5 %  ETA = 2 m : 38 s 
+tracking  65.8 %  ETA = 2 m : 38 s 
+tracking  67.0 %  ETA = 2 m : 36 s 
+tracking  68.2 %  ETA = 2 m : 35 s 
+tracking  69.5 %  ETA = 2 m : 34 s 
+tracking  70.7 %  ETA = 2 m : 34 s 
+tracking  71.9 %  ETA = 2 m : 33 s 
+tracking  73.1 %  ETA = 2 m : 31 s 
+tracking  74.3 %  ETA = 2 m : 31 s 
+tracking  75.5 %  ETA = 2 m : 28 s 
+tracking  76.7 %  ETA = 2 m : 29 s 
+tracking  77.9 %  ETA = 2 m : 27 s 
+tracking  79.1 %  ETA = 2 m : 26 s 
+tracking  80.3 %  ETA = 2 m : 24 s 
+tracking  81.5 %  ETA = 2 m : 23 s 
+tracking  82.7 %  ETA = 2 m : 23 s 
+tracking  83.9 %  ETA = 2 m : 21 s 
+tracking  85.0 %  ETA = 2 m : 19 s 
+tracking  86.2 %  ETA = 2 m : 20 s 
+tracking  87.4 %  ETA = 2 m : 17 s 
+tracking  88.5 %  ETA = 2 m : 17 s 
+tracking  89.7 %  ETA = 2 m : 16 s 
+tracking  90.8 %  ETA = 2 m : 14 s 
+tracking  92.0 %  ETA = 2 m : 14 s 
+tracking  93.1 %  ETA = 2 m : 14 s 
+tracking  94.2 %  ETA = 2 m : 12 s 
+tracking  95.4 %  ETA = 2 m : 11 s 
+tracking  96.5 %  ETA = 2 m : 10 s 
+tracking  97.6 %  ETA = 2 m : 8 s 
+tracking  98.8 %  ETA = 2 m : 6 s 
+tracking  99.9 %  ETA = 2 m : 6 s 
+tracking 100.0 %
+[0;32mdelivering batch no. 2/3[0m
+Start tracking now:
+
+tracking   0.2 %
+tracking   1.7 %  ETA = 55.1 s 
+tracking   3.2 %  ETA = 2 m : 5 s 
+tracking   4.7 %  ETA = 2 m : 2 s 
+tracking   6.2 %  ETA = 2 m : 46 s 
+tracking   7.7 %  ETA = 1 m : 27 s 
+tracking   9.1 %  ETA = 1 m : 59 s 
+tracking  10.6 %  ETA = 1 m : 58 s 
+tracking  12.1 %  ETA = 1 m : 58 s 
+tracking  13.5 %  ETA = 1 m : 57 s 
+tracking  15.0 %  ETA = 2 m : 1 s 
+tracking  16.4 %  ETA = 1 m : 54 s 
+tracking  17.8 %  ETA = 1 m : 53 s 
+tracking  19.3 %  ETA = 1 m : 52 s 
+tracking  20.7 %  ETA = 1 m : 51 s 
+tracking  22.1 %  ETA = 1 m : 51 s 
+tracking  23.5 %  ETA = 1 m : 49 s 
+tracking  24.9 %  ETA = 1 m : 47 s 
+tracking  26.3 %  ETA = 1 m : 46 s 
+tracking  27.7 %  ETA = 1 m : 46 s 
+tracking  29.1 %  ETA = 1 m : 44 s 
+tracking  30.5 %  ETA = 1 m : 44 s 
+tracking  31.8 %  ETA = 1 m : 42 s 
+tracking  33.2 %  ETA = 1 m : 41 s 
+tracking  34.6 %  ETA = 1 m : 41 s 
+tracking  35.9 %  ETA = 1 m : 39 s 
+tracking  37.3 %  ETA = 1 m : 38 s 
+tracking  38.6 %  ETA = 1 m : 36 s 
+tracking  40.0 %  ETA = 1 m : 35 s 
+tracking  41.3 %  ETA = 1 m : 34 s 
+tracking  42.6 %  ETA = 1 m : 34 s 
+tracking  44.0 %  ETA = 1 m : 32 s 
+tracking  45.3 %  ETA = 1 m : 31 s 
+tracking  46.6 %  ETA = 1 m : 30 s 
+tracking  47.9 %  ETA = 1 m : 29 s 
+tracking  49.2 %  ETA = 24.8 s 
+tracking  50.5 %  ETA = 1 m : 27 s 
+tracking  51.8 %  ETA = 1 m : 26 s 
+tracking  53.1 %  ETA = 1 m : 25 s 
+tracking  54.4 %  ETA = 1 m : 23 s 
+tracking  55.7 %  ETA = 1 m : 22 s 
+tracking  57.0 %  ETA = 1 m : 21 s 
+tracking  58.2 %  ETA = 1 m : 20 s 
+tracking  59.5 %  ETA = 1 m : 20 s 
+tracking  60.8 %  ETA = 1 m : 18 s 
+tracking  62.0 %  ETA = 1 m : 17 s 
+tracking  63.3 %  ETA = 1 m : 16 s 
+tracking  64.5 %  ETA = 1 m : 15 s 
+tracking  65.8 %  ETA = 1 m : 13 s 
+tracking  67.0 %  ETA = 1 m : 14 s 
+tracking  68.2 %  ETA = 1 m : 11 s 
+tracking  69.5 %  ETA = 1 m : 10 s 
+tracking  70.7 %  ETA = 1 m : 9 s 
+tracking  71.9 %  ETA = 1 m : 9 s 
+tracking  73.1 %  ETA = 1 m : 7 s 
+tracking  74.3 %  ETA = 1 m : 6 s 
+tracking  75.5 %  ETA = 1 m : 5 s 
+tracking  76.7 %  ETA = 1 m : 4 s 
+tracking  77.9 %  ETA = 1 m : 3 s 
+tracking  79.1 %  ETA = 1 m : 1 s 
+tracking  80.3 %  ETA = 1 m : 0 s 
+tracking  81.5 %  ETA = 59.4 s 
+tracking  82.7 %  ETA = 58.6 s 
+tracking  83.9 %  ETA = 57.9 s 
+tracking  85.0 %  ETA = 56.4 s 
+tracking  86.2 %  ETA = 55.5 s 
+tracking  87.4 %  ETA = 54.0 s 
+tracking  88.5 %  ETA = 53.9 s 
+tracking  89.7 %  ETA = 52.4 s 
+tracking  90.8 %  ETA = 51.3 s 
+tracking  92.0 %  ETA = 50.1 s 
+tracking  93.1 %  ETA = 49.3 s 
+tracking  94.2 %  ETA = 48.1 s 
+tracking  95.4 %  ETA = 46.5 s 
+tracking  96.5 %  ETA = 46.1 s 
+tracking  97.6 %  ETA = 44.3 s 
+tracking  98.8 %  ETA = 43.5 s 
+tracking  99.9 %  ETA = 42.3 s 
+tracking 100.0 %
+[0;32mdelivering batch no. 3/3[0m
+Start tracking now:
+
+tracking   0.5 %
+tracking   3.5 %  ETA = 36.6 s 
+tracking   6.5 %  ETA = 40.0 s 
+tracking   9.4 %  ETA = 38.6 s 
+tracking  12.3 %  ETA = 37.4 s 
+tracking  15.2 %  ETA = 36.6 s 
+tracking  18.1 %  ETA = 35.5 s 
+tracking  20.9 %  ETA = 34.4 s 
+tracking  23.8 %  ETA = 33.2 s 
+tracking  26.6 %  ETA = 32.3 s 
+tracking  29.4 %  ETA = 31.0 s 
+tracking  32.1 %  ETA = 30.1 s 
+tracking  34.9 %  ETA = 28.8 s 
+tracking  37.6 %  ETA = 27.8 s 
+tracking  40.3 %  ETA = 26.6 s 
+tracking  42.9 %  ETA = 25.6 s 
+tracking  45.6 %  ETA = 24.6 s 
+tracking  48.2 %  ETA = 23.2 s 
+tracking  50.8 %  ETA = 22.5 s 
+tracking  53.4 %  ETA = 21.2 s 
+tracking  56.0 %  ETA = 20.3 s 
+tracking  58.5 %  ETA = 19.2 s 
+tracking  61.1 %  ETA = 18.0 s 
+tracking  63.6 %  ETA = 16.8 s 
+tracking  66.1 %  ETA = 15.9 s 
+tracking  68.6 %  ETA = 14.7 s 
+tracking  71.0 %  ETA = 13.6 s 
+tracking  73.4 %  ETA = 12.4 s 
+tracking  75.9 %  ETA = 11.5 s 
+tracking  78.3 %  ETA = 10.4 s 
+tracking  80.7 %  ETA = 9.3 s 
+tracking  83.0 %  ETA = 8.1 s 
+tracking  85.4 %  ETA = 7.0 s 
+tracking  87.7 %  ETA = 5.9 s 
+tracking  90.0 %  ETA = 4.9 s 
+tracking  92.3 %  ETA = 3.7 s 
+tracking  94.6 %  ETA = 2.6 s 
+tracking  96.9 %  ETA = 1.5 s 
+tracking  99.1 %  ETA = 0.4 s 
+tracking 100.0 %
+
+[0;35mWriting output: [0m[0;32mOK[0m
+[0;35mRBE models: [0m[0;32mOK[0m
+
+################################################################################
+Running config (PTHREADS,GPU): 16,1
+    Num of CPU threads = 16
+    GPU[0] = NVIDIA GeForce MX550
+################################################################################
+Timing summary:
+      initialization    0.46 s   0.2%
+        primary list    3.38 s   1.6%
+   delivery checking    0.00 s   0.0%
+   geometry checking    0.00 s   0.0%
+            tracking  211.66 s  97.9%
+      writing output    0.05 s   0.0%
+               other    0.73 s   0.3%
+################################################################################
+Number of primary particles:   1.00e+08
+Tracking rate:   4.72e+05 primary/s
+Track time per primary:     2.1 us
+################################################################################
+Run with [0;32mfred Version 3.71.0  (bd7887c) - 2024/07/22
+[0m################################################################################
+Run wallclock time: 216 s =   3.6 min

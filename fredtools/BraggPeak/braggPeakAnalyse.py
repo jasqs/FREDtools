@@ -1,3 +1,8 @@
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
 class braggPeak:
     """Class for Bragg curve analysis.
 
@@ -26,7 +31,7 @@ class braggPeak:
         Order of spline interpolation. Must be in range 0-5. (def. 3)
     bortCut : float, optional
         The range of the data that the Bortfeld fit will be performed on.
-        It is defined as the range of the BP in the proximal region at the percent
+        It is defined as the range of the BP in the proximal region at the fraction
         of the maximum of the spline interpolation. The Bortfeld fit will be
         performed for the input data in the distal of this range. (def. 0.6)
 
@@ -40,16 +45,22 @@ class braggPeak:
     .. [2] `Jupyter notebook of Bragg Peak Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Bragg%20Peak%20analysis%20Tutorial.ipynb>`_
     """
 
-    def __init__(self, pos, vec, accuracy=0.01, offset=0, interpolation="spline", splineOrder=3, bortCut=0.6):
+    def __init__(self, pos: Iterable[Numberic], vec: Iterable[Numberic], accuracy: Numberic = 0.01, offset: Numberic = 0, interpolation: Literal["linear", "spline", "nearest"] = "spline", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, bortCut: Annotated[Numberic, Field(strict=True, ge=0, le=1)] = 0.6):
         import numpy as np
 
         # check if pos and vec are both iterable, are vectors and have the same length
-        if not hasattr(pos, "__iter__") and not hasattr(vec, "__iter__"):
-            raise TypeError(f"The input `pos` and `vec` must be both iterable.")
+        if not isinstance(pos, Iterable) or not isinstance(vec, Iterable):
+            error = TypeError(f"The input `pos` and `vec` must be both iterable.")
+            _logger.error(error)
+            raise error
         if not np.array(pos).ndim == 1 and np.array(vec).ndim == 1:
-            raise TypeError(f"The input `pos` and `vec` must be both one-dimensional vectors.")
+            error = TypeError(f"The input `pos` and `vec` must be both one-dimensional vectors.")
+            _logger.error(error)
+            raise error
         if len(list(pos)) != len(list(vec)):
-            raise TypeError(f"The input `pos` and `vec` must be of the same length.")
+            error = TypeError(f"The input `pos` and `vec` must be of the same length.")
+            _logger.error(error)
+            raise error
 
         self.__bp = [np.array(pos), np.array(vec)]
 
@@ -62,9 +73,9 @@ class braggPeak:
         self.__reset__()
 
     def __reset__(self):
-        self.__bpInterp = []
-        self.__bpBort = []
-        self.__bortfeldFit = []
+        self.__bpInterp = None
+        self.__bpBort = None
+        self.__bortfeldFit = None
 
         self.__bortfeldParamConstant = {
             "p": 1.72566928,  # [-] Exponent of range-energy relation
@@ -73,116 +84,136 @@ class braggPeak:
         }
 
     @property
-    def bp(self):
+    def bp(self) -> list[NDArray]:
         """list of arrays: Original Bragg curve loaded by `pos` and `vec`."""
         return self.__bp
 
     @property
-    def offset(self):
+    def offset(self) -> Numberic:
         """float: Distance offset of the Bragg curve points."""
         return self.__offset
 
     @offset.setter
-    def offset(self, offset):
+    def offset(self, offset: Numberic) -> None:
         import numpy as np
 
         # validate argument
-        if not np.isscalar(offset):
-            raise ValueError(f"The value {offset} is not correct. It must be a scalar.")
+        if not isinstance(offset, Numberic):
+            error = ValueError(f"The value {offset} is not correct. It must be a scalar.")
+            _logger.error(error)
+            raise error
 
         self.__offset = offset
         self.__reset__()
 
     @property
-    def interpolation(self):
+    def interpolation(self) -> str:
         """str: Interpolation method. Available are 'linear', 'nearest' or 'spline'."""
         return self.__interpolation
 
     @interpolation.setter
-    def interpolation(self, interpolation):
+    def interpolation(self, interpolation: Literal["linear", "spline", "nearest"]) -> None:
         # validate argument
-        interpolation = interpolation.lower()
-        if interpolation not in ["linear", "spline", "nearest"]:
-            raise ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+        interp = interpolation.lower()
+        if interp not in ["linear", "spline", "nearest"]:
+            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            _logger.error(error)
+            raise error
 
-        self.__interpolation = interpolation
+        self.__interpolation = interp
         self.__reset__()
 
     @property
-    def splineOrder(self):
+    def splineOrder(self) -> int:
         """int: Order of the spline interpolation. Must be in range 0-5."""
         return self.__splineOrder
 
     @splineOrder.setter
-    def splineOrder(self, splineOrder):
+    def splineOrder(self, splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)]) -> None:
         # validate argument
         if not isinstance(splineOrder, int) or splineOrder > 5 or splineOrder < 0:
-            raise ValueError(f"Spline order must be a scalar in range 0-5.")
+            error = ValueError(f"Spline order must be a scalar in range 0-5.")
+            _logger.error(error)
+            raise error
 
         self.__splineOrder = splineOrder
         self.__reset__()
 
-    def __setInterpolationScipy(self):
+    def __setInterpolationScipy(self) -> Union[str, int]:
         """str or int: Method of the interpolation defined as `kind` in scipy.interpolate.interp1D."""
         # validate argument
         if self.__interpolation not in ["linear", "spline", "nearest"]:
-            raise ValueError(f"Interpolation type '{self.__interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            error = ValueError(f"Interpolation type '{self.__interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            _logger.error(error)
+            raise error
         if self.__splineOrder > 5 or self.__splineOrder < 0:
-            raise ValueError(f"Spline order must be in range 0-5.")
+            error = ValueError(f"Spline order must be in range 0-5.")
+            _logger.error(error)
+            raise error
 
         return self.__splineOrder if self.__interpolation == "spline" else self.__interpolation
 
     @property
-    def accuracy(self):
+    def accuracy(self) -> Numberic:
         """float: Accuracy of the spline and Bortfeld profiles interpolations."""
         return self.__accuracy
 
     @accuracy.setter
-    def accuracy(self, accuracy):
+    def accuracy(self, accuracy: Numberic) -> None:
         import numpy as np
 
         # validate argument
-        if not np.isscalar(accuracy) or accuracy <= 0:
-            raise ValueError(f"The value {accuracy} is not correct. It must be a positive scalar.")
+        if not isinstance(accuracy, Numberic) or accuracy <= 0:
+            error = ValueError(f"The value {accuracy} is not correct. It must be a positive scalar.")
+            _logger.error(error)
+            raise error
         self.__accuracy = accuracy
         self.__reset__()
 
     @property
-    def bortCut(self):
+    def bortCut(self) -> Numberic:
         """float: The range of the data to perform Bortfeld fit on."""
         return self.__bortCut
 
     @bortCut.setter
-    def bortCut(self, bortCut):
+    def bortCut(self, bortCut: Annotated[Numberic, Field(strict=True, ge=0, le=1)]) -> None:
         import numpy as np
 
         # validate argument
-        if not np.isscalar(bortCut) or bortCut < 0 or bortCut > 1:
-            raise ValueError(f"The value {bortCut} is not correct. It must be a positive scalar in range 0-1.")
+        if not isinstance(bortCut, Numberic) or bortCut < 0 or bortCut > 1:
+            error = ValueError(f"The value {bortCut} is not correct. It must be a positive scalar in range 0-1.")
+            _logger.error(error)
+            raise error
         self.__bortCut = bortCut
-        self.__bpBort = []
-        self.__bortfeldFit = []
+        self.__bpBort = None
+        self.__bortfeldFit = None
 
     @property
-    def bpInterp(self):
+    def bpInterp(self) -> list[NDArray]:
         """list of arrays: List of arrays describing `pos` and `vec` of the interpolated profile."""
         from scipy.interpolate import interp1d
         import numpy as np
 
         if not self.__bpInterp:
             interpPos = np.arange(self.__bp[0].min() - self.__offset, self.__bp[0].max(), self.__accuracy)
-            self.__bpInterp = [interpPos, interp1d(self.__bp[0], self.__bp[1], kind=self.__setInterpolationScipy(), fill_value="extrapolate")(interpPos)]
+            self.__bpInterp = [interpPos, interp1d(self.__bp[0], self.__bp[1], kind=self.__setInterpolationScipy(), fill_value="extrapolate")(interpPos)]  # type: ignore
             return self.__bpInterp
         else:
             return self.__bpInterp
 
     @property
-    def bpBort(self):
+    def bpBort(self) -> list[NDArray]:
         """list of arrays: List of arrays describing `pos` and `vec` of the Bortfeld fit profile."""
         import numpy as np
 
         if not self.__bpBort:
-            bortfeldFit = self.bortfeldFit
+            if not self.__bortfeldFit:
+                self.__bortfeldFit = self.__fitBortfeld()
+            bortfeldFit = self.__bortfeldFit
+            if bortfeldFit.userkws is None:
+                error = ValueError("bortfeldFit.userkws is None, cannot access 'depth'.")
+                _logger.error(error)
+                raise error
             imgPos = bortfeldFit.userkws["depth"]
             # build bragg peak for bortfeld fit curve with accuracy step
             imgBortPos = np.arange(imgPos[0], imgPos[-1], self.__accuracy)
@@ -192,7 +223,7 @@ class braggPeak:
         else:
             return self.__bpBort
 
-    def getDInterp(self, R):
+    def getDInterp(self, R: Numberic) -> Numberic:
         """Get signal value at given range/depth based on profile interpolation.
 
         The function calculates the signal value (for instance dose) at a given
@@ -217,7 +248,7 @@ class braggPeak:
         """
         return self.__getD(self.__bp, R)
 
-    def getDBort(self, R):
+    def getDBort(self, R: Numberic) -> Numberic:
         """Get the signal value at a given range/depth based on Bortfeld fit.
 
         The function calculates the signal value (for instance dose) at a given
@@ -241,7 +272,7 @@ class braggPeak:
         """
         return self.__getD(self.bpBort, R)
 
-    def __getD(self, bp, R):
+    def __getD(self, bp: list[NDArray], R: Numberic) -> Numberic:
         """Calculate the value for a given range/depth for the image.
 
         Parameters
@@ -259,9 +290,9 @@ class braggPeak:
         from scipy.interpolate import interp1d
         import numpy as np
 
-        return interp1d(bp[0], bp[1], kind=self.__setInterpolationScipy(), fill_value=np.NaN)(R)
+        return interp1d(bp[0], bp[1], kind=self.__setInterpolationScipy(), fill_value=np.NaN)(R)  # type: ignore
 
-    def getRInterp(self, D, side="distal", percentD=True):
+    def getRInterp(self, D: Numberic, side: Literal["proximal", "P", "distal", "D"] = "distal", percentD: bool = True) -> Numberic:
         """Calculate the range/depth at a given signal level based on profile interpolation.
 
         The function calculates range (depth) at the distal or proximal part, at the absolute
@@ -295,7 +326,7 @@ class braggPeak:
         """
         return self.__getR(self.bpInterp, D=D, side=side, percentD=percentD)
 
-    def getRBort(self, D, side="distal", percentD=True):
+    def getRBort(self, D: Numberic, side: Literal["proximal", "P", "distal", "D"] = "distal", percentD: bool = True) -> Numberic:
         """Calculate the range/depth at a given signal level based on Bortfeld fit.
 
         The function calculates the range (depth) at the distal or proximal part, at the absolute
@@ -328,7 +359,7 @@ class braggPeak:
         """
         return self.__getR(self.bpBort, D=D, side=side, percentD=percentD)
 
-    def __getR(self, bp, D, side, percentD):
+    def __getR(self, bp: List[NDArray], D: Numberic, side: Literal["proximal", "P", "distal", "D"], percentD: bool) -> Numberic:
         """Calculate the range/depth at a given signal level.
 
         Parameters
@@ -350,14 +381,16 @@ class braggPeak:
         import numpy as np
         import fredtools as ft
 
-        side = side.lower()
+        sideLocal = side.lower()
         # check if side is in proper format and unify it
-        if side not in ["p", "d", "prox", "dist", "proximal", "distal"]:
-            raise ValueError(f"Parameter `side` {side} cannot be recognized. Only the values `proximal` (or `P`) or `distal` (or `D`) are allowed.")
-        if side in ["p", "prox", "proximal"]:
-            side = "proximal"
-        elif side in ["d", "dist", "distal"]:
-            side = "distal"
+        if sideLocal not in ["p", "d", "prox", "dist", "proximal", "distal"]:
+            error = ValueError(f"Parameter `side` {side} cannot be recognized. Only the values `proximal` (or `P`) or `distal` (or `D`) are allowed.")
+            _logger.error(error)
+            raise error
+        if sideLocal in ["p", "prox", "proximal"]:
+            sideLocal = "proximal"
+        elif sideLocal in ["d", "dist", "distal"]:
+            sideLocal = "distal"
 
         pos = bp[0]
         val = bp[1]
@@ -371,16 +404,18 @@ class braggPeak:
         # get index of the maximum value
         R100idx = np.argmax(val)
 
-        if side == "proximal":
-            val = val[0 : R100idx + 1]
-            pos = pos[0 : R100idx + 1]
+        if sideLocal == "proximal":
+            val = val[0: R100idx + 1]
+            pos = pos[0: R100idx + 1]
             return pos[np.where(val >= level)].min() if (any(val >= level) and any(val <= level)) else np.nan
-        elif side == "distal":
+        elif sideLocal == "distal":
             val = val[R100idx:]
             pos = pos[R100idx:]
             return pos[np.where(val >= level)].max() if (any(val >= level) and any(val <= level)) else np.nan
+        else:
+            return np.nan
 
-    def getWInterp(self, D, percentD=True):
+    def getWInterp(self, D: Numberic, percentD: bool = True) -> Numberic:
         """Calculate the width of the BP at a given signal level based on profile interpolation.
 
         The function calculates the width of the BP at the absolute or relative signal value
@@ -411,7 +446,7 @@ class braggPeak:
         """
         return self.__getW(self.bpInterp, D=D, percentD=percentD)
 
-    def getWBort(self, D, percentD=True):
+    def getWBort(self, D: Numberic, percentD: bool = True) -> Numberic:
         """Calculate the width of the BP at a given signal level based on Bortfeld fit.
 
         The function calculates the width of the BP at the absolute or relative signal value
@@ -442,7 +477,7 @@ class braggPeak:
         """
         return self.__getW(self.bpBort, D=D, percentD=percentD)
 
-    def __getW(self, bp, D, percentD):
+    def __getW(self, bp: list[NDArray], D: Numberic, percentD: bool) -> Numberic:
         """Calculate the width of the BP at a given signal level for the image.
 
         Parameters
@@ -461,9 +496,10 @@ class braggPeak:
         """
         Rprox = self.__getR(bp, D, side="proximal", percentD=percentD)
         Rdist = self.__getR(bp, D, side="distal", percentD=percentD)
+
         return Rdist - Rprox
 
-    def getDFOInterp(self, Dup, Dlow, percentD=True):
+    def getDFOInterp(self, Dup: Numberic, Dlow: Numberic, percentD: bool = True) -> Numberic:
         """Calculate the width of the distal fall-off of the BP at a given signal level based on profile interpolation.
 
         The function calculates the width of the distal fall-off of the BP at the absolute or
@@ -496,7 +532,7 @@ class braggPeak:
         """
         return self.__getDFO(self.bpInterp, Dup=Dup, Dlow=Dlow, percentD=percentD)
 
-    def getDFOBort(self, Dup, Dlow, percentD=True):
+    def getDFOBort(self, Dup: Numberic, Dlow: Numberic, percentD: bool = True) -> Numberic:
         """Calculate the width of the distal fall-off of the BP at a given signal level based on Bortfeld fit.
 
         The function calculates the width of the distal fall-off of the BP at the absolute or
@@ -529,7 +565,7 @@ class braggPeak:
         """
         return self.__getDFO(self.bpBort, Dup=Dup, Dlow=Dlow, percentD=percentD)
 
-    def __getDFO(self, bp, Dup, Dlow, percentD):
+    def __getDFO(self, bp: list[NDArray], Dup: Numberic, Dlow: Numberic, percentD: bool) -> Numberic:
         """Calculate the width of the distal fall-off of the BP at a given signal level for the image.
 
         Parameters
@@ -549,13 +585,15 @@ class braggPeak:
             Width of the distal fall-off at signal level.
         """
         if Dup < Dlow:
-            raise ValueError(f"The parameter Dup must be higher than Dlow.")
+            error = ValueError(f"The parameter Dup must be higher than Dlow.")
+            _logger.error(error)
+            raise error
         Rup = self.__getR(bp, Dup, side="distal", percentD=percentD)
         Rdown = self.__getR(bp, Dlow, side="distal", percentD=percentD)
         return Rdown - Rup
 
     @property
-    def bortfeldFit(self):
+    def bortfeldFit(self) -> LMFitModelResult:
         """lmfit.model.ModelResult: Result from the Model of the Bortfeld fit."""
         if not self.__bortfeldFit:
             self.__bortfeldFit = self.__fitBortfeld()
@@ -564,7 +602,7 @@ class braggPeak:
             return self.__bortfeldFit
 
     @property
-    def bortfeldFitParam(self):
+    def bortfeldFitParam(self) -> dict:
         """dict: Physical parameters of the calculated based on the Bortfeld fit."""
         import numpy as np
 
@@ -574,13 +612,12 @@ class braggPeak:
         bortfeldResults["R0_mm"] = bortfeldFit.params["R0"].value + self.__offset
         bortfeldResults["E0_MeV"] = (bortfeldResults["R0_mm"] / bortfeldParam["alpha"]) ** (1 / bortfeldParam["p"])
         bortfeldResults["sigmaMono_mm"] = 0.012 * bortfeldResults["R0_mm"] ** 0.935
-        bortfeldResults["sigmaE0_MeV"] = np.sqrt(
-            (bortfeldFit.params["sigma"].value ** 2 - bortfeldResults["sigmaMono_mm"] ** 2)
-            / (bortfeldParam["alpha"] ** 2 * bortfeldParam["p"] ** 2 * bortfeldResults["E0_MeV"] ** (2 * bortfeldParam["p"] - 2))
-        )
+        bortfeldResults["sigmaE0_MeV"] = np.sqrt((bortfeldFit.params["sigma"].value ** 2 - bortfeldResults["sigmaMono_mm"] ** 2)
+                                                 / (bortfeldParam["alpha"] ** 2 * bortfeldParam["p"] ** 2 * bortfeldResults["E0_MeV"] ** (2 * bortfeldParam["p"] - 2))
+                                                 )
         return bortfeldResults
 
-    def __fitBortfeld(self):
+    def __fitBortfeld(self) -> LMFitModelResult:
         """Perform a Bortfeld fit.
 
         The function is preparing and performing a Bortfeld fit to the original data
@@ -624,41 +661,38 @@ class braggPeak:
             return D(depth, R0, phi0, epsilon, sigma)
 
         bortfeldParam = self.__bortfeldParamConstant
-        bortfeldParam["R0"] = self.getRInterp(0.8, "distal")  # [mm]
-        bortfeldParam["phi"] = self.getDInterp(self.__bp[0].min())  # [1/mm^2] initial fluence at the beginning of the profile (normalization factor)
+        bortfeldParam["R0"] = float(self.getRInterp(0.8, "distal"))  # [mm]
+        bortfeldParam["phi"] = float(self.getDInterp(self.__bp[0].min()))  # [1/mm^2] initial fluence at the beginning of the profile (normalization factor)
         bortfeldParam["E0"] = ((bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) / bortfeldParam["alpha"]) ** (1 / bortfeldParam["p"])  # [MeV] initial energy
         bortfeldParam["sigmaMono"] = (0.012 * (bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) ** 0.935) / 10  # [mm] width of Gaussian range straggling
         bortfeldParam["sigmaE0"] = 0.01 * bortfeldParam["E0"]  # [MeV] width of Gaussian energy spectrum
-        bortfeldParam["sigma"] = np.sqrt(
-            bortfeldParam["sigmaMono"] ** 2 + bortfeldParam["sigmaE0"] ** 2 * bortfeldParam["alpha"] ** 2 * bortfeldParam["p"] ** 2 * bortfeldParam["E0"] ** (2 * bortfeldParam["p"] - 2)
-        )  # [mm] proton range dispersion
+        bortfeldParam["sigma"] = np.sqrt(bortfeldParam["sigmaMono"] ** 2 + bortfeldParam["sigmaE0"] ** 2 * bortfeldParam["alpha"] ** 2 * bortfeldParam["p"] ** 2 * bortfeldParam["E0"] ** (2 * bortfeldParam["p"] - 2))  # [mm] proton range dispersion
 
         bortfeldFitModel = Model(bortfeldEquation)
         bortfeldFit = bortfeldFitModel.fit(data=val, depth=pos, R0=bortfeldParam["R0"], phi0=bortfeldParam["phi"], epsilon=bortfeldParam["epsilon"], sigma=bortfeldParam["sigma"], method="leastsq")
         return bortfeldFit
 
     @property
-    def displayInfo(self):
+    def displayInfo(self) -> None:
         """Display information about the Bragg peak analysis."""
         import numpy as np
 
         bortfeldFitParam = self.bortfeldFitParam
-        print(f"### {__class__.__name__} ###")
-        print("# max value [-]:            {:.2f}".format(np.nanmax(self.__bp[1])))
-        print("# D100 Interp/Bort [-]:     {:.2f}/{:.2f}".format(self.getDInterp(self.getRInterp(1, "D")), self.getDBort(self.getRBort(1, "D"))))
-        print("# R10D Interp/Bort [mm]:    {:.2f}/{:.2f}".format(self.getRInterp(0.1, "D"), self.getRBort(0.1, "D")))
-        print("# R80D Interp/Bort [mm]:    {:.2f}/{:.2f}".format(self.getRInterp(0.8, "D"), self.getRBort(0.8, "D")))
-        print("# DFO9010 Interp/Bort [mm]: {:.2f}/{:.2f}".format(self.getDFOInterp(0.9, 0.1), self.getDFOBort(0.9, 0.1)))
-        print("# FWHM Interp/Bort [mm]:    {:.2f}/{:.2f}".format(self.getWInterp(0.5), self.getWBort(0.5)))
-        print("# Bortfeld fit chi-square [-]:                      {:.5f}".format(self.bortfeldFit.chisqr))
-        print("# Bortfeld range (R0) [mm]:                         {:.2f}".format(bortfeldFitParam["R0_mm"]))
-        print("# Bortfeld sigma of Gaussian range straggling [mm]: {:.2f}".format(bortfeldFitParam["sigmaMono_mm"]))
-        print("# Bortfeld initial energy [MeV]:                    {:.2f}".format(bortfeldFitParam["E0_MeV"]))
-        print("# Bortfeld sigma of Gaussian energy spectrum [MeV]: {:.2f}".format(bortfeldFitParam["sigmaE0_MeV"]))
-        print("#" * len(f"### {__class__.__name__} ###"))
+        strLog = ["max value [-]:                                     {:.2f}".format(np.nanmax(self.__bp[1])),
+                  "D100 Interp/Bort [-]:                              {:.2f}/{:.2f}".format(self.getDInterp(self.getRInterp(1, "D")), self.getDBort(self.getRBort(1, "D"))),
+                  "R10D Interp/Bort [mm]:                             {:.2f}/{:.2f}".format(self.getRInterp(0.1, "D"), self.getRBort(0.1, "D")),
+                  "R80D Interp/Bort [mm]:                             {:.2f}/{:.2f}".format(self.getRInterp(0.8, "D"), self.getRBort(0.8, "D")),
+                  "DFO9010 Interp/Bort [mm]:                          {:.2f}/{:.2f}".format(self.getDFOInterp(0.9, 0.1), self.getDFOBort(0.9, 0.1)),
+                  "FWHM Interp/Bort [mm]:                             {:.2f}/{:.2f}".format(self.getWInterp(0.5), self.getWBort(0.5)),
+                  "Bortfeld fit chi-square [-]:                       {:.5f}".format(self.bortfeldFit.chisqr),
+                  "Bortfeld range (R0) [mm]:                          {:.2f}".format(bortfeldFitParam["R0_mm"]),
+                  "Bortfeld sigma of Gaussian range straggling [mm]:  {:.2f}".format(bortfeldFitParam["sigmaMono_mm"]),
+                  "Bortfeld initial energy [MeV]:                     {:.2f}".format(bortfeldFitParam["E0_MeV"]),
+                  "Bortfeld sigma of Gaussian energy spectrum [MeV]:  {:.2f}".format(bortfeldFitParam["sigmaE0_MeV"])]
+        _logger.info("Bragg peak analysis:\n" + "\t" + "\n\t".join(strLog))
 
     @property
-    def plot(self):
+    def plot(self) -> None:
         """Simple plot of the Bragg peak and analysis methods."""
         import matplotlib.pyplot as plt
 

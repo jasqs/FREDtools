@@ -1,0 +1,76 @@
+
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       8888888888                   888                       |
+|                       888                          888                       |
+|                       888                          888                       |
+|                       8888888 88 d888 .d88b.   .d88888                       |
+|                       888     888P   d8P  Y8b d88' 888                       |
+|                       888     888    88888888 888  888                       |
+|                       888     888    Y8b.     Y88b 888                       |
+|                       888     888     'Y8888   'Y88888                       |
+|                                                                              |
++------------------------------------------------------------------------------+
+|                               www.fred-mc.org                                |
++------------------------------------------------------------------------------+
+|                    Version 3.71.0  (bd7887c) - 2024/07/22                    |
++------------------------------------------------------------------------------+
+
+Input  directory:  .
+Output directory:  out
+Main input file :  ./fred.inp
+
+--------------------------------------------------------------------------------
+[0;35mParsing main input: [0m[0;32mOK[0m
+[0;35mGeometry definitions: [0m[0;32mOK[0m
+[0;35mMaterial definitions: [0m[0;32mOK[0m
+[0;35mActivation: [0m[0;32mOK[0m
+[0;35mSpectra scorer: [0m[0;32mOK[0m
+[0;35mIonization Detail: [0m[0;32mOK[0m
+[0;35mPlane Crossing Scorers: [0m[0;32mOK[0m
+[0;35mSources: [0m[0;32mOK[0m
+[0;35mPhysics packages: [0m[0;32mOK[0m
+[0;35mInit Variance Reduction: [0m[0;32mOK[0m
+[0;35mRadiobiology: [0m[0;32mOK[0m
+[0;35mVerify complete parsing of input file: [0m[0;32m	OK[0m
+[0;35mDelivery sequence: [0m[0;32mOK[0m
+[0;35mGeometry checking: [0m[0;32mOK[0m
+--------------------------------------------------------------------------------
+
+[0;35mTracking particles: [0m
+[0;32mdelivering batch no. 1/1[0m
+Start tracking now:
+##########  10% tracked 
+##########  20% tracked 
+##########  30% tracked 
+##########  40% tracked 
+##########  50% tracked 
+##########  60% tracked 
+##########  70% tracked 
+##########  80% tracked 
+##########  90% tracked 
+########## 100% tracked
+
+[0;35mWriting output: [0m[0;32mOK[0m
+[0;35mRBE models: [0m[0;32mOK[0m
+
+################################################################################
+Running config (PTHREADS,GPU): 16,0
+    Num of CPU threads = 16
+################################################################################
+Timing summary:
+      initialization    0.34 s   1.0%
+        primary list    0.09 s   0.3%
+   delivery checking    0.00 s   0.0%
+   geometry checking    0.00 s   0.0%
+            tracking   32.74 s  98.6%
+      writing output    0.01 s   0.0%
+               other    0.01 s   0.0%
+################################################################################
+Number of primary particles:   1.00e+06
+Tracking rate:   3.05e+04 primary/s
+Track time per primary:    32.7 us
+################################################################################
+Run with [0;32mfred Version 3.71.0  (bd7887c) - 2024/07/22
+[0m################################################################################
+Run wallclock time: 33 s
