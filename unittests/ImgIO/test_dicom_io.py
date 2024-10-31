@@ -11,7 +11,7 @@ testPath = Path(os.path.dirname(__file__))
 
 class test_SortDicoms(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
 
     def test_sortDicoms_recursive(self):
         dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True, displayInfo=True)
@@ -22,7 +22,7 @@ class test_SortDicoms(unittest.TestCase):
         self.assertIn('RNfileNames', dicomFiles)
         self.assertIsInstance(dicomFiles['RNfileNames'], str)
         self.assertIn('RDfileNames', dicomFiles)
-        self.assertEqual(len(dicomFiles['RDfileNames']), 2)
+        self.assertEqual(len(dicomFiles['RDfileNames']), 3)
         self.assertIn('PETfileNames', dicomFiles)
         # self.assertIsInstance(dicomFiles['PETfileNames'], str)
         self.assertIn('Unknown', dicomFiles)
@@ -36,13 +36,13 @@ class test_SortDicoms(unittest.TestCase):
         self.assertIn('RNfileNames', dicomFiles)
         self.assertIsInstance(dicomFiles['RNfileNames'], str)
         self.assertIn('RDfileNames', dicomFiles)
-        self.assertEqual(len(dicomFiles['RDfileNames']), 2)
+        self.assertEqual(len(dicomFiles['RDfileNames']), 3)
         self.assertIn('PETfileNames', dicomFiles)
         # self.assertIsInstance(dicomFiles['PETfileNames'], str)
         self.assertIn('Unknown', dicomFiles)
 
     def test_sortDicoms_no_dicoms(self):
-        dicomFiles = ft.sortDicoms("unittests/testData", recursive=False)
+        dicomFiles = ft.sortDicoms("unittests/testData/TPSDicoms", recursive=False)
         self.assertIn('CTfileNames', dicomFiles)
         self.assertEqual(len(dicomFiles['CTfileNames']), 0)
         self.assertIn('RSfileNames', dicomFiles)
@@ -56,9 +56,9 @@ class test_SortDicoms(unittest.TestCase):
         self.assertIn('Unknown', dicomFiles)
 
 
-class test_GetDicomTypeName(unittest.TestCase):
+class test_getDicomTypeName(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getDicomTypeName(self):
@@ -73,7 +73,7 @@ class test_GetDicomTypeName(unittest.TestCase):
 
 class test_IsDicomCT(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_isDicomCT(self):
@@ -87,7 +87,7 @@ class test_IsDicomCT(unittest.TestCase):
 
 class test_IsDicomRS(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_isDicomRS(self):
@@ -101,7 +101,7 @@ class test_IsDicomRS(unittest.TestCase):
 
 class test_IsDicomRN(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_isDicomRN(self):
@@ -115,7 +115,7 @@ class test_IsDicomRN(unittest.TestCase):
 
 class test_IsDicomRD(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_isDicomRD(self):
@@ -130,7 +130,7 @@ class test_IsDicomRD(unittest.TestCase):
 @unittest.skip("TODO: generate a dicom file with a PET image")
 class test_IsDicomPET(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_isDicomPET(self):
@@ -143,97 +143,97 @@ class test_IsDicomPET(unittest.TestCase):
             ft.ImgIO.dicom_io._isDicomPET(self.dicomFiles.RSfileNames, raiseError=True)
 
 
-class test_GetRNMachineName(unittest.TestCase):
+class test_getRNMachineName(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRNMachineName(self):
         machine_name = ft.getRNMachineName(self.dicomFiles.RNfileNames)
         self.assertIsInstance(machine_name, str)
-        self.assertEqual(machine_name, 'GTR4')
+        self.assertEqual(machine_name, 'GTR3')
 
 
-class test_GetRNIsocenter(unittest.TestCase):
+class test_getRNIsocenter(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRNIsocenter(self):
         isocenter = ft.getRNIsocenter(self.dicomFiles.RNfileNames)
         self.assertIsInstance(isocenter, tuple)
         self.assertEqual(len(isocenter), 3)
-        self.assertEqual(isocenter, (39.3807283826884, -238.93381359307, -570.12038065644))
+        self.assertEqual(isocenter, (38.64990791296525, -239.956199552955, -569.809756326375))
 
 
-class test_GetRNSpots(unittest.TestCase):
+class test_getRNSpots(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRNSpots(self):
         spotsInfo = ft.getRNSpots(self.dicomFiles.RNfileNames)
         self.assertFalse(spotsInfo.empty)
-        self.assertEqual(spotsInfo.loc[spotsInfo.PBMU != 0].shape, (3205, 21))
-        self.assertEqual(spotsInfo.PBMU.sum(), 564.9283290522891)
-        self.assertEqual(spotsInfo[["PBPosX", "PBPosY"]].mean().tolist(), [-2.455148205928237, 0.24765990639625585])
+        self.assertEqual(spotsInfo.loc[spotsInfo.PBMU != 0].shape, (5399, 21))
+        self.assertEqual(spotsInfo.PBMU.sum(), 644.5418658654452)
+        self.assertEqual(spotsInfo[["PBPosX", "PBPosY"]].mean().tolist(), [1.2872754213743285, 0.9203093165401001])
 
 
-class test_GetRNFields(unittest.TestCase):
+class test_getRNFields(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRNFields(self):
         fieldsInfo = ft.getRNFields(self.dicomFiles.RNfileNames)
         self.assertFalse(fieldsInfo.empty)
-        self.assertEqual(fieldsInfo.shape, (2, 18))
+        self.assertEqual(fieldsInfo.shape, (3, 18))
         self.assertEqual(fieldsInfo.loc[fieldsInfo.FNo == 1].FName.tolist(), ['Field 1'])
-        self.assertAlmostEqual(fieldsInfo.FMU.sum(), 564.9283290522891, places=5)
+        self.assertAlmostEqual(fieldsInfo.FMU.sum(), 644.5418658654452, places=5)
 
 
-class test_GetRNInfo(unittest.TestCase):
+class test_getRNInfo(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRNInfo(self):
         planInfo = ft.getRNInfo(self.dicomFiles.RNfileNames)
         self.assertIsInstance(planInfo, dict)
-        self.assertEqual(planInfo.fractionNo, 35)
-        self.assertEqual(planInfo.dosePrescribed, 70.0)
+        self.assertEqual(planInfo.fractionNo, 10)
+        self.assertEqual(planInfo.dosePrescribed, 20.0)
         self.assertEqual(planInfo.targetStructName, '')
-        self.assertEqual(planInfo.planLabel, 'Sphere_2F')
-        self.assertEqual(planInfo.planDate, '20210702')
-        self.assertEqual(planInfo.planTime, '171808.89')
-        self.assertEqual(planInfo.patientName, 'RASISndwYCjIhgDE')
+        self.assertEqual(planInfo.planLabel, 'Sphere_2F_FT')
+        self.assertEqual(planInfo.planDate, '20241031')
+        self.assertEqual(planInfo.planTime, '125905.397')
+        self.assertEqual(planInfo.patientName, 'mNQWVCZsiQgCFHze')
         self.assertEqual(planInfo.patientBirthDate, '')
-        self.assertEqual(planInfo.patientID, '0h3XaG9gsktUcYRGBpgpW9d33')
+        self.assertEqual(planInfo.patientID, 'KHTOG7e2vQYwpyyzHqOJ3R7o5')
         self.assertEqual(planInfo.manufacturer, 'Varian Medical Systems')
         self.assertEqual(planInfo.softwareVersions, '16.1.3')
         self.assertEqual(planInfo.stationName, '')
-        self.assertEqual(planInfo.machineName, 'GTR4')
-        self.assertEqual(planInfo.totalFieldsNumber, 2)
-        self.assertEqual(planInfo.treatmentFieldsNumber, 2)
+        self.assertEqual(planInfo.machineName, 'GTR3')
+        self.assertEqual(planInfo.totalFieldsNumber, 3)
+        self.assertEqual(planInfo.treatmentFieldsNumber, 3)
         self.assertEqual(planInfo.setupFieldsNumber, 0)
         self.assertEqual(planInfo.otherFieldsNumber, 0)
 
 
-class test_GetRSInfo(unittest.TestCase):
+class test_getRSInfo(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRSInfo(self):
         rsInfo = ft.getRSInfo(self.dicomFiles.RSfileNames)
         self.assertFalse(rsInfo.empty)
         self.assertEqual(rsInfo.groupby("ROIType")["ROIType"].count().index.to_list(), ['AVOIDANCE', 'CONTROL', 'EXTERNAL', 'ORGAN', 'PTV'])
-        self.assertEqual(rsInfo.groupby("ROIType")["ROIType"].count().tolist(), [1, 8, 1, 1, 4])
+        self.assertEqual(rsInfo.groupby("ROIType")["ROIType"].count().tolist(), [1, 11, 1, 1, 4])
 
 
-class test_GetExternalName(unittest.TestCase):
+class test_getExternalName(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getExternalName(self):
@@ -242,9 +242,9 @@ class test_GetExternalName(unittest.TestCase):
         self.assertEqual(externalName, 'External')
 
 
-class test_GetCT(unittest.TestCase):
+class test_getCT(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getCT(self):
@@ -256,9 +256,9 @@ class test_GetCT(unittest.TestCase):
         self.assertAlmostEqual(ft.getStatistics(imgCT).GetMean(), -893.670319255193)
 
 
-class test_GetRD(unittest.TestCase):
+class test_getRD(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRD(self):
@@ -267,12 +267,12 @@ class test_GetRD(unittest.TestCase):
         self.assertEqual(imgDose.GetSize(), (93, 116, 121))
         self.assertListEqual(np.round(imgDose.GetSpacing(), decimals=5).tolist(), [2.5,  2.5, 2.4])
         self.assertListEqual(np.round(imgDose.GetOrigin(), decimals=5).tolist(), [-114.51172, -356.48828, -718.3])
-        self.assertAlmostEqual(ft.getStatistics(imgDose).GetMean(), 1.5692553116950076)
+        self.assertAlmostEqual(ft.getStatistics(imgDose).GetMean(), 0.6062437075936838)
 
 
-class test_GetRDFileNameForFieldNumber(unittest.TestCase):
+class test_getRDFileNameForFieldNumber(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
 
     def test_getRDFileNameForFieldNumber(self):
@@ -281,13 +281,13 @@ class test_GetRDFileNameForFieldNumber(unittest.TestCase):
         self.assertIn("Field 1", str(RDfileNameField1))
 
     def test_getRDFileNameForFieldNumber_non_existing_field(self):
-        RDfileNameField3 = ft.getRDFileNameForFieldNumber(self.dicomFiles.RDfileNames, 3, displayInfo=True)
+        RDfileNameField3 = ft.getRDFileNameForFieldNumber(self.dicomFiles.RDfileNames, 10, displayInfo=True)
         self.assertIsNone(RDfileNameField3)
 
 
 class test_anonymizeDicoms(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.test_dir = Path.joinpath(testPath, "anonymizeDataFolder")
         self.test_dir.mkdir(exist_ok=True)
         # Copy all files recursively from testDataFolder to test_dir
@@ -325,9 +325,9 @@ class test_anonymizeDicoms(unittest.TestCase):
                 self.assertEqual(dicomTags.PhysiciansOfRecord, "")
 
 
-class test_GetStructureContoursByName(unittest.TestCase):
+class test_getStructureContoursByName(unittest.TestCase):
     def setUp(self):
-        self.testDataFolder = 'unittests/testData/TPSDicoms'
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
         # print(ft.getRSInfo(self.dicomFiles.RSfileNames).to_string())
 
@@ -345,7 +345,6 @@ class test_GetStructureContoursByName(unittest.TestCase):
         with self.assertRaises(ValueError):
             ft.ImgIO.dicom_io._getStructureContoursByName(self.dicomFiles.RSfileNames, 'InvalidStructure')
 
-    @unittest.skip("TODO: generate a dicom file with a structure with no ContourSequence")
     def test_getStructureContoursByName_no_contour_sequence(self):
         contours, info = ft.ImgIO.dicom_io._getStructureContoursByName(self.dicomFiles.RSfileNames, 'NoContour')
         self.assertIsInstance(contours, list)
