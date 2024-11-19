@@ -9,12 +9,12 @@ from fredtools._typing import *
 class TestOmniProIO(unittest.TestCase):
 
     def setUp(self):
-        self.test_data_dir = Path("unittests/testData/OmniPro")
-        self.opg_file = Path.joinpath(self.test_data_dir, "image.opg")
-        self.opd_file = Path.joinpath(self.test_data_dir, "image.opd")
+        self.testDir = Path("unittests/testData/OmniPro")
+        self.filePath_opg = Path.joinpath(self.testDir, "image.opg")
+        self.filePath_opd = Path.joinpath(self.testDir, "image.opd")
 
     def test_readOPG(self):
-        img = ft.readOPG(self.opg_file, depth=5.0, displayInfo=True)
+        img = ft.readOPG(self.filePath_opg, depth=5.0, displayInfo=True)
         self.assertIsInstance(img, SITKImage)
         self.assertEqual(img.GetDepth(), 1)
         self.assertListEqual(np.round(img.GetSpacing(), decimals=5).tolist(), [7.61935, 7.61935, 0.1])
@@ -22,7 +22,7 @@ class TestOmniProIO(unittest.TestCase):
         self.assertAlmostEqual((ft.getStatistics(img).GetMean()), 0.0609984375)
 
     def test_readOPD(self):
-        imgs = ft.readOPD(self.opd_file, depth=5.0, returnImg=["Integral", "Sum"], raiseWarning=True, displayInfo=True)
+        imgs = ft.readOPD(self.filePath_opd, depth=5.0, returnImg=["Integral", "Sum"], raiseWarning=True, displayInfo=True)
         self.assertIsInstance(imgs, list)
         self.assertGreater(len(imgs), 0)
         meanSum = 0

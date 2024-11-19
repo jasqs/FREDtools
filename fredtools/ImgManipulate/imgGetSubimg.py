@@ -100,7 +100,6 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     >>> matplotlib.pyplot.ylabel('X [mm] (reversed)')
     """
     import re
-    import warnings
     import SimpleITK as sitk
     import fredtools as ft
     import numpy as np

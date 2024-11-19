@@ -6,7 +6,7 @@ re_number: str = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
 '''Regular expression for a number in almost any notation inlcuding the scientific notation.'''
 
 
-def mergePDF(PDFFileNames: Iterable[str], mergedPDFFileName: str, removeSource: bool = False, displayInfo: bool = False) -> str:
+def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, removeSource: bool = False, displayInfo: bool = False) -> str:
     """Merge multiple PDF files to a single PDF.
 
     The function merges multiple PDF files given as a list of
@@ -34,7 +34,7 @@ def mergePDF(PDFFileNames: Iterable[str], mergedPDFFileName: str, removeSource: 
     import fredtools as ft
 
     # check if it is a single string
-    if isinstance(PDFFileNames, str):
+    if isinstance(PDFFileNames, PathLike):
         PDFFileNames = [PDFFileNames]
 
     # check if all files to be merged exist
@@ -57,10 +57,10 @@ def mergePDF(PDFFileNames: Iterable[str], mergedPDFFileName: str, removeSource: 
     mergedPDF.save(mergedPDFFileName)
 
     if displayInfo:
-        _logger.info(f"# Merged PDF files:\n# " + "\n# ".join(PDFFileNames))
-        _logger.info(f"# Saved merged PDF to: ", mergedPDFFileName)
-        if removeSource:
-            _logger.info(f"# Removed the source PDF files")
+        _logger.info(f"Merged PDF files:\n\t"
+                     + "\n\t".join(map(str, PDFFileNames))
+                     + f"\n\tsaved to: {mergedPDFFileName}"
+                     + ("\n\tand removed the source PDF files." if removeSource else ""))
 
     return os.path.abspath(mergedPDFFileName)
 
@@ -145,6 +145,7 @@ def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = N
     # create bins if not given
     if bins is None:
         bins = np.linspace(np.nanmin(dataX), np.nanmax(dataX), 100)
+        _logger.debug(f"Bins were not given. Automatically generated between {bins[0]} and {bins[-1]} in 100 steps.")
 
     # validate kind parameter
     if dataY is not None and kind not in ["sum", "mean", "std", "median", "min", "max", "mean-std", "mean+std"]:

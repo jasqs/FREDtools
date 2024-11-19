@@ -10,17 +10,17 @@ testPath = Path(os.path.dirname(__file__))
 class test_mhd_io(unittest.TestCase):
 
     def setUp(self):
-        self.test_dir = Path.joinpath(testPath, "test_mhd_io")
-        self.test_dir.mkdir(exist_ok=True)
-        self.filePath = Path.joinpath(self.test_dir, "test.mhd")
+        self.testDir = Path.joinpath(testPath, "test_mhd_io")
+        self.testDir.mkdir(exist_ok=True)
+        self.filePath = Path.joinpath(self.testDir, "test.mhd")
         self.img = ft.createImg((10, 10, 10), spacing=(1, 1, 1), origin=(0, 0, 0), fillRandom=True)
-        self.filePaths = [Path.joinpath(self.test_dir, "test1.mhd"),
-                          Path.joinpath(self.test_dir, "test2.mhd")]
+        self.filePaths = [Path.joinpath(self.testDir, "test1.mhd"),
+                          Path.joinpath(self.testDir, "test2.mhd")]
 
     def tearDown(self):
-        for file in self.test_dir.glob("*"):
+        for file in self.testDir.glob("*"):
             file.unlink()
-        self.test_dir.rmdir()
+        self.testDir.rmdir()
 
     def test_writeMHD_single_file(self):
         ft.writeMHD(self.img, self.filePath, singleFile=True, overwrite=True, displayInfo=True)
@@ -29,7 +29,7 @@ class test_mhd_io(unittest.TestCase):
     def test_writeMHD_double_file(self):
         ft.writeMHD(self.img, self.filePath, singleFile=False, overwrite=True)
         self.assertTrue(self.filePath.exists())
-        self.assertTrue(Path.joinpath(self.test_dir, "test.raw").exists())
+        self.assertTrue(Path.joinpath(self.testDir, "test.raw").exists())
 
     def test_writeMHD_overwrite(self):
         ft.writeMHD(self.img, self.filePath, singleFile=True, overwrite=True)
@@ -63,7 +63,7 @@ class test_mhd_io(unittest.TestCase):
         ft.writeMHD(self.img, self.filePath, singleFile=False, overwrite=True)
         ft.convertMHDtoSingleFile(self.filePath, displayInfo=True)
         self.assertTrue(self.filePath.exists())
-        self.assertFalse(Path.joinpath(self.test_dir, "test.raw").exists())
+        self.assertFalse(Path.joinpath(self.testDir, "test.raw").exists())
         result = ft.readMHD(self.filePath)
         self.assertTrue(ft.compareImgFoR(result, self.img))
         self.assertEqual(sitk.GetArrayFromImage(result).tolist(), sitk.GetArrayFromImage(self.img).tolist())
@@ -72,7 +72,7 @@ class test_mhd_io(unittest.TestCase):
         ft.writeMHD(self.img, str(self.filePath), singleFile=True, overwrite=True)
         ft.convertMHDtoDoubleFiles(str(self.filePath), displayInfo=True)
         self.assertTrue(self.filePath.exists())
-        self.assertTrue(Path.joinpath(self.test_dir, "test.raw").exists())
+        self.assertTrue(Path.joinpath(self.testDir, "test.raw").exists())
         result = ft.readMHD(self.filePath)
         self.assertTrue(ft.compareImgFoR(result, self.img))
         self.assertEqual(sitk.GetArrayFromImage(result).tolist(), sitk.GetArrayFromImage(self.img).tolist())

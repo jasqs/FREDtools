@@ -39,6 +39,7 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
     import SimpleITK as sitk
     import fredtools as ft
 
+    # validate size and components
     if len(size) < 2 or len(size) > 3:
         error = ValueError(f"Only 2D or 3D images are supported. The parameter size = {list(size)} was used.")
         _logger.error(error)
@@ -50,6 +51,12 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
         sitkType = sitk.sitkVectorFloat32
     else:
         error = ValueError(f"The parameter components must be a non-negative integer. The parameter components={components} was used.")
+        _logger.error(error)
+        raise error
+
+    # validate spacing
+    if len(spacing) != len(size):
+        error = ValueError(f"The parameter spacing must have the same length as the size. The parameter spacing={list(spacing)} was used.")
         _logger.error(error)
         raise error
 
