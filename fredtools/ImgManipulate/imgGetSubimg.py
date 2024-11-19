@@ -226,10 +226,10 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
 
     Returns
     -------
-    SimpleITK Image
-        Instance of a SimpleITK image object describing a profile.
+    SimpleITK Image        cumsum_img = ft.getCumSum(self.img3D, axis='X', displayInfo=True)
+        self.assertEqual(cumsum_img.GetDimension(), 3)
+        self.assertEqual(cumsum_img.GetSize(), self.img3D.GetSize())
 
-    See Also
     --------
         matplotlib.pyplot.plot : displaying profiles.
         pos : get voxels' centers for axes of size different than one.
@@ -496,7 +496,11 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
     if displayInfo:
         if not ft.isPointInside(img, point):
             _logger.warning(f"Warning: the point {point} is not inside the image extent: {ft.getExtent(img)}.")
-        _logger.info(f"Getting value at point {np.array(point)}: {ft.arr(pointVal)}" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(pointVal))
+        if ft._imgTypeChecker.isSITK_vector(img):
+            _logger.info(f"Getting value at point {np.array(point)}: vector of {len(ft.arr(pointVal))} values" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(pointVal))
+            _logger.debug(f"Vector of point values:\n {ft.arr(pointVal)}")
+        else:
+            _logger.info(f"Getting value at point {np.array(point)}: {ft.arr(pointVal)}" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(pointVal))
 
     return pointVal
 

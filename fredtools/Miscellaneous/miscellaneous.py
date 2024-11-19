@@ -144,7 +144,7 @@ def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = N
 
     # create bins if not given
     if bins is None:
-        bins = np.linspace(np.nanmin(dataX), np.nanmax(dataX), 100)
+        bins = np.asarray(np.linspace(np.nanmin(dataX), np.nanmax(dataX), 100))
         _logger.debug(f"Bins were not given. Automatically generated between {bins[0]} and {bins[-1]} in 100 steps.")
 
     # validate kind parameter

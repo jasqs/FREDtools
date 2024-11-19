@@ -317,6 +317,28 @@ class test_compareImgFoR(unittest.TestCase):
         img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
         self.assertTrue(ft.compareImgFoR(self.img3D, img2, displayInfo=True))
 
+    def test_compareImgFoR_fail(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[1.0, 0.0, 0.0])
+        self.assertFalse(ft.compareImgFoR(self.img3D, img2, displayInfo=True))
+
+
+class test_compareImg(unittest.TestCase):
+    def setUp(self):
+        self.img3D = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
+
+    def test_compareImg(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
+        self.assertTrue(ft.compareImg(self.img3D, img2, displayInfo=True))
+
+    def test_compareImg_fail(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
+        img2[5, 5, 5] = 1.0
+        self.assertFalse(ft.compareImg(self.img3D, img2, displayInfo=True))
+
+    def test_compareImg_differentFoR(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[1.0, 0.0, 0.0])
+        self.assertTrue(ft.compareImg(self.img3D, img2, displayInfo=True))
+
 
 if __name__ == '__main__':
     unittest.main()

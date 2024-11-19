@@ -1,0 +1,14 @@
+ObjectType = Image
+NDims = 3
+BinaryData = True
+BinaryDataByteOrderMSB = False
+CompressedData = False
+TransformMatrix = 1 0 0 0 1 0 0 0 1
+Offset = 3.5390625 -237.3359375 -580.89999999999998
+CenterOfRotation = 0 0 0
+AnatomicalOrientation = RAI
+ElementSpacing = 3 3 3
+DimSize = 1 1 1
+ElementType = MET_FLOAT
+ElementDataFile = LOCAL
+_.C

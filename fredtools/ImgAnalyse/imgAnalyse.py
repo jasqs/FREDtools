@@ -900,7 +900,55 @@ def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageF
     return stat
 
 
-def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: bool = False) -> bool:
+def compareImg(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInfo: bool = False) -> bool:
+    """Compare two images pixel by pixel.
+
+    The function gets two images defined as instances of a SimpleITK image
+    object and compares them pixel by pixel. The comparison is done with
+    a given decimal tolerance.
+
+    Parameters
+    ----------
+    img1 : SimpleITK Image
+        An object of a SimpleITK image.
+    img2 : SimpleITK Image
+        An object of a SimpleITK image.
+    decimal: int, optional
+        The number of decimal places to compare the images. (def. 3)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    bool
+        A true/false value describing if the images are the same
+        in the sense of the pixel values.
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    ft._imgTypeChecker.isSITK(img1, raiseError=True)
+    ft._imgTypeChecker.isSITK(img2, raiseError=True)
+
+    if not ft.compareImgFoR(img1, img2):
+        _logger.warning("The images have different FoR.")
+
+    if not img1.GetPixelID() == img2.GetPixelID():
+        _logger.warning(f"The images have different pixel types. The 'img' type is {img1.GetPixelIDTypeAsString()} and 'img2' type is {img2.GetPixelIDTypeAsString()}.")
+
+    try:
+        np.testing.assert_array_almost_equal(sitk.GetArrayFromImage(img1), sitk.GetArrayFromImage(img2), decimal=decimal)
+        if displayInfo:
+            _logger.info(f"Images are equal within {decimal} decimal places.")
+        return True
+    except AssertionError:
+        if displayInfo:
+            _logger.info(f"Images are different within {decimal} decimal places.")
+        return False
+
+
+def compareImgFoR(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInfo: bool = False) -> bool:
     """Compare two images frame of reference
 
     The function gets two images defined as instances of a SimpleITK image
@@ -942,10 +990,10 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: boo
     sizeMatch = img1.GetSize() == img2.GetSize()
 
     # compare origin
-    originMatch = np.all(np.round(np.array(img1.GetOrigin()), decimals=decimals) == np.round(np.array(img2.GetOrigin()), decimals=decimals))
+    originMatch = np.all(np.round(np.array(img1.GetOrigin()), decimals=decimal) == np.round(np.array(img2.GetOrigin()), decimals=decimal))
 
     # compare spacing
-    spacingMatch = np.all(np.round(np.array(img1.GetSpacing()), decimals=decimals) == np.round(np.array(img2.GetSpacing()), decimals=decimals))
+    spacingMatch = np.all(np.round(np.array(img1.GetSpacing()), decimals=decimal) == np.round(np.array(img2.GetSpacing()), decimals=decimal))
 
     # compare direction
     directionMatch = np.all(np.array(img1.GetDirection()) == np.array(img2.GetDirection()))
@@ -954,7 +1002,8 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: boo
 
     # compare values if displayInfo
     if match and displayInfo:
-        valuesMatch = np.allclose(sitk.GetArrayFromImage(img1), sitk.GetArrayFromImage(img2), rtol=0, atol=1 / (10**decimals), equal_nan=True)
+        # valuesMatch = np.allclose(sitk.GetArrayFromImage(img1), sitk.GetArrayFromImage(img2), rtol=0, atol=1 / (10**decimals), equal_nan=True)
+        valuesMatch = ft.compareImg(img1, img2, decimal=decimal)
     else:
         valuesMatch = False
 
@@ -962,10 +1011,10 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimals=3, displayInfo: boo
         strLog = [
             f"Dimension matching:       {dimensionMatch}",
             f"Size matching:            {sizeMatch}",
-            f"Origin matching:          {originMatch} ({decimals} decimals tolerance)",
-            f"Spacing matching:         {spacingMatch} ({decimals} decimals tolerance)",
+            f"Origin matching:          {originMatch} ({decimal} decimals tolerance)",
+            f"Spacing matching:         {spacingMatch} ({decimal} decimals tolerance)",
             f"Direction matching:       {directionMatch}",
-            f"Pixel-to-pixel matching:  {valuesMatch} ({decimals} decimals tolerance)",
+            f"Pixel-to-pixel matching:  {valuesMatch} ({decimal} decimals tolerance)",
         ]
         _logger.info("FoRs matching:\n\t" + "\n\t".join(strLog))
 
