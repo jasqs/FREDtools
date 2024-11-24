@@ -22,9 +22,15 @@ from SimpleITK import Transform as SITKTransform
 
 # numpy
 from numpy.typing import NDArray, ArrayLike, DTypeLike
+from scipy.sparse import spmatrix, csr_matrix
+from cupy.sparse import spmatrix as cp_spmatrix
+from cupy.sparse import csr_matrix as cp_csr_matrix
+SparseMatrix: TypeAlias = Union[spmatrix, cp_spmatrix]
+SparseMatrixCSR: TypeAlias = Union[csr_matrix, cp_csr_matrix]
 
-from matplotlib.axes import Axes
-from matplotlib.image import AxesImage
+# matplotlib
+from matplotlib.axes import Axes  # noqa
+from matplotlib.image import AxesImage  # noqa
 
 # from pandas._typing import Scalar as PDScalar
 # numberic

@@ -3,6 +3,172 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
+def _getInmFREDVersion(fileName: PathLike) -> int:
+    """Get the version of the FRED influence matrix file."""
+    import struct
+
+    with open(fileName, "rb") as file_h:
+        InmFREDVersion, = struct.unpack("i", file_h.read(4))
+
+    _logger.debug(f"Version of Inm file {fileName}: {InmFREDVersion/10}.")
+
+    return InmFREDVersion/10
+
+
+def _isInmFRED(fileName: PathLike, raiseError: bool = False) -> bool:
+    """Check if the file is a proper FRED influence matrix file and raise error if requested."""
+
+    try:
+        InmFREDVersion = _getInmFREDVersion(fileName)/10
+        if InmFREDVersion == 0 or InmFREDVersion > 10:
+            if raiseError:
+                raise TypeError(f"The file is not a proper FRED influence matrix file.")
+            else:
+                return False
+        else:
+            return True
+    except Exception as e:
+        if raiseError:
+            error = f"Error reading the version of the Inm file '{fileName}': {e}"
+            _logger.error(error)
+            raise e
+        else:
+            return False
+
+
+def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
+    """Read basic information from FRED influence matrix.
+
+    The function reads an influence matrix file produced by the FRED Monte Carlo
+    and gets the basic information about the pencil beams and fields saved.
+
+    Parameters
+    ----------
+    fileName : path
+        Path to FRED influence matrix file to read.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    DataFrame
+        Pandas DataFrame with pencil beams and field numbers.
+
+    See Also
+    --------
+        getInmFREDBaseImg : get base image defined in FRED influence matrix.
+        getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
+        getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
+        getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
+    """
+    import fredtools as ft
+    import numpy as np
+    import struct
+
+    _isInmFRED(fileName, raiseError=True)
+
+    # create an empty basic image with FoR defined in Inm
+    imgBase = ft.getInmFREDBaseImg(fileName, dtype="uint8")
+
+    # read the influence matrix file depanding on the version
+    InmFREDVersion = _getInmFREDVersion(fileName)
+    match InmFREDVersion:
+        case 2:
+            with open(fileName, "rb") as file_h:
+                [_, _, _, _, _, _, _, _, _, _, componentNo, _] = struct.unpack("<4i6f2i", file_h.read(48))
+            inmInfo = _getInmFREDInfoVersion2(fileName)
+        case 3:
+            with open(fileName, "rb") as file_h:
+                [_, _, _, _, _, _, _, _, _, _, componentNo, _] = struct.unpack("<4i6f2i", file_h.read(48))
+            inmInfo = _getInmFREDInfoVersion3(fileName)
+        case _:
+            error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
+            _logger.error(error)
+            raise error
+
+    if displayInfo:
+        strLog = [f"Imn file version: {InmFREDVersion}",
+                  f"Number of PBs: {inmInfo.PBID.size}",
+                  f"Number of fields: {inmInfo.FID.unique().size}",
+                  f"Number of components: {componentNo}",
+                  f"Number of voxels (min/max/mean): {inmInfo.voxelsNo.min()}/{inmInfo.voxelsNo.max()}/{inmInfo.voxelsNo.mean():.0f}",
+                  f"Percent of voxels (min/max/mean): {inmInfo.voxelsNo.min()/np.prod(imgBase.GetSize())*100:.2f}%/{inmInfo.voxelsNo.max()/np.prod(imgBase.GetSize())*100:.2f}%/{inmInfo.voxelsNo.mean()/np.prod(imgBase.GetSize())*100:.2f}%",
+                  "FoR of the image:"]
+        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgBase))
+
+    return inmInfo
+
+
+def _getInmFREDInfoVersion2(fileName: PathLike) -> DataFrame:
+    import pandas as pd
+    import struct
+
+    headerSize = 48
+
+    with open(fileName, "rb") as file_h:
+        # get FoR of the Inm image and pencil beam number
+        [InmFREDVersion, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+
+    with open(fileName, "rb") as file_h:
+        file_h.seek(headerSize, 1)  # skip header
+
+        FIDs = []
+        PBIDs = []
+        # fileTargets =[]
+        voxelsNos = []
+        try:
+            for _ in range(pencilBeamNo):
+                [PBTag, voxelsNo] = struct.unpack("2i", file_h.read(8))
+
+                # fileTargets.append(file_h.tell())
+                FIDs.append(int(PBTag / 1000000))
+                PBIDs.append(PBTag % 1000000)
+                voxelsNos.append(voxelsNo)
+
+                file_h.seek(voxelsNo * 4 * (componentNo+1), 1)  # jump to the next PB
+        except:
+            error = TypeError('Could not parse the whole structure of the influence matrix.')
+            _logger.error(error)
+            raise error
+
+    inmInfo = pd.DataFrame({"FID": FIDs, "PBID": PBIDs, "voxelsNo": voxelsNos})
+    inmInfo.index.set_names('PBIdx', inplace=True)
+
+    return inmInfo
+
+
+def _getInmFREDInfoVersion3(fileName: PathLike) -> DataFrame:
+    import pandas as pd
+    import struct
+    import numpy as np
+
+    headerSize = 48
+
+    with open(fileName, "rb") as file_h:
+        # get FoR of the Inm image and pencil beam number
+        [InmFREDVersion, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+
+    with open(fileName, "rb") as file_h:
+        file_h.seek(headerSize, 1)  # skip header
+
+        # get PBIdx to (FID, PBID) mapping array
+        mapPBIdx = np.frombuffer(file_h.read(3 * pencilBeamNo * 4), dtype="uint32", count=pencilBeamNo*3)
+        mapPBIdx = np.reshape(mapPBIdx, (pencilBeamNo, 3))
+
+        # get components' size
+        componentsDataSize = np.frombuffer(file_h.read(4 * componentNo), dtype="uint32", count=componentNo)
+
+        pbIdx = np.frombuffer(file_h.read(componentsDataSize[0]*4), dtype="uint32", count=componentsDataSize[0])
+
+    inmInfo = pd.DataFrame(mapPBIdx, columns=["PBIdx", "FID", "PBID"]).set_index("PBIdx")
+
+    pbIdx, voxelsNos = np.unique(pbIdx, return_counts=True)
+    voxelsNo = pd.DataFrame({"PBIdx": pbIdx, "voxelsNo": voxelsNos}).set_index("PBIdx")
+    inmInfo = pd.merge(inmInfo, voxelsNo, left_index=True, right_index=True, how="left")
+
+    return inmInfo
+
+
 def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo: bool = False) -> SITKImage:
     """Get base image defined in FRED influence matrix.
 
@@ -36,13 +202,15 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
     import SimpleITK as sitk
     import struct
 
+    _isInmFRED(fileName, raiseError=True)
+
     with open(fileName, "rb") as file_h:
         # get FoR of the Inm image and pencil beam number
-        [fileVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
+        [InmFREDVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
         shape = np.array([sizeX, sizeY, sizeZ])
         size = np.prod(shape)
-        spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=7) * 10
-        offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=7) * 10
+        spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=4) * 10
+        offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=4) * 10
         origin = offset + spacing / 2
 
         # create empty basic image with FoR defined in Inm
@@ -51,473 +219,165 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
         imgBase.SetSpacing(spacing)
 
     if displayInfo:
-        ft.ImgAnalyse.imgInfo._displayImageInfo(imgBase)
+        strLog = [f"Inm file version: {InmFREDVersion}",
+                  f"Number of PBs: {pencilBeamNo}",
+                  f"Number of components: {componentNo}"]
+        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgBase))
 
     return imgBase
 
 
-def getInmFREDSumImage(fileName: PathLike, inmInfo: DataFrame | PDSeries | None = None, threshold: Numberic | Sequence[Numberic] | None = None, dtype: DTypeLike = float, displayInfo: bool = False) -> SITKImage:
-    """Read the FRED influence matrix to sum up the SimpleITK image object.
+def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interpreter: str = "numpy", displayInfo: bool = False) -> Sequence[SparseMatrixCSR]:
 
-    The function reads an influence matrix file produced by
-    the FRED Monte Carlo to an instance of a SimpleITK image object by summing
-    the requested pencil beams with weights if requested. By default,
-    all the pencil beams saved to the Inm influence matrix are read with the unitary weights
-    for all pencil beams. Still, the user can ask for selected pencil beams providing influence 
-    matrix info pandas DataFrame, which must include at least columns 'PBID' and 'FID', and 
-    can include column 'weight', which will be used for weight calculation.
-
-    Parameters
-    ----------
-    fileName : path
-        Path to FRED influence matrix file to read.
-    inmInfo : pandas.DataFrame, optional
-        A pandas DataFrame with at least columns 'PBID' and 'FID'. (def. None)
-    threshold : scalar, array_like or None, optional
-        The threshold for which the values are filtered, defined as the fraction 
-        of maximum value for each bencim beam. It can be a scalar for a single component
-        influence matrix or an iterable of the same size as the number of components. (def. None)
-    dtype : data-type, optional
-        The desired data-type for the output image, e.g., `numpy.uint32` or `float32`. (def. numpy.float64)
-    displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
-
-    Returns
-    -------
-    SimpleITK Image
-        An object of a SimpleITK image.
-
-    See Also
-    --------
-        getInmFREDBaseImg : get base image defined in FRED influence matrix.
-        getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
-    """
-    import struct
-    import SimpleITK as sitk
     import numpy as np
-    import fredtools as ft
-    from collections.abc import Iterable
+    import cupy as cp
 
-    fileHeaderSize = 48
+    _isInmFRED(fileName, raiseError=True)
 
-    # get number of PBs and FoR saved to Inm
-    with open(fileName, "rb") as file_h:
-        [fileVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(fileHeaderSize))
-        shape = np.array([sizeX, sizeY, sizeZ])
-        size = np.prod(shape)
-        spacing = np.around(np.array([spacingX, spacingY, spacingZ]) * 10, decimals=7)  # [mm]
-        offset = np.around(np.array([offsetX, offsetY, offsetZ]) * 10, decimals=7)  # [mm]
-        origin = offset + spacing / 2  # [mm]
+    # validate interpreter
+    if interpreter.lower() not in ["numpy", "cupy"]:
+        error = ValueError(f"Interpreter '{interpreter}' is not supported. Use 'numpy' for CPU or 'cupy' for GPU implementation.")
+        _logger.error(error)
+        raise error
 
-    # validate threshold
-    if threshold:
-        if isinstance(threshold, Numberic):
-            threshold = tuple([threshold])
-        else:
-            threshold = tuple(threshold)
-
-        if len(threshold) != componentNo:
-            error = AttributeError(f"The influence matrix describes {componentNo} components but threshold is {threshold}. The size of threshold must be the same as the number of components.")
-            _logger.error(error)
-            raise error
-
-    # get requested pencil beams info
-    inmInfoRequested = _mergeInmInfo(inmInfo, fileName)
-
-    # create empty vector
-    arrVec = [np.zeros(size, dtype="float64") for _ in range(componentNo)]
-
-    with open(fileName, "rb") as file_h:
-        file_h.seek(fileHeaderSize, 1)  # skip header
-        for _, inmInfoRow in inmInfoRequested.iterrows():
-            # jump to PB data file target
-            file_h.seek(int(inmInfoRow.PBfileTarget))
-
-            # read voxel indices and values
-            voxelsNo = int(inmInfoRow.voxelsNo)
-            voxelIndices = np.frombuffer(file_h.read(voxelsNo * 4), dtype="uint32", count=voxelsNo)
-            voxelValues = np.frombuffer(file_h.read(voxelsNo * componentNo * 4), dtype="float32", count=voxelsNo*componentNo)
-
-            # filter voxels for low signal
-            # voxelsFilter=np.where(voxelValues>=(np.max(voxelValues)*0.1))
-            # voxelIndices=
-            # add values to array for each component
-            for component in range(componentNo):
-
-                voxelValuesComponent = voxelValues[component::componentNo]
-                # filter values if requested
-                """The filterring is done for values above or equal to a given fraction of the maximum value, defined with the threshold for a given component"""
-                if isinstance(threshold, Tuple):
-                    voxelsFilter = np.where(voxelValuesComponent >= (np.max(voxelValuesComponent)*threshold[component]))
-                    voxelValuesComponent = voxelValuesComponent[voxelsFilter]
-                    voxelIndices = voxelIndices[voxelsFilter]
-
-                arrVec[component][voxelIndices] += voxelValuesComponent * inmInfoRow.weight  # add values to array
-
-    # reshape each array
-    for component in range(componentNo):
-        arrVec[component] = np.reshape(arrVec[component], shape, order="F")
-    # stack array for each component to single array
-    arr = np.stack(arrVec, axis=3)
-    arr = arr.astype(dtype)
-    # squeeze axis=3 if only one component
-    if arr.shape[3] == 1:
-        arr = arr[:, :, :, 0]
-    arr = np.moveaxis(arr, list(range(len(shape))), list(range(len(shape)))[::-1])
-    img = sitk.GetImageFromArray(arr)
-    img.SetOrigin(origin)
-    img.SetSpacing(spacing)
-
-    if displayInfo:
-        strLog = [f"Number of PBs: {len(inmInfoRequested)}",
-                  f"Number of fields: {len(inmInfoRequested.FID.unique())}",
-                  f"Number of components: {componentNo}"]
-        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(img))
-
-    return img
-
-
-def getInmFREDPoint(fileName: PathLike, point: PointLike, inmInfo: DataFrame | PDSeries | None = None, dtype: DTypeLike = float, interpolation: Literal['linear', 'nearest', 'cubic'] = "linear", raiseMemError: bool = True, displayInfo: bool = False) -> NDArray:
-    """Get vector of interpolated values in a point from FRED influence matrix.
-
-    The function reads an influence matrix file produced by the FRED Monte Carlo
-    and interpolates the signal value for a given point or list of points. By default, the interpolated
-    values for all the pencil beams saved to the Inm influence matrix will be calculated with the unitary weights
-    for all pencil beams. Still, the user can ask for selected pencil beams providing influence 
-    matrix info pandas DataFrame, which must include at least columns 'PBID' and 'FID', and 
-    can include column 'weight', which will be used for weight calculation.
-
-    Parameters
-    ----------
-    fileName : path
-        Path to FRED influence matrix file to read.
-    point : Nx3 array_like
-        3-element iterable or an N-element iterable of 3-element iterables.
-    inmInfo : pandas.DataFrame, optional
-        A pandas DataFrame with at least columns 'PBID' and 'FID'. (def. None)        
-    dtype : data-type, optional
-        The desired data-type for the output image, e.g., `numpy.uint32` or `float32`. (def. numpy.float64)        
-    interpolation : {'linear', 'nearest', 'cubic'}, optional
-       Determine the interpolation method. (def. 'linear')
-    raiseMemError : bool, optional
-        Raise an error if the expected size of the calculated array is larger than the available RAM space. (def. True)
-    displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
-
-    Returns
-    -------
-    CxPxN numpy array
-        A numpy array of shape CxPxN where C is the component number, P is the number of pencil beam, and N is the number of point.
-
-    See Also
-    --------
-        getInmFREDBaseImg : get base image defined in FRED influence matrix.
-        getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
-
-    Notes
-    -----
-    1. The function exploits the scipy RegularGridInterpolator [1]_ to interpolate the point value.
-
-    2. The function calculates the values in a given point or list of points for each pencil beam and each component
-    saved in the Inm influence matrix. In particular, it can be used to get the values for each pencil beam for
-    each voxel by supplying the position of the center of each voxel (interpolation "nearest" can be set
-    to speed up the calculations). The user should be aware of the memory usage in such cases.
-
-    3. Some vectors (when calculating for multiple points) are often filled with zero 
-    for each component. This means that no pencil beam saved in the influence matrix delivered a signal to those voxels. 
-    Filtering the function's output for such cases and recording the zero-signal voxels is recommended.
-
-    References
-    ----------
-    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.RegularGridInterpolator.html
-
-    Notes
-    -----type
-    The output array is a 3-dimensional array showing the signal for each component, each pencil beam, and each point. 
-    The following examples help with understanding the order of dimensions:
-
-    >> out[0, :, :] - get signals for all pencil beams at each point for component 0. It is useful for single-component scorers like dose or Edep.
-
-    >> out[1, :, 2] - get signals from all pencil beams for component 1 and point 2.
-
-    >> out[0, 2, 5] - get signal from the component 0, pencil beam 2 at point 5.
-
-    >> out[0, :, 2].sum()/out[1,:,2].sum() - calculate the ratio of the signals' sum from all pencil beams of component 0 to component 1. 
-    In particular, this might be the LETd value at point 2, where the numerator is saved to component 0 and the denominator to component 1.
-    """
-    import struct
-    import fredtools as ft
-    import numpy as np
-    import psutil
-    import SimpleITK as sitk
-    from scipy.interpolate import RegularGridInterpolator
-
-    fileHeaderSize = 48
-
-    # convert points to 3xN numpy array and check the shape
-    points = np.array(point)
-    if points.ndim == 1:
-        points = np.expand_dims(points, 0)
+    # validate points
+    points = np.asarray(points)
     if points.ndim != 2 or points.shape[1] != 3:
-        error = TypeError("Parameter 'point' must typebe a 3-element iterable (for a single point) or an N-element iterable of 3 elements iterables (for N points).")
+        error = TypeError("Parameter 'point' must be an N-element iterable of 3 elements iterables.")
         _logger.error(error)
         raise error
     pointsNo = points.shape[0]
 
-    # check interpolation
-    if interpolation.lower() not in ["nearest", "linear", "cubic"]:
-        error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'cubic' are supported.")
-        _logger.error(error)
-        raise error
+    # create an empty basic image with FoR defined in Inm
+    imgBase = getInmFREDBaseImg(fileName, dtype="uint8")
 
-    # get number of PBs and FoR saved to Inm
-    with open(fileName, "rb") as file_h:
-        [fileVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(fileHeaderSize))
-        shape = np.array([sizeX, sizeY, sizeZ])
-        size = np.prod(shape)
-        spacing = np.around(np.array([spacingX, spacingY, spacingZ]) * 10, decimals=7)  # [mm]
-        offset = np.around(np.array([offsetX, offsetY, offsetZ]) * 10, decimals=7)  # [mm]
-        origin = offset + spacing / 2  # [mm]
+    # convert physical points to indices
+    points = np.round((points-imgBase.GetOrigin())/imgBase.GetSpacing()).astype(int)  # equivalent to transformPhysicalPointToIndex but faster
+    indices = np.ravel_multi_index(tuple(np.array(points).T), imgBase.GetSize(), order="F")
 
-    # check the memory
-    if raiseMemError:
-        expectedMemorySize = componentNo * pencilBeamNo * pointsNo * np.array(1, dtype=dtype).nbytes  # bytes
-        if psutil.virtual_memory().available < (componentNo * pencilBeamNo * pointsNo * np.array(1, dtype=dtype).nbytes):
-            error = MemoryError(f"Requested to calculate signal of type {dtype} in {pointsNo} points for {pencilBeamNo} pencil beams for {componentNo} components which is expected to use {(expectedMemorySize/1024**3):.2f} GB of RAM but only {psutil.virtual_memory().available/1024**3:.2f} GB is available.")
+    # get pencil beams info
+    imnInfo = getInmFREDInfo(fileName)
+
+    # read the influence matrix file depanding on the version
+    InmFREDVersion = _getInmFREDVersion(fileName)
+    match InmFREDVersion:
+        case 2:
+            if interpreter == "cupy":
+                _logger.warning("Cupy interpreter is not supported for version 2.0 of the Inm file. The numpy interpreter will be used to read the Imn file and then the result will be uploaded to GPU.")
+            listInmSparse = _getInmFREDSparseVersion2(fileName, indices, imnInfo, imgBase)
+            if interpreter == "cupy":
+                listInmSparse = [cp.sparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
+
+        case 3:
+            listInmSparse = _getInmFREDSparseVersion3(fileName, indices, imnInfo, imgBase, interpreter=interpreter)
+        case _:
+            error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
             _logger.error(error)
             raise error
-
-    # get requested pencil beams info
-    inmInfoRequested = _mergeInmInfo(inmInfo, fileName)
-
-    # create an empty basic image with FoR defined in Inm
-    imgBase = sitk.GetImageFromArray(np.zeros(shape[::-1], dtype="uint8"))
-    imgBase.SetOrigin(origin)
-    imgBase.SetSpacing(spacing)
-
-    # generate scipy RegularGridInterpolator
-    voxelCentres = ft.getVoxelCentres(imgBase)
-    arrVec = np.zeros(size, dtype="float64")
-    rgi = RegularGridInterpolator(voxelCentres, np.reshape(arrVec, shape, order="F"), method=interpolation, bounds_error=False, fill_value=np.nan)
-
-    with open(fileName, "rb") as file_h:
-        file_h.seek(fileHeaderSize, 1)  # skip header
-        # interpolate point value for BP
-        pointValues = []
-        for _, inmInfoRow in inmInfoRequested.iterrows():
-            # jump to PB data file target
-            file_h.seek(int(inmInfoRow.PBfileTarget))
-
-            # read voxel indices and values
-            voxelsNo = int(inmInfoRow.voxelsNo)
-            voxelIndices = np.frombuffer(file_h.read(voxelsNo * 4), dtype="uint32", count=voxelsNo)
-            voxelValues = np.frombuffer(file_h.read(voxelsNo * componentNo * 4), dtype="float32", count=voxelsNo*componentNo)
-
-            pointValuesPB = []
-            for component in range(componentNo):
-                arrVec = np.zeros(size, dtype="float64")
-                arrVec[voxelIndices] = voxelValues[component::componentNo] * inmInfoRow.weight  # replace values in array
-                rgi.values = np.reshape(arrVec, shape, order="F")
-                pointValuesPB.append(rgi(points).astype(dtype))
-            pointValues.append(pointValuesPB)
-
-    pointValues = np.stack(pointValues, axis=1)  # [component, pb, point]
 
     if displayInfo:
         strLog = [f"Number of points: {pointsNo}",
-                  f"Number of PBs: {len(inmInfoRequested)}",
-                  f"Number of fields: {len(inmInfoRequested.FID.unique())}",
-                  f"Number of components: {componentNo}",
-                  f"Number of no-signal points: {(pointValues.sum(axis=0).sum(axis=0)==0).sum()} ({((pointValues.sum(axis=0).sum(axis=0)==0).sum()/pointsNo)*100:.2f}%)",
-                  f"Memory used: {(pencilBeamNo*pointsNo*4/1024**3):.2f} GB"]
-        _logger.info("\n\t".join(strLog))
+                  f"Number of PBs: {imnInfo.shape[0]}",
+                  f"Number of fields: {len(imnInfo.FID.unique())}",
+                  f"Number of components: {len(listInmSparse)}",
+                  f"Stored elements per component: {[InmSparse.nnz for InmSparse in listInmSparse]}"]
+        _logger.info("\n".join(strLog))
 
-    return pointValues
+    return listInmSparse
 
 
-def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
-    """Read basic information from FRED influence matrix.
+def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, imnInfo: DataFrame, imgBase: SITKImage) -> Sequence[SparseMatrixCSR]:
 
-    The function reads an influence matrix file produced by the FRED Monte Carlo
-    and gets the basic information about the pencil beams and fields saved.
-
-    Parameters
-    ----------
-    fileName : path
-        Path to FRED influence matrix file to read.
-    displayInfo : bool, optional
-        Displays a summary of the function results. (def. False)
-
-    Returns
-    -------
-    DataFrame
-        Pandas DataFrame with pencil beams and field numbers.
-
-    See Also
-    --------
-        getInmFREDBaseImg : get base image defined in FRED influence matrix.
-        getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
-    """
-    import fredtools as ft
-    import numpy as np
-    import SimpleITK as sitk
-    import pandas as pd
     import struct
+    import numpy as np
+    from scipy import sparse
+
+    headerSize = 48
+
+    # get number of PBs and components
+    with open(fileName, "rb") as file_h:
+        [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
 
     with open(fileName, "rb") as file_h:
-        # get FoR of the Inm image and pencil beam number
-        [fileVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
-        shape = np.array([sizeX, sizeY, sizeZ])
-        size = np.prod(shape)
-        spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=7) * 10
-        offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=7) * 10
-        origin = offset + spacing / 2
+        file_h.seek(headerSize, 1)  # skip header
+        # list of sparse matrices of point values for each component
+        listInmSparse = [sparse.lil_array((pencilBeamNo, np.prod(imgBase.GetSize())), dtype=np.float32) for _ in range(componentNo)]
 
-        # create empty basic image with FoR defined in Inm
-        imgBase = sitk.GetImageFromArray(np.zeros(shape[::-1], dtype="float32"))
-        imgBase.SetOrigin(origin)
-        imgBase.SetSpacing(spacing)
+        for PBIdx, inmInfoRow in imnInfo.iterrows():
+            # skip the header of PB with PBtag and number of voxels
+            file_h.seek(8, 1)
 
-        PBIDs = []
-        FIDs = []
-        voxelsNos = []
-        try:
-            for _ in range(pencilBeamNo):
-                [PBTag, voxelsNo] = struct.unpack("2i", file_h.read(8))
-                PBIDs.append(PBTag % 1000000)
-                FIDs.append(int(PBTag / 1000000))
-                voxelsNos.append(voxelsNo)
+            # get number of voxels to read
+            voxelsNo = int(inmInfoRow.voxelsNo)
+            # read voxel indices
+            voxelIndices = np.frombuffer(file_h.read(voxelsNo * 4), dtype="uint32", count=voxelsNo)
 
-                file_h.seek(voxelsNo * 4 * (componentNo+1), 1)  # jump to the next PB
-        except:
-            error = TypeError('Could not parse the whole structure of the influence matrix.')
+            # generate mask of voxelIndices length with marked positions overlapping with requested indices
+            voxelIndicesMask = np.isin(voxelIndices, indices, assume_unique=True)
+            # get only voxelIndices that overly with the requested indices
+            voxelIndices = voxelIndices[voxelIndicesMask]
+            if voxelIndices.size == 0:
+                continue
+
+            # read voxel values
+            voxelValues = np.frombuffer(file_h.read(voxelsNo * componentNo * 4), dtype="float32", count=voxelsNo*componentNo)
+
+            for component in range(componentNo):
+                listInmSparse[component][PBIdx, voxelIndices] = voxelValues[component::componentNo][voxelIndicesMask]
+
+    return [sparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
+
+
+def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, imnInfo: DataFrame, imgBase: SITKImage, interpreter: str = "numpy") -> Sequence[SparseMatrixCSR]:
+
+    import struct
+    import numpy as np
+    from scipy import sparse
+    import cupy as cp
+
+    # determine interpreter
+    match interpreter.lower():
+        case "cupy":
+            xp = cp
+            indices = cp.asarray(indices)
+        case "numpy":
+            xp = np
+        case _:
+            error = ValueError(f"Interpreter '{interpreter}' is not supported.")
             _logger.error(error)
             raise error
 
-    InmInfo = pd.DataFrame({"PBID": PBIDs, "FID": FIDs, "voxelsNo": voxelsNos})
+    headerSize = 48
 
-    if displayInfo:
-        strLog = [f"Influence file version: {fileVersion/10}",
-                  f"Number of PBs: {InmInfo.PBID.size}",
-                  f"Number of fields: {InmInfo.FID.unique().size}",
-                  f"Number of components: {componentNo}",
-                  f"Number of voxels (min/max/mean): {InmInfo.voxelsNo.min()}/{InmInfo.voxelsNo.max()}/{InmInfo.voxelsNo.mean():.0f}",
-                  f"Percent of voxels (min/max/mean): {InmInfo.voxelsNo.min()/size*100:.2f}%/{InmInfo.voxelsNo.max()/size*100:.2f}%/{InmInfo.voxelsNo.mean()/size*100:.2f}%",
-                  "FoR of the image:"]
-        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgBase))
+    # get number of PBs and components
+    with open(fileName, "rb") as file_h:
+        [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+        file_h.seek(3 * pencilBeamNo * 4, 1)  # skip PB mapping
+        componentsDataSize = np.frombuffer(file_h.read(4 * componentNo), dtype="uint32", count=componentNo)
 
-    return InmInfo
-
-
-def _getInmFREDPBfileTarget(fileName: PathLike) -> Tuple:
-    """Read target in FRED influence matrix for each pencil beam.
-
-    The function reads the file target for each pencil beam (PB) produced by the FRED 
-    Monte Carlo. The function is a helper in the influence matrix file reading,
-    providing with the file starting position of each PB data (excluding the PB tag).
-
-    Parameters
-    ----------
-    fileName : path
-        Path to FRED influence matrix file to read.
-
-    Returns
-    -------
-    tuple
-        Tupe with the file positions.
-    """
-    import struct
-
-    fileHeaderSize = 48
-    PBHeaderSize = 8
+    size = np.prod(imgBase.GetSize())
 
     with open(fileName, "rb") as file_h:
+        file_h.seek(headerSize + 3 * pencilBeamNo * 4 + 4 * componentNo)  # skip header
 
-        [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(fileHeaderSize))
+        listInmSparse = []
+        for component in range(componentNo):
+            componentDataSize = componentsDataSize[component]
+            pbIdx = xp.frombuffer(file_h.read(componentDataSize*4), dtype="uint32", count=componentDataSize)
+            voxelIdx = xp.frombuffer(file_h.read(componentDataSize*4), dtype="uint32", count=componentDataSize)
+            voxelData = xp.frombuffer(file_h.read(componentDataSize*4), dtype="float32", count=componentDataSize)
 
-        PBfileTarget = []
-        try:
-            for _ in range(pencilBeamNo):
-                [_, voxelsNo] = struct.unpack("2i", file_h.read(PBHeaderSize))
-                PBfileTarget.append(file_h.tell())
-                file_h.seek(voxelsNo * 4 * (componentNo+1), 1)  # jump to the next PB
-        except:
-            error = TypeError('Could not parse the whole structure of the influence matrix.')
-            _logger.error(error)
-            raise error
+            # filter sparse matrix to requested indices/points
+            voxelIdxRequestedMask = xp.isin(voxelIdx, indices, assume_unique=True)
+            pbIdx = pbIdx[voxelIdxRequestedMask]
+            voxelIdx = voxelIdx[voxelIdxRequestedMask]
+            voxelData = voxelData[voxelIdxRequestedMask]
 
-    return tuple(PBfileTarget)
+            if interpreter == "numpy":
+                inmPointSparse = sparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
+            elif interpreter == "cupy":
+                inmPointSparse = cp.sparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
 
+            listInmSparse.append(inmPointSparse)
 
-def _mergeInmInfo(inmInfo: DataFrame | PDSeries | None, fileName: PathLike) -> DataFrame:
-    """Merge inmInfo with the influence matrix info.
-
-    The function merges the field and pencil beam IDs from the inmInfo defined as a pandas DataFrame
-    with the influence matrix info taken from the influence matrix file defined by the fileName. 
-    The inmInfo DataFrame must include at least columns 'PBID' and 'FID', and can include column 'weight'
-    which will be used for weights calculation. If no 'weight' column is provided, then a unit weight 
-    will be used for all requested pencil beams. Additionally, the pencil beam file targets will be calculated.
-
-    Parameters
-    ----------
-    inmInfo : pandas.DataFrame
-        A pandas DataFrame with at least columns 'PBID' and 'FID'.
-    fileName : path
-        Path to FRED influence matrix file.
-
-    Returns
-    -------
-    pandas.DataFrame
-        A pandas DataFrame with requested pencil beams.
-    """
-    import fredtools as ft
-    import numpy as np
-    import pandas as pd
-    import copy
-
-    # get influence matrix info for all PBs
-    inmInfoAll = ft.getInmFREDInfo(fileName)
-    inmInfoAll.set_index(["FID", "PBID"], inplace=True)
-
-    # get PB data file target for all PBs
-    inmInfoAll["PBfileTarget"] = _getInmFREDPBfileTarget(fileName)
-
-    # merge influence matrix info for all PBs with the influence matrix provided
-    if inmInfo is not None:
-        inmInfoInput = copy.deepcopy(inmInfo)
-
-        # convert to DataFrame if Series
-        if isinstance(inmInfoInput, PDSeries):
-            inmInfoInput = inmInfoInput.to_frame().T
-
-        # validate if required columns exist in inmInfoInput
-        if not {"PBID", "FID"}.issubset(inmInfoInput.columns):
-            error = ValueError(f"Missing columns or wrong column names of 'inmInfo'. Must include at least 'PBID' and 'FID'")
-            _logger.error(error)
-            raise error
-
-        inmInfoInput.set_index(["FID", "PBID"], inplace=True)
-
-        if not np.all(inmInfoInput.index.isin(inmInfoAll.index)):
-            error = ValueError(f"Not all pencil beam or field IDs are present in the influence matrix file.")
-            _logger.error(error)
-            raise error
-
-        if "weight" in inmInfoInput.columns:
-            inmInfoAll = pd.concat([inmInfoAll, inmInfoInput["weight"]], axis=1)
-        else:
-            inmInfoAll.loc[inmInfoInput.index, "weight"] = 1
-    else:
-        inmInfoAll["weight"] = 1
-    inmInfoAll.reset_index(inplace=True)
-
-    # remove all rows for which weights is NaN
-    inmInfoAll.dropna(axis=0, inplace=True)
-
-    return inmInfoAll
+    return listInmSparse

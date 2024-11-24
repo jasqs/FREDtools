@@ -484,9 +484,7 @@ def cropImgToMask(img: SITKImage, imgMask: SITKImage, displayInfo: bool = False)
 
     # convert the floating mask to binary with a minimum threshold larger than 0
     if ft._imgTypeChecker.isSITK_maskFloating(imgMask):
-        imgMaskNonZero = copy.copy(imgMask)
-        imgMaskNonZero[imgMaskNonZero == 0] = np.nan
-        imgMask = ft.floatingToBinaryMask(imgMask, threshold=ft.getStatistics(imgMaskNonZero).GetMinimum())
+        imgMask = floatingToBinaryMask(imgMask, threshold=0, thresholdEqual=False)
 
     labelStatistics = sitk.LabelStatisticsImageFilter()
     labelStatistics.Execute(imgMask, imgMask)
@@ -501,7 +499,7 @@ def cropImgToMask(img: SITKImage, imgMask: SITKImage, displayInfo: bool = False)
     return imgCrop
 
 
-def setValueMask(img: SITKImage, imgMask: SITKImage, value: int, outside: bool = True, displayInfo: bool = False) -> SITKImage:
+def setValueMask(img: SITKImage, imgMask: SITKImage, value: Numberic, outside: bool = True, displayInfo: bool = False) -> SITKImage:
     """Set value inside/outside mask.
 
     The function sets the values of the `img` defined as an instance of
@@ -549,16 +547,14 @@ def setValueMask(img: SITKImage, imgMask: SITKImage, value: int, outside: bool =
 
     # convert the floating mask to binary with a minimum threshold larger than 0
     if ft._imgTypeChecker.isSITK_maskFloating(imgMask):
-        imgMaskNonZero = copy.copy(imgMask)
-        imgMaskNonZero[imgMaskNonZero == 0] = np.nan
-        imgMask = ft.floatingToBinaryMask(imgMask, threshold=ft.getStatistics(imgMaskNonZero).GetMinimum())
+        imgMask = floatingToBinaryMask(imgMask, threshold=0, thresholdEqual=False)
 
     if outside:
         maskingValue = 0
     else:
         maskingValue = 1
 
-    imgMasked = sitk.Mask(img, imgMask, outsideValue=value, maskingValue=maskingValue)
+    imgMasked = sitk.Mask(img, imgMask, outsideValue=value, maskingValue=maskingValue)  # type: ignore
 
     if displayInfo:
         _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMasked))

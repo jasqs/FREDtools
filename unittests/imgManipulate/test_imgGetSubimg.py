@@ -1,6 +1,4 @@
 import unittest
-import SimpleITK as sitk
-import numpy as np
 import fredtools as ft
 
 
@@ -71,6 +69,8 @@ class test_getPoint(unittest.TestCase):
     def setUp(self):
         self.img3D = ft.readMHD('unittests/testData/MHDImages/img3D.mhd')
         self.point = ft.getImageCenter(self.img3D)
+        self.img3DVec = ft.readMHD('unittests/testData/MHDImages/img3DVec.mhd')
+        self.pointImgVec = ft.getImageCenter(self.img3DVec)
 
     def test_getPoint_linear(self):
         imgRef = ft.readMHD("unittests/testData/MHDImages/img3DPoint_resampleLinear.mhd")
@@ -89,6 +89,12 @@ class test_getPoint(unittest.TestCase):
         imgEval = ft.getPoint(self.img3D, self.point, interpolation='spline', splineOrder=3, displayInfo=True)
         self.assertEqual(imgRef.GetSize(), (1, 1, 1))
         self.assertAlmostEqual(ft.arr(imgRef), ft.arr(imgEval))
+
+    def test_getPoint_vectorImg(self):
+        imgRef = ft.readMHD("unittests/testData/MHDImages/img3DVecPoint_resampleNearest.mhd")
+        imgEval = ft.getPoint(self.img3DVec, self.pointImgVec, interpolation='nearest', displayInfo=True)
+        self.assertEqual(imgRef.GetSize(), (1, 1, 1))
+        self.assertAlmostEqual(ft.arr(imgRef).tolist(), ft.arr(imgEval).tolist(), places=7)
 
     def test_getPoint_invalid_point(self):
         with self.assertRaises(AttributeError):

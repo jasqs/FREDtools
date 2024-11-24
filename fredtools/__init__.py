@@ -16,7 +16,7 @@ from .ImgAnalyse.spotAnalyse import (fitSpotProfile)
 from . import ImgIO
 from .ImgIO.dicom_io import (getDicomTypeName, sortDicoms, getRNMachineName, getRNIsocenter, getRNSpots, getRNFields, getRNInfo, getRSInfo, getExternalName, getCT, getPET, getRD, getRDFileNameForFieldNumber, anonymizeDicoms)
 from .ImgIO.imgConverter import (SITK2ITK, ITK2SITK)
-from .ImgIO.influenceMatrix_io import (getInmFREDBaseImg, getInmFREDSumImage, getInmFREDPoint, getInmFREDInfo)
+from .ImgIO.influenceMatrix_io import (getInmFREDBaseImg, getInmFREDSparse, getInmFREDInfo)
 from .ImgIO.mhd_io import (writeMHD, readMHD, convertMHDtoSingleFile, convertMHDtoDoubleFiles)
 from .ImgIO.OmniPro_io import (readOPG, readOPD)
 
@@ -25,6 +25,7 @@ from . import ImgManipulate
 from .ImgManipulate.imgGetSubimg import (getSlice, getProfile, getPoint, getInteg, getCumSum)
 from .ImgManipulate.imgManipulate import (mapStructToImg, floatingToBinaryMask, cropImgToMask, setValueMask, resampleImg, sumImg, imgDivide, sumVectorImg, getImgBEV, overwriteCTPhysicalProperties, setIdentityDirection, addMarginToMask, addGaussMarginToMask, addExpMarginToMask)
 from .ImgManipulate.imgCreate import (createEllipseMask, createConeMask, createCylinderMask, createImg)
+from .ImgManipulate.inmManipulate import (inmSumVec, inmSumImg)
 
 from . import Miscellaneous
 from .Miscellaneous.landauVavilovGauss import (pdfLandau, pdfLandauGauss, fitLandau, fitLandauGauss, pdfVavilov, fitVavilov)

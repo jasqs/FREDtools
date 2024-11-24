@@ -380,7 +380,7 @@ def getVoxelEdges(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[floa
     return tuple(voxelEdges)
 
 
-def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo: bool = False) -> NDArray:
+def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo: bool = False) -> Iterable[PointLike]:
     """Get physical positions of voxels.
 
     The function gets voxels' physical positions of an image
