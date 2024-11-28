@@ -3,6 +3,7 @@ import SimpleITK as sitk
 import numpy as np
 
 import fredtools as ft
+print(ft.__version__)
 
 
 class test_getExtent(unittest.TestCase):
@@ -247,7 +248,7 @@ class test_getVoxelPhysicalPoints(unittest.TestCase):
         self.img3D = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
 
     def test_getVoxelPhysicalPoints(self):
-        points = ft.getVoxelPhysicalPoints(self.img3D, displayInfo=True)
+        points = np.array(ft.getVoxelPhysicalPoints(self.img3D, displayInfo=True))
         self.assertEqual(points.shape, (1000, 3))
 
 
