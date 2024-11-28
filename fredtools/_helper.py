@@ -81,6 +81,7 @@ def checkJupyterMode() -> bool:
 
 
 def checkMatplotlibBackend() -> str:
+    """Check the matplotlib backend"""
     import matplotlib
 
     if "inline" in matplotlib.get_backend():
@@ -89,3 +90,26 @@ def checkMatplotlibBackend() -> str:
         return "ipympl"
     else:
         return "unknown"
+
+
+def checkGPUcupy() -> bool:
+    """Check if the GPU is available and cupy is working"""
+
+    try:
+        import cupy as cp
+    except ModuleNotFoundError:
+        _logger.debug('Cupy is not installed. Install cupy to use GPU acceleration.')
+        return False
+
+    try:
+        if cp.cuda.is_available():
+            cp.arange(1)
+            _logger.debug('Cupy and GPU are available and working.')
+            return True
+        else:
+            _logger.debug('GPU is not available.')
+            return False
+    except RuntimeError as e:
+        _logger.debug("Cupy is available but not working properly. Try checking the CUDA version and install correct cupy version (see more at https://docs.cupy.dev/en/latest/install.html).")
+        _logger.debug(e)
+        return False
