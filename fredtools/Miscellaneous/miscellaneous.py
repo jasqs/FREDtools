@@ -35,7 +35,9 @@ def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, remo
 
     # check if it is a single string
     if isinstance(PDFFileNames, PathLike):
-        PDFFileNames = [PDFFileNames]
+        error = TypeError(f"The variable 'PDFFileNames' must be a list of strings but a single string was given.")
+        _logger.error(error)
+        raise error
 
     # check if all files to be merged exist
     for PDFFileName in PDFFileNames:

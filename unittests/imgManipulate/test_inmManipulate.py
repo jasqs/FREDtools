@@ -12,9 +12,7 @@ class test_inmManipulate(unittest.TestCase):
     def setUp(self):
         testDir = Path("unittests/testData/INMImages")
         self.imgRef = ft.readMHD(testDir.joinpath("v3.Dose.mhd"))
-        imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(self.imgRef)).astype(np.uint8))
-        imgMaskNaN.CopyInformation(self.imgRef)
-        self.imgRef[imgMaskNaN == 1] = 0
+        self.imgRef = ft.setNaNImg(self.imgRef, value=0)
 
         self.imgBase = ft.getInmFREDBaseImg(testDir.joinpath("v3.Dose.bin"))
         points = ft.getVoxelPhysicalPoints(self.imgBase)

@@ -56,6 +56,10 @@ class test_mergePDF(unittest.TestCase):
         merged_pdf = fitz.open(self.filePaths_pdf_output)
         self.assertEqual(merged_pdf.page_count, total_pages)
 
+    def test_mergePDF_single_file(self):
+        with self.assertRaises(TypeError):
+            ft.mergePDF(self.filesPath_pdf[0], self.filePaths_pdf_output)  # type: ignore
+
 
 class test_getHistogram(unittest.TestCase):
 

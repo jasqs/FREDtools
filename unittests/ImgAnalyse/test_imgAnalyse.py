@@ -137,6 +137,7 @@ class test_getMassCenter(unittest.TestCase):
         self.img2D_custom = ft.createImg([10, 10], spacing=[2.0, 2.0], centred=True)
         self.img2D_custom[5, 5] = 1.0
         self.img3D_vector = ft.createImg([10, 10, 10], components=7, spacing=[1.0, 1.0, 1.0])
+        self.img3D_vector[5, 5, 5] = [1, 2, 3, 4, 5, 6, 7]
 
     def test_getMassCenter_3D(self):
         expected_center = (5.5, 5.5, 5.5)
@@ -171,7 +172,7 @@ class test_getMassCenter(unittest.TestCase):
         self.assertEqual(center, expected_center)
 
     def test_getMassCenter_vector_image(self):
-        expected_center = (np.nan, np.nan, np.nan)
+        expected_center = (5.5, 5.5, 5.5)
         center = ft.getMassCenter(self.img3D_vector, displayInfo=True)
         self.assertEqual(center, expected_center)
 

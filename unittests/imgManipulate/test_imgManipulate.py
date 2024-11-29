@@ -47,12 +47,12 @@ class test_floatingToBinaryMask(unittest.TestCase):
         self.assertAlmostEqual(ft.getStatistics(imgROIBinary).GetSum()*np.prod(imgROIBinary.GetSpacing()), 125928, places=-2)
 
     def test_floatingToBinaryMask_invalidThreshold(self):
-        with self.subTest("thresholdEqual=False"):
+        with self.subTest(thresholdEqual=False):
             with self.assertRaises(ValueError):
                 ft.floatingToBinaryMask(self.imgROI, threshold=-0.1, thresholdEqual=False, displayInfo=True)
             with self.assertRaises(ValueError):
                 ft.floatingToBinaryMask(self.imgROI, threshold=1.1, thresholdEqual=False, displayInfo=True)
-        with self.subTest("thresholdEqual=True"):
+        with self.subTest(thresholdEqual=True):
             with self.assertRaises(ValueError):
                 ft.floatingToBinaryMask(self.imgROI, threshold=0, thresholdEqual=True, displayInfo=True)
             with self.assertRaises(ValueError):
@@ -93,42 +93,65 @@ class test_resampleImg(unittest.TestCase):
         self.img = ft.readMHD("unittests/testData/MHDImages/img3D.mhd")
 
     def test_resampleImg(self):
-        result = ft.resampleImg(self.img, spacing=[2.0, 2.0, 2.0])
-        ft.resampleImg(self.img, [2, 1, 3], interpolation="spline", splineOrder=5)  # todo
-        self.assertIsInstance(result, sitk.Image)
+        with self.subTest(interpolation="nearest"):
+            imgRef = ft.readMHD("unittests/testData/MHDImages/img3D_resampleNearest.mhd")
+            imgRes = ft.resampleImg(self.img, spacing=[2, 1, 3], interpolation="nearest")
+            self.assertTrue(ft.compareImg(imgRes, imgRef))
+        with self.subTest(interpolation="linear"):
+            imgRef = ft.readMHD("unittests/testData/MHDImages/img3D_resampleLinear.mhd")
+            imgRes = ft.resampleImg(self.img, spacing=[2, 1, 3], interpolation="linear")
+            self.assertTrue(ft.compareImg(imgRes, imgRef))
+        for splineOrder in range(1, 6):
+            with self.subTest(interpolation="spline", splineOrder=splineOrder):
+                imgRef = ft.readMHD(f"unittests/testData/MHDImages/img3D_resampleSpline{splineOrder}.mhd")
+                imgRes = ft.resampleImg(self.img, spacing=[2, 1, 3], interpolation="spline", splineOrder=splineOrder)
+                self.assertTrue(ft.compareImg(imgRes, imgRef))
 
 
 class test_sumImg(unittest.TestCase):
 
     def setUp(self):
-        self.img = sitk.Image([10, 10, 10], sitk.sitkFloat32)
+        fileNames = ["unittests/testData/MHDImages/img3D_resampleLinear.mhd",
+                     "unittests/testData/MHDImages/img3D_resampleNearest.mhd",
+                     "unittests/testData/MHDImages/img3D_resampleSpline0.mhd"]
+        self.imgs = ft.readMHD(fileNames)
 
     def test_sumImg(self):
-        result = ft.sumImg([self.img, self.img])
-        self.assertIsInstance(result, sitk.Image)
+        imgSum = ft.sumImg(self.imgs, displayInfo=True)
+        self.assertAlmostEqual(ft.getStatistics(imgSum).GetSum(), np.sum([ft.getStatistics(img).GetSum() for img in self.imgs]), places=0)
+
+    def test_sumImg_emptyList(self):
+        with self.assertRaises(ValueError):
+            ft.sumImg([])
+
+    def test_sumImg_wrongFoR(self):
+        self.imgs = list(self.imgs)
+        self.imgs.append(ft.readMHD("unittests/testData/MHDImages/img3D.mhd"))
+        with self.assertRaises(ValueError):
+            ft.sumImg(self.imgs, displayInfo=True)
 
 
-class test_imgDivide(unittest.TestCase):
+class test_divideImg(unittest.TestCase):
 
     def setUp(self):
-        self.img = sitk.Image([10, 10, 10], sitk.sitkFloat32)
-        self.imgMask = sitk.Image([10, 10, 10], sitk.sitkUInt8)
-        self.imgMask += 1  # Set all values to 1
+        self.img = ft.readMHD("unittests/testData/MHDImages/img3D.mhd")
 
-    def test_imgDivide(self):
-        result = ft.divideImg(self.img, self.imgMask)
-        self.assertIsInstance(result, sitk.Image)
+    def test_divideImg(self):
+        imgDiv = ft.divideImg(self.img, self.img, displayInfo=True)
+        self.assertListEqual(list(np.unique(sitk.GetArrayViewFromImage(imgDiv))), [0, 1])
 
 
 class test_sumVectorImg(unittest.TestCase):
 
     def setUp(self):
-        self.img = sitk.Image([10, 10, 10], sitk.sitkFloat32)
+        self.img = ft.readMHD("unittests/testData/MHDImages/img3DVec.mhd")
+        self.point = ft.getImageCenter(self.img)
 
     def test_sumVectorImg(self):
-        vector_img = sitk.Compose([self.img, self.img])
-        result = ft.sumVectorImg(vector_img)
-        self.assertIsInstance(result, sitk.Image)
+        imgSumVec = ft.sumVectorImg(self.img, displayInfo=True)
+        pointSum = ft.arr(ft.readMHD("unittests/testData/MHDImages/img3DVecPoint_resampleNearest.mhd")).sum()
+        imgSumPoint = ft.getPoint(imgSumVec, point=self.point, interpolation="nearest")
+        self.assertEqual(ft.arr(imgSumPoint), pointSum)
 
 
 class test_setNaNImg(unittest.TestCase):

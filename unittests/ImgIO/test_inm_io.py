@@ -110,9 +110,7 @@ class test_getInmFREDSparse(unittest.TestCase):
                 # read the reference image
                 imgRef = ft.readMHD(str(filePath).replace(".bin", ".mhd"))
                 # replace NaNs with zeros in the reference image
-                imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(imgRef)).astype(np.uint8))
-                imgMaskNaN.CopyInformation(imgRef)
-                imgRef[imgMaskNaN == 1] = 0
+                imgRef = ft.setNaNImg(imgRef, value=0)
                 # read the sparse matrix
                 imnSparse = ft.getInmFREDSparse(filePath, points=self.imgROIpoints, interpreter="numpy", displayInfo=True)
                 self.assertIsInstance(imnSparse, list)
@@ -137,9 +135,7 @@ class test_getInmFREDSparse(unittest.TestCase):
                 # read the reference image
                 imgRef = ft.readMHD(str(filePath).replace(".bin", ".mhd"))
                 # replace NaNs with zeros in the reference image
-                imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(imgRef)).astype(np.uint8))
-                imgMaskNaN.CopyInformation(imgRef)
-                imgRef[imgMaskNaN == 1] = 0
+                imgRef = ft.setNaNImg(imgRef, value=0)
                 # read the sparse matrix
                 imnSparse = ft.getInmFREDSparse(filePath, points=self.imgROIpoints, interpreter="cupy", displayInfo=True)
                 self.assertIsInstance(imnSparse, list)
@@ -161,9 +157,7 @@ class test_getInmFREDSparse(unittest.TestCase):
                 # read the reference image
                 imgRef = ft.readMHD(str(filePath).replace(".bin", ".mhd"))
                 # replace NaNs with zeros in the reference image
-                imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(imgRef)).astype(np.uint8))
-                imgMaskNaN.CopyInformation(imgRef)
-                imgRef[imgMaskNaN == 1] = 0
+                imgRef = ft.setNaNImg(imgRef, value=0)
                 # read the sparse matrix
                 imnSparse = ft.getInmFREDSparse(filePath, points=self.imgROIpoints, interpreter="numpy", displayInfo=True)
                 self.assertIsInstance(imnSparse, list)
@@ -194,9 +188,7 @@ class test_getInmFREDSparse(unittest.TestCase):
                 # read the reference image
                 imgRef = ft.readMHD(str(filePath).replace(".bin", ".mhd"))
                 # replace NaNs with zeros in the reference image
-                imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(imgRef)).astype(np.uint8))
-                imgMaskNaN.CopyInformation(imgRef)
-                imgRef[imgMaskNaN == 1] = 0
+                imgRef = ft.setNaNImg(imgRef, value=0)
                 # read the sparse matrix
                 imnSparse = ft.getInmFREDSparse(filePath, points=self.imgROIpoints, interpreter="cupy", displayInfo=True)
                 self.assertIsInstance(imnSparse, list)

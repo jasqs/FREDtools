@@ -127,7 +127,7 @@ def getImageCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     if not _isDirectionIdentity(img):
         _logger.debug("The image direction array is not identity. The image center may be incorrect.")
 
-    imgCenter = tuple(np.mean(np.array(getExtent(img)), 1))
+    imgCenter = tuple(np.mean(np.array(getExtent(img)), 1).tolist())
 
     if displayInfo:
         _logger.info("Image center:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(imgCenter, "center"))
@@ -168,15 +168,13 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     if ft._imgTypeChecker.isSITK_vector(img, raiseError=False):
-        _logger.error("Cannot compute mass centre of a multicomponent (vector) image.")
-        return tuple([np.nan]*img.GetDimension())
+        _logger.debug("The image is a vector image. Calculating the mass centre for the sum of components.")
+        img = ft.sumVectorImg(img)
 
     # check if there are nan values in the image and replace them with zeros
     if np.any(np.isnan(sitk.GetArrayViewFromImage(img))):
         _logger.debug("Found NaN values in the image. Replacing them with zeros.")
-        imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(img)).astype("uint8"))
-        imgMaskNaN.CopyInformation(img)
-        img = sitk.Mask(img, imgMaskNaN, outsideValue=0, maskingValue=1)
+        img = ft.setNaNImg(img, value=0)
 
     # check if the image is filled with zeros only
     if np.all(sitk.GetArrayViewFromImage(img) == 0):
