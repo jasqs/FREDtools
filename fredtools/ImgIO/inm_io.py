@@ -243,7 +243,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
         raise error
 
     # validate cupy
-    if not checkGPUcupy():
+    if interpreter.lower() == "cupy" and not checkGPUcupy():
         _logger.warning("Cupy is not available. The numpy interpreter will be used.")
         interpreter = "numpy"
 
