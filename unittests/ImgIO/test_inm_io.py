@@ -178,7 +178,7 @@ class test_getInmFREDSparse(unittest.TestCase):
                 imgSum1.CopyInformation(imgRef)
 
                 # divide the two components
-                imgSum = ft.imgDivide(imgSum0, imgSum1)
+                imgSum = ft.divideImg(imgSum0, imgSum1)
                 imgSum = sitk.Cast(imgSum, sitk.sitkFloat32)
 
                 self.assertTrue(ft.compareImg(imgRef, imgSum, decimal=4))
@@ -214,7 +214,7 @@ class test_getInmFREDSparse(unittest.TestCase):
                 imgSum1.CopyInformation(imgRef)
 
                 # divide the two components
-                imgSum = ft.imgDivide(imgSum0, imgSum1)
+                imgSum = ft.divideImg(imgSum0, imgSum1)
                 imgSum = sitk.Cast(imgSum, sitk.sitkFloat32)
 
                 self.assertTrue(ft.compareImg(imgRef, imgSum, decimal=4))

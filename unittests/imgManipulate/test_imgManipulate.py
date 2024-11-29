@@ -116,7 +116,7 @@ class test_imgDivide(unittest.TestCase):
         self.imgMask += 1  # Set all values to 1
 
     def test_imgDivide(self):
-        result = ft.imgDivide(self.img, self.imgMask)
+        result = ft.divideImg(self.img, self.imgMask)
         self.assertIsInstance(result, sitk.Image)
 
 
@@ -129,6 +129,31 @@ class test_sumVectorImg(unittest.TestCase):
         vector_img = sitk.Compose([self.img, self.img])
         result = ft.sumVectorImg(vector_img)
         self.assertIsInstance(result, sitk.Image)
+
+
+class test_setNaNImg(unittest.TestCase):
+
+    def setUp(self):
+        self.img = sitk.Image([10, 10, 10], sitk.sitkFloat32)
+        self.img += 1  # Set all values to 1
+        self.img[5, 5, 5] = float('nan')  # Introduce a NaN value
+
+    def test_setNaNImg_defaultValue(self):
+        imgResult = ft.setNaNImg(self.img, displayInfo=True)
+        self.assertEqual(sitk.GetArrayViewFromImage(imgResult)[5, 5, 5], 0)
+        self.assertNotIn(float('nan'), sitk.GetArrayViewFromImage(imgResult))
+
+    def test_setNaNImg_customValue(self):
+        imgResult = ft.setNaNImg(self.img, value=-1, displayInfo=True)
+        self.assertEqual(sitk.GetArrayViewFromImage(imgResult)[5, 5, 5], -1)
+        self.assertNotIn(float('nan'), sitk.GetArrayViewFromImage(imgResult))
+
+    def test_setNaNImg_noNaN(self):
+        img = sitk.Image([10, 10, 10], sitk.sitkFloat32)
+        img += 1  # Set all values to 1
+        imgResult = ft.setNaNImg(img, value=-1, displayInfo=True)
+        self.assertEqual(sitk.GetArrayViewFromImage(imgResult)[5, 5, 5], 1)
+        self.assertNotIn(float('nan'), sitk.GetArrayViewFromImage(imgResult))
 
 
 if __name__ == '__main__':

@@ -535,8 +535,6 @@ def setValueMask(img: SITKImage, imgMask: SITKImage, value: Numberic, outside: b
     """
     import SimpleITK as sitk
     import fredtools as ft
-    import copy
-    import numpy as np
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
     ft._imgTypeChecker.isSITK_mask(imgMask, raiseError=True)
@@ -560,6 +558,43 @@ def setValueMask(img: SITKImage, imgMask: SITKImage, value: Numberic, outside: b
         _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMasked))
 
     return imgMasked
+
+
+def setNaNImg(img: SITKImage, value: Numberic = 0, displayInfo: bool = False) -> SITKImage:
+    """Replace NaN values in the image.
+
+    The function replaces NaN values in the image defined as an instance of a SimpleITK
+    image object with a specified value. The function exploits the numpy.isnan routine.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    value : scalar, optional
+        Value to replace NaN values. (def. 0)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An object of a SimpleITK image.
+    """
+    import SimpleITK as sitk
+    import fredtools as ft
+
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
+
+    # Create a mask of NaN values
+    imgMaskNaN = sitk.GetImageFromArray(np.isnan(sitk.GetArrayViewFromImage(img)).astype(np.uint8))
+    imgMaskNaN.CopyInformation(img)
+
+    img = ft.setValueMask(img, imgMaskNaN, value=value, outside=False)
+
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
+
+    return img
 
 
 def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
@@ -704,7 +739,7 @@ def sumImg(imgs: Sequence[SITKImage], displayInfo: bool = False) -> SITKImage:
     return img
 
 
-def imgDivide(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -> SITKImage:
+def divideImg(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Divide two images.
 
     The function divides two images images defined as instances 

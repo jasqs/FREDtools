@@ -23,7 +23,7 @@ from .ImgIO.OmniPro_io import (readOPG, readOPD)
 
 from . import ImgManipulate
 from .ImgManipulate.imgGetSubimg import (getSlice, getProfile, getPoint, getInteg, getCumSum)
-from .ImgManipulate.imgManipulate import (mapStructToImg, floatingToBinaryMask, cropImgToMask, setValueMask, resampleImg, sumImg, imgDivide, sumVectorImg, getImgBEV, overwriteCTPhysicalProperties, setIdentityDirection, addMarginToMask, addGaussMarginToMask, addExpMarginToMask)
+from .ImgManipulate.imgManipulate import (mapStructToImg, floatingToBinaryMask, cropImgToMask, setValueMask, setNaNImg, resampleImg, sumImg, divideImg, sumVectorImg, getImgBEV, overwriteCTPhysicalProperties, setIdentityDirection, addMarginToMask, addGaussMarginToMask, addExpMarginToMask)
 from .ImgManipulate.imgCreate import (createEllipseMask, createConeMask, createCylinderMask, createImg)
 from .ImgManipulate.inmManipulate import (inmSumVec, inmSumImg)
 
@@ -45,7 +45,7 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-_version = [0, 8, 8]
+_version = [0, 8, 11]
 __version__ = ".".join(map(str, _version))
 
 # configure logging if no root logger configured

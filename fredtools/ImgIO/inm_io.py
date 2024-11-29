@@ -166,6 +166,8 @@ def _getInmFREDInfoVersion3(fileName: PathLike) -> DataFrame:
     pbIdx, voxelsNos = np.unique(pbIdx, return_counts=True)
     voxelsNo = pd.DataFrame({"PBIdx": pbIdx, "voxelsNo": voxelsNos.astype("uint32")}).set_index("PBIdx")
     inmInfo = pd.merge(inmInfo, voxelsNo, left_index=True, right_index=True, how="left")
+    inmInfo.fillna(0, inplace=True)
+    inmInfo = inmInfo.astype({"FID": "uint32", "PBID": "uint32", "voxelsNo": "uint32"})
 
     return inmInfo
 
