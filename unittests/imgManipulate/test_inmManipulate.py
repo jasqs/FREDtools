@@ -5,9 +5,6 @@ import SimpleITK as sitk
 import fredtools as ft
 import pandas as pd
 import numpy as np
-import re
-from itertools import chain
-from scipy import sparse
 
 
 class test_inmManipulate(unittest.TestCase):

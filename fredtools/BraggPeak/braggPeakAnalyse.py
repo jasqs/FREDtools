@@ -290,7 +290,7 @@ class braggPeak:
         from scipy.interpolate import interp1d
         import numpy as np
 
-        return interp1d(bp[0], bp[1], kind=self.__setInterpolationScipy(), fill_value=np.NaN)(R)  # type: ignore
+        return interp1d(bp[0], bp[1], kind=self.__setInterpolationScipy(), fill_value=np.nan)(R)  # type: ignore
 
     def getRInterp(self, D: Numberic, side: Literal["proximal", "P", "distal", "D"] = "distal", percentD: bool = True) -> Numberic:
         """Calculate the range/depth at a given signal level based on profile interpolation.

@@ -668,9 +668,9 @@ def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False
             _logger.debug("Could not find ReferencedBeamDataset for field number {:d}.".format(fieldInfo.FNo))
             continue
 
-        fieldsInfo.at[FDeliveryNo, "FDose"] = ReferencedBeamDataset.BeamDose.real if "BeamDose" in ReferencedBeamDataset else np.NaN
-        fieldsInfo.at[FDeliveryNo, "FDosePos"] = np.array(ReferencedBeamDataset.BeamDoseSpecificationPoint).tolist() if "BeamDoseSpecificationPoint" in ReferencedBeamDataset else np.NaN
-        fieldsInfo.at[FDeliveryNo, "FMU"] = ReferencedBeamDataset.BeamMeterset.real if "BeamMeterset" in ReferencedBeamDataset else np.NaN
+        fieldsInfo.at[FDeliveryNo, "FDose"] = ReferencedBeamDataset.BeamDose.real if "BeamDose" in ReferencedBeamDataset else np.nan
+        fieldsInfo.at[FDeliveryNo, "FDosePos"] = np.array(ReferencedBeamDataset.BeamDoseSpecificationPoint).tolist() if "BeamDoseSpecificationPoint" in ReferencedBeamDataset else np.nan
+        fieldsInfo.at[FDeliveryNo, "FMU"] = ReferencedBeamDataset.BeamMeterset.real if "BeamMeterset" in ReferencedBeamDataset else np.nan
 
     fieldsInfo["FMagDist"] = np.nan
     fieldsInfo["FMagDist"] = fieldsInfo["FMagDist"].astype("object")
@@ -681,11 +681,11 @@ def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False
             _logger.debug("Could not find IonBeamDataset for field number {:d}.".format(fieldInfo.FNo))
             continue
 
-        fieldsInfo.at[FDeliveryNo, "FCumMsW"] = IonBeamDataset.FinalCumulativeMetersetWeight.real if "FinalCumulativeMetersetWeight" in IonBeamDataset else np.NaN  # Final Cumulative Meterset Weight
-        fieldsInfo.at[FDeliveryNo, "FnomRange"] = IonBeamDataset[(0x300B, 0x1004)].value if (0x300B, 0x1004) in IonBeamDataset else np.NaN
-        fieldsInfo.at[FDeliveryNo, "FnomSOBPWidth"] = IonBeamDataset[(0x300B, 0x100E)].value if (0x300B, 0x100E) in IonBeamDataset else np.NaN
+        fieldsInfo.at[FDeliveryNo, "FCumMsW"] = IonBeamDataset.FinalCumulativeMetersetWeight.real if "FinalCumulativeMetersetWeight" in IonBeamDataset else np.nan  # Final Cumulative Meterset Weight
+        fieldsInfo.at[FDeliveryNo, "FnomRange"] = IonBeamDataset[(0x300B, 0x1004)].value if (0x300B, 0x1004) in IonBeamDataset else np.nan
+        fieldsInfo.at[FDeliveryNo, "FnomSOBPWidth"] = IonBeamDataset[(0x300B, 0x100E)].value if (0x300B, 0x100E) in IonBeamDataset else np.nan
         fieldsInfo.at[FDeliveryNo, "FsupportID"] = IonBeamDataset.PatientSupportID if "PatientSupportID" in IonBeamDataset else "unknown"
-        fieldsInfo.at[FDeliveryNo, "FMagDist"] = IonBeamDataset.VirtualSourceAxisDistances if "VirtualSourceAxisDistances" in IonBeamDataset else np.NaN  # Virtual Source-Axis Distances
+        fieldsInfo.at[FDeliveryNo, "FMagDist"] = IonBeamDataset.VirtualSourceAxisDistances if "VirtualSourceAxisDistances" in IonBeamDataset else np.nan  # Virtual Source-Axis Distances
 
     # make consistency check and raise warning if raiseWarning==True
     if raiseWarning:

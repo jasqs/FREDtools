@@ -338,7 +338,7 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
 
     elif np.issubdtype(arrGI.dtype, np.floating):
         mode = "gamma"
-        arrGI[arrGI < 0] = np.NaN
+        arrGI[arrGI < 0] = np.nan
         GIstat["passRate"] = (arrGI <= 1).sum() / (arrGI >= 0).sum() * 100
         GIstat["mean"] = np.nanmean(arrGI)
         GIstat["std"] = np.nanstd(arrGI)
