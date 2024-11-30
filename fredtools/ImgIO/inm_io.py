@@ -3,8 +3,21 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def getInmFREDVersion(fileName: PathLike) -> int:
-    """Get the version of the FRED influence matrix file."""
+def getInmFREDVersion(fileName: PathLike) -> float:
+    """Get the version of the FRED influence matrix file.
+
+    The function reads the version of the influence matrix file produced by the FRED Monte Carlo.
+
+    Parameters
+    ----------
+    fileName : path
+        Path to FRED influence matrix file to read.
+
+    Returns
+    -------
+    int
+        Version of the FRED influence matrix file.
+    """
     import struct
 
     with open(fileName, "rb") as file_h:
@@ -17,7 +30,6 @@ def getInmFREDVersion(fileName: PathLike) -> int:
 
 def _isInmFRED(fileName: PathLike, raiseError: bool = False) -> bool:
     """Check if the file is a proper FRED influence matrix file and raise error if requested."""
-
     try:
         InmFREDVersion = getInmFREDVersion(fileName)/10
         if InmFREDVersion == 0 or InmFREDVersion > 10:
@@ -57,9 +69,7 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     See Also
     --------
         getInmFREDBaseImg : get base image defined in FRED influence matrix.
-        getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
+        getInmFREDSparse : get sparse matrices of point values from an influence matrix produced by FRED Monte Carlo.
     """
     import fredtools as ft
     import numpy as np
@@ -100,6 +110,7 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
 
 
 def _getInmFREDInfoVersion2(fileName: PathLike) -> DataFrame:
+    """Get information from the FRED influence matrix file version 2.0."""
     import pandas as pd
     import struct
 
@@ -139,6 +150,7 @@ def _getInmFREDInfoVersion2(fileName: PathLike) -> DataFrame:
 
 
 def _getInmFREDInfoVersion3(fileName: PathLike) -> DataFrame:
+    """Get information from the FRED influence matrix file version 3.0."""
     import pandas as pd
     import struct
     import numpy as np
@@ -175,7 +187,7 @@ def _getInmFREDInfoVersion3(fileName: PathLike) -> DataFrame:
 def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo: bool = False) -> SITKImage:
     """Get base image defined in FRED influence matrix.
 
-    The function reads an influence matrix file produced by the FRED Monte Carlo
+    The function reads the header of an influence matrix file produced by the FRED Monte Carlo
     and builds the basic image of a given type, defined as an instance of a SimpleITK image object, 
     with the frame of reference defined in the influence matrix. 
 
@@ -196,9 +208,7 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
     See Also
     --------
         getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDPoint : get a vector of interpolated values in a point from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDVectorImage : get a vector image from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDSumImage : get FRED influence matrix image to a sum SimpleITK image object.
+        getInmFREDSparse : get sparse matrices of point values from an influence matrix produced by FRED Monte Carlo.
     """
     import fredtools as ft
     import numpy as np
@@ -231,7 +241,27 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
 
 
 def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interpreter: str = "numpy", displayInfo: bool = False) -> Sequence[SparseMatrixCSR]:
+    """Get sparse matrices of point values from an influence matrix produced by FRED Monte Carlo.
 
+    The function reads an influence matrix file produced by the FRED Monte Carlo and returns
+    a list of sparse matrices of point values for each component at the requested points.
+
+    Parameters
+    ----------
+    fileName : path
+        Path to FRED influence matrix file to read.
+    points : array_like
+        An N-element iterable of 3 elements iterables with physical points.
+    interpreter : {'numpy', 'cupy'}, optional
+        The interpreter to be used for calculations. Use 'numpy' for CPU or 'cupy' for GPU implementation. (def. 'numpy')
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    list[scipy.sparse.csr_matrix] or list[cupy.sparse.csr_matrix]
+        List of sparse matrices of point values for each component.
+    """
     import numpy as np
     import cupy as cp
     from fredtools._helper import checkGPUcupy
@@ -296,7 +326,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
 
 
 def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, imnInfo: DataFrame, imgBase: SITKImage) -> Sequence[SparseMatrixCSR]:
-
+    """Get sparse matrices of point values from the FRED influence matrix file version 2.0."""
     import struct
     import numpy as np
     from scipy import sparse
@@ -338,7 +368,7 @@ def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, imnInfo: D
 
 
 def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, imnInfo: DataFrame, imgBase: SITKImage, interpreter: str = "numpy") -> Sequence[SparseMatrixCSR]:
-
+    """Get sparse matrices of point values from the FRED influence matrix file version 3.0."""
     import struct
     import numpy as np
     from scipy import sparse

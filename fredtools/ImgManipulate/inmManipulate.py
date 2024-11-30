@@ -4,7 +4,33 @@ _logger = getLogger(__name__)
 
 
 def inmSumVec(imnSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayInfo: bool = False) -> NDArray:
+    """Sum up the influence matrix to a vector.
 
+    The function sums up the influence matrix for a given set of pencil beams
+    and their weights. The influence matrix must be a sparse matrix. The function
+    returns a summed influence matrix as a numpy array. The sparse matrix can be given
+    as an instance of a scipy.sparse.csr_matrix or cupy.sparse.csr_matrix object. 
+    In case of the cupy.sparse.csr_matrix object, the multiplication and summing 
+    will be perfoemd on GPU.   
+
+    Parameters
+    ----------
+    imnSparse : scipy.sparse.csr_matrix
+        Sparse matrix of the influence matrix.
+    weigths : array-like
+        Array of weights for each pencil beam.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    numpy.ndarray
+        Summed influence matrix.
+
+    See Also
+    --------
+        inmSumImg : sum up the influence matrix and create an image.
+    """
     import cupy as cp
     xp = cp.get_array_module(imnSparse)
     if imnSparse.shape is None:
@@ -31,7 +57,33 @@ def inmSumVec(imnSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayIn
 
 
 def inmSumImg(imnSparse: SparseMatrixCSR, weigths: Iterable[Numberic], imgBase: SITKImage, displayInfo: bool = False) -> SITKImage:
+    """Sum up the influence matrix and create an image.
 
+    The function sums up the influence matrix for a given set of pencil beams
+    and their weights. The influence matrix must be a sparse matrix. The function
+    returns a summed influence image defined as an instance of a SimpleITK object. 
+    The function is useful for calculating the sum of the influence matrix for a set of pencil beams.
+
+    Parameters
+    ----------
+    imnSparse : scipy.sparse.csr_matrix
+        Sparse matrix of the influence matrix.
+    weigths : array-like
+        Array of weights for each pencil beam.
+    imgBase : SimpleITK.Image
+        Base image for the influence matrix.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK.Image
+        Summed influence image.
+
+    See Also
+    --------
+        inmSumVec : sum up the influence matrix to a vector.
+    """
     import fredtools as ft
     import SimpleITK as sitk
     import cupy as cp
