@@ -174,9 +174,9 @@ class test_getRNSpots(unittest.TestCase):
     def test_getRNSpots(self):
         spotsInfo = ft.getRNSpots(self.dicomFiles.RNfileNames)
         self.assertFalse(spotsInfo.empty)
-        self.assertEqual(spotsInfo.loc[spotsInfo.PBMU != 0].shape, (5399, 21))
-        self.assertEqual(spotsInfo.PBMU.sum(), 644.5418658654452)
-        self.assertEqual(spotsInfo[["PBPosX", "PBPosY"]].mean().tolist(), [1.2872754213743285, 0.9203093165401001])
+        self.assertEqual(spotsInfo.loc[spotsInfo.PBMU != 0].shape, (5726, 21))
+        self.assertEqual(spotsInfo.PBMU.sum(), 480.3859992669222)
+        self.assertEqual(spotsInfo[["PBPosX", "PBPosY"]].mean().tolist(), [1.7813482361159623, 0.32963674467341947])
 
 
 class test_getRNFields(unittest.TestCase):
@@ -189,7 +189,7 @@ class test_getRNFields(unittest.TestCase):
         self.assertFalse(fieldsInfo.empty)
         self.assertEqual(fieldsInfo.shape, (3, 18))
         self.assertEqual(fieldsInfo.loc[fieldsInfo.FNo == 1].FName.tolist(), ['Field 1'])
-        self.assertAlmostEqual(fieldsInfo.FMU.sum(), 644.5418658654452, places=5)
+        self.assertAlmostEqual(fieldsInfo.FMU.sum(), 480.3859992669222, places=5)
 
 
 class test_getRNInfo(unittest.TestCase):
@@ -203,12 +203,12 @@ class test_getRNInfo(unittest.TestCase):
         self.assertEqual(planInfo.fractionNo, 10)
         self.assertEqual(planInfo.dosePrescribed, 20.0)
         self.assertEqual(planInfo.targetStructName, '')
-        self.assertEqual(planInfo.planLabel, 'Sphere_2F_FT')
-        self.assertEqual(planInfo.planDate, '20241031')
-        self.assertEqual(planInfo.planTime, '125905.397')
-        self.assertEqual(planInfo.patientName, 'mNQWVCZsiQgCFHze')
+        self.assertEqual(planInfo.planLabel, 'Sphere_3F_FT')
+        self.assertEqual(planInfo.planDate, '20241204')
+        self.assertEqual(planInfo.planTime, '134517.437')
+        self.assertEqual(planInfo.patientName, 'xgEnkciZOZvojKYZ')
         self.assertEqual(planInfo.patientBirthDate, '')
-        self.assertEqual(planInfo.patientID, 'KHTOG7e2vQYwpyyzHqOJ3R7o5')
+        self.assertEqual(planInfo.patientID, 'AjowCijxx9AyaXQLz6pg1AqYp')
         self.assertEqual(planInfo.manufacturer, 'Varian Medical Systems')
         self.assertEqual(planInfo.softwareVersions, '16.1.3')
         self.assertEqual(planInfo.stationName, '')
@@ -264,10 +264,10 @@ class test_getRD(unittest.TestCase):
     def test_getRD(self):
         imgDose = ft.sumImg(ft.getRD(self.dicomFiles.RDfileNames, displayInfo=True))
         self.assertIsNotNone(imgDose)
-        self.assertEqual(imgDose.GetSize(), (93, 116, 121))
-        self.assertListEqual(np.round(imgDose.GetSpacing(), decimals=5).tolist(), [2.5,  2.5, 2.4])
-        self.assertListEqual(np.round(imgDose.GetOrigin(), decimals=5).tolist(), [-114.51172, -356.48828, -718.3])
-        self.assertAlmostEqual(ft.getStatistics(imgDose).GetMean(), 0.6062437075936838)
+        self.assertEqual(imgDose.GetSize(), (232, 290, 240))
+        self.assertListEqual(np.round(imgDose.GetSpacing(), decimals=5).tolist(), [1.0, 1.0, 1.2])
+        self.assertListEqual(np.round(imgDose.GetOrigin(), decimals=5).tolist(), [-114.51172, -357.48828, -718.3])
+        self.assertAlmostEqual(ft.getStatistics(imgDose).GetMean(), 0.4451632775837297)
 
 
 class test_getRDFileNameForFieldNumber(unittest.TestCase):

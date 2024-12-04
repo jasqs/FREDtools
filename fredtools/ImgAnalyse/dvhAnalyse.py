@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: float, doseLevelStep: float = 0.01, displayInfo: bool = False) -> DVH:
+def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFloat, doseLevelStep: float = 0.01, displayInfo: bool = False) -> DVH:
     """Calculate DVH for the mask.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside

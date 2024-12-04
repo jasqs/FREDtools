@@ -441,7 +441,7 @@ def getRNIsocenter(fileName: PathLike, displayInfo: bool = False) -> tuple:
     # check if all values are the same
     if not isocenterPosition.shape[0] == 1:
         _logger.warning(f"Not all isocenter positions are the same. Found isocenter positions:\n {isocenterPosition} \nThe geometrical centre will be returned.")
-        isocenterPosition = np.mean(isocenterPosition, axis=0)
+        isocenterPosition = np.mean(isocenterPosition, axis=0).tolist()
     else:
         isocenterPosition = isocenterPosition[0]
 

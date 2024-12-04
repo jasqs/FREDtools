@@ -8,7 +8,7 @@ class test_mapStructToImg(unittest.TestCase):
 
     def setUp(self):
         self.img = ft.readMHD("unittests/testData/MHDImages/img3D.mhd")
-        self.RSfileName = "unittests/testData/TPSDicoms/TPSPlan/RS.KHTOG7e2vQYwpyyzHqOJ3R7o5.CT Horizontal OW.dcm"
+        self.RSfileName = ft.sortDicoms("unittests/testData/TPSDicoms/TPSPlan/").RSfileNames
 
     def test_mapStructToImg(self):
         imgROI = ft.mapStructToImg(self.img, self.RSfileName, "testStuct_SphHoleDet", displayInfo=True)
@@ -35,7 +35,7 @@ class test_floatingToBinaryMask(unittest.TestCase):
 
     def setUp(self):
         self.img = ft.readMHD("unittests/testData/MHDImages/img3D.mhd")
-        self.RSfileName = "unittests/testData/TPSDicoms/TPSPlan/RS.KHTOG7e2vQYwpyyzHqOJ3R7o5.CT Horizontal OW.dcm"
+        self.RSfileName = ft.sortDicoms("unittests/testData/TPSDicoms/TPSPlan/").RSfileNames
         self.imgROI = ft.mapStructToImg(self.img, self.RSfileName, "testStuct_SphHoleDet", displayInfo=True)
 
     def test_floatingToBinaryMask(self):
