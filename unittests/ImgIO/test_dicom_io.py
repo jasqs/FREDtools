@@ -9,7 +9,7 @@ import pydicom as dicom
 testPath = Path(os.path.dirname(__file__))
 
 
-class test_SortDicoms(unittest.TestCase):
+class test_sortDicoms(unittest.TestCase):
     def setUp(self):
         self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
 
@@ -71,7 +71,7 @@ class test_getDicomTypeName(unittest.TestCase):
             ft.getDicomTypeName(1)
 
 
-class test_IsDicomCT(unittest.TestCase):
+class test_isDicomCT(unittest.TestCase):
     def setUp(self):
         self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
@@ -85,7 +85,7 @@ class test_IsDicomCT(unittest.TestCase):
             ft.ImgIO.dicom_io._isDicomCT(self.dicomFiles.RSfileNames, raiseError=True)
 
 
-class test_IsDicomRS(unittest.TestCase):
+class test_isDicomRS(unittest.TestCase):
     def setUp(self):
         self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
@@ -99,7 +99,7 @@ class test_IsDicomRS(unittest.TestCase):
             ft.ImgIO.dicom_io._isDicomRS(self.dicomFiles.RNfileNames, raiseError=True)
 
 
-class test_IsDicomRN(unittest.TestCase):
+class test_isDicomRN(unittest.TestCase):
     def setUp(self):
         self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
@@ -113,7 +113,7 @@ class test_IsDicomRN(unittest.TestCase):
             ft.ImgIO.dicom_io._isDicomRN(self.dicomFiles.RSfileNames, raiseError=True)
 
 
-class test_IsDicomRD(unittest.TestCase):
+class test_isDicomRD(unittest.TestCase):
     def setUp(self):
         self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
@@ -128,7 +128,7 @@ class test_IsDicomRD(unittest.TestCase):
 
 
 @unittest.skip("TODO: generate a dicom file with a PET image")
-class test_IsDicomPET(unittest.TestCase):
+class test_isDicomPET(unittest.TestCase):
     def setUp(self):
         self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
         self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
