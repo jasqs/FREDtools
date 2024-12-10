@@ -55,21 +55,26 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
     if singleFile:
         _logger.debug(f"Converting {filePath} to a single file MHD.")
         # get the original raw/zraw file name and change ElementDataFile to LOCAL
+        rawFileName = None
         with fileinput.FileInput(filePath, inplace=True) as file:
             for line in file:
                 rawFileName = re.findall(r"ElementDataFile\W+=\W+(.+)", line)
-                print(re.sub("ElementDataFile.+", "ElementDataFile = LOCAL", line), end="")
-        rawFileName = os.path.join(os.path.dirname(os.path.abspath(filePath)), rawFileName[0])
+                print(re.sub(r"ElementDataFile.+", "ElementDataFile = LOCAL", line), end="")
         # read binary raw/zraw file and attach to the mhd file
         try:
+            if not rawFileName:
+                raise ValueError(f"Could not find `ElementDataFile` tag in {filePath}.")
+            rawFileName = os.path.join(os.path.dirname(os.path.abspath(filePath)), rawFileName[0])
             with open(rawFileName, mode="rb") as file:
                 rawFileContent = file.read()
             with open(filePath, "ab") as fout:
                 fout.write(rawFileContent)
             # remove raw/zraw file
             os.remove(rawFileName)
-        except IOError:
-            error = IOError(f"Cannot save voxel map to file {filePath}.")
+        except IOError as error:
+            _logger.error(error)
+            raise error
+        except ValueError as error:
             _logger.error(error)
             raise error
 
@@ -119,7 +124,7 @@ def readMHD(fileNames: Sequence[PathLike] | PathLike, displayInfo: bool = False)
     for fileName in fileNames:
         img.append(sitk.ReadImage(str(fileName), imageIO="MetaImageIO"))
 
-    _logger.debug(f"Read {len(img)} {'file' if len(img)==1 else 'files'} from:\n" + "\n".join(map(str, fileNames)))
+    _logger.debug(f"Read {len(img)} {'file' if len(img)==1 else 'files'} from:\n\t" + "\n\t".join(map(str, fileNames)))
 
     if displayInfo:
         _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0]))

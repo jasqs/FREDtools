@@ -49,4 +49,4 @@ DicomDataset: TypeAlias = Union[Dataset, FileDataset]
 DicomDataElement: TypeAlias = DataElement
 
 # DVH
-from dicompylercore.dvh import DVH  # noqa
+# from dicompylercore.dvh import DVH  # noqa

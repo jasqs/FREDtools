@@ -23,15 +23,17 @@ def getInmFREDVersion(fileName: PathLike) -> float:
     with open(fileName, "rb") as file_h:
         InmFREDVersion, = struct.unpack("i", file_h.read(4))
 
-    _logger.debug(f"Version of Inm file {fileName}: {InmFREDVersion/10}.")
-
     return InmFREDVersion/10
 
 
 def _isInmFRED(fileName: PathLike, raiseError: bool = False) -> bool:
     """Check if the file is a proper FRED influence matrix file and raise error if requested."""
+    import struct
+
     try:
-        InmFREDVersion = getInmFREDVersion(fileName)/10
+        with open(fileName, "rb") as file_h:
+            InmFREDVersion, = struct.unpack("i", file_h.read(4))
+            InmFREDVersion = InmFREDVersion/10
         if InmFREDVersion == 0 or InmFREDVersion > 10:
             if raiseError:
                 raise TypeError(f"The file is not a proper FRED influence matrix file.")
@@ -39,11 +41,16 @@ def _isInmFRED(fileName: PathLike, raiseError: bool = False) -> bool:
                 return False
         else:
             return True
-    except Exception as e:
+    except TypeError as error:
         if raiseError:
-            error = f"Error reading the version of the Inm file '{fileName}': {e}"
-            _logger.error(error)
-            raise e
+            _logger.error(f"Error reading the version of the Inm file '{fileName}': {error}")
+            raise error
+        else:
+            return False
+    except FileNotFoundError as error:
+        if raiseError:
+            _logger.error(f"Error reading the version of the Inm file '{fileName}': {error}")
+            raise error
         else:
             return False
 
@@ -80,16 +87,14 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     # create an empty basic image with FoR defined in Inm
     imgBase = ft.getInmFREDBaseImg(fileName, dtype="uint8")
 
-    # read the influence matrix file depanding on the version
+    # read the influence matrix file depending on the version
     InmFREDVersion = getInmFREDVersion(fileName)
+    _logger.debug(f"Version of Inm file {fileName}: {InmFREDVersion}.")
+
     match InmFREDVersion:
-        case 2:
-            with open(fileName, "rb") as file_h:
-                [_, _, _, _, _, _, _, _, _, _, componentNo, _] = struct.unpack("<4i6f2i", file_h.read(48))
+        case 2.0 | 2.1:
             inmInfo = _getInmFREDInfoVersion2(fileName)
-        case 3:
-            with open(fileName, "rb") as file_h:
-                [_, _, _, _, _, _, _, _, _, _, componentNo, _] = struct.unpack("<4i6f2i", file_h.read(48))
+        case 3.0 | 3.1:
             inmInfo = _getInmFREDInfoVersion3(fileName)
         case _:
             error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
@@ -97,6 +102,17 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
             raise error
 
     if displayInfo:
+        with open(fileName, "rb") as file_h:
+            match InmFREDVersion:
+                case 2.0 | 3.0:
+                    [_, _, _, _, _, _, _, _, _, _, componentNo, _] = struct.unpack("<4i6f2i", file_h.read(48))
+                case 2.1 | 3.1:
+                    [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, componentNo, _] = struct.unpack("<4i6f9f2i", file_h.read(84))
+                case _:
+                    error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
+                    _logger.error(error)
+                    raise error
+
         strLog = [f"Imn file version: {InmFREDVersion}",
                   f"Number of PBs: {inmInfo.PBID.size}",
                   f"Number of fields: {inmInfo.FID.unique().size}",
@@ -110,15 +126,24 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
 
 
 def _getInmFREDInfoVersion2(fileName: PathLike) -> DataFrame:
-    """Get information from the FRED influence matrix file version 2.0."""
+    """Get information from the FRED influence matrix file version 2"""
     import pandas as pd
     import struct
 
-    headerSize = 48
+    InmFREDVersion = getInmFREDVersion(fileName)
 
     with open(fileName, "rb") as file_h:
-        # get FoR of the Inm image and pencil beam number
-        [InmFREDVersion, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+        match InmFREDVersion:
+            case 2.0:
+                headerSize = 48
+                [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+            case 2.1:
+                headerSize = 84
+                [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f9f2i", file_h.read(headerSize))
+            case _:
+                error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
+                _logger.error(error)
+                raise error
 
     with open(fileName, "rb") as file_h:
         file_h.seek(headerSize, 1)  # skip header
@@ -150,16 +175,25 @@ def _getInmFREDInfoVersion2(fileName: PathLike) -> DataFrame:
 
 
 def _getInmFREDInfoVersion3(fileName: PathLike) -> DataFrame:
-    """Get information from the FRED influence matrix file version 3.0."""
+    """Get information from the FRED influence matrix file version 3"""
     import pandas as pd
     import struct
     import numpy as np
 
-    headerSize = 48
+    InmFREDVersion = getInmFREDVersion(fileName)
 
     with open(fileName, "rb") as file_h:
-        # get FoR of the Inm image and pencil beam number
-        [InmFREDVersion, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+        match InmFREDVersion:
+            case 3.0:
+                headerSize = 48
+                [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+            case 3.1:
+                headerSize = 84
+                [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f9f2i", file_h.read(headerSize))
+            case _:
+                error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
+                _logger.error(error)
+                raise error
 
     with open(fileName, "rb") as file_h:
         file_h.seek(headerSize, 1)  # skip header
@@ -188,15 +222,15 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
     """Get base image defined in FRED influence matrix.
 
     The function reads the header of an influence matrix file produced by the FRED Monte Carlo
-    and builds the basic image of a given type, defined as an instance of a SimpleITK image object, 
-    with the frame of reference defined in the influence matrix. 
+    and builds the basic image of a given type, defined as an instance of a SimpleITK image object,
+    with the frame of reference defined in the influence matrix.
 
     Parameters
     ----------
     fileName : path
         Path to FRED influence matrix file to read.
     dtype : data-type, optional
-        The desired data-type for the output image, e.g., `numpy.uint32` or `float32`. (def. numpy.float64)        
+        The desired data-type for the output image, e.g., `numpy.uint32` or `float32`. (def. numpy.float64)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -217,19 +251,41 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
 
     _isInmFRED(fileName, raiseError=True)
 
+    InmFREDVersion = getInmFREDVersion(fileName)
+    _logger.debug(f"Version of Inm file {fileName}: {InmFREDVersion}.")
+
     with open(fileName, "rb") as file_h:
         # get FoR of the Inm image and pencil beam number
-        [InmFREDVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
-        shape = np.array([sizeX, sizeY, sizeZ])
-        size = np.prod(shape)
-        spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=4) * 10
-        offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=4) * 10
-        origin = offset + spacing / 2
+        match InmFREDVersion:
+            case 2.0 | 3.0:
+                [InmFREDVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
+                shape = np.array([sizeX, sizeY, sizeZ])
+                spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=4) * 10
+                offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=4) * 10
+                origin = offset + spacing / 2
 
-        # create empty basic image with FoR defined in Inm
-        imgBase = sitk.GetImageFromArray(np.zeros(shape[::-1], dtype=dtype))
-        imgBase.SetOrigin(origin)
-        imgBase.SetSpacing(spacing)
+                # create empty basic image with FoR defined in Inm
+                imgBase = sitk.GetImageFromArray(np.zeros(shape[::-1], dtype=dtype))
+                imgBase.SetOrigin(origin)
+                imgBase.SetSpacing(spacing)
+            case 2.1 | 3.1:
+                transformMatrix = np.zeros((3, 3)).flatten()
+                [InmFREDVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, originX, originY, originZ, *transformMatrix, componentNo, pencilBeamNo] = struct.unpack("<4i6f9f2i", file_h.read(84))
+                shape = np.array([sizeX, sizeY, sizeZ])
+                spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=4) * 10
+                origin = np.around(np.array([originX, originY, originZ]), decimals=4) * 10
+
+                # create empty basic image with FoR defined in Inm
+                imgBase = sitk.GetImageFromArray(np.zeros(shape[::-1], dtype=dtype))
+                imgBase.SetOrigin(origin)
+                imgBase.SetSpacing(spacing)
+                directionMatrix = np.reshape(transformMatrix, [imgBase.GetDimension()]*2).T.dot(np.eye(imgBase.GetDimension()))
+                imgBase.SetDirection(directionMatrix.flatten())
+
+            case _:
+                error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
+                _logger.error(error)
+                raise error
 
     if displayInfo:
         strLog = [f"Inm file version: {InmFREDVersion}",
@@ -297,17 +353,17 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
     # get pencil beams info
     imnInfo = getInmFREDInfo(fileName)
 
-    # read the influence matrix file depanding on the version
+    # read the influence matrix file depending on the version
     InmFREDVersion = getInmFREDVersion(fileName)
     match InmFREDVersion:
-        case 2:
+        case 2.0 | 2.1:
             if interpreter == "cupy":
                 _logger.warning("Cupy interpreter is not supported for version 2.0 of the Inm file. The numpy interpreter will be used to read the Imn file and then the result will be uploaded to GPU.")
             listInmSparse = _getInmFREDSparseVersion2(fileName, indices, imnInfo, imgBase)
             if interpreter == "cupy":
                 listInmSparse = [cp.sparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
 
-        case 3:
+        case 3.0 | 3.1:
             listInmSparse = _getInmFREDSparseVersion3(fileName, indices, imnInfo, imgBase, interpreter=interpreter)
         case _:
             error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
@@ -331,11 +387,21 @@ def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, imnInfo: D
     import numpy as np
     from scipy import sparse
 
-    headerSize = 48
+    InmFREDVersion = getInmFREDVersion(fileName)
 
     # get number of PBs and components
     with open(fileName, "rb") as file_h:
-        [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+        match InmFREDVersion:
+            case 2.0:
+                headerSize = 48
+                [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+            case 2.1:
+                headerSize = 84
+                [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f9f2i", file_h.read(headerSize))
+            case _:
+                error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
+                _logger.error(error)
+                raise error
 
     with open(fileName, "rb") as file_h:
         file_h.seek(headerSize, 1)  # skip header
@@ -386,13 +452,24 @@ def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, imnInfo: D
             _logger.error(error)
             raise error
 
-    headerSize = 48
+    InmFREDVersion = getInmFREDVersion(fileName)
 
-    # get number of PBs and components
     with open(fileName, "rb") as file_h:
-        [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
-        file_h.seek(3 * pencilBeamNo * 4, 1)  # skip PB mapping
-        componentsDataSize = np.frombuffer(file_h.read(4 * componentNo), dtype="uint32", count=componentNo)
+        match InmFREDVersion:
+            case 3.0:
+                headerSize = 48
+                [_, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(headerSize))
+                file_h.seek(3 * pencilBeamNo * 4, 1)  # skip PB mapping
+                componentsDataSize = np.frombuffer(file_h.read(4 * componentNo), dtype="uint32", count=componentNo)
+            case 3.1:
+                headerSize = 84
+                [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, componentNo, pencilBeamNo] = struct.unpack("<4i6f9f2i", file_h.read(headerSize))
+                file_h.seek(3 * pencilBeamNo * 4, 1)  # skip PB mapping
+                componentsDataSize = np.frombuffer(file_h.read(4 * componentNo), dtype="uint32", count=componentNo)
+            case _:
+                error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
+                _logger.error(error)
+                raise error
 
     size = np.prod(imgBase.GetSize())
 
@@ -416,6 +493,10 @@ def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, imnInfo: D
                 inmPointSparse = sparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
             elif interpreter == "cupy":
                 inmPointSparse = cp.sparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
+            else:
+                error = NotImplementedError(f"Interpreter '{interpreter}' is not supported.")
+                _logger.error(error)
+                raise error
 
             listInmSparse.append(inmPointSparse)
 

@@ -11,12 +11,12 @@ class test_inmManipulate(unittest.TestCase):
 
     def setUp(self):
         testDir = Path("unittests/testData/INMImages")
-        self.imgRef = ft.readMHD(testDir.joinpath("v3.Dose.mhd"))
+        self.imgRef = ft.readMHD(testDir.joinpath("v3.1.Dose.mhd"))
         self.imgRef = ft.setNaNImg(self.imgRef, value=0)
 
-        self.imgBase = ft.getInmFREDBaseImg(testDir.joinpath("v3.Dose.bin"))
+        self.imgBase = ft.getInmFREDBaseImg(testDir.joinpath("v3.1.Dose.bin"))
         points = ft.getVoxelPhysicalPoints(self.imgBase)
-        self.inmBase = ft.getInmFREDSparse(testDir.joinpath("v3.Dose.bin"), points)[0]
+        self.inmBase = ft.getInmFREDSparse(testDir.joinpath("v3.1.Dose.bin"), points)[0]
         self.weights = pd.read_csv(testDir.joinpath("primaryNo.csv"), delimiter=r"\s+").N.to_numpy()
 
     def test_inmSumVec_CPU(self):

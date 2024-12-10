@@ -19,7 +19,7 @@ class test_getInmFREDVersion(unittest.TestCase):
 
     def test_getInmFREDVersion(self):
         for filePath in self.filePaths:
-            fileVersion = re.findall(r"v(\d+).\S+.bin", str(filePath))
+            fileVersion = re.findall(r"v(\d+\.\d+).\S+.bin", str(filePath))
             if fileVersion:
                 fileVersion = float(fileVersion[0])
                 with self.subTest(version=fileVersion, fileName=filePath.name):
@@ -81,8 +81,8 @@ class test_getInmFREDBaseImg(unittest.TestCase):
 
     def setUp(self):
         self.testDir = Path("unittests/testData/INMImages")
-        self.filePathsDose = Path.glob(self.testDir, "v*.Dose.bin")
-        self.filePathsLETd = Path.glob(self.testDir, "v*.LETd.bin")
+        self.filePathsDose = Path.glob(self.testDir, "*.Dose.bin")
+        self.filePathsLETd = Path.glob(self.testDir, "*.LETd.bin")
         self.filePaths = chain(self.filePathsDose, self.filePathsLETd)
 
     def test_getInmFREDBaseImg(self):
