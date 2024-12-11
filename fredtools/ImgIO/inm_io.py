@@ -376,7 +376,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
                   f"Number of fields: {len(imnInfo.FID.unique())}",
                   f"Number of components: {len(listInmSparse)}",
                   f"Stored elements per component: {[InmSparse.nnz for InmSparse in listInmSparse]}"]
-        _logger.info("\n".join(strLog))
+        _logger.info("\n\t" + "\n\t".join(strLog))
 
     return listInmSparse
 

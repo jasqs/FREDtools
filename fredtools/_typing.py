@@ -4,6 +4,13 @@ from typing import Any, Iterable, Sequence, Literal, Union, Annotated, TypeVar, 
 from pydantic import Field, StringConstraints, NonNegativeInt, NonNegativeFloat
 from dotted_dict import DottedDict
 
+# Self (used in class definitions)
+import sys
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 # pandas
 from pandas import DataFrame
 from pandas import Series as PDSeries
@@ -33,7 +40,7 @@ from matplotlib.axes import Axes  # noqa
 from matplotlib.image import AxesImage  # noqa
 
 # from pandas._typing import Scalar as PDScalar
-# numberic
+# numeric
 import numpy as np  # noqa
 Numberic: TypeAlias = Union[int, float, np.number]
 PointLike: TypeAlias = Iterable[Numberic]
@@ -47,6 +54,3 @@ PathLike: TypeAlias = Union[os.PathLike, str]
 from pydicom import Dataset, FileDataset, DataElement  # noqa
 DicomDataset: TypeAlias = Union[Dataset, FileDataset]
 DicomDataElement: TypeAlias = DataElement
-
-# DVH
-# from dicompylercore.dvh import DVH  # noqa

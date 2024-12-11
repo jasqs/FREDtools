@@ -3,10 +3,46 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
+class DVHValue(object):
+    """Class that stores DVH values with the appropriate units."""
+
+    def __init__(self, value: Numberic, units: str = ''):
+        """Initialization for a DVH value that will also store units."""
+        self.value = value
+        self.units = units
+
+    def __repr__(self) -> str:
+        """Representation of the DVH value."""
+        return "DVHValue(" + self.value.__repr__() + ", '" + self.units + "')"
+
+    def __str__(self) -> str:
+        """String representation of the DVH value."""
+        if not self.units:
+            return format(self.value, '0.2f')
+        else:
+            return format(self.value, '0.2f') + ' ' + self.units
+
+    def __eq__(self, other) -> bool:
+        """Comparison method between two DVHValue objects.
+
+        Parameters
+        ----------
+        other : DVHValue
+            Other DVHValue object to compare with
+
+        Returns
+        -------
+        bool
+            True or False if the DVHValues have equal attributes
+        """
+        attribs_eq = self.units == other.units
+        return attribs_eq and np.allclose(self.value, other.value)
+
+
 class DVH(object):
     """Class that stores dose volume histogram (DVH) data."""
 
-    def __init__(self, counts: Sequence[Numberic], bins: Sequence[Numberic], dvh_type: str = 'cumulative', dose_units: str = 'Gy', volume_units: str = 'cm3', rx_dose: Numberic | None = None, name: str | None = None, color: str | None = None):
+    def __init__(self, counts: Sequence[Numberic], bins: Sequence[Numberic], dvh_type: str = 'cumulative', dose_units: str = 'Gy', volume_units: str = 'cm3', rx_dose: Numberic | None = None, name: str | None = None, color: str | Sequence[Numberic] | None = None):
         """Initialization for a DVH from existing histogram counts and bins.
 
         The class has been adapted from the dicompyler-core package.
@@ -73,18 +109,11 @@ class DVH(object):
         self.name = name
         self.color = color
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation of the class."""
-        return 'DVH(%s, %r bins: [%r:%r] %s, volume: %r %s, name: %r, ' \
-            'rx_dose: %d %s%s)' % \
-            (self.dvh_type, self.counts.size, self.bins.min(),
-             self.bins.max(), self.dose_units,
-             self.volume, self.volume_units,
-             self.name,
-             0 if not self.rx_dose else self.rx_dose,
-             self.dose_units)
+        return f'DVH({self.dvh_type}, {self.counts.size} bins: [{self.bins.min()}:{self.bins.max()}] {self.dose_units}, volume: {self.volume:.3f} {self.volume_units}, name: {self.name}, rx_dose: {0 if not self.rx_dose else self.rx_dose} {self.dose_units})'
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Comparison method between two DVH objects.
 
         Parameters
@@ -94,17 +123,32 @@ class DVH(object):
 
         Returns
         -------
-        Bool
+        bool
             True or False if the DVHs have equal attributes and via numpy.allclose
         """
         attribs = ('dvh_type', 'dose_units', 'volume_units')
         attribs_eq = {k: self.__dict__[k] for k in attribs} == {k: other.__dict__[k] for k in attribs}
         return attribs_eq and np.allclose(self.counts, other.counts) and np.allclose(self.bins, other.bins)
 
+    def __getattr__(self, name: str) -> DVHValue:
+        """Method used to dynamically determine dose or volume stats.
+
+        Parameters
+        ----------
+        name : string
+            Property name called to determine dose & volume statistics
+
+        Returns
+        -------
+        number
+            Value from the dose or volume statistic calculation.
+        """
+        return self.statistic(name)
+
     # ============================= DVH properties ============================= #
 
     @property
-    def bincenters(self):
+    def bincenters(self) -> NDArray[Any]:
         """Return a numpy array containing the bin centers."""
         return 0.5 * (self.bins[1:] + self.bins[:-1])
 
@@ -126,7 +170,7 @@ class DVH(object):
         else:
             return DVH(**dict(self.__dict__, counts=self.counts[::-1].cumsum()[::-1], dvh_type=dvh_type))
 
-    def absolute_dose(self, rx_dose=None, dose_units='Gy'):
+    def absolute_dose(self, rx_dose: Numberic | None = None, dose_units: str = 'Gy'):
         """Return an absolute dose DVH.
 
         Parameters
@@ -146,12 +190,14 @@ class DVH(object):
         else:
             # Raise an error if no rx_dose defined
             if not self.rx_dose and not rx_dose:
-                raise AttributeError("'DVH' has no defined prescription dose.")
+                error = AttributeError("'DVH' has no defined prescription dose.")
+                _logger.error(error)
+                raise error
             else:
                 rxdose = rx_dose if self.rx_dose is None else self.rx_dose
             return DVH(**dict(self.__dict__, bins=self.bins * rxdose / 100, dose_units=dose_units))
 
-    def relative_dose(self, rx_dose=None):
+    def relative_dose(self, rx_dose: Numberic | None = None) -> Self:
         """Return a relative dose DVH based on a prescription dose.
 
         Parameters
@@ -171,12 +217,19 @@ class DVH(object):
         else:
             # Raise an error if no rx_dose defined
             if not self.rx_dose and not rx_dose:
-                raise AttributeError("'DVH' has no defined prescription dose.")
+                error = AttributeError("'DVH' has no defined prescription dose.")
+                _logger.error(error)
+                raise error
             else:
-                rxdose = rx_dose if self.rx_dose is None else self.rx_dose
+                rxdose = rx_dose if rx_dose else self.rx_dose
+
+            if rxdose is None:
+                error = ValueError("Prescription dose (rxdose) must be provided for relative dose calculation.")
+                _logger.error(error)
+                raise error
             return DVH(**dict(self.__dict__, bins=100 * self.bins / rxdose, dose_units=dose_units))
 
-    def absolute_volume(self, volume, volume_units='cm3'):
+    def absolute_volume(self, volume: Numberic, volume_units: str = 'cm3'):
         """Return an absolute volume DVH.
 
         Parameters
@@ -204,7 +257,7 @@ class DVH(object):
             return DVH(**dict(self.__dict__, counts=100 * self.counts / (1 if (self.max == 0) else self.counts.max()), volume_units=volume_units))
 
     @ property
-    def max(self):
+    def max(self) -> Numberic:
         """Return the maximum dose."""
         if self.counts.size <= 1 or max(self.counts) == 0:
             return 0
@@ -213,7 +266,7 @@ class DVH(object):
         return diff.bins[1:][diff.counts > 0][-1]
 
     @ property
-    def min(self):
+    def min(self) -> Numberic:
         """Return the minimum dose."""
         if self.counts.size <= 1 or max(self.counts) == 0:
             return 0
@@ -222,7 +275,7 @@ class DVH(object):
         return diff.bins[1:][diff.counts > 0][0]
 
     @ property
-    def mean(self):
+    def mean(self) -> Numberic:
         """Return the mean dose."""
         if self.counts.size <= 1 or max(self.counts) == 0:
             return 0
@@ -231,33 +284,29 @@ class DVH(object):
         return (diff.bincenters * diff.counts).sum() / diff.counts.sum()
 
     @ property
-    def volume(self):
+    def volume(self) -> Numberic:
         """Return the volume of the structure."""
         return self.differential.counts.sum()
 
-    def describe(self):
+    def displayInfo(self) -> None:
         """Describe a summary of DVH statistics in a text based format."""
-        print("Structure: {}".format(self.name))
-        print("-----")
-        dose = "rel dose" if self.dose_units == '%' else "abs dose: {}".format(self.dose_units)
-        vol = "rel volume" if self.volume_units == '%' else "abs volume: {}".format(self.volume_units)
-        print("DVH Type:  {}, {}, {}".format(self.dvh_type, dose, vol))
-        print("Volume:    {:0.2f} {}".format(self.volume, self.volume_units))
-        print("Max Dose:  {:0.2f} {}".format(self.max, self.dose_units))
-        print("Min Dose:  {:0.2f} {}".format(self.min, self.dose_units))
-        print("Mean Dose: {:0.2f} {}".format(self.mean, self.dose_units))
-        print("D100:      {}".format(self.D100))
-        print("D98:       {}".format(self.D98))
-        print("D95:       {}".format(self.D95))
-        # Only show volume statistics if a Rx Dose has been defined
-        # i.e. dose is in relative units
+        strLog = [f"Statistics for structure '{self.name}':",
+                  f"DVH Type:  {self.dvh_type}, {'rel dose' if self.dose_units == '%' else f'abs dose: {self.dose_units}'}, {'rel volume' if self.volume_units == '%' else f'abs volume: {self.volume_units}'}",
+                  f"Volume:    {self.volume:0.2f} {self.volume_units}",
+                  f"Max Dose:  {self.max:0.2f} {self.dose_units}",
+                  f"Min Dose:  {self.min:0.2f} {self.dose_units}",
+                  f"Mean Dose: {self.mean:0.2f} {self.dose_units}",
+                  f"D100:      {self.D100}",
+                  f"D98:       {self.D98}",
+                  f"D95:       {self.D95}"]
         if self.dose_units == '%':
-            print("V100:      {}".format(self.V100))
-            print("V95:       {}".format(self.V95))
-            print("V5:        {}".format(self.V5))
-        print("D2cc:      {}".format(self.D2cc))
+            strLog.extend([f"V100:      {self.V100}",
+                           f"V95:       {self.V95}",
+                           f"V5:        {self.V5}"])
+        strLog.append(f"D2cc:      {self.D2cc}")
+        _logger.info("\n\t".join(strLog))
 
-    def compare(self, dvh):
+    def compare(self, dvh: Self) -> None:
         """Compare the DVH properties with another DVH.
 
         Parameters
@@ -270,10 +319,16 @@ class DVH(object):
         AttributeError
             If DVHs do not have equivalent dose & volume units
         """
-        if not (self.dose_units == dvh.dose_units) or not (self.volume_units == dvh.volume_units):
-            raise AttributeError("DVH units are not equivalent")
 
-        def fmtcmp(attr, units, ref=self, comp=dvh):
+        # check if the DVHs have equivalent dose & volume units
+        if not (self.dose_units == dvh.dose_units):
+            error = AttributeError(f"DVH dose units are not equivalent ('{self.dose_units}' vs '{dvh.dose_units}')")
+            _logger.error(error)
+        if not (self.volume_units == dvh.volume_units):
+            error = AttributeError(f"DVH volume units are not equivalent ('{self.volume_units}' vs '{dvh.volume_units}')")
+            _logger.error(error)
+
+        def fmtcmp(attr: str, units: str, ref: Self = self, comp: Self = dvh) -> Tuple[str, Numberic, str, Numberic, str, Numberic, Numberic]:
             """Generate arguments for string formatting.
 
             Parameters
@@ -286,7 +341,7 @@ class DVH(object):
             Returns
             -------
             tuple
-                tuple used in a string formatter
+                tuple used in a string formatter 
             """
             if attr in ['volume', 'max', 'min', 'mean']:
                 val = ref.__getattribute__(attr)
@@ -296,48 +351,46 @@ class DVH(object):
                 cmpval = comp.statistic(attr).value
             return attr.capitalize() + ":", val, units, cmpval, units, 0 if not val else ((cmpval - val) / val) * 100, cmpval - val
 
-        print("{:11} {:>14} {:>17} {:>17} {:>14}".format(
-            'Structure:', self.name, dvh.name, 'Rel Diff', 'Abs diff'))
-        print("-----")
-        dose = "rel dose" if self.dose_units == '%' else \
-            "abs dose: {}".format(self.dose_units)
-        vol = "rel volume" if self.volume_units == '%' else \
-            "abs volume: {}".format(self.volume_units)
-        print("DVH Type:  {}, {}, {}".format(self.dvh_type, dose, vol))
-        fmtstr = "{:11} {:12.2f} {:3}{:14.2f} {:3}{:+14.2f} % {:+14.2f}"
-        print(fmtstr.format(*fmtcmp('volume', self.volume_units)))
-        print(fmtstr.format(*fmtcmp('max', self.dose_units)))
-        print(fmtstr.format(*fmtcmp('min', self.dose_units)))
-        print(fmtstr.format(*fmtcmp('mean', self.dose_units)))
-        print(fmtstr.format(*fmtcmp('D100', self.dose_units)))
-        print(fmtstr.format(*fmtcmp('D98', self.dose_units)))
-        print(fmtstr.format(*fmtcmp('D95', self.dose_units)))
-        # Only show volume statistics if a Rx Dose has been defined
-        # i.e. dose is in relative units
+        strLog = ["{:11} {:>14} {:>17} {:>17} {:>14}".format('Structure:', self.name, dvh.name, 'Rel Diff', 'Abs diff'),
+                  "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f}% {:+14.2f}".format(*fmtcmp('volume', self.volume_units)),
+                  "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f}% {:+14.2f}".format(*fmtcmp('max', self.dose_units)),
+                  "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f}% {:+14.2f}".format(*fmtcmp('min', self.dose_units)),
+                  "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f}% {:+14.2f}".format(*fmtcmp('mean', self.dose_units)),
+                  "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f}% {:+14.2f}".format(*fmtcmp('D100', self.dose_units)),
+                  "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f}% {:+14.2f}".format(*fmtcmp('D98', self.dose_units)),
+                  "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f}% {:+14.2f}".format(*fmtcmp('D95', self.dose_units))]
         if self.dose_units == '%':
-            print(fmtstr.format(*fmtcmp('V100', self.dose_units, self.relative_dose(), dvh.relative_dose())))
-            print(fmtstr.format(*fmtcmp('V95', self.dose_units, self.relative_dose(), dvh.relative_dose())))
-            print(fmtstr.format(*fmtcmp('V5', self.dose_units, self.relative_dose(), dvh.relative_dose())))
-            print(fmtstr.format(*fmtcmp('D2cc', self.dose_units)))
+            strLog.extend(["{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f} % {:+14.2f}".format(*fmtcmp('V100', self.dose_units, self.relative_dose(), dvh.relative_dose())),
+                           "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f} % {:+14.2f}".format(*fmtcmp('V95', self.dose_units, self.relative_dose(), dvh.relative_dose())),
+                           "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f} % {:+14.2f}".format(*fmtcmp('V5', self.dose_units, self.relative_dose(), dvh.relative_dose())),
+                           "{:11} {:9.2f} {:3}{:15.2f} {:3}{:+16.2f} % {:+14.2f}".format(*fmtcmp('D2cc', self.dose_units))])
+        _logger.info("\n\t" + "\n\t".join(strLog))
         self.plot()
         dvh.plot()
 
-    def plot(self):
+    def plot(self) -> Self:
         """Plot the DVH using Matplotlib if present."""
         try:
             import matplotlib.pyplot as plt
         except (ImportError, RuntimeError):
-            print('Matplotlib could not be loaded. Install and try again.')
+            error = ImportError("Matplotlib could not be loaded. Install and try again.")
+            _logger.error(error)
         else:
-            plt.plot(self.bincenters, self.counts, label=self.name, color=None if not isinstance(self.color, np.ndarray) else (self.color / 255))
-            # plt.axis([0, self.bins[-1], 0, self.counts[0]])
-            plt.xlabel('Dose [%s]' % self.dose_units)
-            plt.ylabel('Volume [%s]' % self.volume_units)
+            if isinstance(self.color, Sequence) and not isinstance(self.color, str):
+                color = np.array(self.color) / 255
+            else:
+                color = self.color
+            plt.plot(self.bincenters, self.counts, label=self.name, color=color)
+            plt.xlabel(f'Dose [{self.dose_units}]')
+            plt.ylabel(f'Volume [{self.volume_units}]')
+            plt.xlim(0,)
+            plt.ylim(0,)
+            plt.grid()
             if self.name:
                 plt.legend(loc='best')
         return self
 
-    def volume_constraint(self, dose, dose_units=None):
+    def volume_constraint(self, dose: Numberic, dose_units: str | None = None) -> DVHValue:
         """Calculate the volume that receives at least a specific dose.
 
         i.e. V100, V150 or V20Gy
@@ -359,13 +412,13 @@ class DVH(object):
         else:
             dose_bins = self.absolute_dose().bins
         index = np.argmin(np.fabs(dose_bins - dose))
-        # TODO Add interpolation
+        # TODO: Add interpolation
         if index >= self.counts.size:
             return DVHValue(0.0, self.volume_units)
         else:
             return DVHValue(self.counts[index], self.volume_units)
 
-    def dose_constraint(self, volume, volume_units=None):
+    def dose_constraint(self, volume: Numberic, volume_units: str | None = None) -> DVHValue:
         """Calculate the maximum dose that a specific volume receives.
 
         i.e. D90, D100 or D2cc
@@ -401,10 +454,10 @@ class DVH(object):
 
             return DVHValue(self.bins[index_range - index_min_value], self.dose_units)
 
-        # TODO Add interpolation
+        # TODO: Add interpolation
         return DVHValue(self.bins[np.argmin(np.fabs(volume_counts - volume))], self.dose_units)
 
-    def statistic(self, name):
+    def statistic(self, name: str) -> DVHValue:
         """Return a DVH dose or volume statistic.
 
         Parameters
@@ -419,12 +472,11 @@ class DVH(object):
         """
         import re
         # Compile a regex to determine dose & volume statistics
-        p = re.compile(r'(\S+)?(D|V){1}(\d+[.]?\d*)(gy|cc)?(?!\S+)', re.IGNORECASE)
+        p = re.compile(r"(\S+)?(D|V){1}(\d+[.]?\d*)(gy|cc)?(?!\S+)", re.IGNORECASE)
         match = re.match(p, name)
         # Return the default attribute if not a dose or volume statistic
-        # print(match.groups())
-        if not match or match.groups()[0] is not None:
-            raise AttributeError("'DVH' has no attribute '%s'" % name)
+        if (match is None) or (match.groups()[0] is not None):
+            raise AttributeError(f"'DVH' has no attribute '{name}'")
 
         # Process the regex match
         c = [x.lower() for x in match.groups() if x]
@@ -440,59 +492,10 @@ class DVH(object):
                 return self.cumulative.dose_constraint(float(c[1]))
             # Dose Constraints in abs volume (i.e. D2cc) & return a dose
             return self.cumulative.dose_constraint(float(c[1]), c[2])
-
-    def __getattr__(self, name):
-        """Method used to dynamically determine dose or volume stats.
-
-        Parameters
-        ----------
-        name : string
-            Property name called to determine dose & volume statistics
-
-        Returns
-        -------
-        number
-            Value from the dose or volume statistic calculation.
-        """
-        return self.statistic(name)
-
-
-class DVHValue(object):
-    """Class that stores DVH values with the appropriate units."""
-
-    def __init__(self, value, units=''):
-        """Initialization for a DVH value that will also store units."""
-        self.value = value
-        self.units = units
-
-    def __repr__(self):
-        """Representation of the DVH value."""
-        return "dvh.DVHValue(" + self.value.__repr__() + ", '" + self.units + "')"
-
-    def __str__(self):
-        """String representation of the DVH value."""
-        if not self.units:
-            # return str(self.value)
-            return format(self.value, '0.2f')
         else:
-            # return str(self.value) + ' ' + self.units
-            return format(self.value, '0.2f') + ' ' + self.units
-
-    def __eq__(self, other):
-        """Comparison method between two DVHValue objects.
-
-        Parameters
-        ----------
-        other : DVHValue
-            Other DVHValue object to compare with
-
-        Returns
-        -------
-        Bool
-            True or False if the DVHValues have equal attributes
-        """
-        attribs_eq = self.units == other.units
-        return attribs_eq and np.allclose(self.value, other.value)
+            error = AttributeError(f"'DVH' has no attribute '{name}'")
+            _logger.error(error)
+            raise error
 
 
 def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFloat, doseLevelStep: float = 0.01, displayInfo: bool = False) -> DVH:
@@ -501,9 +504,8 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
     The function calculates a dose-volume histogram (DVH) for voxels inside
     a mask with the same field of reference (FoR). The mask must defined as
     a SimpleITK image object describing a binary or floating mask.
-    The routine exploits and returns dicompylercore.dvh.DVH class to hold the DVH.
-    Read more about the dicompyler-core DVH module
-    on https://dicompyler-core.readthedocs.io/en/latest/index.html.
+    The routine exploits and returns DVH class to hold the DVH. The class 
+    has been adapted from dicompyler-core DVH module (https://dicompyler-core.readthedocs.io/en/latest/index.html)
 
     Parameters
     ----------
@@ -520,20 +522,19 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
 
     Returns
     -------
-    dicompylercore DVH
-        An instance of a dicompylercore.dvh.DVH class holding the DVH.
+    DVH
+        An instance of a DVH class holding the DVH.
 
     See Also
     --------
-        dicompylercore : more information about the dicompylercore.dvh.DVH.
         resampleImg : resample image.
         mapStructToImg : map structure to image (refer for more information about mapping algorithms).
         getDVHStruct : calculate DVH for structure.
     """
-    from dicompylercore import dvh
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
+    import re
 
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
     ft._imgTypeChecker.isSITK3D(imgMask, raiseError=True)
@@ -562,21 +563,22 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
     volume *= np.prod(img.GetSpacing())
 
     # get color and name
-    maskColor = imgMask.GetMetaData("ROIColor") if "ROIColor" in imgMask.GetMetaDataKeys() else [0, 0, 255]
+    maskColor = imgMask.GetMetaData("ROIColor") if "ROIColor" in imgMask.GetMetaDataKeys() else "[0, 0, 255]"
+    maskColor = [int(x) for x in re.findall(r'(\d+)', maskColor)]  # convert string to list of integers
     maskName = imgMask.GetMetaData("ROIName") if "ROIName" in imgMask.GetMetaDataKeys() else "unknown"
 
     # generate DVH
-    dvhMask = dvh.DVH(volume / 1e3, doseBins, rx_dose=dosePrescribed, name=maskName, color=maskColor, dvh_type="differential").cumulative
+    dvhMask = DVH(volume / 1e3, doseBins.tolist(), rx_dose=dosePrescribed, name=maskName, color=maskColor, dvh_type="differential").cumulative
 
     if displayInfo:
         dvhStatLog = [f"Prescribed dose: {dosePrescribed:.3f} Gy",
                       f"Volume: {dvhMask.volume:.3f} {dvhMask.volume_units}",
                       f"Dose max/min: {dvhMask.max:.3f}/{dvhMask.min:.3f} {dvhMask.dose_units}",
                       f"Dose mean: {dvhMask.mean:.3f} {dvhMask.dose_units}",
-                      f"Absolute HI (D02-D98): {dvhMask.statistic('D02').value-dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",  # type: ignore
-                      f"D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",  # type: ignore
-                      f"D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}",  # type: ignore
-                      f"D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}"]  # type: ignore
+                      f"Absolute HI (D02-D98): {dvhMask.statistic('D02').value-dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",
+                      f"D98: {dvhMask.statistic('D98').value:.3f} {dvhMask.dose_units}",
+                      f"D50: {dvhMask.statistic('D50').value:.3f} {dvhMask.dose_units}",
+                      f"D02: {dvhMask.statistic('D02').value:.3f} {dvhMask.dose_units}"]
         _logger.info(f"DVH statistics for '{dvhMask.name}' structure:" + "\n\t" + "\n\t".join(dvhStatLog))
 
     return dvhMask
@@ -587,11 +589,9 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
     a structure named `structName` and is defined in the structure dicom file.
-    The image can be resampled before mapping to increase the resolution. The routine
-    exploits and returns dicompylercore.dvh.DVH class to hold the DVH.
-    Read more about the dicompyler-core DVH module
-    on https://dicompyler-core.readthedocs.io/en/latest/index.html.
-
+    The image can be resampled before mapping to increase the resolution. The routine 
+    exploits and returns DVH class to hold the DVH. The class has been adapted 
+    from dicompyler-core DVH module (https://dicompyler-core.readthedocs.io/en/latest/index.html)
     Parameters
     ----------
     img : SimpleITK Image
@@ -642,7 +642,7 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
     # get structure info
     structList = ft.getRSInfo(RSfileName)
     if structName not in list(structList.ROIName):
-        error = ValueError(f"Cannot find the structure '{structName}' in {RSfileName} dicom file with structures.")
+        error = ValueError(f"Cannot find the structure '{structName}' in {RSfileName} dicom file with structures. Available structures are: {list(structList.ROIName)}.")
         _logger.error(error)
         raise error
 
@@ -671,10 +671,10 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
                       f"Volume: {dvhROI.volume:.3f} {dvhROI.volume_units}",
                       f"Dose max/min: {dvhROI.max:.3f}/{dvhROI.min:.3f} {dvhROI.dose_units}",
                       f"Dose mean: {dvhROI.mean:.3f} {dvhROI.dose_units}",
-                      f"Absolute HI (D02-D98): {dvhROI.statistic('D02').value-dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",  # type: ignore
-                      f"D98: {dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",  # type: ignore
-                      f"D50: {dvhROI.statistic('D50').value:.3f} {dvhROI.dose_units}",  # type: ignore
-                      f"D02: {dvhROI.statistic('D02').value:.3f} {dvhROI.dose_units}"]  # type: ignore
+                      f"Absolute HI (D02-D98): {dvhROI.statistic('D02').value-dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",
+                      f"D98: {dvhROI.statistic('D98').value:.3f} {dvhROI.dose_units}",
+                      f"D50: {dvhROI.statistic('D50').value:.3f} {dvhROI.dose_units}",
+                      f"D02: {dvhROI.statistic('D02').value:.3f} {dvhROI.dose_units}"]
         _logger.info(f"DVH statistics for '{dvhROI.name}' structure:" + "\n\t" + "\n\t".join(dvhStatLog))
 
     return dvhROI
