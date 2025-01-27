@@ -30,3 +30,19 @@ def ITK2SITK(imgITK: ITKImage) -> SITKImage:
     imgSITK.SetSpacing(list(imgITK.GetSpacing()))
     imgSITK.SetDirection(itk.GetArrayFromMatrix(imgITK.GetDirection()).flatten())
     return imgSITK
+
+
+def img2vec(img: SITKImage) -> NDArray:
+    """Convert an image to a vector."""
+    import cupy as cp
+    import SimpleITK as sitk
+    import fredtools as ft
+
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
+    xp = cp.get_array_module(img)
+
+    vec = xp.swapaxes(sitk.GetArrayViewFromImage(img), 0, 2).flatten(order='F')
+
+    vec = xp.asarray(vec)
+
+    return vec

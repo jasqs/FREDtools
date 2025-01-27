@@ -933,7 +933,7 @@ def compareImg(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInfo: 
         _logger.warning("The images have different FoR.")
 
     if not img1.GetPixelID() == img2.GetPixelID():
-        _logger.warning(f"The images have different pixel types. The 'img' type is {img1.GetPixelIDTypeAsString()} and 'img2' type is {img2.GetPixelIDTypeAsString()}.")
+        _logger.warning(f"The images have different pixel types. The 'img1' type is {img1.GetPixelIDTypeAsString()} and 'img2' type is {img2.GetPixelIDTypeAsString()}.")
 
     try:
         np.testing.assert_array_almost_equal(sitk.GetArrayFromImage(img1), sitk.GetArrayFromImage(img2), decimal=decimal)
