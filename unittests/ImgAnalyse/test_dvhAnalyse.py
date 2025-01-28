@@ -1,8 +1,44 @@
 import unittest
 import numpy as np
+from scipy.stats import norm
 from dicompylercore import dvh
 import fredtools as ft
 import pydvh
+
+
+class test_DVH(unittest.TestCase):
+    def setUp(self):
+        self.doseBins = np.arange(0, 140.01, 0.01)
+        self.doseBinsCenter = 0.5*(self.doseBins[1:] + self.doseBins[:-1])
+        self.dosePrescribed = 70
+        self.doseSigma = 7
+        self.countsDiff = norm.pdf(self.doseBinsCenter, loc=self.dosePrescribed, scale=self.doseSigma)
+        self.countsDiff[self.doseBinsCenter < (self.dosePrescribed-(self.doseBinsCenter.max()-self.dosePrescribed))] = 0
+        self.countsCum = self.countsDiff[::-1].cumsum()[::-1]
+
+    def test_DVHInit(self):
+        with self.subTest("Differential DVH"):
+            dvhTest = ft.ImgAnalyse.dvhAnalyse.DVH(self.countsDiff, self.doseBins, type="differential", dose_units="Gy", volume_units="cm3", dosePrescribed=self.dosePrescribed, name="testDVH", color="r")
+            self.assertIsInstance(dvhTest, ft.ImgAnalyse.dvhAnalyse.DVH)
+            self.assertEqual(dvhTest.type, "differential")
+            self.assertTrue(np.allclose(dvhTest.cumulative.counts, self.countsCum))
+
+        with self.subTest("Cumulative DVH"):
+            dvhTest = ft.ImgAnalyse.dvhAnalyse.DVH(self.countsCum, self.doseBins, type="cumulative", dose_units="Gy", volume_units="cm3", dosePrescribed=self.dosePrescribed, name="testDVH", color="r")
+            self.assertIsInstance(dvhTest, ft.ImgAnalyse.dvhAnalyse.DVH)
+            self.assertEqual(dvhTest.type, "cumulative")
+            self.assertTrue(np.allclose(dvhTest.differential.counts, self.countsDiff))
+
+        # self.assertEqual(dvhTest.volume, self.countsDiff.sum())
+        # self.assertEqual(dvhTest.mean, np.sum(self.countsDiff*self.doseBinsCenter)/dvhTest.volume)
+        # self.assertEqual(dvhTest.max, self.doseBinsCenter[np.argmax(self.countsDiff)])
+        # self.assertEqual(dvhTest.min, self.doseBinsCenter[np.argmin(self.countsDiff)])
+        # self.assertEqual(dvhTest.statistic('D98').value, 98)
+        # self.assertEqual(dvhTest.statistic('D98').dose, self.doseBinsCenter[np.where(np.cumsum(self.countsDiff) >= 0.98*dvhTest.volume)[0][0]])
+        # self.assertEqual(dvhTest.statistic('D2').value, 2)
+        # self.assertEqual(dvhTest.statistic('D2').dose, self.doseBinsCenter[np.where(np.cumsum(self.countsDiff) >= 0.02*dvhTest.volume)[0][0]])
+        # self.assertEqual(dvhTest.statistic('D50').value, 50)
+        # self.assertEqual(dvhTest.statistic('D50').dose, self.doseBinsCenter[np.where(np.cumsum(self.countsDiff) >= 0.50*dvhTest.volume)[0][0]])
 
 
 class test_getDVHStruct(unittest.TestCase):

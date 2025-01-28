@@ -32,6 +32,12 @@ class test_imgConverter(unittest.TestCase):
         self.assertTrue((sitk.GetArrayFromImage(imgSITK) == sitk.GetArrayFromImage(self.imgSITK)).all())
         self.assertEqual(sitk.GetArrayFromImage(imgSITK).tolist(), itk.array_from_image(self.imgITK).tolist())
 
+    def test_img2vec(self):
+        vec = ft.img2vec(self.imgSITK)
+        # self.assertTrue(isinstance(vec, NDArray))
+        self.assertEqual(vec.shape, (100,))
+        self.assertEqual(vec.tolist(), sitk.GetArrayFromImage(self.imgSITK).flatten().tolist())
+
 
 if __name__ == '__main__':
     unittest.main()

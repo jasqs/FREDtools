@@ -42,7 +42,7 @@ class DVHValue(object):
 class DVH(object):
     """Class that stores dose volume histogram (DVH) data."""
 
-    def __init__(self, counts: Sequence[Numberic], bins: Sequence[Numberic], dvh_type: str = 'cumulative', dose_units: str = 'Gy', volume_units: str = 'cm3', rx_dose: Numberic | None = None, name: str | None = None, color: str | Sequence[Numberic] | None = None):
+    def __init__(self, counts: Iterable[Numberic], bins: Iterable[Numberic], type: Literal['cumulative', 'differential'] = 'cumulative', dose_units: str = 'Gy', volume_units: str = 'cm3', dosePrescribed: Numberic | None = None, name: str | None = None, color: str | Sequence[Numberic] | None = None):
         """Initialization for a DVH from existing histogram counts and bins.
 
         The class has been adapted from the dicompyler-core package.
@@ -53,7 +53,7 @@ class DVH(object):
             An iterable of volume or percent count data
         bins : iterable or numpy array
             An iterable of dose bins
-        dvh_type : str, optional
+        type : str, optional
             Choice of 'cumulative' or 'differential' type of DVH
         dose_units : str, optional
             Absolute dose units, i.e. 'gy' or relative units '%'
@@ -100,18 +100,19 @@ class DVH(object):
         NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         """
+
         self.counts = np.array(counts)
         self.bins = np.array(bins) if bins[0] == 0 else np.append([0], np.array(bins))
-        self.dvh_type = dvh_type
+        self.type = type
         self.dose_units = dose_units
         self.volume_units = volume_units
-        self.rx_dose = rx_dose
+        self.dosePrescribed = dosePrescribed
         self.name = name
         self.color = color
 
     def __repr__(self) -> str:
         """String representation of the class."""
-        return f'DVH({self.dvh_type}, {self.counts.size} bins: [{self.bins.min()}:{self.bins.max()}] {self.dose_units}, volume: {self.volume:.3f} {self.volume_units}, name: {self.name}, rx_dose: {0 if not self.rx_dose else self.rx_dose} {self.dose_units})'
+        return f'DVH({self.type}, {self.counts.size} bins: [{self.bins.min()}:{self.bins.max()}] {self.dose_units}, volume: {self.volume:.3f} {self.volume_units}, name: {self.name}, rx_dose: {0 if not self.dosePrescribed else self.dosePrescribed} {self.dose_units})'
 
     def __eq__(self, other) -> bool:
         """Comparison method between two DVH objects.
@@ -126,7 +127,7 @@ class DVH(object):
         bool
             True or False if the DVHs have equal attributes and via numpy.allclose
         """
-        attribs = ('dvh_type', 'dose_units', 'volume_units')
+        attribs = ('type', 'dose_units', 'volume_units')
         attribs_eq = {k: self.__dict__[k] for k in attribs} == {k: other.__dict__[k] for k in attribs}
         return attribs_eq and np.allclose(self.counts, other.counts) and np.allclose(self.bins, other.bins)
 
@@ -155,20 +156,20 @@ class DVH(object):
     @property
     def differential(self):
         """Return a differential DVH from a cumulative DVH."""
-        dvh_type = 'differential'
-        if self.dvh_type == dvh_type:
+        type = 'differential'
+        if self.type == type:
             return self
         else:
-            return DVH(**dict(self.__dict__, counts=abs(np.diff(np.append(self.counts, 0))), dvh_type=dvh_type))
+            return DVH(**dict(self.__dict__, counts=abs(np.diff(np.append(self.counts, 0))), type=type))
 
     @property
     def cumulative(self):
         """Return a cumulative DVH from a differential DVH."""
-        dvh_type = 'cumulative'
-        if self.dvh_type == dvh_type:
+        type = 'cumulative'
+        if self.type == type:
             return self
         else:
-            return DVH(**dict(self.__dict__, counts=self.counts[::-1].cumsum()[::-1], dvh_type=dvh_type))
+            return DVH(**dict(self.__dict__, counts=self.counts[::-1].cumsum()[::-1], type=type))
 
     def absolute_dose(self, rx_dose: Numberic | None = None, dose_units: str = 'Gy'):
         """Return an absolute dose DVH.
@@ -189,12 +190,12 @@ class DVH(object):
             return self
         else:
             # Raise an error if no rx_dose defined
-            if not self.rx_dose and not rx_dose:
+            if not self.dosePrescribed and not rx_dose:
                 error = AttributeError("'DVH' has no defined prescription dose.")
                 _logger.error(error)
                 raise error
             else:
-                rxdose = rx_dose if self.rx_dose is None else self.rx_dose
+                rxdose = rx_dose if self.dosePrescribed is None else self.dosePrescribed
             return DVH(**dict(self.__dict__, bins=self.bins * rxdose / 100, dose_units=dose_units))
 
     def relative_dose(self, rx_dose: Numberic | None = None) -> Self:
@@ -216,12 +217,12 @@ class DVH(object):
             return self
         else:
             # Raise an error if no rx_dose defined
-            if not self.rx_dose and not rx_dose:
+            if not self.dosePrescribed and not rx_dose:
                 error = AttributeError("'DVH' has no defined prescription dose.")
                 _logger.error(error)
                 raise error
             else:
-                rxdose = rx_dose if rx_dose else self.rx_dose
+                rxdose = rx_dose if rx_dose else self.dosePrescribed
 
             if rxdose is None:
                 error = ValueError("Prescription dose (rxdose) must be provided for relative dose calculation.")
@@ -251,7 +252,7 @@ class DVH(object):
         if self.volume_units == '%':
             return self
         # Convert back to cumulative before returning a relative volume
-        elif self.dvh_type == 'differential':
+        elif self.type == 'differential':
             return self.cumulative.relative_volume.differential
         else:
             return DVH(**dict(self.__dict__, counts=100 * self.counts / (1 if (self.max == 0) else self.counts.max()), volume_units=volume_units))
@@ -291,7 +292,7 @@ class DVH(object):
     def displayInfo(self) -> None:
         """Describe a summary of DVH statistics in a text based format."""
         strLog = [f"Statistics for structure '{self.name}':",
-                  f"DVH Type:  {self.dvh_type}, {'rel dose' if self.dose_units == '%' else f'abs dose: {self.dose_units}'}, {'rel volume' if self.volume_units == '%' else f'abs volume: {self.volume_units}'}",
+                  f"DVH Type:  {self.type}, {'rel dose' if self.dose_units == '%' else f'abs dose: {self.dose_units}'}, {'rel volume' if self.volume_units == '%' else f'abs volume: {self.volume_units}'}",
                   f"Volume:    {self.volume:0.2f} {self.volume_units}",
                   f"Max Dose:  {self.max:0.2f} {self.dose_units}",
                   f"Min Dose:  {self.min:0.2f} {self.dose_units}",
@@ -568,7 +569,7 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
     maskName = imgMask.GetMetaData("ROIName") if "ROIName" in imgMask.GetMetaDataKeys() else "unknown"
 
     # generate DVH
-    dvhMask = DVH(volume / 1e3, doseBins.tolist(), rx_dose=dosePrescribed, name=maskName, color=maskColor, dvh_type="differential").cumulative
+    dvhMask = DVH(volume / 1e3, doseBins.tolist(), dosePrescribed=dosePrescribed, name=maskName, color=maskColor, type="differential").cumulative
 
     if displayInfo:
         dvhStatLog = [f"Prescribed dose: {dosePrescribed:.3f} Gy",

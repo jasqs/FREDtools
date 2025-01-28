@@ -41,7 +41,7 @@ def img2vec(img: SITKImage) -> NDArray:
     ft._imgTypeChecker.isSITK(img, raiseError=True)
     xp = cp.get_array_module(img)
 
-    vec = xp.swapaxes(sitk.GetArrayViewFromImage(img), 0, 2).flatten(order='F')
+    vec = xp.swapaxes(sitk.GetArrayViewFromImage(img), 0, -1).flatten(order='F')
 
     vec = xp.asarray(vec)
 

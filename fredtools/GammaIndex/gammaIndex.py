@@ -321,6 +321,7 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
     """
     import fredtools as ft
     import numpy as np
+    ft._imgTypeChecker.isSITK(imgGI, raiseError=True)
 
     arrGI = ft.arr(imgGI)
     GIstat = {}

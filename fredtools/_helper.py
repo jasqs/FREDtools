@@ -24,6 +24,7 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     import SimpleITK as sitk
 
     # set interpolation method
+    interpolator = sitk.sitkLinear
     match interpolation.lower():
         case "linear":
             interpolator = sitk.sitkLinear
