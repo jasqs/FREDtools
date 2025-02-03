@@ -203,7 +203,7 @@ def readFREDStat(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
         if runConfigKeys:
             runConfigValues = [simInfo[runConfigKey] for runConfigKey in runConfigKeys]
             runConfigKeys = [runConfigKey.replace("runConfig", "") for runConfigKey in runConfigKeys]
-            strLog.append(f"Run Config ({','.join(runConfigKeys)}):      {str(runConfigValues).replace('[','').replace(']','')}")
+            strLog.append(f"Run Config ({','.join(runConfigKeys)}):      {str(runConfigValues).replace('[', '').replace(']', '')}")
         strLog.append("Run Config:                     {}".format(simInfo["runConfig"]))
         strLog.append("Run Wall clock Time:            {:.2f} s".format(simInfo["runWallclockTime_s"]))
         strLog.append("Average Track Time Per Primary: {:5f} us".format(simInfo["trackTimePerPrimary_us"]))
@@ -230,7 +230,7 @@ def getFREDVersions() -> List[str]:
     import subprocess
     import re
 
-    FREDrunCommand = ["fred", "-listVers"]
+    FREDrunCommand = ["fred", "-listvers"]
     runFredProc = subprocess.Popen(r" ".join(FREDrunCommand), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8")
     stdout, stderr = runFredProc.communicate()
     runFredProc.wait()
@@ -300,7 +300,7 @@ def getFREDVersion(version: str = "") -> str:
         raise error
 
     if version:
-        FREDrunCommand = ["fred", f"-useVers {version}", "-v"]
+        FREDrunCommand = ["fred", f"-usevers {version}", "-v"]
     else:
         FREDrunCommand = ["fred", "-v"]
     runFredProc = subprocess.Popen(r" ".join(FREDrunCommand), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8")
@@ -366,7 +366,7 @@ def runFRED(fileName: PathLike, version: str = "", params: Iterable[str] = [], d
     # run fred sim
     FREDrunCommand = ["fred"]
 
-    FREDrunCommand.append(f"-useVers {version}") if version else None
+    FREDrunCommand.append(f"-usevers {version}") if version else None
     params = [params] if isinstance(params, str) else params
     FREDrunCommand.extend(params) if params else None
     FREDrunCommand.append(f"-f {fileName}")
