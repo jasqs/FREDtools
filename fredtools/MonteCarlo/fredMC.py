@@ -248,7 +248,8 @@ def checkFREDVersion(version: str) -> bool:
     Parameters
     ----------
     version : str
-        Version in format #.#.#.
+        Version to be checked. Usually it is in format '#.#.#', 
+        but can be any string, e.g. 'devel'.
 
     Returns
     -------
@@ -262,8 +263,8 @@ def checkFREDVersion(version: str) -> bool:
     import re
     import fredtools as ft
 
-    if not isinstance(version, str) or not re.findall(r"\d.\d+.\d+", version):
-        error = ValueError(f"The version must be a string in format #.#.#, for instance '3.71.0'")
+    if not isinstance(version, str):
+        error = ValueError(f"The version must be a string for instance '3.71.0' or 'devel'")
         _logger.error(error)
         raise error
     fredVersions = ft.getFREDVersions()
