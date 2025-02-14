@@ -369,6 +369,22 @@ class test_getDVHMask(unittest.TestCase):
             with self.assertRaises(TypeError):
                 ft.getDVHMask(self.imgDose, imgMask, self.dosePrescribed, displayInfo=True)
 
+    def test_getDVHMask_NaNValues(self):
+        imgMask = ft.mapStructToImg(self.imgDose, self.dicomFiles.RSfileNames, self.structNames[0])
+        massCenter = ft.transformPhysicalPointToIndex(imgMask, ft.getMassCenter(imgMask))[0]
+
+        with self.subTest("NaN inside the mask"):
+            imgDose = self.imgDose.__copy__()
+            imgDose[massCenter[0], massCenter[1], massCenter[2]] = np.nan
+            with self.assertRaises(ValueError):
+                ft.getDVHMask(imgDose, imgMask, self.dosePrescribed, displayInfo=True)
+
+        with self.subTest("NaN outside the mask"):
+            imgDose = self.imgDose.__copy__()
+            imgDose[0, 0, 0] = np.nan
+            dvhTest = ft.getDVHMask(imgDose, imgMask, self.dosePrescribed, displayInfo=True)
+            self.assertIsInstance(dvhTest, ft.ImgAnalyse.dvhAnalyse.DVH)
+
 
 class test_getDVHStruct(unittest.TestCase):
     def setUp(self):

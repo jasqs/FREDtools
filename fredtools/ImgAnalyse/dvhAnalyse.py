@@ -518,6 +518,12 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
     arrImg = arrImg[arrMaskValid]
     arrMask = arrMask[arrMaskValid]
 
+    # check NaN values in the image
+    if np.isnan(arrImg).any():
+        error = ValueError("The image contains NaN values inside the mask.")
+        _logger.error(error)
+        raise error
+
     # calculate DVH
     def getVolumeCumAbs(arrImg, arrMask, doseLevel):
         return arrMask[arrImg > doseLevel].sum()

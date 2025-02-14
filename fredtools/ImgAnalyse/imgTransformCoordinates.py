@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[int]) -> Tuple[Tuple[float], ...]:
+def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[int]) -> Tuple[Tuple[float, ...], ...]:
     """Transform indices to physical points.
 
     The function transforms an iterable of indices into a tuple of
@@ -60,7 +60,7 @@ def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[int]) -> Tup
     return tuple(map(img.TransformIndexToPhysicalPoint, indices.tolist()))
 
 
-def transformContinuousIndexToPhysicalPoint(img: SITKImage, indices: Iterable[Numberic]) -> Tuple[Tuple[float], ...]:
+def transformContinuousIndexToPhysicalPoint(img: SITKImage, indices: Iterable[Numberic]) -> Tuple[Tuple[float, ...], ...]:
     """Transform indices to physical points.
 
     The function transforms an iterable of indices into a tuple of
@@ -110,7 +110,7 @@ def transformContinuousIndexToPhysicalPoint(img: SITKImage, indices: Iterable[Nu
     return tuple(map(img.TransformContinuousIndexToPhysicalPoint, indices.tolist()))
 
 
-def transformPhysicalPointToIndex(img: SITKImage, points: Iterable[Numberic]) -> Tuple[Tuple[int], ...]:
+def transformPhysicalPointToIndex(img: SITKImage, points: Iterable[Numberic]) -> Tuple[Tuple[int, ...], ...]:
     """Transform physical points to indices.
 
     The function transforms an iterable of points into a tuple of
@@ -159,7 +159,7 @@ def transformPhysicalPointToIndex(img: SITKImage, points: Iterable[Numberic]) ->
     return tuple(map(img.TransformPhysicalPointToIndex, points.tolist()))
 
 
-def transformPhysicalPointToContinuousIndex(img: SITKImage, points: Iterable[Numberic]) -> Tuple[Tuple[float], ...]:
+def transformPhysicalPointToContinuousIndex(img: SITKImage, points: Iterable[Numberic]) -> Tuple[Tuple[float, ...], ...]:
     """Transform physical points to continuous indices.
 
     The function transforms an iterable of points into a tuple of
