@@ -870,7 +870,10 @@ def getRSInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
 
     # fill the ROI infor table
     ROITable = pd.DataFrame(columns=["ROIID", "ROIType", "ROIName", "ROIColor", "ROIPhysicalProperty", "ROIPhysicalPropertyValue"])
-
+    ROIType = None
+    ROIColor = None
+    ROIPhysicalProperty = None
+    ROIPhysicalPropertyValue = np.nan
     for StructureSetROI in dicomTags["StructureSetROISequence"]:
 
         ROIID = int(StructureSetROI.ROINumber)
@@ -958,7 +961,7 @@ def getExternalName(fileName: PathLike, displayInfo: bool = False) -> str:
     return externalName
 
 
-def getCT(fileNames: Sequence[PathLike], displayInfo: bool = False) -> SITKImage:
+def getCT(fileNames: Iterable[PathLike], displayInfo: bool = False) -> SITKImage:
     """Get a CT image from dicom series.
 
     The function reads a series of dicom files containing a CT scan
@@ -985,6 +988,13 @@ def getCT(fileNames: Sequence[PathLike], displayInfo: bool = False) -> SITKImage
     import fredtools as ft
     import pydicom as dicom
     import SimpleITK as sitk
+
+    if not isinstance(fileNames, Iterable):
+        error = TypeError(f"Parameter 'fileNames' should be an iterable of paths to dicoms.")
+        _logger.error(error)
+        raise error
+    else:
+        fileNames = list(fileNames)
 
     # check if all files are CT type
     for fileName in fileNames:
@@ -1059,7 +1069,7 @@ def getCT(fileNames: Sequence[PathLike], displayInfo: bool = False) -> SITKImage
     return img
 
 
-def getPET(fileNames: Sequence[PathLike], SUV: bool = True, displayInfo: bool = False) -> SITKImage:
+def getPET(fileNames: Iterable[PathLike], SUV: bool = True, displayInfo: bool = False) -> SITKImage:
     """Get a PET image from dicom series.
 
     The function reads a series of dicom files containing a PET scan
@@ -1090,6 +1100,13 @@ def getPET(fileNames: Sequence[PathLike], SUV: bool = True, displayInfo: bool = 
     import pydicom as dicom
     import SimpleITK as sitk
 
+    if not isinstance(fileNames, Iterable):
+        error = TypeError(f"Parameter 'fileNames' should be an iterable of paths to dicoms.")
+        _logger.error(error)
+        raise error
+    else:
+        fileNames = list(fileNames)
+
     # check if all files are PT type
     for fileName in fileNames:
         if not _isDicomPET(fileName):
@@ -1098,50 +1115,51 @@ def getPET(fileNames: Sequence[PathLike], SUV: bool = True, displayInfo: bool = 
             raise error
 
     # read dicoms' tags
-    dicomSeries = []
+    dicomDataset = dicom.dataset.Dataset()  # type: ignore
+    dicomsDataset = []
     for fileName in fileNames:
-        dicomSeries.append(dicom.dcmread(fileName))
+        dicomsDataset.append(dicom.dcmread(fileName))
 
     # check if all dicoms have Frame of Reference UID tag
-    for fileName, dicomSimple in zip(fileNames, dicomSeries):
-        if "FrameOfReferenceUID" not in dicomSimple:
+    for fileName, dicomDataset in zip(fileNames, dicomsDataset):
+        if "FrameOfReferenceUID" not in dicomDataset:
             error = TypeError(f"No 'FrameOfReferenceUID' tag in {fileName}.")
             _logger.error(error)
             raise error
 
     # check if Frame of Reference UID is the same for all dicoms
-    for fileName, dicomSimple in zip(fileNames, dicomSeries):
-        if dicomSimple.FrameOfReferenceUID != dicomSeries[0].FrameOfReferenceUID:
+    for fileName, dicomDataset in zip(fileNames, dicomsDataset):
+        if dicomDataset.FrameOfReferenceUID != dicomsDataset[0].FrameOfReferenceUID:
             error = TypeError(f"Frame of Reference UID for dicom {fileName} is different than for {fileNames[0]}.")
             _logger.error(error)
             raise error
 
     # check if all dicoms have Series Instance UID tag
-    for fileName, dicomSimple in zip(fileNames, dicomSeries):
-        if "SeriesInstanceUID" not in dicomSimple:
+    for fileName, dicomDataset in zip(fileNames, dicomsDataset):
+        if "SeriesInstanceUID" not in dicomDataset:
             error = TypeError(f"No 'SeriesInstanceUID' tag in {fileName}.")
             _logger.error(error)
             raise error
 
     # check if Series Instance UID is the same for all dicoms
-    for fileName, dicomSimple in zip(fileNames, dicomSeries):
-        if dicomSimple.SeriesInstanceUID != dicomSeries[0].SeriesInstanceUID:
+    for fileName, dicomDataset in zip(fileNames, dicomsDataset):
+        if dicomDataset.SeriesInstanceUID != dicomsDataset[0].SeriesInstanceUID:
             error = TypeError(f"Series Instance UID for dicom {fileName} is different than for {fileNames[0]}.")
             _logger.error(error)
             raise error
 
     # check if all dicoms have Slice Location tag
     sliceLosationPresent = []
-    for fileName, dicomSimple in zip(fileNames, dicomSeries):
-        sliceLosationPresent.append("SliceLocation" in dicomSimple)
+    for fileName, dicomDataset in zip(fileNames, dicomsDataset):
+        sliceLosationPresent.append("SliceLocation" in dicomDataset)
     if not all(sliceLosationPresent):
         _logger.warning("Warning: All dicom files are of PT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
 
     # get slice location
     if not all(sliceLosationPresent):
-        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.ImagePositionPatient[2]), dicomSeries))
+        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.ImagePositionPatient[2]), dicomsDataset))
     else:
-        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomSeries))
+        slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomsDataset))
 
     # sort fileNames according to the Slice Location tag
     slicesLocationSorted, fileNamesSorted = zip(*sorted(zip(slicesLocation, fileNames)))
@@ -1158,10 +1176,10 @@ def getPET(fileNames: Sequence[PathLike], SUV: bool = True, displayInfo: bool = 
 
     # Recalculate image to SUV if requested
     if SUV:
-        delta_time = (float(dicomSimple.AcquisitionTime) - float(dicomSimple.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)) / 100  # [min]
-        half_life = dicomSimple.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife / 60  # [min]
-        corrected_dose = dicomSimple.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose * np.exp(-delta_time * np.log(2) / half_life)  # [Bq]
-        SUV_factor = (dicomSimple.RescaleSlope * float(dicomSimple.PatientWeight) * 1000) / (corrected_dose)  # [g/Bq] = [] * [Kg]* 1000[g/kg] / [Bq]
+        delta_time = (float(dicomDataset.AcquisitionTime) - float(dicomDataset.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)) / 100  # [min]
+        half_life = dicomDataset.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife / 60  # [min]
+        corrected_dose = dicomDataset.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose * np.exp(-delta_time * np.log(2) / half_life)  # [Bq]
+        SUV_factor = (dicomDataset.RescaleSlope * float(dicomDataset.PatientWeight) * 1000) / (corrected_dose)  # [g/Bq] = [] * [Kg]* 1000[g/kg] / [Bq]
         # Create SUV image
         img = img * float(SUV_factor)  # [g/ml] = [Bq/ml] * [g/Bq]
 
@@ -1173,14 +1191,14 @@ def getPET(fileNames: Sequence[PathLike], SUV: bool = True, displayInfo: bool = 
 
 
 @overload
-def getRD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...
+def getRD(fileNames: Iterable[PathLike], displayInfo: bool = False) -> tuple[SITKImage]: ...
 
 
 @overload
-def getRD(fileNames: Sequence[PathLike], displayInfo: bool = False) -> tuple[SITKImage]: ...
+def getRD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...
 
 
-def getRD(fileNames: Sequence[PathLike] | PathLike, displayInfo: bool = False) -> SITKImage | tuple[SITKImage]:
+def getRD(fileNames: Iterable[PathLike] | PathLike, displayInfo: bool = False) -> SITKImage | tuple[SITKImage]:
     """Get an image from dicom.
 
     The function reads a single dicom file or an iterable of dicom files
@@ -1209,6 +1227,8 @@ def getRD(fileNames: Sequence[PathLike] | PathLike, displayInfo: bool = False) -
     # if fileName is a single string then make it a single element list
     if isinstance(fileNames, PathLike):
         fileNames = [fileNames]
+    else:
+        fileNames = list(fileNames)
 
     imgOut = []
     for fileName in fileNames:
@@ -1268,6 +1288,8 @@ def _getStructureContoursByName(RSfileName: PathLike, structName: str) -> tuple:
 
     dicomRS = dicom.dcmread(RSfileName)
 
+    ROINumber = None
+    GenerationAlgorithm = None
     for StructureSetROISequence in dicomRS.StructureSetROISequence:
         if StructureSetROISequence.ROIName == structName:
             # get the ROInumber
@@ -1294,6 +1316,7 @@ def _getStructureContoursByName(RSfileName: PathLike, structName: str) -> tuple:
         if RTROIObservationsSequence.ReferencedROINumber == ROINumber:
             ROIinfo["Type"] = RTROIObservationsSequence.RTROIInterpretedType
 
+    ContourSequence = []
     for ROIContourSequence in dicomRS.ROIContourSequence:
         if ROIContourSequence.ReferencedROINumber == ROINumber:
             ROIinfo["Color"] = ROIContourSequence.ROIDisplayColor
@@ -1309,7 +1332,7 @@ def _getStructureContoursByName(RSfileName: PathLike, structName: str) -> tuple:
     return StructureContours, ROIinfo
 
 
-def getRDFileNameForFieldNumber(fileNames: Sequence[PathLike], fieldNumber: int, displayInfo: bool = False) -> PathLike | None:
+def getRDFileNameForFieldNumber(fileNames: Iterable[PathLike], fieldNumber: int, displayInfo: bool = False) -> PathLike | None:
     """Get the file name of the RD dose dicom of for the given field number.
 
     The function searches for the RD dose dicom file for a given
@@ -1331,6 +1354,7 @@ def getRDFileNameForFieldNumber(fileNames: Sequence[PathLike], fieldNumber: int,
     """
     import pydicom as dicom
 
+    fileName = None
     for fileName in fileNames:
         if not _isDicomRD(fileName):
             _logger.warning(f"File {fileName} is not a RD dicom.")
@@ -1351,7 +1375,7 @@ def getRDFileNameForFieldNumber(fileNames: Sequence[PathLike], fieldNumber: int,
     return fileName
 
 
-def anonymizeDicoms(fileNames: Sequence[PathLike] | PathLike, removePrivateTags: bool = False, displayInfo: bool = False) -> None:
+def anonymizeDicoms(fileNames: Iterable[PathLike] | PathLike, removePrivateTags: bool = False, displayInfo: bool = False) -> None:
     """Anonymize dicom files.
 
     The function anonymizes dicom files given as an iterable of file paths.
@@ -1371,6 +1395,8 @@ def anonymizeDicoms(fileNames: Sequence[PathLike] | PathLike, removePrivateTags:
     # if fileName is a single string then make it a single element list
     if isinstance(fileNames, PathLike):
         fileNames = [fileNames]
+    else:
+        fileNames = list(fileNames)
 
     for fileName in fileNames:
         dicomTags = dicom.dcmread(fileName)

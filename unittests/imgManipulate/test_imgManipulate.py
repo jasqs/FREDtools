@@ -2,6 +2,7 @@ import unittest
 import SimpleITK as sitk
 import fredtools as ft
 import numpy as np
+import pandas as pd
 
 
 class test_mapStructToImg(unittest.TestCase):
@@ -111,10 +112,10 @@ class test_resampleImg(unittest.TestCase):
 class test_sumImg(unittest.TestCase):
 
     def setUp(self):
-        fileNames = ["unittests/testData/MHDImages/img3D_resampleLinear.mhd",
-                     "unittests/testData/MHDImages/img3D_resampleNearest.mhd",
-                     "unittests/testData/MHDImages/img3D_resampleSpline0.mhd"]
-        self.imgs = ft.readMHD(fileNames)
+        self.fileNames = ["unittests/testData/MHDImages/img3D_resampleLinear.mhd",
+                          "unittests/testData/MHDImages/img3D_resampleNearest.mhd",
+                          "unittests/testData/MHDImages/img3D_resampleSpline0.mhd"]
+        self.imgs = ft.readMHD(self.fileNames)
 
     def test_sumImg(self):
         imgSum = ft.sumImg(self.imgs, displayInfo=True)
@@ -129,6 +130,14 @@ class test_sumImg(unittest.TestCase):
         self.imgs.append(ft.readMHD("unittests/testData/MHDImages/img3D.mhd"))
         with self.assertRaises(ValueError):
             ft.sumImg(self.imgs, displayInfo=True)
+
+    def test_sumImg_pandasSeries(self):
+        dataFrame = pd.DataFrame()
+        imgs = ft.readMHD(self.fileNames)
+        dataFrame['img'] = imgs
+        dataFrame.set_index(pd.Index([4, 6, 3]), inplace=True)
+        imgSum = ft.sumImg(dataFrame['img'], displayInfo=True)
+        self.assertIsInstance(imgSum, sitk.Image)
 
 
 class test_divideImg(unittest.TestCase):

@@ -248,10 +248,10 @@ def readOPD(fileName: PathLike, depth: Numberic = 0, returnImg=["Integral", "Sum
 
     if displayInfo:
         strLog = [f"Found {len(imgsType)} images of types: ",
-                  f"\t Snap: {np.sum([x=='Snap' for x in imgsType])}",
-                  f"\t Integral: {np.sum([x=='Integral' for x in imgsType])}",
-                  f"\t Sum: {np.sum([x=='Sum' for x in imgsType])}",
-                  f"\t Other: {np.sum([x not in ['Snap','Integral','Sum'] for x in imgsType])}",
+                  f"\t Snap: {np.sum([x == 'Snap' for x in imgsType])}",
+                  f"\t Integral: {np.sum([x == 'Integral' for x in imgsType])}",
+                  f"\t Sum: {np.sum([x == 'Sum' for x in imgsType])}",
+                  f"\t Other: {np.sum([x not in ['Snap', 'Integral', 'Sum'] for x in imgsType])}",
                   f"Returned image types: {', '.join(returnImg).title()}",
                   f"Information about the last image:"]
         _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgs[-1]))

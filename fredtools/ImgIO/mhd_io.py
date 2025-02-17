@@ -83,14 +83,14 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
 
 
 @overload
-def readMHD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...
+def readMHD(fileNames: Iterable[PathLike], displayInfo: bool = False) -> tuple[SITKImage, ...]: ...
 
 
 @overload
-def readMHD(fileNames: Sequence[PathLike], displayInfo: bool = False) -> tuple[SITKImage, ...]: ...
+def readMHD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...
 
 
-def readMHD(fileNames: Sequence[PathLike] | PathLike, displayInfo: bool = False) -> SITKImage | tuple[SITKImage, ...]:
+def readMHD(fileNames: Iterable[PathLike] | PathLike, displayInfo: bool = False) -> SITKImage | tuple[SITKImage, ...]:
     """Read MetaImage image to SimpleITK image object.
 
     The function reads a single MetaImage file or an iterable of MetaImage files
@@ -124,7 +124,7 @@ def readMHD(fileNames: Sequence[PathLike] | PathLike, displayInfo: bool = False)
     for fileName in fileNames:
         img.append(sitk.ReadImage(str(fileName), imageIO="MetaImageIO"))
 
-    _logger.debug(f"Read {len(img)} {'file' if len(img)==1 else 'files'} from:\n\t" + "\n\t".join(map(str, fileNames)))
+    _logger.debug(f"Read {len(img)} {'file' if len(img) == 1 else 'files'} from:\n\t" + "\n\t".join(map(str, fileNames)))
 
     if displayInfo:
         _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img[0]))

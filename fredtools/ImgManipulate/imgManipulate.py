@@ -692,7 +692,7 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     return imgRes
 
 
-def sumImg(imgs: Sequence[SITKImage], displayInfo: bool = False) -> SITKImage:
+def sumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
     """Sum list of images.
 
     The function sums an iterable (list, tuple, etc.) of images
@@ -715,10 +715,11 @@ def sumImg(imgs: Sequence[SITKImage], displayInfo: bool = False) -> SITKImage:
     import SimpleITK as sitk
 
     # check if the input iterable is not empty
-    if not imgs:
+    if not any(imgs):
         error = ValueError("The input iterable 'imgs' is empty.")
         _logger.error(error)
         raise error
+    imgs = list(imgs)
 
     # check if all images have the same FoR
     for img in imgs:

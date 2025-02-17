@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, plane: str = "XY", point: PointLike | None = None, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", alphaFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.7, imgROIs: Sequence[SITKImage] | None = None, vmaxBack: float | None = None, vmaxFront: float | None = None, showLegend: bool = True, fontsize: NonNegativeInt = 8) -> AxesImage:
+def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, plane: str = "XY", point: PointLike | None = None, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", alphaFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.7, imgROIs: Iterable[SITKImage] | None = None, vmaxBack: float | None = None, vmaxFront: float | None = None, showLegend: bool = True, fontsize: NonNegativeInt = 8) -> AxesImage:
     """Display image slice in front of another image slice including contours.
 
     The function displays on `ax` a `plane` going through `point`
@@ -213,7 +213,7 @@ t
     See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
     """
 
-    def __init__(self, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, imgROIs: Sequence[SITKImage] | None = None, point: PointLike | None = None, DCOFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.1, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", figsize: Iterable[Numberic] = (15, 5)):
+    def __init__(self, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, imgROIs: Iterable[SITKImage] | None = None, point: PointLike | None = None, DCOFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.1, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", figsize: Iterable[Numberic] = (15, 5)):
         import ipywidgets as ipyw
         from matplotlib import colorbar, colors
         import matplotlib.pyplot as plt
