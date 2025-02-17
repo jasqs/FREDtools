@@ -83,11 +83,11 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
 
 
 @overload
-def readMHD(fileNames: Iterable[PathLike], displayInfo: bool = False) -> tuple[SITKImage, ...]: ...
+def readMHD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...  # type: ignore
 
 
 @overload
-def readMHD(fileNames: PathLike, displayInfo: bool = False) -> SITKImage: ...
+def readMHD(fileNames: Iterable[PathLike], displayInfo: bool = False) -> tuple[SITKImage, ...]: ...
 
 
 def readMHD(fileNames: Iterable[PathLike] | PathLike, displayInfo: bool = False) -> SITKImage | tuple[SITKImage, ...]:

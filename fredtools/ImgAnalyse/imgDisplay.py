@@ -112,6 +112,10 @@ def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | 
     if imgFront and not vmaxFront:
         vmaxFront = float(ft.getStatistics(imgFront).GetMaximum())
 
+    axesImage = None
+    slBack = None
+    slFront = None
+
     # show back slice image
     if imgBack:
         # check if imgBack is a 3D SimpleITK image
@@ -127,6 +131,11 @@ def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | 
 
         slFront = ft.getSlice(imgFront, point=point, plane=plane)
         axesImage = ax.imshow(sitk.GetArrayViewFromImage(slFront).squeeze(), cmap=cmapFrontColormap, extent=ft.getExtMpl(slFront), alpha=alphaFront, vmin=0, vmax=vmaxFront)
+
+    if not axesImage:
+        error = AttributeError(f"Cannot display the image slice.")
+        _logger.error(error)
+        raise
 
     # show ROIs slice
     if imgROIs:
@@ -150,12 +159,15 @@ def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | 
             ax.legend(fontsize=fontsize)
 
     # set  x/y limits to CT
-    if imgBack:
+    if slBack:
         ax.set_xlim(ft.getExtMpl(slBack)[0], ft.getExtMpl(slBack)[1])
         ax.set_ylim(ft.getExtMpl(slBack)[2], ft.getExtMpl(slBack)[3])
-    else:
+    elif slFront:
         ax.set_xlim(ft.getExtMpl(slFront)[0], ft.getExtMpl(slFront)[1])
         ax.set_ylim(ft.getExtMpl(slFront)[2], ft.getExtMpl(slFront)[3])
+    else:
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
 
     # set axis labels
     planeSimple = re.sub("[-+]", "", plane)
@@ -260,8 +272,13 @@ t
         if self.imgFront:
             statFront = ft.getStatistics(self.imgFront)
             self.imgFront = sitk.Threshold(self.imgFront, lower=statFront.GetMaximum() * DCOFront, upper=statFront.GetMaximum() * 10, outsideValue=np.nan)
+        else:
+            statFront = sitk.StatisticsImageFilter()
+
         if self.imgBack:
             statBack = ft.getStatistics(self.imgBack)
+        else:
+            statBack = sitk.StatisticsImageFilter()
 
         # # determine if interactive is possible (only jupyter)
         if get_backend() in ["widget", "ipympl"]:

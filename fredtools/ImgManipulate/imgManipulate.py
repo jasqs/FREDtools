@@ -346,7 +346,7 @@ def _getStructureContourArray(StructureContourPx: NDArray) -> NDArray:
     # remove remaining pixels at the contour border that do not intersect with the contour
     StructureContourBorderPixelsPolygonsIntersects = [StructureContourBorderPixelsPlygon.intersects(StructureContourPxPolygon.boundary) for StructureContourBorderPixelsPlygon in StructureContourBorderPixelsPolygons]
     StructureContourBorderPixels = StructureContourBorderPixels[StructureContourBorderPixelsPolygonsIntersects]
-    StructureContourBorderPixelsPolygons = np.array(StructureContourBorderPixelsPolygons)[StructureContourBorderPixelsPolygonsIntersects].tolist()
+    StructureContourBorderPixelsPolygons: list = np.array(StructureContourBorderPixelsPolygons)[StructureContourBorderPixelsPolygonsIntersects].tolist()
 
     # generate contour slice
     arr = np.zeros(StructureContourBorderPixels.max(axis=0)[::-1] + 1, dtype="float")
@@ -356,7 +356,11 @@ def _getStructureContourArray(StructureContourPx: NDArray) -> NDArray:
 
     # fill pixels inside the contour
     arr = ndimage.binary_fill_holes(arr.astype("bool"))
-    if arr is not None:
+    if not arr:
+        error = RuntimeError("The contour is empty.")
+        _logger.error(error)
+        raise error
+    else:
         arr = arr.astype("float")
 
     # calculate the contour pixels area inside the contour

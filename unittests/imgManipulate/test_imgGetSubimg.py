@@ -1,5 +1,6 @@
 import unittest
 import fredtools as ft
+import numpy as np
 
 
 class test_getSlice(unittest.TestCase):
@@ -94,7 +95,7 @@ class test_getPoint(unittest.TestCase):
         imgRef = ft.readMHD("unittests/testData/MHDImages/img3DVecPoint_resampleNearest.mhd")
         imgEval = ft.getPoint(self.img3DVec, self.pointImgVec, interpolation='nearest', displayInfo=True)
         self.assertEqual(imgRef.GetSize(), (1, 1, 1))
-        self.assertAlmostEqual(ft.arr(imgRef).tolist(), ft.arr(imgEval).tolist(), places=7)
+        self.assertTrue(np.all(np.isclose(ft.arr(imgRef).tolist(), ft.arr(imgEval).tolist())))
 
     def test_getPoint_invalid_point(self):
         with self.assertRaises(AttributeError):

@@ -420,5 +420,9 @@ def _getMPV(x: Iterable[Numberic], y: Iterable[Numberic]) -> tuple[Numberic, Num
     cr_pts = interpFun.derivative().roots()
     cr_pts = np.append(cr_pts, (x[0], x[-1]))
     cr_vals = interpFun(cr_pts)
+    if isinstance(cr_vals, list):
+        error = ValueError("The MPV calculation failed. Multiple MPV candidates found.")
+        _logger.error(error)
+        raise error
     max_index = np.argmax(cr_vals)
-    return cr_pts[max_index], cr_vals[max_index]
+    return float(cr_pts[max_index]), float(cr_vals[max_index])

@@ -56,6 +56,8 @@ def _generateSpatialCentresString(pixelCentres: tuple[float, ...]) -> str:
         spatialCentresString = "[ {:12f}, {:12f} ]".format(pixelCentres[0], pixelCentres[1])
     elif len(pixelCentres) == 1:
         spatialCentresString = "[ {:12f} ]".format(pixelCentres[0])
+    else:
+        spatialCentresString = "[]"  # empty list
     return spatialCentresString
 
 

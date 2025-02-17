@@ -265,7 +265,7 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['first'] = "
 def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['last'] = "last", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[int, str] | None: ...
 
 
-def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'first', 'last'] = "all", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[int, str] | tuple[tuple[int, ...], tuple[str, ...]] | None:
+def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'first', 'last'] = "all", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[tuple[int, ...], tuple[str, ...]] | tuple[int, str] | None:
     """Read the line and line number from an ASCI file.
 
     The function searches an ASCI file for lines matching a pattern and returns

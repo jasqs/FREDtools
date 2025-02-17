@@ -218,10 +218,11 @@ def getMaxPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     getMinPosition : get the position of an image minimum.
     """
     import fredtools as ft
+    import numpy as np
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    maxPosition = ft.getVoxelPhysicalPoints(img == ft.getStatistics(img).GetMaximum(), insideMask=True)
+    maxPosition = np.asarray(ft.getVoxelPhysicalPoints(img == ft.getStatistics(img).GetMaximum(), insideMask=True))
 
     # check if only one maximum value exists and raise a warning
     if maxPosition.shape[0] != 1:
@@ -265,10 +266,11 @@ def getMinPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     getMaxPosition : get the position of an image maximum.
     """
     import fredtools as ft
+    import numpy as np
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
-    minPosition = ft.getVoxelPhysicalPoints(img == ft.getStatistics(img).GetMinimum(), insideMask=True)
+    minPosition = np.asarray(ft.getVoxelPhysicalPoints(img == ft.getStatistics(img).GetMinimum(), insideMask=True))
 
     # check if only one maximum value exists and raise a warning
     if minPosition.shape[0] != 1:
@@ -829,15 +831,15 @@ def isPointInside(img: SITKImage, point: PointLike | Iterable[PointLike], displa
     isIns = []
     for axis in range(point.shape[1]):
         isIns.append((point[:, axis] >= extents[axis][0]) & (point[:, axis] <= extents[axis][1]))
-    isIns = list(np.array(isIns).all(axis=0))
+    isIns = np.square(np.array(isIns).all(axis=0))
 
     if displayInfo:
-        if all(isIns):
+        if np.all(isIns):
             _logger.info("All points are inside the image.")
         else:
             _logger.info("Not all points are inside the image.")
 
-    return isIns[0] if len(isIns) == 1 else tuple(isIns)
+    return bool(isIns[0]) if len(isIns) == 1 else tuple(isIns)
 
 
 def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageFilter:

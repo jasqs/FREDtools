@@ -68,7 +68,7 @@ class test_getDicomTypeName(unittest.TestCase):
         self.assertEqual(ft.getDicomTypeName(self.dicomFiles.RDfileNames[0]), "RT Dose Storage")
         # self.assertEqual(getDicomTypeName(self.dicomFiles.pet_file), "Positron Emission Tomography Image Storage")
         with self.assertRaises(TypeError):
-            ft.getDicomTypeName(1)
+            ft.getDicomTypeName(1)  # type: ignore
 
 
 class test_isDicomCT(unittest.TestCase):

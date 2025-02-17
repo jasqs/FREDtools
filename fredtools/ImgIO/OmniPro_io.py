@@ -179,6 +179,7 @@ def readOPD(fileName: PathLike, depth: Numberic = 0, returnImg=["Integral", "Sum
 
     imgs = []
     imgsType = []
+    imgNo = 0
     for imgStartIdx in imgsStartIdx:
         imgType = np.frombuffer(data, dtype="S4", count=1, offset=imgStartIdx)[0].decode()
         match imgType:
@@ -218,8 +219,8 @@ def readOPD(fileName: PathLike, depth: Numberic = 0, returnImg=["Integral", "Sum
         arr = np.flipud(arr)
         arr = np.expand_dims(arr, 0)
         img = sitk.GetImageFromArray(arr)
-        img.SetOrigin(imgCornerVoxelsCentres[:, 0].tolist() + [depth])
-        img.SetSpacing(imgPixelSize.tolist() + [0.1])
+        img.SetOrigin(list(imgCornerVoxelsCentres[:, 0]) + [depth])
+        img.SetSpacing(list(imgPixelSize) + [0.1])
         img.SetMetaData("OPDimageType", imgType)
         img.SetMetaData("OPDimageNo", str(imgNo))
 
