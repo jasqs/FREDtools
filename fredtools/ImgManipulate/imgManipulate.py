@@ -356,7 +356,7 @@ def _getStructureContourArray(StructureContourPx: NDArray) -> NDArray:
 
     # fill pixels inside the contour
     arr = ndimage.binary_fill_holes(arr.astype("bool"))
-    if not arr:
+    if arr is None:
         error = RuntimeError("The contour is empty.")
         _logger.error(error)
         raise error
