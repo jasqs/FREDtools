@@ -57,6 +57,48 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     return interpolator
 
 
+def get1DInterpolator(x: Iterable[Numberic], y: Iterable[Numberic], interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3):
+    from scipy.interpolate import make_interp_spline
+    from functools import partial
+    import numpy as np
+
+    def _nearest1Dinterpolator(x, y, xNew):
+        x = np.asarray(x)
+        y = np.asarray(y)
+        xHalfWayPoints = (x[:-1] + x[1:]) / 2.0   # halfway points
+        idx = np.searchsorted(xHalfWayPoints, xNew, side='left')
+        idx = np.clip(idx, 0, len(x) - 1)  # clip the indices so that they are within the range of x indices.
+
+        return y[idx]
+
+    def nearest1Dinterpolator(x, y):
+        return partial(_nearest1Dinterpolator, x, y)
+
+    match interpolation.lower():
+        case "linear":
+            interpolator = make_interp_spline(x, y, k=1)
+        case "nearest":
+            interpolator = nearest1Dinterpolator(x, y)
+        case "spline":
+            if splineOrder > 5 or splineOrder < 0:
+                error = ValueError(f"Spline order must be in range 0-5.")
+                _logger.error(error)
+                raise error
+            interpolator = make_interp_spline(x, y, k=splineOrder)
+            match splineOrder:
+                case 0:
+                    _logger.warning("The spline order 0 is not equivalent to 'nearest' but to 'previous' interpolation type.")
+                case 1:
+                    _logger.info("The spline order 1 is equivalent to 'linear' interpolation type.")
+        case _:
+            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            _logger.error(error)
+            raise error
+
+    _logger.debug(f"Setting 1D interpolation method to '{interpolation}'" + (f" with spline order {splineOrder}." if interpolation is "spline" else "."))
+    return interpolator
+
+
 def copyImgMetaData(imgSrc: SITKImage, imgDes: SITKImage) -> SITKImage:
     """Copy meta data to the image source to the image destination"""
     import fredtools as ft
