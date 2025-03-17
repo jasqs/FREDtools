@@ -87,6 +87,8 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         _logger.error(error)
         raise error
 
+    _logger.debug(f"Mapping structure '{structName}' to the image.")
+
     # get structure contour and structure info
     StructureContours, StructInfo = ft.ImgIO.dicom_io._getStructureContoursByName(RSfileName, structName)
 
@@ -202,6 +204,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     for MaskDepth_idx, MaskDepth in enumerate(MaskDepths):
         # get list of indices of StructureContours for MaskDepth
         StructureContoursIdx = np.where(StructureContoursDepths == MaskDepth)[0]
+        # print(StructureContoursIdx)
 
         # skip calculation of the mask if no structure exists for MaskDepth
         if StructureContoursIdx.size == 0:
@@ -212,6 +215,12 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
                 arrMask[MaskDepth_idx, :, :] += StructureContoursArrays[StructureContourIdx]
             else:
                 arrMask[MaskDepth_idx, :, :] -= StructureContoursArrays[StructureContourIdx]
+
+            # print("mask depth: ", MaskDepth)
+            # print("Structure Contours Direction: ", StructureContoursDirection[StructureContourIdx])
+            # print("Array min value for StructureContourIdx: ", arrMask[MaskDepth_idx, :, :].min())
+            # print("Array max value for StructureContourIdx: ", arrMask[MaskDepth_idx, :, :].max())
+            # print()
 
     # prepare SimpleITK mask
     imgMask = sitk.GetImageFromArray(arrMask)
@@ -228,6 +237,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         except TypeError:
             error = RuntimeError("The structure was mapped but the binary mask is incorrect.")
             _logger.error(error)
+            _logger.debug(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
             raise error
     else:
         imgMask = sitk.Cast(imgMask, sitk.sitkFloat64)
@@ -237,6 +247,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         except TypeError:
             error = RuntimeError("The structure was mapped but the floating mask is incorrect.")
             _logger.error(error)
+            _logger.debug(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
             raise error
 
     # set additional metadata
