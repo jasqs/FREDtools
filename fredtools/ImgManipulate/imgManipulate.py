@@ -49,16 +49,15 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     out that it does not consider holes and detached structures. Therefore, a new
     approach has been implemented
 
-    2. The mapping is done for each contour separately and based on the direction (CW or CCW)
-    of the contour, it is treated as an inclusive (mask, CW) or exclusive (hole, CCW) contour.
-    The mapping of each contour is done in 2D, meaning slice by slice. The resulting image has
-    the voxel size and shape the same as the input `img` in X and Y directions. The voxel size
-    in the Z direction is calculated based on the contour slice distances, taking into account
-    gaps, holes and detached contours. The shape of the image in the Z direction is equal to
-    the contour boundings in the Z direction, enlarged by 1 px (``sliceAddNo`` parameter). Such
-    image mask is then resampled to the frame of reference of the input `img`. In fact,
-    the resampling is applied only to the Z direction, because the frame of reference of X and Y
-    directions are the same as the input `img`.
+    2. The mapping is done for each contour separately. If more than one contour is defined at depth, then 
+    the contours are summed with XOR operation, utilizing the shapely library. The mapping of each contour is 
+    done in 2D, meaning slice by slice. The resulting image has  the voxel size and shape the same as 
+    the input `img` in X and Y directions. The voxel size  in the Z direction is calculated based on 
+    the contour slice distances, taking into account gaps, holes and detached contours. The shape of 
+    the image in the Z direction is equal to the contour boundings in the Z direction, enlarged 
+    by 1 px (``sliceAddNo`` parameter). Such image mask is then resampled to the frame of reference of 
+    the input `img`. In fact, the resampling is applied only to the Z direction, because the frame of 
+    reference of X and Y directions are the same as the input `img`.
     """
     import fredtools as ft
     import numpy as np
