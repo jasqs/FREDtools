@@ -321,7 +321,6 @@ class test_getDVHMask(unittest.TestCase):
         self.dvhfileTPS = pydvh.DVHFile.from_file_eclipse("unittests/testData/TPSDicoms/TPSPlan/DVHexportFromTPS.txt")
         # self.structNames = ["PTV_sphere",  "testStuct_SphHoleDet", "BODY", "Body-SpherePTV"]
         self.structNames = ["PTV_sphere",  "testStuct_SphHoleDet", "BODY"]
-        # self.structNames = ["PTV_sphere"]
         # self.structNames = ["testStruct_small"]
 
     def test_getDVHMask(self):

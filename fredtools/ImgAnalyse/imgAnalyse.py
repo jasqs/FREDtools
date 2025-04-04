@@ -42,8 +42,8 @@ def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, f
     cornerLow = img.TransformContinuousIndexToPhysicalPoint(np.zeros(img.GetDimension(), dtype="float64") - 0.5)
     cornerHigh = img.TransformContinuousIndexToPhysicalPoint(np.array(img.GetSize(), dtype="float64") - 1 + 0.5)
 
-    cornerLow = np.dot(np.abs(_getDirectionArray(img)).T, cornerLow)
-    cornerHigh = np.dot(np.abs(_getDirectionArray(img)).T, cornerHigh)
+    cornerLow = np.dot(np.abs(_getDirectionArray(img)).T, cornerLow).tolist()
+    cornerHigh = np.dot(np.abs(_getDirectionArray(img)).T, cornerHigh).tolist()
 
     extent = tuple(zip(cornerLow, cornerHigh))
 
@@ -322,7 +322,7 @@ def getVoxelCentres(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[fl
         voxelIndices = np.zeros([axisSize, img.GetDimension()], dtype=np.int32)
         voxelIndices[:, axis] = np.arange(axisSize, dtype=np.int32)
         voxelCentresAxis = np.array(ft.transformIndexToPhysicalPoint(img, voxelIndices))
-        voxelCentres.append(tuple(voxelCentresAxis[:, axis]))
+        voxelCentres.append(tuple(voxelCentresAxis[:, axis].tolist()))
 
     if displayInfo:
         axesNames = ["x", "y", "z", "t"]

@@ -63,6 +63,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     import fredtools as ft
     import numpy as np
     import SimpleITK as sitk
+    import shapely as sph
     from multiprocessing import Pool
 
     if not ft._imgTypeChecker.isSITK3D(img, raiseError=True):
@@ -122,63 +123,85 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
             _logger.error(error)
             raise error
 
-    # get depth for each contour and sort the depths
-    StructureContoursDepths = np.array([StructureContour[0, 2] for StructureContour in StructureContours])
-
-    # get contour spacing in Z direction as the minimum spacing between individual contours excluding 0.
-    """
-    note: spacing 0 means that holes or detached contours exist in the structure
-    note: more than single spacing (excluding 0) means that a gap exists in the structure
-    """
-    StructureContoursSpacing = np.unique(np.round(np.diff(np.sort(StructureContoursDepths)), decimals=3))
-    StructureContoursSpacing = StructureContoursSpacing[StructureContoursSpacing != 0].min()
-
-    # get CW (True) or CCW (False) direction for each contour
-    StructureContoursDirection = [_checkContourCWDirection(StructureContour) for StructureContour in StructureContours]
-
-    # get structure bounding box in Z
-    """
-    note: this is not extent because it takes the positions of vertices and not the positions of voxels' borders
-    """
-    StructureContoursBBoxZ = (StructureContoursDepths.min(), StructureContoursDepths.max())
-
-    # calculate the mask depths
-    # it is larger in Z direction of +/- StructureContoursSpacing
-    MaskDepths = np.round(np.arange(StructureContoursBBoxZ[0] - StructureContoursSpacing, StructureContoursBBoxZ[1] + StructureContoursSpacing, StructureContoursSpacing), 3)
-
-    # verify if all contour depths are present in the mask depths
-    if not set(StructureContoursDepths).issubset(MaskDepths):
-        raise RuntimeError(f"Not all depths defined in coutour are represented in the created mask.")
-
-    # validate if all contour vertices are defined inside the image extent
+    # check if all contour vertices are defined inside the image extent
     StructureContoursExtent = np.stack((np.min(np.concatenate(StructureContours, axis=0), axis=0), np.max(np.concatenate(StructureContours, axis=0), axis=0)))
     if not all(tuple([ft.isPointInside(img, StructureContoursExtent)])):
         _logger.debug(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
                       f"The image extent is {ft.getExtent(img)}\n" +
                       f"and the contour extent is {StructureContoursExtent.T.tolist()}.")
 
-    # calculate mask size
-    arrMaskSize = np.array([len(MaskDepths), img.GetSize()[1], img.GetSize()[0]])
+    # sort structure contours by Z position
+    StructureContours.sort(key=lambda StructureContour: StructureContour[0, 2])
+
+    # get depth for each contour
+    StructureContoursDepths = np.array([StructureContour[0, 2] for StructureContour in StructureContours])
+
+    # convert all structure contours to shapely polygons
+    """
+    note: the shapely polygons are created with the assumption that the contour is closed
+    note: the conversion is done to a simple shapely polygon with possible interiors (holes) or to a MultiPolygon 
+    when more detached contours exist on the same depth.
+    """
+    StructurePolygons = []
+    StructurePolygonsDepths = np.array([])
+    for StructureContoursDepth in np.unique(StructureContoursDepths):
+
+        # get list of indices for given depth
+        StructureContoursDepthsIdx = np.where(StructureContoursDepths == StructureContoursDepth)[0]
+
+        # create a list of shapely polygons for each structure contour at a given depth
+        StructurePolygonList = [sph.Polygon(StructureContours[StructureContoursDepthIdx]) for StructureContoursDepthIdx in StructureContoursDepthsIdx]
+
+        # make the union of all polygons with XOR
+        """
+        If the StructurePolygon is a Polygon, it means that there is a single exterior (filling) and can be multiple interiors (holes). The Polygon is converted to more general MultiPolygon then.
+        If the StructurePolygon is already a MultiPolygon, it means that there can be multiple exteriors (filling) with multiple interiors (holes) each.
+        """
+        StructurePolygonMultiPolygon = sph.symmetric_difference_all(StructurePolygonList)
+        if isinstance(StructurePolygonMultiPolygon, sph.Polygon):
+            StructurePolygons.append(StructurePolygonMultiPolygon)
+            StructurePolygonsDepths = np.append(StructurePolygonsDepths, StructureContoursDepth)
+        elif isinstance(StructurePolygonMultiPolygon, sph.MultiPolygon):
+            for StructurePolygon in StructurePolygonMultiPolygon.geoms:
+                StructurePolygons.append(StructurePolygon)
+                StructurePolygonsDepths = np.append(StructurePolygonsDepths, StructureContoursDepth)
+        else:
+            _logger.warning(f"Error: The contour at depth {StructureContoursDepth} for the structure '{structName}' is cannot be properly mapped to polygon nor multipolygon, but was mapped to {type(StructurePolygonMultiPolygon)} instead.")
+
+    # get contour spacing in Z direction as the minimum spacing between individual contours.
+    """
+    note: spacing 0 means that detached contours exist in the structure
+    note: more than single spacing (excluding 0) means that a gap exists in the structure
+    """
+    StructureSpacingZ = np.round(np.diff(StructurePolygonsDepths), decimals=3)
+    StructureSpacingZ = float(np.min(StructureSpacingZ[StructureSpacingZ > 0]))
 
     # prepare an empty mask
-    arrMask = np.zeros(arrMaskSize, dtype="float")
-    imgMask = sitk.GetImageFromArray(arrMask)
-    imgMask.SetOrigin([img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
-    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
+    """
+    note: the mask size in Z direction is calculated based on the number of unique depths in the structure enlarged by two slices
+    note: the mask size in XY direction is the same as the image size
+    note: the mask origin in Z direction is set to the minimum depth of the structure minus the spacing (to include additional slice)
+    note: the mask origin in XY direction is the same as the image origin
+    """
+    imgMaskBase = ft.createImg(size=[img.GetSize()[0], img.GetSize()[1], int(np.ceil(((StructurePolygonsDepths.max() - StructurePolygonsDepths.min())/StructureSpacingZ))+2)],
+                               origin=[img.GetOrigin()[0], img.GetOrigin()[1], StructurePolygonsDepths.min() - StructureSpacingZ],
+                               spacing=[img.GetSpacing()[0], img.GetSpacing()[1], StructureSpacingZ],
+                               centred=False)
+    imgMaskBase = sitk.Cast(imgMaskBase, sitk.sitkFloat64)
 
-    # convert all structure contour coordinates from the real world to pixel and correct the pixel coordinates
-    """
-    Correcting the pixel coordinates ensures that all contours are inside the image. 
-    This correction ensures that it will be mapped appropriately if the image is smaller than the contour 
-    (some of the contour vertices are outside the image's extent). It applies to the contour vertices' positions
-    in pixel coordinates, for which the positions in X and Y are below -0.5, meaning that they are outside the first 
-    voxel edges. In such a case, the mapped contour is not closed in the image FoR and cannot be filled.
-    """
-    StructureContoursPx = []
-    for StructureContour in StructureContours:
-        StructureContourPx = np.array(ft.transformPhysicalPointToContinuousIndex(imgMask, StructureContour))
-        StructureContourPx[:, 0:2] = np.clip(StructureContourPx[:, 0:2], -0.5, None)  # correct contours
-        StructureContoursPx.append(StructureContourPx)
+    # verify if all contour depths are present in the mask depths
+    if not set(StructurePolygonsDepths).issubset(np.round(ft.getVoxelCentres(imgMaskBase)[2], 6)):
+        raise RuntimeError(f"Not all depths defined in coutour are represented in the created mask.")
+
+    # Crop the structure polygons to fit in the image mask
+    imgMaskExtent = ft.getExtent(imgMaskBase)
+    imgMaskSlicePolygon = sph.Polygon.from_bounds(xmin=imgMaskExtent[0][0], xmax=imgMaskExtent[0][1], ymin=imgMaskExtent[1][0], ymax=imgMaskExtent[1][1])
+    for StructurePolygonIdx, StructurePolygon in enumerate(StructurePolygons):
+        if not imgMaskSlicePolygon.contains(StructurePolygon):
+            StructurePolygons[StructurePolygonIdx] = imgMaskSlicePolygon.intersection(StructurePolygon)
+
+    # convert all structure Polygons from the physical to pixel coordinates
+    StructurePolygonsPx = sph.transform(StructurePolygons, lambda point: np.array(ft.transformPhysicalPointToContinuousIndex(imgMaskBase, point)), include_z=True)
 
     # map all structure contours to structure arrays using multiprocessing
     """
@@ -186,46 +209,24 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     The 2D arrays are in floating numbers in the range 0-1, showing the voxel occupancy by the structure contour.
     """
     with Pool(CPUNo) as p:
-        StructureContoursArrays = p.map(_getStructureContourArray, StructureContoursPx)
+        StructureArrays = p.map(_getStructureArray, StructurePolygonsPx)
 
     # correct each structure contour array for the size
-    for StructureContoursArrayIdx in range(len(StructureContoursArrays)):
-        StructureContoursArray = StructureContoursArrays[StructureContoursArrayIdx]
-        StructureContoursArray = StructureContoursArray[0: arrMaskSize[1], 0: arrMaskSize[2]]  # clip array to given shape if needed
-        StructureContoursArray = np.pad(StructureContoursArray, ((0, arrMaskSize[1] - StructureContoursArray.shape[0]), (0, arrMaskSize[2] - StructureContoursArray.shape[1])))  # pad array to given shape if needed
-        StructureContoursArrays[StructureContoursArrayIdx] = StructureContoursArray
+    imgMaskSize = imgMaskBase.GetSize()
+    for StructureArrayIdx, StructureArray in enumerate(StructureArrays):
+        StructureArray = StructureArray[0: imgMaskSize[0], 0: imgMaskSize[1]]  # clip array to given shape if needed
+        StructureArray = np.pad(StructureArray, ((0, imgMaskSize[1] - StructureArray.shape[0]), (0, imgMaskSize[0] - StructureArray.shape[1])))  # pad array to given shape if needed
+        StructureArrays[StructureArrayIdx] = StructureArray
 
     # merge the structure contours arrays into a single mask
-    """
-    The 3D array is in floating numbers in the range 0-1, showing the voxel occupancy by the structure contour.
-    The positive-direction contours are added, and the negative-direction contours are subtracted. The routine proceeds 
-    in the order of appearance of the structure contour in the structure RS dicom. 
-    """
-    for MaskDepth_idx, MaskDepth in enumerate(MaskDepths):
-        # get list of indices of StructureContours for MaskDepth
-        StructureContoursIdx = np.where(StructureContoursDepths == MaskDepth)[0]
-        # print(StructureContoursIdx)
+    arrMask = sitk.GetArrayFromImage(imgMaskBase)
+    for StructureArray, StructurePolygonPx in zip(StructureArrays, StructurePolygonsPx):
+        maskDepthIdx = int(np.round(sph.get_coordinates(StructurePolygonPx, include_z=True)[0, 2]))
 
-        # skip calculation of the mask if no structure exists for MaskDepth
-        if StructureContoursIdx.size == 0:
-            continue
+        arrMask[maskDepthIdx, :, :] += StructureArray
 
-        for StructureContourIdx in StructureContoursIdx:
-            if StructureContoursDirection[StructureContourIdx]:
-                arrMask[MaskDepth_idx, :, :] += StructureContoursArrays[StructureContourIdx]
-            else:
-                arrMask[MaskDepth_idx, :, :] -= StructureContoursArrays[StructureContourIdx]
-
-            # print("mask depth: ", MaskDepth)
-            # print("Structure Contours Direction: ", StructureContoursDirection[StructureContourIdx])
-            # print("Array min value for StructureContourIdx: ", arrMask[MaskDepth_idx, :, :].min())
-            # print("Array max value for StructureContourIdx: ", arrMask[MaskDepth_idx, :, :].max())
-            # print()
-
-    # prepare SimpleITK mask
     imgMask = sitk.GetImageFromArray(arrMask)
-    imgMask.SetOrigin([img.GetOrigin()[0], img.GetOrigin()[1], MaskDepths.min()])
-    imgMask.SetSpacing([img.GetSpacing()[0], img.GetSpacing()[1], StructureContoursSpacing])
+    imgMask.CopyInformation(imgMaskBase)
 
     # interpolate mask to input image
     imgMask = sitk.Resample(imgMask, img, interpolator=ft._helper.setSITKInterpolator(interpolation="linear"))
@@ -263,16 +264,6 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         _logger.info("\n\t".join(logStr) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
 
     return imgMask
-
-
-def _checkContourCWDirection(contour: NDArray) -> bool:
-    import numpy as np
-
-    """Check if the contour has CW (True) or CCW (False) direction. 
-    The CW (True) contour direction usually means that it is a filled polygon
-    and the CCW (False) contour direction that it is a hole in the filled polygon."""
-    result = 0.5 * np.array(np.dot(contour[:, 0], np.roll(contour[:, 1], 1)) - np.dot(contour[:, 1], np.roll(contour[:, 0], 1)))
-    return bool(result < 0)
 
 
 def _getLineSegmentPixels(lineSegmentStart: NDArray, lineSegmentEnd: NDArray) -> NDArray:
@@ -337,25 +328,21 @@ def _getStructureContourBorderPixels(StructureContourPx: NDArray) -> NDArray:
     return StructureContourBorderPixels
 
 
-def _getStructureContourArray(StructureContourPx: NDArray) -> NDArray:
-    """
-    Calculates array with unit values inside the structure polygon and
-    floating values in the range 0-1 at the contour border, describing
-    the voxel occupancy fraction.
-    """
+def _getStructureArray(StructurePolygonPx: ShapePolygon) -> NDArray:
+    import cv2
     import shapely as sph
-    import scipy.ndimage as ndimage
-    import numpy as np
 
-    # get a list of pixels at the contour border
-    StructureContourBorderPixels = _getStructureContourBorderPixels(StructureContourPx[:, 0:2])
+    # get a list of pixels at the contour exterior
+    StructureContourBorderPixels = _getStructureContourBorderPixels(np.array(StructurePolygonPx.exterior.xy).T)
+    if len(StructurePolygonPx.interiors) != 0:
+        for StructureContoursPxPolygonInterior in StructurePolygonPx.interiors:
+            StructureContourBorderPixels = np.append(StructureContourBorderPixels, _getStructureContourBorderPixels(np.array(StructureContoursPxPolygonInterior.xy).T), axis=0)
 
     # convert the contour and contour pixels to polygons
     StructureContourBorderPixelsPolygons = [sph.Polygon(StructureContourBorderPixel + np.array([[-0.5, -0.5], [-0.5, 0.5], [0.5, 0.5], [0.5, -0.5]])) for StructureContourBorderPixel in StructureContourBorderPixels]
-    StructureContourPxPolygon = sph.Polygon(StructureContourPx[:, 0:2])
 
     # remove remaining pixels at the contour border that do not intersect with the contour
-    StructureContourBorderPixelsPolygonsIntersects = [StructureContourBorderPixelsPlygon.intersects(StructureContourPxPolygon.boundary) for StructureContourBorderPixelsPlygon in StructureContourBorderPixelsPolygons]
+    StructureContourBorderPixelsPolygonsIntersects = [StructureContourBorderPixelsPlygon.intersects(StructurePolygonPx.boundary) for StructureContourBorderPixelsPlygon in StructureContourBorderPixelsPolygons]
     StructureContourBorderPixels = StructureContourBorderPixels[StructureContourBorderPixelsPolygonsIntersects]
     StructureContourBorderPixelsPolygons: list = np.array(StructureContourBorderPixelsPolygons)[StructureContourBorderPixelsPolygonsIntersects].tolist()
 
@@ -366,16 +353,14 @@ def _getStructureContourArray(StructureContourPx: NDArray) -> NDArray:
     arr[StructureContourBorderPixels[:, 1], StructureContourBorderPixels[:, 0]] = 1
 
     # fill pixels inside the contour
-    arr = ndimage.binary_fill_holes(arr.astype("bool"))
-    if arr is None:
-        error = RuntimeError("The contour is empty.")
-        _logger.error(error)
-        raise error
-    else:
-        arr = arr.astype("float")
+    StructureContourPxPolygonRepresentativePoint = StructurePolygonPx.representative_point()  # get the representative point of the polygon (guaranteed to be within the object)
+    StructureContourPxPolygonRepresentativePoint = np.round([StructureContourPxPolygonRepresentativePoint.x, StructureContourPxPolygonRepresentativePoint.y]).astype(int)  # convert the point to integer
+    arrFill = arr.astype("uint8")  # convert the array to uint8 as the floodFill function requires this type
+    cv2.floodFill(arrFill, None, StructureContourPxPolygonRepresentativePoint, newVal=1)  # type: ignore
+    arr = arrFill.astype("float")  # convert the array back to float
 
     # calculate the contour pixels area inside the contour
-    StructureContourBorderPixelsArea = [StructureContourBorderPixelsPolygon.intersection(StructureContourPxPolygon).area for StructureContourBorderPixelsPolygon in StructureContourBorderPixelsPolygons]
+    StructureContourBorderPixelsArea = [StructureContourBorderPixelsPolygon.intersection(StructurePolygonPx).area for StructureContourBorderPixelsPolygon in StructureContourBorderPixelsPolygons]
 
     # set contour pixels with the area inside the contour
     arr[StructureContourBorderPixels[:, 1], StructureContourBorderPixels[:, 0]] = StructureContourBorderPixelsArea

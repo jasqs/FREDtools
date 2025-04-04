@@ -1,6 +1,7 @@
 # https://docs.pydantic.dev/latest/concepts/types/
 
-from typing import Any, Iterable, Sequence, Literal, Union, Annotated, TypeVar, List, Tuple, SupportsFloat, NewType, overload, Type, NamedTuple, TypeAlias
+from typing import Any, Iterable, Sequence, Literal, Union, Annotated, TypeVar, List, Tuple, SupportsFloat, NewType, Type, NamedTuple, TypeAlias
+from typing import cast, overload
 from pydantic import Field, StringConstraints, NonNegativeInt, NonNegativeFloat
 from dotted_dict import DottedDict
 
@@ -54,3 +55,7 @@ PathLike: TypeAlias = Union[os.PathLike, str]
 from pydicom import Dataset, FileDataset, DataElement  # noqa
 DicomDataset: TypeAlias = Union[Dataset, FileDataset]
 DicomDataElement: TypeAlias = DataElement
+
+# shapely
+from shapely.geometry import Polygon as ShapePolygon  # noqa
+from shapely.geometry import MultiPolygon as ShapeMultiPolygon  # noqa
