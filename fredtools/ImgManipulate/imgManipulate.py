@@ -71,6 +71,9 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     if not ft.ImgIO.dicom_io._isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
+    if not ft.ImgAnalyse.imgAnalyse._isDirectionIdentity(img):
+        _logger.warning("The image direction is not identity. The mapping of the structure to the image may be incorrect.")
+
     # set the number of CPUs to be used
     CPUNo = ft.getCPUNo(ft.CPUNO)
 
