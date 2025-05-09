@@ -58,6 +58,9 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     by 1 px (``sliceAddNo`` parameter). Such image mask is then resampled to the frame of reference of 
     the input `img`. In fact, the resampling is applied only to the Z direction, because the frame of 
     reference of X and Y directions are the same as the input `img`.
+
+    3. The structures in the structure DICOM file are usually defined for an image with the identity direction.
+    Although the mapping will be done for images with nonunitary direction, the results may be incorrect.
     """
     import fredtools as ft
     import numpy as np
