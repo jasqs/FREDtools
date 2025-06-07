@@ -33,7 +33,7 @@ from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fw
 
 
 from . import MonteCarlo
-from .MonteCarlo.beamModel import (readBeamModel, writeBeamModel, interpolateBeamModel, calcRaysVectors)
+from .MonteCarlo.beamModel import (readBeamModel, writeBeamModel, interpolateBeamModel, calcRaysVectors, beamModel)
 from .MonteCarlo.fredMC import (setFieldsFolderStruct, readFREDStat, getFREDVersions, checkFREDVersion, getFREDVersion, runFRED)
 from .MonteCarlo.gateMC import (readGATE_HITSActor, readGATE_PSActor, readGATEStat)
 
