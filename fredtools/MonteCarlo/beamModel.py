@@ -369,6 +369,9 @@ class beamModel:
         if "RangeShifters" not in beamModel.keys():
             beamModel["RangeShifters"] = beamModel["BM RangeShifters"]
         rsModel = pd.DataFrame(beamModel["RangeShifters"]).T
+        rsModel["L"] = rsModel["L"].apply(lambda x: [v * 10 for v in x])  # convert from cm to mm
+        rsModel.drop(columns=["f", "u"], inplace=True)
+        rsModel["direction"] = [[[0, 1, 0], [0, 0, 1], [1, 0, 0]],]*len(rsModel.index)
         rsModel.index.name = "name"
         rsModel.reset_index(inplace=True)
         self.rsModel = rsModel
@@ -379,6 +382,7 @@ class beamModel:
         materials.index.name = "name"
         materials.rename(columns={"rho": "density"}, inplace=True)
         materials.reset_index(inplace=True)
+
         self.materials = materials
 
     def getSigma(self, distance: Numberic, nomEnergy: Numberic | Iterable[Numberic]) -> Tuple[Numberic, Numberic] | Tuple[List[Numberic], List[Numberic]]:
