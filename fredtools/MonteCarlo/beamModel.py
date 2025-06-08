@@ -475,13 +475,19 @@ class beamModel:
         with open(fileName, "wb") as f:
             pkl.dump(self, f)
 
-    def fromPickle(self, fileName: PathLike) -> None:
+    @classmethod
+    def fromPickle(cls, fileName: PathLike) -> Self:
         """Loads the beam model from a pickle file.
 
         Parameters
         ----------
         fileName : PathLike
             The name of the file to load the beam model from. The file must be in binary format.
+
+        Returns
+        -------
+        Self
+            An instance of the beamModel class loaded from the pickle file. 
         """
         import pickle as pkl
         if not os.path.exists(fileName):
@@ -492,12 +498,12 @@ class beamModel:
         with open(fileName, "rb") as f:
             beamModel = pkl.load(f)
 
-        if not isinstance(beamModel, self.__class__):
+        if not isinstance(beamModel, cls):
             error = TypeError(f"The file {fileName} does not contain a valid beamModel object.")
             _logger.error(error)
             raise error
 
-        self.__dict__.update(beamModel.__dict__)
+        return beamModel
 
 
 def twiss2SigmaSquared(epsilon: Numberic, alpha: Numberic, beta: Numberic) -> Tuple[Numberic, Numberic, Numberic] | Tuple[List[Numberic], List[Numberic], List[Numberic]]:
