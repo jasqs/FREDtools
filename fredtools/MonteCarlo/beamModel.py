@@ -444,7 +444,7 @@ class beamModel:
             return pd.DataFrame()
 
         energyModel: DataFrame = self.interpolateBeamModel(nomEnergy)
-        sigmaX, sigmaY = self.getSigma(sourceToAxisDistance, nomEnergy)
+        sigmaX, sigmaY = self.getSigma(-sourceToAxisDistance, nomEnergy)
         thetaX = np.sqrt(np.asarray(energyModel["cX"]))
         thetaY = np.sqrt(np.asarray(energyModel["cY"]))
         epsilonX, _, _ = ft.MonteCarlo.beamModel.sigmaSquare2Twiss(energyModel["aX"], energyModel["bX"], energyModel["cX"])
