@@ -2,7 +2,7 @@
 
 from typing import Any, Iterable, Sequence, Literal, Union, Annotated, TypeVar, List, Tuple, SupportsFloat, NewType, Type, NamedTuple, TypeAlias
 from typing import cast, overload
-from pydantic import Field, StringConstraints, NonNegativeInt, NonNegativeFloat, PositiveFloat, NegativeFloat
+from pydantic import Field, StringConstraints, NonNegativeInt, NonNegativeFloat, PositiveFloat, NegativeFloat, PositiveInt, NegativeInt
 from dotted_dict import DottedDict
 
 # Self (used in class definitions)
@@ -62,3 +62,6 @@ DicomDataElement: TypeAlias = DataElement
 # shapely
 from shapely.geometry import Polygon as ShapePolygon  # noqa
 from shapely.geometry import MultiPolygon as ShapeMultiPolygon  # noqa
+
+# FREDtools classess
+from fredtools.MonteCarlo.beamModel import beamModel as beamModelClass  # noqa
