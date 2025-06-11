@@ -62,6 +62,3 @@ DicomDataElement: TypeAlias = DataElement
 # shapely
 from shapely.geometry import Polygon as ShapePolygon  # noqa
 from shapely.geometry import MultiPolygon as ShapeMultiPolygon  # noqa
-
-# FREDtools classess
-from fredtools.MonteCarlo.beamModel import beamModel as beamModelClass  # noqa

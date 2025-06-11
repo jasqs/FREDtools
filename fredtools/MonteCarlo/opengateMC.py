@@ -1,12 +1,38 @@
 from fredtools._typing import *
-# from fredtools import beamModel as beamModelClass
+from fredtools.MonteCarlo.beamModel import beamModel
 from fredtools import getLogger
 _logger = getLogger(__name__)
 
+try:
+    import opengate  # type: ignore #
+    from . import opengateMC
+except ModuleNotFoundError:
+    _logger.info("The opengate package is not available and the behaviour of the functions in the opengateMC FREDtools module might be unexpected.\nInstall the opengate first to use the functions in opengateMC module.")
 
-def importBeamModel(beamModel: beamModelClass, fitOrder: PositiveInt | Literal["auto"] = "auto"):
+
+def importBeamModel(beamModel: beamModel, fitOrder: PositiveInt | Literal["auto"] = "auto"):
+    """Import a beam model from a fredtools beamModel object to an OpenGATE BeamlineModel.
+
+    The function converts the beam model parameters from a fredtools beamModel object to an OpenGATE BeamlineModel object.
+    The beam model parameters include the radiation type, distances from the nozzle to the isocenter, and the beam parameters for different energies.
+    The beam parameters include the energy, energy spread, beam size, beam divergence, emittance, and convergence.
+    The function also fits the beam parameters to a polynomial of a specified order.
+    The fitted coefficients are stored in the OpenGATE BeamlineModel object.
+
+    Parameters
+    ----------
+    beamModel : fredtools.beamModel
+        The beam model to be imported. It must be an instance of fredtools beamModel.
+    fitOrder : PositiveInt or Literal["auto"], optional
+        The order of the polynomial fit for the beam parameters. If "auto", the fit order is set to the number of energies minus one. (def. "auto")
+
+    Returns
+    -------
+    BeamlineModel : opengate.contrib.beamlines.ionbeamline.BeamlineModel
+        The OpenGATE BeamlineModel object containing the imported beam model parameters.
+    """
     import numpy as np
-    from opengate.contrib.beamlines.ionbeamline import BeamlineModel
+    from opengate.contrib.beamlines.ionbeamline import BeamlineModel  # type: ignore
     import fredtools as ft
     import pandas as pd
 
@@ -37,12 +63,6 @@ def importBeamModel(beamModel: beamModelClass, fitOrder: PositiveInt | Literal["
     BeamlineModel.conv_x = int(np.unique(beamModelGate.convergenceX)[0])
     BeamlineModel.conv_y = int(np.unique(beamModelGate.convergenceY)[0])
 
-    """
-    beamModelEnergyFRED.epsilon in [mm * rad]
-    beamModelEnergyFRED.beta in [mm]
-    beamModelEnergyFRED.alpha in [-]
-    """
-
     # fit order
     if fitOrder == "auto":
         fitOrder = len(beamModelGate.index) - 1
@@ -63,8 +83,20 @@ def importBeamModel(beamModel: beamModelClass, fitOrder: PositiveInt | Literal["
     return BeamlineModel
 
 
-def addMaterials(sim, beamModel: beamModelClass):
-    from opengate import g4_units
+def addMaterials(sim, beamModel: beamModel):
+    """Add materials from a fredtools beamModel to an OpenGATE simulation.
+
+    The function iterates over the materials defined in the beamModel and adds them to the OpenGATE simulation.
+    The mean excitation energy (ionization potential) is set for each material based on the properties defined in the beamModel.
+
+    Parameters
+    ----------
+    sim : opengate.simulation.Simulation
+        The OpenGATE simulation object to which the materials will be added.
+    beamModel : fredtools.beamModel
+        The beam model containing the materials to be added. It must be an instance of fredtools beamModel.
+    """
+    from opengate import g4_units  # type: ignore
 
     for materialName, materialProperties in beamModel.materials.iterrows():
         if materialProperties.basedOn == "PMMA":
