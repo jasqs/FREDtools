@@ -4,8 +4,22 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 try:
-    import opengate  # type: ignore #
-    from . import opengateMC
+    import opengate as gate  # type: ignore
+
+    # get units
+    m = gate.g4_units.m
+    km = gate.g4_units.km
+    cm = gate.g4_units.cm
+    mm = gate.g4_units.mm
+    um = gate.g4_units.um
+    MeV = gate.g4_units.MeV
+    eV = gate.g4_units.eV
+    deg = gate.g4_units.deg
+    mrad = gate.g4_units.mrad
+    rad = gate.g4_units.rad
+    s = gate.g4_units.s
+    gcm3 = gate.g4_units.g_cm3
+
 except ModuleNotFoundError:
     _logger.info("The opengate package is not available and the behaviour of the functions in the opengateMC FREDtools module might be unexpected.\nInstall the opengate first to use the functions in opengateMC module.")
 
