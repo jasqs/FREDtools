@@ -7,15 +7,16 @@ class beamModel:
     def __init__(self):
         from datetime import datetime
         import pandas as pd
+
         # beam model description
         self.name = None
         self.creationTime = datetime.now()
         self.radiationType = "proton"
 
-        self.siteName: str | None = None
-        self.machineName: str | None = None
-        self.machineVendor: str | None = None
-        self.machineModel: str | None = None
+        self.siteName = None
+        self.machineName = None
+        self.machineVendor = None
+        self.machineModel = None
 
         self.notes: str | None = None
 
@@ -33,6 +34,24 @@ class beamModel:
 
         # nozzle materials
         self._materials = pd.DataFrame(columns=["name", "density", "basedOn"])
+
+    def __repr__(self) -> str:
+        """String representation of the class."""
+        return f"beamModel(name={self.name}, radiationType={self.radiationType}, siteName={self.siteName}, machineName={self.machineName}, machineVendor={self.machineVendor}, machineModel={self.machineModel})"
+
+    @property
+    def name(self) -> str | None:
+        """Returns the name of the beam model."""
+        return self._name
+
+    @name.setter
+    def name(self, name: str | None) -> None:
+        """Sets the name of the beam model."""
+        if name is not None and not isinstance(name, str):
+            error = AttributeError("The name must be a string or None.")
+            _logger.error(error)
+            raise error
+        self._name = name
 
     @property
     def creationTime(self) -> str:
@@ -61,6 +80,62 @@ class beamModel:
             _logger.error(error)
             raise error
         self._radiationType = radiationType
+
+    @property
+    def siteName(self) -> str | None:
+        """Returns the name of the site where the beam model was created."""
+        return self._siteName
+
+    @siteName.setter
+    def siteName(self, siteName: str | None) -> None:
+        """Sets the name of the site where the beam model was created."""
+        if siteName is not None and not isinstance(siteName, str):
+            error = AttributeError("The siteName must be a string or None.")
+            _logger.error(error)
+            raise error
+        self._siteName = siteName
+
+    @property
+    def machineName(self) -> str | None:
+        """Returns the name of the machine used for the beam model."""
+        return self._machineName
+
+    @machineName.setter
+    def machineName(self, machineName: str | None) -> None:
+        """Sets the name of the machine used for the beam model."""
+        if machineName is not None and not isinstance(machineName, str):
+            error = AttributeError("The machineName must be a string or None.")
+            _logger.error(error)
+            raise error
+        self._machineName = machineName
+
+    @property
+    def machineVendor(self) -> str | None:
+        """Returns the vendor of the machine used for the beam model."""
+        return self._machineVendor
+
+    @machineVendor.setter
+    def machineVendor(self, machineVendor: str | None) -> None:
+        """Sets the vendor of the machine used for the beam model."""
+        if machineVendor is not None and not isinstance(machineVendor, str):
+            error = AttributeError("The machineVendor must be a string or None.")
+            _logger.error(error)
+            raise error
+        self._machineVendor = machineVendor
+
+    @property
+    def machineModel(self) -> str | None:
+        """Returns the model of the machine used for the beam model."""
+        return self._machineModel
+
+    @machineModel.setter
+    def machineModel(self, machineModel: str | None) -> None:
+        """Sets the model of the machine used for the beam model."""
+        if machineModel is not None and not isinstance(machineModel, str):
+            error = AttributeError("The machineModel must be a string or None.")
+            _logger.error(error)
+            raise error
+        self._machineModel = machineModel
 
     @property
     def spreadingDeviceDistance(self) -> Tuple[float, float]:
@@ -278,6 +353,8 @@ class beamModel:
         logStr.append(f"Creation Time: {self.creationTime}")
         logStr.append(f"Radiation Type: {self.radiationType}")
         logStr.append(f"Spreading device dist. [X/Y]: {self.spreadingDeviceDistance[0]} mm, {self.spreadingDeviceDistance[1]} mm")
+        if self.notes is not None:
+            logStr.append(f"Notes: {self.notes}")
 
         if self.energyModel is not None:
             logStr.append("Energy Model:")
@@ -371,7 +448,7 @@ class beamModel:
         rsModel = pd.DataFrame(beamModel["RangeShifters"]).T
         rsModel["L"] = rsModel["L"].apply(lambda x: [v * 10 for v in x])  # convert from cm to mm
         rsModel.drop(columns=["f", "u"], inplace=True)
-        rsModel["direction"] = [[[0, 1, 0], [0, 0, 1], [1, 0, 0]],]*len(rsModel.index)
+        rsModel["direction"] = [[[-1, 0, 0], [0, 0, 1], [0, 1, 0]],]*len(rsModel.index)
         rsModel.index.name = "name"
         rsModel.reset_index(inplace=True)
         self.rsModel = rsModel
