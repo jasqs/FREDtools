@@ -1097,7 +1097,7 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
         structsInfo = structsInfo.loc[structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])]
 
     # calculate HU from Rel. Electronic Density
-    structsInfo["ROIPhysicalHUValue"] = np.round(relElecDensCalibInterp(structsInfo.ROIPhysicalPropertyValue))
+    structsInfo["ROIPhysicalHUValue"] = np.round(relElecDensCalibInterp(structsInfo.ROIPhysicalPropertyValue.to_list()))
     structsInfo = structsInfo.astype({"ROIPhysicalHUValue": "int"})
 
     # remove mapped structures outs,  HU range
