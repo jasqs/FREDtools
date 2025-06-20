@@ -219,7 +219,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     # correct each structure contour array for the size
     imgMaskSize = imgMaskBase.GetSize()
     for StructureArrayIdx, StructureArray in enumerate(StructureArrays):
-        StructureArray = StructureArray[0: imgMaskSize[0], 0: imgMaskSize[1]]  # clip array to given shape if needed
+        StructureArray = StructureArray[0: imgMaskSize[1], 0: imgMaskSize[0]]  # clip array to given shape if needed
         StructureArray = np.pad(StructureArray, ((0, imgMaskSize[1] - StructureArray.shape[0]), (0, imgMaskSize[0] - StructureArray.shape[1])))  # pad array to given shape if needed
         StructureArrays[StructureArrayIdx] = StructureArray
 
