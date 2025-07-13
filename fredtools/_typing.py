@@ -28,13 +28,17 @@ from SimpleITK import StatisticsImageFilter
 from SimpleITK import Image as SITKImage
 from SimpleITK import Transform as SITKTransform
 
-# numpy
+# numpy and cupy
 from numpy.typing import NDArray, ArrayLike, DTypeLike
 from scipy.sparse import spmatrix, csr_matrix
-from cupy.sparse import spmatrix as cp_spmatrix
-from cupy.sparse import csr_matrix as cp_csr_matrix
-SparseMatrix: TypeAlias = Union[spmatrix, cp_spmatrix]
-SparseMatrixCSR: TypeAlias = Union[csr_matrix, cp_csr_matrix]
+try:  # cupy is optional, so we try to import it
+    from cupy.sparse import spmatrix as cp_spmatrix
+    from cupy.sparse import csr_matrix as cp_csr_matrix
+    SparseMatrix: TypeAlias = Union[spmatrix, cp_spmatrix]
+    SparseMatrixCSR: TypeAlias = Union[csr_matrix, cp_csr_matrix]
+except ImportError:  # cupy is not installed
+    SparseMatrix: TypeAlias = spmatrix
+    SparseMatrixCSR: TypeAlias = csr_matrix
 
 # matplotlib
 from matplotlib.axes import Axes  # noqa

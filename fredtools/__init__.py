@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+FREDtools
+==========
+
+FREDtools is a library of packages collecting modules with functions for the FRED Monte Carlo simulation
+tool. It provides tools for image analysis, manipulation, Monte Carlo simulations, and more.    
+
+It is designed to work with images, particularly in the context of medical physics and radiation therapy.
+"""
+
+# check if the cupy is installed
+
+
 from ._logger import configureLogging, getLogger
 
 from . import _typing
@@ -45,7 +59,7 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-_version = [0, 8, 15]
+_version = [0, 8, 16]
 __version__ = ".".join(map(str, _version))
 
 # configure logging if no root logger configured
@@ -58,7 +72,3 @@ getLogger(__name__).debug(f"Loaded FREDtools version {__version__}")
 # global parameters
 CPUNO: _typing.Literal["auto"] | _typing.NonNegativeInt = "auto"
 '''CPU number to use for multiprocessing. If set to "auto", the number of CPUs will be determined automatically.'''
-
-"""
-The FREDtools is a library of packages collecting modules with functions. 
-"""

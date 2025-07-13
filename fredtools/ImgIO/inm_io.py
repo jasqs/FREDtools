@@ -319,7 +319,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
         List of sparse matrices of point values for each component.
     """
     import numpy as np
-    import cupy as cp
+
     from fredtools._helper import checkGPUcupy
 
     _isInmFRED(fileName, raiseError=True)
@@ -331,9 +331,12 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
         raise error
 
     # validate cupy
-    if interpreter.lower() == "cupy" and not checkGPUcupy():
-        _logger.warning("Cupy is not available. The numpy interpreter will be used.")
-        interpreter = "numpy"
+    if interpreter.lower() == "cupy":
+        if not checkGPUcupy():
+            _logger.warning("Cupy is not available. The numpy interpreter will be used.")
+            interpreter = "numpy"
+        else:
+            import cupy as cp
 
     # validate points
     points = np.asarray(points)
@@ -438,11 +441,11 @@ def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, imnInfo: D
     import struct
     import numpy as np
     from scipy import sparse
-    import cupy as cp
 
     # determine interpreter
     match interpreter.lower():
         case "cupy":
+            import cupy as cp
             xp = cp
             indices = cp.asarray(indices)
         case "numpy":
