@@ -95,7 +95,7 @@ def get1DInterpolator(x: Iterable[Numberic], y: Iterable[Numberic], interpolatio
             _logger.error(error)
             raise error
 
-    _logger.debug(f"Setting 1D interpolation method to '{interpolation}'" + (f" with spline order {splineOrder}." if interpolation is "spline" else "."))
+    # _logger.debug(f"Setting 1D interpolation method to '{interpolation}'" + (f" with spline order {splineOrder}." if interpolation is "spline" else "."))
     return interpolator
 
 
