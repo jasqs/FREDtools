@@ -345,6 +345,10 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
         GIstat["std"] = np.nanstd(arrGI)
         GIstat["min"] = np.nanmin(arrGI)
         GIstat["max"] = np.nanmax(arrGI)
+    else:
+        error = TypeError(f"The input image is of type {arrGI.dtype} but it should be either integer or float type.")
+        _logger.error(error)
+        raise error
 
     if displayInfo:
         strLog = [f"Gamma Index statistics for the image calculated in '{mode}' mode:",
