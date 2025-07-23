@@ -122,3 +122,107 @@ def addMaterials(sim, beamModel: beamModel):
             error = ValueError(f"Material {materialName} is based on {materialProperties.basedOn}, which is not implemented.")
             _logger.error(error)
             raise error
+
+
+def generateTimeStamps(spotsInfo: DataFrame, timeSpotDuration: float = 0.1, timeBetweenSpots: float = 0.0, timeBetweenFields: float = 30) -> tuple[list[DateTime], list[DateTime]]:
+    """Add start and stop time for each spot in the spotsInfo DataFrame.
+
+    The function calculates the start and stop times for each spot based on the provided duration of a single spot and the time between fields.
+    It returns a DataFrame with the added time information.
+
+    Parameters
+    ----------
+    spotsInfo : DataFrame
+        The DataFrame containing spot information.
+    timeSpotDuration : float, optional
+        The duration of a single spot in seconds (def. 0.1).
+    timeBetweenSpots : float, optional
+        The time between consecutive spots in seconds (def. 0.0).
+    timeBetweenFields : float, optional
+        The time between fields in seconds (def. 30).
+
+    Returns
+    -------
+    tuple[list[DateTime], list[DateTime]]
+        A tuple containing two lists: the start times and stop times for each spot.
+    """
+    from datetime import timedelta
+
+    timesStart = []
+    timesStop = []
+    current_time = 0
+
+    for _, spotsInfoField in spotsInfo.groupby(by="FDeliveryNo"):
+        spotsNo = len(spotsInfoField)
+        for i in range(spotsNo):
+            timesStart.append(timedelta(seconds=current_time + i * (timeSpotDuration + timeBetweenSpots)))
+            timesStop.append(timedelta(seconds=current_time + i * (timeSpotDuration + timeBetweenSpots) + timeSpotDuration))
+        current_time += spotsNo * (timeSpotDuration + timeBetweenSpots) + timeBetweenFields
+
+    return timesStart, timesStop
+
+
+def addIonPencilBeamSources(sim, spotsInfo: DataFrame, beamModel: beamModel, primNo: PositiveInt, CPUNo: PositiveInt) -> DataFrame:
+
+    from datetime import datetime, timedelta
+    from scipy.spatial.transform import Rotation
+    from fredtools import calcRaysVectors
+
+    if len(spotsInfo.loc[spotsInfo.PBMU == 0]) != 0:
+        _logger.debug(f"There are spots with PBMU = 0 ({len(spotsInfo.loc[spotsInfo.PBMU == 0])} out of {len(spotsInfo)}) which will be ignored in the simulation.")
+        spotsInfoMC = spotsInfo.loc[spotsInfo.PBMU != 0].copy()
+    else:
+        spotsInfoMC = spotsInfo.copy()
+
+    # calculate MC parameters for each spot
+    spotsInfoMCInterp = beamModel.getGateParams(-beamModel.sourceToAxisDistance, spotsInfoMC.PBnomEnergy).reset_index(drop=True)
+
+    # merge interpolated parameters into spotsInfoMC
+    spotsInfoMC.reset_index(drop=True, inplace=True)
+    spotsInfoMC = spotsInfoMC.join(spotsInfoMCInterp[["Energy", "dEnergy", "scalingFactor", "sigmaX", "sigmaY", "thetaX", "thetaY", "epsilonX", "epsilonY", "convergenceX", "convergenceY"]])
+
+    # calculate number of primaries for each spot
+    spotsInfoMC["PBPrimNo"] = spotsInfoMC.PBMU * spotsInfoMC.scalingFactor
+
+    # calculate gantry rotation for each spot
+    spotsInfoMC["PBGantryRotation"] = [Rotation.from_euler("z", FGantryAngle, degrees=True) for FGantryAngle in spotsInfoMC.FGantryAngle]  # gantry rotates around Z axis
+
+    # calculate translation and rotation of each spot
+    """The calculation is based on the ray position and direction versor, which assumes the ray basic direction along +Z axis. After recalculation below, the basic beam direction is along +Y axis."""
+    PBPos = spotsInfoMC[["PBPosX", "PBPosY"]].copy()
+    PBPos["PBPosZ"] = 0
+    PBPos = PBPos.to_numpy() * np.array([1, -1, 1])
+    raysPosition, raysVersor = calcRaysVectors(PBPos, SAD=beamModel.spreadingDeviceDistance)
+    raysTranslation = Rotation.from_euler("x", -90, degrees=True).apply(raysPosition)  # apply rotation to rays translation to get basic beam direction along +Y axis
+    raysTranslation = [PBGantryRotation.apply(rayTranslation) for PBGantryRotation, rayTranslation in zip(spotsInfoMC["PBGantryRotation"], raysTranslation)]  # apply gantry rotation to rays translation
+    raysRotation = [Rotation.from_euler("x", -90, degrees=True) * Rotation.align_vectors(rayVersor, [[0, 0, 1]])[0] for rayVersor in raysVersor]  # calculate rays rotation from ray direction versor
+    raysRotation = spotsInfoMC["PBGantryRotation"] * raysRotation  # apply gantry rotation to rays rotation
+    spotsInfoMC["rayTranslation"] = raysTranslation
+    spotsInfoMC["rayRotation"] = raysRotation
+
+    # generate IonPencilBeamSource objects
+
+    for idx, spotInfoMC in spotsInfoMC.iterrows():
+        PBsource = sim.add_source("IonPencilBeamSource", f"PBsource_{idx}")
+        PBsource.attached_to = "world"
+        PBsource.n = primNo / CPUNo
+        # set energy
+        PBsource.energy.type = "gauss"
+        PBsource.energy.mono = spotInfoMC.Energy
+        PBsource.energy.sigma_gauss = spotInfoMC.dEnergy
+        PBsource.particle = beamModel.radiationType
+        # PBsource.position.type = "disc"
+        # set optics parameters
+        PBsource.direction.partPhSp_x = spotInfoMC[["sigmaX", "thetaX", "epsilonX"]].tolist() + ([1] if spotInfoMC["convergenceX"] else [0])
+        PBsource.direction.partPhSp_y = spotInfoMC[["sigmaY", "thetaY", "epsilonY"]].tolist() + ([1] if spotInfoMC["convergenceY"] else [0])
+        # set position and rotation
+        PBsource.position.translation = spotInfoMC.rayTranslation
+        PBsource.position.rotation = spotInfoMC.rayRotation.as_matrix()
+
+        # set time parameters
+        PBsource.start_time = spotInfoMC.timeStart.total_seconds() * s
+        PBsource.end_time = spotInfoMC.timeStop.total_seconds() * s
+        # set weight
+        PBsource.weight = spotInfoMC.PBPrimNo / primNo
+
+    return spotsInfoMC
