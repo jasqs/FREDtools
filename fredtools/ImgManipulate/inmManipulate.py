@@ -15,7 +15,7 @@ def inmSumVec(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayIn
 
     Parameters
     ----------
-    imnSparse : scipy.sparse.csr_matrix
+    imnSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
         Sparse matrix of the influence matrix.
     weigths : array-like
         Array of weights for each pencil beam.
@@ -71,7 +71,7 @@ def inmSumImg(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], imgBase: 
 
     Parameters
     ----------
-    imnSparse : scipy.sparse.csr_matrix
+    imnSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
         Sparse matrix of the influence matrix.
     weigths : array-like
         Array of weights for each pencil beam.
