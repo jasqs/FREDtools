@@ -900,6 +900,48 @@ def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageF
     return stat
 
 
+def getIntegral(img: SITKImage, displayInfo: bool = False) -> Numberic:
+    """Get integral of image
+
+    The function calculates the integral of an image defined as
+    a SimpleITK image object. The integral is calculated as the sum
+    of all voxel values multiplied by the voxel volume.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    float
+        A float value with the integral of the image.
+
+    See Also
+    --------
+        getStatistics : get basic statistics of the image.
+    """
+    import fredtools as ft
+    import numpy as np
+
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
+
+    if ft._imgTypeChecker.isSITK_vector(img):
+        _logger.warning("The input image is a vector image. Integral returned for the sum of vectors.")
+        img = ft.sumVectorImg(img)
+
+    stat = ft.getStatistics(img)
+    voxelVolume = np.prod(img.GetSpacing())
+    integral = stat.GetSum() * voxelVolume
+
+    if displayInfo:
+        _logger.info(f"Image integral: {integral}")
+
+    return float(integral)
+
+
 def compareImg(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInfo: bool = False) -> bool:
     """Compare two images pixel by pixel.
 

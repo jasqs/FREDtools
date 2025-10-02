@@ -20,7 +20,7 @@ from . import _helper
 from . import ImgAnalyse
 from .ImgAnalyse import _imgTypeChecker
 from .ImgAnalyse.dvhAnalyse import (getDVHMask, getDVHStruct)
-from .ImgAnalyse.imgAnalyse import (getExtent, getSize, getImageCenter, getMassCenter, getMaxPosition, getMinPosition, getVoxelCentres, getVoxelEdges, getVoxelPhysicalPoints, getExtMpl, pos, arr, vec, isPointInside, getStatistics, compareImg, compareImgFoR)
+from .ImgAnalyse.imgAnalyse import (getExtent, getSize, getImageCenter, getMassCenter, getMaxPosition, getMinPosition, getVoxelCentres, getVoxelEdges, getVoxelPhysicalPoints, getExtMpl, pos, arr, vec, isPointInside, getStatistics, getIntegral, compareImg, compareImgFoR)
 from .ImgAnalyse.imgDisplay import (showSlice, showSlices)
 from .ImgAnalyse.imgInfo import (displayImageInfo)
 from .ImgAnalyse.imgTransformCoordinates import (transformIndexToPhysicalPoint, transformContinuousIndexToPhysicalPoint, transformPhysicalPointToIndex, transformPhysicalPointToContinuousIndex)
@@ -59,7 +59,7 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-_version = [0, 8, 16]
+_version = [0, 8, 17]
 __version__ = ".".join(map(str, _version))
 
 # configure logging if no root logger configured
