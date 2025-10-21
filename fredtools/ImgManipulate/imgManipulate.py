@@ -745,6 +745,152 @@ def sumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
     return img
 
 
+def maximumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
+    """Maximum of list of images.
+
+    The function computes the maximum of an iterable (list, tuple, etc.) of images
+    defined as instances of a SimpleITK image object. The frame
+    of references of all images must be the same.
+
+    Parameters
+    ----------
+    imgs : iterable
+        An iterable (list, tuple, etc.) of SimpleITK image objects.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An object of a SimpleITK image.
+    """
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    # check if the input iterable is not empty
+    if not any(imgs):
+        error = ValueError("The input iterable 'imgs' is empty.")
+        _logger.error(error)
+        raise error
+    imgs = list(imgs)
+
+    # check if all images have the same FoR
+    for img in imgs:
+        ft._imgTypeChecker.isSITK(img, raiseError=True)
+        if not ft.compareImgFoR(img, imgs[0]):
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            _logger.error(error)
+            raise error
+
+    # sum images
+    img: SITKImage = imgs[0]
+    for i in range(1, len(imgs)):
+        img = sitk.Maximum(img, imgs[i])
+
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
+
+    return img
+
+
+def minimumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
+    """Minimum of list of images.
+
+    The function computes the minimum of an iterable (list, tuple, etc.) of images
+    defined as instances of a SimpleITK image object. The frame
+    of references of all images must be the same.
+
+    Parameters
+    ----------
+    imgs : iterable
+        An iterable (list, tuple, etc.) of SimpleITK image objects.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An object of a SimpleITK image.
+    """
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    # check if the input iterable is not empty
+    if not any(imgs):
+        error = ValueError("The input iterable 'imgs' is empty.")
+        _logger.error(error)
+        raise error
+    imgs = list(imgs)
+
+    # check if all images have the same FoR
+    for img in imgs:
+        ft._imgTypeChecker.isSITK(img, raiseError=True)
+        if not ft.compareImgFoR(img, imgs[0]):
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            _logger.error(error)
+            raise error
+
+    # sum images
+    img: SITKImage = imgs[0]
+    for i in range(1, len(imgs)):
+        img = sitk.Minimum(img, imgs[i])
+
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
+
+    return img
+
+
+def meanImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
+    """Mean of list of images.
+
+    The function computes the mean of an iterable (list, tuple, etc.) of images
+    defined as instances of a SimpleITK image object. The frame
+    of references of all images must be the same.
+
+    Parameters
+    ----------
+    imgs : iterable
+        An iterable (list, tuple, etc.) of SimpleITK image objects.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An object of a SimpleITK image.
+    """
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    # check if the input iterable is not empty
+    if not any(imgs):
+        error = ValueError("The input iterable 'imgs' is empty.")
+        _logger.error(error)
+        raise error
+    imgs = list(imgs)
+
+    # check if all images have the same FoR
+    for img in imgs:
+        ft._imgTypeChecker.isSITK(img, raiseError=True)
+        if not ft.compareImgFoR(img, imgs[0]):
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            _logger.error(error)
+            raise error
+
+    # sum images
+    img: SITKImage = imgs[0]
+    for i in range(1, len(imgs)):
+        img = sitk.Add(img, imgs[i])
+
+    img = sitk.Cast(img, sitk.sitkFloat64) / len(imgs)
+
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(img))
+
+    return img
+
+
 def divideImg(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Divide two images.
 

@@ -35,6 +35,16 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
     ------
     ValueError
         If the size is not 2D or 3D, or if components is a negative integer.
+
+    See Also
+    --------
+        mapStructToImg : mapping a structure to an image to create a mask.
+        setValueMask : setting values of the image inside/outside a mask.
+        cropImgToMask : crop an image to mask.
+        createCylinderMask: create a cylinder mask.
+        createConeMask : create a cone mask.
+        createEllipseMask : create an ellipse mask.
+        createBoxMask : create a box mask.
     """
     import SimpleITK as sitk
     import fredtools as ft
@@ -107,6 +117,7 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numberic | Sequen
         cropImgToMask : crop an image to mask.
         createCylinderMask: create a cylinder mask.
         createConeMask : create a cone mask.
+        createBoxMask : create a box mask.
     """
     import itk
     import fredtools as ft
@@ -197,6 +208,7 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
         cropImgToMask : crop an image to mask.
         createCylinderMask: create a cylinder mask.
         createEllipseMask : create an ellipse mask.
+        createBoxMask : create a box mask.
     """
     import itk
     import fredtools as ft
@@ -282,11 +294,103 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
         cropImgToMask : crop an image to mask.
         createConeMask: create a cone mask.
         createEllipseMask : create an ellipse mask.
+        createBoxMask : create a box mask.
     """
     import fredtools as ft
     import numpy as np
 
     imgMask = ft.createConeMask(img, startPoint, endPoint, radious, radious)
+
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
+
+    return imgMask
+
+
+def createBoxMask(img: SITKImage, point: PointLike, size: Numberic | Sequence[Numberic], displayInfo: bool = False) -> SITKImage:
+    """Create a Box mask in the image field of reference.
+
+    The function creates a box mask, defined with the center point and size
+    in the frame of references of an image defined as a SimpleITK image
+    object. Any dimension, i.e. 2D-4D, of the image is supported.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    point : array_like
+        A point describing the position of the center of the box. The dimension must match the image dimension.
+    size : scalar or array_like
+        Size of the box for each dimension. It might be a scalar, then the same size will be used in each direction.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
+
+    See Also
+    --------
+        mapStructToImg : mapping a structure to an image to create a mask.
+        setValueMask : setting values of the image inside/outside a mask.
+        cropImgToMask : crop an image to mask.
+        createCylinderMask: create a cylinder mask.
+        createEllipseMask : create an ellipse mask.
+        createConeMask : create a cone mask.
+    """
+    import itk
+    import fredtools as ft
+    from collections.abc import Iterable
+    import numpy as np
+
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
+
+    # convert image to ITK
+    imgITK = ft.SITK2ITK(img)
+
+    # check size and point parameters
+    if isinstance(size, Sequence):
+        size = list(size)
+    elif np.isscalar(size):
+        size = list([size]*img.GetDimension())
+    else:
+        error = TypeError(f"The `size` parameter must be a scalar or an iterable. The parameter {size} was used.")
+        _logger.error(error)
+        raise error
+
+    if len(size) != img.GetDimension():
+        error = ValueError(f"The `size` parameter must be an iterable of the same length as the image dimension. Image dimension is {img.GetDimension()} but size {size} was used.")
+        _logger.error(error)
+        raise error
+    if len(list(point)) != img.GetDimension():
+        error = ValueError(f"The `point` parameter must be an iterable of the same length as the image dimension. Image dimension is {img.GetDimension()} but point {point} was used.")
+        _logger.error(error)
+        raise error
+
+    # convert center of box to corner
+    point = np.array(point) - 0.5 * np.array(size)
+
+    # create box and mapping objects
+    BoxSpatialObject = itk.BoxSpatialObject[img.GetDimension()].New()  # type: ignore
+    SpatialObjectToImage = itk.SpatialObjectToImageFilter[itk.SpatialObject[img.GetDimension()], itk.Image[itk.UC, img.GetDimension()]].New()  # type: ignore
+
+    BoxSpatialObject.SetPositionInObjectSpace(point)
+    BoxSpatialObject.SetSizeInObjectSpace(size)
+    BoxSpatialObject.Update()
+
+    # map spatial object to image FoR
+    SpatialObjectToImage.SetInsideValue(1)
+    SpatialObjectToImage.SetOutsideValue(0)
+    SpatialObjectToImage.SetInput(BoxSpatialObject)
+    SpatialObjectToImage.SetSize(imgITK.GetLargestPossibleRegion().GetSize())
+    SpatialObjectToImage.SetDirection(imgITK.GetDirection())
+    SpatialObjectToImage.SetOrigin(imgITK.GetOrigin())
+    SpatialObjectToImage.SetSpacing(imgITK.GetSpacing())
+    SpatialObjectToImage.Update()
+    imgMask = SpatialObjectToImage.GetOutput()
+
+    imgMask = ft.ITK2SITK(imgMask)
 
     if displayInfo:
         _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
