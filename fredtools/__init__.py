@@ -24,7 +24,7 @@ from .ImgAnalyse.imgAnalyse import (getExtent, getSize, getImageCenter, getMassC
 from .ImgAnalyse.imgDisplay import (showSlice, showSlices)
 from .ImgAnalyse.imgInfo import (displayImageInfo)
 from .ImgAnalyse.imgTransformCoordinates import (transformIndexToPhysicalPoint, transformContinuousIndexToPhysicalPoint, transformPhysicalPointToIndex, transformPhysicalPointToContinuousIndex)
-from .ImgAnalyse.spotAnalyse import (fitSpotProfile)
+from .ImgAnalyse.spotAnalyse import (fitSpotProfile, fitSpotImg, findSpots)
 
 
 from . import ImgIO
@@ -36,14 +36,14 @@ from .ImgIO.OmniPro_io import (readOPG, readOPD)
 
 
 from . import ImgManipulate
-from .ImgManipulate.imgGetSubimg import (getSlice, getProfile, getPoint, getInteg, getCumSum)
+from .ImgManipulate.imgGetSubimg import (getSlice, getProfile, getPoint, getInteg, getCumSum, getProfilePoints)
 from .ImgManipulate.imgManipulate import (mapStructToImg, floatingToBinaryMask, cropImgToMask, setValueMask, setNaNImg, resampleImg, sumImg, divideImg, sumVectorImg, getImgBEV, overwriteCTPhysicalProperties, setIdentityDirection, addMarginToMask, addGaussMarginToMask, addExpMarginToMask, maximumImg, minimumImg, meanImg)
 from .ImgManipulate.imgCreate import (createEllipseMask, createConeMask, createCylinderMask, createBoxMask, createImg)
 from .ImgManipulate.inmManipulate import (inmSumVec, inmSumImg)
 
 from . import Miscellaneous
 from .Miscellaneous.landauVavilovGauss import (pdfLandau, pdfLandauGauss, fitLandau, fitLandauGauss, pdfVavilov, fitVavilov)
-from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fwhm2sigma, getLineFromFile, getCPUNo, re_number)
+from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fwhm2sigma, wrapAngle, getLineFromFile, getCPUNo, re_number)
 
 
 from . import MonteCarlo
@@ -59,7 +59,7 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-_version = [0, 8, 18]
+_version = [0, 8, 19]
 __version__ = ".".join(map(str, _version))
 
 # configure logging if no root logger configured

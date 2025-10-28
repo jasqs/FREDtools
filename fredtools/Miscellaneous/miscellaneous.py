@@ -203,7 +203,13 @@ def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = N
     return hist[0], hist[1]
 
 
-def sigma2fwhm(sigma: Numberic) -> float:
+@overload
+def sigma2fwhm(sigma: Numberic) -> Numberic: ...
+@overload
+def sigma2fwhm(sigma: Iterable[Numberic]) -> Iterable[Numberic]: ...
+
+
+def sigma2fwhm(sigma: Numberic | Iterable[Numberic]) -> Numberic | Iterable[Numberic]:
     """Convert sigma to FWHM.
 
     The function recalculates the sigma parameter of a Gaussian distribution
@@ -225,10 +231,21 @@ def sigma2fwhm(sigma: Numberic) -> float:
     """
     from numpy import log, sqrt
 
-    return 2 * sqrt(2 * log(2)) * sigma
+    fwhm = 2 * sqrt(2 * log(2)) * sigma
+
+    if isinstance(fwhm, Iterable):
+        return fwhm
+    else:
+        return float(fwhm)
 
 
-def fwhm2sigma(fwhm: Numberic) -> float:
+@overload
+def fwhm2sigma(fwhm: Numberic) -> Numberic: ...
+@overload
+def fwhm2sigma(fwhm: Iterable[Numberic]) -> Iterable[Numberic]: ...
+
+
+def fwhm2sigma(fwhm: Numberic | Iterable[Numberic]) -> Numberic | Iterable[Numberic]:
     """Convert FWHM to sigma.
 
     The function recalculates full width at half maximum (FWHM)
@@ -250,7 +267,48 @@ def fwhm2sigma(fwhm: Numberic) -> float:
     """
     from numpy import log, sqrt
 
-    return fwhm / (2 * sqrt(2 * log(2)))
+    sigma = fwhm / (2 * sqrt(2 * log(2)))
+
+    if isinstance(fwhm, Iterable):
+        return sigma
+    else:
+        return float(sigma)
+
+
+@overload
+def wrapAngle(angle: Numberic, deg: bool = False) -> Numberic: ...
+@overload
+def wrapAngle(angle: Iterable[Numberic], deg: bool = False) -> Iterable[Numberic]: ...
+
+
+def wrapAngle(angle: Numberic | Iterable[Numberic], deg: bool = False) -> Numberic | Iterable[Numberic]:
+    """Wrap angle(s) to [0, 2pi) or [0, 360) range.
+    The function wraps angle(s) given in radians [0, 2*pi) range.
+
+    Parameters
+    ----------
+    angle : scalar or iterable of scalars
+        Angle(s) in radians to be wrapped.
+    deg : bool, optional
+        If True, the output angle(s) will be in degrees [0, 360). (def. False)
+
+    Returns
+    -------
+    scalar or iterable of scalars
+        Wrapped angle(s) in the same type as input.
+    """
+    import numpy as np
+
+    angle = np.round(np.arctan2(np.sin(np.asanyarray(angle)), np.cos(np.asanyarray(angle))), decimals=15)
+    angle = np.where(angle < 0, 2*np.pi+angle, angle)
+
+    if deg:
+        angle = np.rad2deg(angle)
+
+    if isinstance(angle, Iterable):
+        return angle
+    else:
+        return float(angle)
 
 
 @overload

@@ -33,7 +33,8 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
         of imshow will be a reversed X-axis of the image. (def. 'XY')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
-    **kwargs : interpolation type, optional
+    **kwargs : 
+        interpolation type, optional
         Determine the interpolation method. The following keyword arguments
         are available:
             interpolation : {'linear', 'nearest', 'spline'}
@@ -216,7 +217,8 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
         image is flipped in the following direction.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
-    **kwargs : interpolation type, optional
+    **kwargs : 
+        interpolation type, optional
         Determine the interpolation method. The following keyword arguments
         are available:
             interpolation : {'linear', 'nearest', 'spline'}
@@ -390,7 +392,8 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
         the image extent.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
-    **kwargs : interpolation type, optional
+    **kwargs : 
+        interpolation type, optional
         Determine the interpolation method. The following keyword arguments
         are available:
             interpolation : {'linear', 'nearest', 'spline'}
@@ -720,3 +723,193 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
         _logger.info(f"Getting cumulative sum along {axis} axis" + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgCumSum))
 
     return imgCumSum
+
+
+def _calcPointsAlongLine(pointA: PointLike, pointB: PointLike, spacing: Numberic) -> NDArray:
+    """Calculate points along a line between two points with given spacing.
+
+    Parameters
+    ----------
+    pointA : np.ndarray
+        Starting point of the line.
+    pointB : np.ndarray
+        Ending point of the line.
+    spacing : float
+        Spacing between points along the line.
+
+    Returns
+    -------
+    NDArray
+        Array of points along the line.
+    """
+    import numpy as np
+
+    pointA = np.array(pointA)
+    pointB = np.array(pointB)
+
+    # check points
+    if not len(pointA) == len(pointB):
+        error = ValueError(f"Points 'pointA' and 'pointB' must have the same dimension. Got {len(pointA)} and {len(pointB)}.")
+        _logger.error(error)
+        raise error
+
+    lineLength = np.linalg.norm(pointB - pointA)
+    lineDir = (pointB - pointA) / lineLength
+    numPoints = int(np.ceil(lineLength / spacing)) + 1
+    points = np.array([pointA + i * spacing * lineDir for i in range(numPoints)])
+
+    return points
+
+
+def _calcPositionsAlongLine(points: Iterable[PointLike], origin: PointLike) -> NDArray:
+    """Calculate positions along a line with respect to an origin point.
+
+    Parameters
+    ----------
+    points : Iterable[PointLike]
+        Points along the line.
+    origin : PointLike
+        Origin point for position calculation.
+
+    Returns
+    -------
+    NDArray
+        Array of positions along the line.
+    """
+    import numpy as np
+
+    origin = np.array(origin)
+    points = np.array(points)
+    lineDir = (points[-1] - points[0]) / np.linalg.norm(points[-1] - points[0])
+
+    positions = np.linalg.norm(np.array(points) - origin, axis=1) * np.sign(np.dot(np.array(points) - origin, lineDir))
+
+    return positions
+
+
+def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spacing: Numberic = 1, origin: Literal["start", "center", "image"] | PointLike = "center", displayInfo: bool = False, **kwargs) -> Tuple[tuple, tuple]:
+    """Get 1D profile between points.
+
+    The function get a profile of an image defined as a SimpleITK
+    image object, between two points, pointA and pointB, with a given step size (spacing).
+    The values at the given points are interpolated from the image.
+
+    Parameters
+    ----------
+    img : SITKImage
+        The input image.
+    pointA : PointLike
+        The starting point of the profile.
+    pointB : PointLike
+        The ending point of the profile.
+    spacing : Numberic, optional
+        The spacing between profile points. (def. 1)
+    origin : Literal["start", "center", "image"] or PointLike, optional
+        The origin point for the profile calculation. (def. "center")
+        available options:
+            - "start": positions calculated starting from pointA.
+            - "center": positions calculated with respect to the line center.
+            - "image": positions calculated with respect to the image 0 point.
+        - PointLike: positions calculated with respect to the given point.
+    displayInfo : bool, optional
+        Whether to display information about the profile points, by default False.
+    **kwargs
+        interpolation type, optional
+        Determine the interpolation method. The following keyword arguments
+        are available:
+            interpolation : {'linear', 'nearest', 'spline'}
+                Determine the interpolation method. (def. 'linear')
+            splineOrder : int
+                Order of spline interpolation. Must be in range 0-5. (def. 3)
+    Returns
+    -------
+    Tuple[tuple, tuple]
+        positions : tuple
+            The positions along the profile line.
+        values : tuple
+            The interpolated values at the profile points.
+    """
+    import fredtools as ft
+    import numpy as np
+    import SimpleITK as sitk
+
+    # validate imgCT
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
+
+    # check if point dimension matches the img dim.
+    pointA = np.array(pointA)
+    pointB = np.array(pointB)
+    if len(pointA) != img.GetDimension() or len(pointB) != img.GetDimension():
+        error = ValueError(f"Point dimension {len(pointA)} or {len(pointB)} does not match image dimension {img.GetDimension()}.")
+        _logger.error(error)
+        raise error
+
+    # check origin
+    originPoint: PointLike = np.zeros(img.GetDimension())
+    originStr: str = "unknown"
+    if isinstance(origin, str):
+        originStr = origin
+        if originStr not in ["start", "center", "image"]:
+            error = ValueError(f"Origin parameter '{originStr}' is not recognized. Available options are 'start', 'center', 'image' or a point-like object.")
+            _logger.error(error)
+            raise error
+    elif isinstance(origin, Iterable) and all(isinstance(p, Numberic) for p in origin):
+        originPoint = np.array(origin)
+        originStr = "point"
+        if len(originPoint) != img.GetDimension():
+            error = ValueError(f"Origin point dimension {len(originPoint)} does not match image dimension {img.GetDimension()}.")
+            _logger.error(error)
+            raise error
+
+    # set interpolator
+    interpolator = ft._helper.setSITKInterpolator(**kwargs)
+
+    # calculate points along the line
+    points = _calcPointsAlongLine(pointA, pointB, spacing)
+
+    # check which points are inside the image physical bounds
+    pointsInsideFlag = ft.isPointInside(img, points)
+    if isinstance(pointsInsideFlag, bool):
+        pointsInsideFlag = (pointsInsideFlag, )
+
+    # interpolate values at the points
+    values = []
+    for idx, point in enumerate(points):
+        if pointsInsideFlag[idx]:
+            values.append(img.EvaluateAtPhysicalPoint(point, interp=interpolator))
+        else:
+            values.append(np.nan)
+
+    # calculate positions along the line
+    lineLength = np.linalg.norm(pointB - pointA)
+    match originStr:
+        case "start":
+            # positions calculated starting from pointA
+            positions: NDArray = np.linalg.norm(np.array(points) - pointA, axis=1)
+        case "center":
+            # positions calculated with respect to the line center
+            lineDir = (pointB - pointA) / lineLength
+            centerPoint = (pointA + pointB) / 2
+            positions: NDArray = np.array([np.linalg.norm(np.array(point) - centerPoint) * np.sign(np.dot(np.array(point) - centerPoint, lineDir)) for point in points])
+        case "image":
+            # positions calculated with respect to the image 0 point
+            positions: NDArray = np.linalg.norm(np.array(points), axis=1)
+        case "point":
+            # positions calculated with respect to the given point
+            lineDir = (pointB - pointA) / lineLength
+            positions: NDArray = np.array([np.linalg.norm(np.array(point) - originPoint) * np.sign(np.dot(np.array(point) - originPoint, lineDir)) for point in points])
+        case _:
+            error = ValueError(f"Origin parameter '{origin}' is not recognized. Available options are 'start', 'center', 'image' or a point-like object.")
+            _logger.error(error)
+            raise error
+
+    if displayInfo:
+        strLog = [f"Profile with spacing {spacing} calculated between points:",
+                  f"Point A: {ft.ImgAnalyse.imgInfo._generateSpatialCentresString(tuple(pointA))}",
+                  f"Point B: {ft.ImgAnalyse.imgInfo._generateSpatialCentresString(tuple(pointB))}",
+                  f"Total profile length: {lineLength} mm",
+                  f"Profile points: {len(points)}",
+                  f"Profile points inside image: {np.sum(pointsInsideFlag)}"]
+        _logger.info("\n".join(strLog))
+
+    return tuple([float(position) for position in positions]), tuple(values)

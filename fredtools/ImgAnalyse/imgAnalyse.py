@@ -831,7 +831,7 @@ def isPointInside(img: SITKImage, point: PointLike | Iterable[PointLike], displa
     isIns = []
     for axis in range(point.shape[1]):
         isIns.append((point[:, axis] >= extents[axis][0]) & (point[:, axis] <= extents[axis][1]))
-    isIns = np.square(np.array(isIns).all(axis=0))
+    isIns = np.square(np.array(isIns).all(axis=0)).astype(bool)
 
     if displayInfo:
         if np.all(isIns):
