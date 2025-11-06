@@ -524,8 +524,8 @@ class beamModel:
         sigmaX, sigmaY = self.getSigma(-sourceToAxisDistance, nomEnergy)
         thetaX = np.sqrt(np.asarray(energyModel["cX"]))
         thetaY = np.sqrt(np.asarray(energyModel["cY"]))
-        epsilonX, _, _ = ft.MonteCarlo.beamModel.sigmaSquare2Twiss(energyModel["aX"], energyModel["bX"], energyModel["cX"])
-        epsilonY, _, _ = ft.MonteCarlo.beamModel.sigmaSquare2Twiss(energyModel["aY"], energyModel["bY"], energyModel["cY"])
+        epsilonX, _, _ = ft.MonteCarlo.beamModel.sigmaSquared2Twiss(energyModel["aX"], energyModel["bX"], energyModel["cX"])
+        epsilonY, _, _ = ft.MonteCarlo.beamModel.sigmaSquared2Twiss(energyModel["aY"], energyModel["bY"], energyModel["cY"])
 
         beamModelEnergyGATE = pd.DataFrame({'Energy': energyModel.Energy,  # [MeV]
                                             'dEnergy': energyModel.dEnergy,  # [MeV]
@@ -622,7 +622,7 @@ def twiss2SigmaSquared(epsilon: Numberic, alpha: Numberic, beta: Numberic) -> Tu
     return (float(np.real(a)), float(b), float(c)) if np.isscalar(a) else (a.tolist(), b.tolist(), c.tolist())
 
 
-def sigmaSquare2Twiss(a: Numberic | Iterable[Numberic], b: Numberic | Iterable[Numberic], c: Numberic | Iterable[Numberic]) -> Tuple[Numberic, Numberic, Numberic] | Tuple[List[Numberic], List[Numberic], List[Numberic]]:
+def sigmaSquared2Twiss(a: Numberic | Iterable[Numberic], b: Numberic | Iterable[Numberic], c: Numberic | Iterable[Numberic]) -> Tuple[Numberic, Numberic, Numberic] | Tuple[List[Numberic], List[Numberic], List[Numberic]]:
     """ Convert sigma squared model parameters to Twiss parameters.
 
     Convert beam propagation parameters defined as sigma squared model to Twiss model parameters.

@@ -247,3 +247,40 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
             error = ValueError(f"The method '{method}' can not be recognized. Only 'singleGauss' is available at the moment.")
             _logger.error(error)
             raise error
+
+
+def _sigmaSquaredModel(pos: NDArray, a: Numberic, b: Numberic, c: Numberic) -> NDArray:
+    import numpy as np
+    return a + b * pos + c * pos**2
+
+
+def fitSigmaSquaredModel(pos: Iterable[Numberic], beamSize: Iterable[Numberic]) -> LMFitModelResult:
+    """Fit sigma squared model to beam size data.
+
+    The function fits the sigma squared model to the beam size data provided.
+    The model is defined as: σ²(z) = a + b*z + c*z², where σ is the beam size
+    at position x, and a, b, c are the parameters to be fitted. 
+
+    Parameters
+    ----------
+    pos : Iterable[Numberic]
+        Positions where the beam sizes were measured.
+    beamSize : Iterable[Numberic]
+        Measured beam sizes at the corresponding positions.
+
+    Returns
+    -------
+    lmfit.model.ModelResult
+        An instance of lmfit.model.ModelResult class.
+    """
+    from lmfit import Model
+    import numpy as np
+
+    gmodel = Model(_sigmaSquaredModel, independent_vars=['pos'])
+    params = gmodel.make_params()
+    params.add("a", value=1.0)
+    params.add("b", value=1.0)
+    params.add("c", value=1.0, min=0.0)
+
+    result = gmodel.fit(data=np.array(beamSize)**2, pos=np.array(pos), params=params)
+    return result

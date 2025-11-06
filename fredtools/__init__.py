@@ -14,8 +14,10 @@ It is designed to work with images, particularly in the context of medical physi
 
 from ._logger import configureLogging, getLogger
 
+
 from . import _typing
 from . import _helper
+from . import _logger
 
 from . import ImgAnalyse
 from .ImgAnalyse import _imgTypeChecker
@@ -24,7 +26,7 @@ from .ImgAnalyse.imgAnalyse import (getExtent, getSize, getImageCenter, getMassC
 from .ImgAnalyse.imgDisplay import (showSlice, showSlices)
 from .ImgAnalyse.imgInfo import (displayImageInfo)
 from .ImgAnalyse.imgTransformCoordinates import (transformIndexToPhysicalPoint, transformContinuousIndexToPhysicalPoint, transformPhysicalPointToIndex, transformPhysicalPointToContinuousIndex)
-from .ImgAnalyse.spotAnalyse import (fitSpotProfile, fitSpotImg, findSpots)
+from .ImgAnalyse.spotAnalyse import (fitSpotProfile, fitSpotImg, findSpots, fitSigmaSquaredModel)
 
 
 from . import ImgIO
