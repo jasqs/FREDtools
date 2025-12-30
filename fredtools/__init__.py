@@ -9,9 +9,6 @@ tool. It provides tools for image analysis, manipulation, Monte Carlo simulation
 It is designed to work with images, particularly in the context of medical physics and radiation therapy.
 """
 
-# check if the cupy is installed
-
-
 from ._logger import configureLogging, getLogger
 
 

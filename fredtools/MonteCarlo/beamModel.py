@@ -476,7 +476,7 @@ class beamModel:
 
         return (float(sigmaX[0]), float(sigmaY[0])) if isinstance(nomEnergy, Numberic) else (sigmaX.tolist(), sigmaY.tolist())
 
-    def getGateParams(self, sourceToAxisDistance: Numberic, nomEnergy: Numberic | Iterable[Numberic]) -> DataFrame:
+    def getGateParams(self, sourceToAxisDistance: NonNegativeFloat, nomEnergy: Numberic | Iterable[Numberic]) -> DataFrame:
         """ Get the beam parameters for GATE simulation.
 
         This function calculates the beam parameters for GATE simulation based on the nozzle exit position and nominal energy.
@@ -508,8 +508,8 @@ class beamModel:
             - thetaY: beam divergence in Y direction in [rad]
             - epsilonX: emittance in X direction in [mm * rad]
             - epsilonY: emittance in Y direction in [mm * rad]
-            - convergenceX: convergence in X direction (always True)
-            - convergenceY: convergence in Y direction (always True)
+            - convergenceX: convergence in X direction (usually True)
+            - convergenceY: convergence in Y direction (usually True)
             - scalingFactor: scaling factor for the beam model (in [p/MU])
         """
         import numpy as np
