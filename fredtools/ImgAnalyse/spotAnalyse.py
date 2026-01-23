@@ -15,11 +15,11 @@ def findSpots(img: SITKImage, DCO: Annotated[Numberic, Field(strict=True, ge=0, 
     img : SITKImage
         2D SITK image.
     DCO : Numberic, optional
-        Dose cut-off to define spot region, by default 0.1
+        Dose cut-off to define spot region. (def. 0.1)
     margin : Numberic | Iterable[Numberic], optional
-        Margin around spot region in mm, by default 3
+        Margin around spot region in mm. (def. 3)
     displayInfo : bool, optional
-        Whether to display information about found spots, by default False
+        Display information about found spots. (def. False)
 
     Returns
     -------
@@ -70,8 +70,8 @@ def findSpots(img: SITKImage, DCO: Annotated[Numberic, Field(strict=True, ge=0, 
         imgLabel[boundingBox[0]:(boundingBox[0]+boundingBox[2]+1), boundingBox[1]:(boundingBox[1]+boundingBox[3]+1)] = label
 
     if displayInfo:
-        strLog = [f"Found {labelShapeStatistics.GetNumberOfLabels()} spots."]
-        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(img))
+        strLog = [f"Found {labelShapeStatistics.GetNumberOfLabels()} spots. Label image:"]
+        _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgLabel))
 
     return imgLabel
 
@@ -180,7 +180,7 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
         Fix the amplitude to the maximum value of `img` and do not use it
         in the fitting. (def. False)
     fixCentreToZero : bool, optional
-        Fix the centre to zero and do not use it in the fitting. (def. False
+        Fix the centre to zero and do not use it in the fitting. (def. False)
     method : {"singleGauss"}, optional
         Method of the fitting. Only single gaussian fitting is implemented now. (def. "singleGauss")
     Returns
