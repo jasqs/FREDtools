@@ -539,8 +539,8 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
 
     # second round with adaptive dose levels
     volume = arrMask.sum()
-    volumeMaxRelativeChange = 0.01
-    doseMaxRelativeStep = 0.001
+    volumeMaxRelativeChange = 0.005  # 0.5% volume change
+    doseMaxRelativeStep = 0.001  # 0.1% of max dose
     doseMaxAbsoluteStep = doseMaxRelativeStep * doseMax
     maxIter = 20
     doseLevelsNew = doseLevels[:-1] + np.diff(doseLevels) / 2

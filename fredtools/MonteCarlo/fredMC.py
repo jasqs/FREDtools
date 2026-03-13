@@ -234,7 +234,7 @@ def getFREDVersions() -> List[str]:
     runFredProc = subprocess.Popen(r" ".join(FREDrunCommand), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8")
     stdout, stderr = runFredProc.communicate()
     runFredProc.wait()
-    if stderr or "Error" in stdout:
+    if (stderr and "error" in stderr.lower()) or "error" in stdout.lower():
         raise RuntimeError(stderr if stderr else stdout)
     return [x.strip() for x in stdout.split("\n") if re.findall(r"\d.\d+.\d+", x)]
 
@@ -307,7 +307,7 @@ def getFREDVersion(version: str = "") -> str:
     runFredProc = subprocess.Popen(r" ".join(FREDrunCommand), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8")
     stdout, stderr = runFredProc.communicate()
     runFredProc.wait()
-    if stderr or "Error" in stdout:
+    if (stderr and "error" in stderr.lower()) or "error" in stdout.lower():
         raise RuntimeError(stderr if stderr else stdout)
 
     return stdout.split("\n")[0]
