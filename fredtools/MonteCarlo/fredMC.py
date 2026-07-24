@@ -230,7 +230,7 @@ def getFREDVersions() -> List[str]:
     import subprocess
     import re
 
-    FREDrunCommand = ["fred", "-listvers"]
+    FREDrunCommand = ["fred", "-listVers"]
     runFredProc = subprocess.Popen(r" ".join(FREDrunCommand), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8")
     stdout, stderr = runFredProc.communicate()
     runFredProc.wait()
@@ -367,7 +367,7 @@ def runFRED(fileName: PathLike, version: str = "", params: Iterable[str] = [], d
     # run fred sim
     FREDrunCommand = ["fred"]
 
-    FREDrunCommand.append(f"-usevers {version}") if version else None
+    FREDrunCommand.append(f"-useVers {version}") if version else None
     params = [params] if isinstance(params, str) else params
     FREDrunCommand.extend(params) if params else None
     FREDrunCommand.append(f"-f {fileName}")
