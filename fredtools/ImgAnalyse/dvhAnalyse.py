@@ -412,7 +412,7 @@ class DVH(object):
                   "{:18} {:9.2f} {:17.2f} {:+14.2f}% {:+14.2f}".format(*fmtcmp('D50')),
                   "{:18} {:9.2f} {:17.2f} {:+14.2f}% {:+14.2f}".format(*fmtcmp('D05')),
                   "{:18} {:9.2f} {:17.2f} {:+14.2f}% {:+14.2f}".format(*fmtcmp('V95')),
-                  "{:18} {:9.2f} {:17.2f} {:+14.2f}% {:+14.2f}".format(*fmtcmp('D05')),
+                  "{:18} {:9.2f} {:17.2f} {:+14.2f}% {:+14.2f}".format(*fmtcmp('V100')),
                   ]
         _logger.info(f"Comparison of the basic DVH parameters for structures '{self.name}' and '{other.name}':\n\t" + "\n\t".join(strLog))
 
@@ -423,12 +423,14 @@ class DVH(object):
             _logger.error(error)
         else:
             fig, ax = plt.subplots()
-            if isinstance(self.color, Sequence) and not isinstance(self.color, str):
-                color = np.array(self.color) / 255
-            else:
-                color = self.color
-            ax.plot(self.doseLevels, self.volumeCumRel, label=self.name, color=color)
-            ax.plot(other.doseLevels, other.volumeCumRel, label=self.name, color=color)
+
+            def normColor(color):
+                if isinstance(color, Sequence) and not isinstance(color, str):
+                    return np.array(color) / 255
+                return color
+
+            ax.plot(self.doseLevels, self.volumeCumRel, label=self.name, color=normColor(self.color))
+            ax.plot(other.doseLevels, other.volumeCumRel, label=other.name, color=normColor(other.color))
             ax.set_xlabel(f'Bin centers (Dose) [abs. units]')
             ax.set_ylabel(f'Volume [%]')
             ax.set_xlim(0,)

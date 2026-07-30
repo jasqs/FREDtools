@@ -1,3 +1,8 @@
+from fredtools._typing import *
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
 def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
     """Convert CT map to WER map.
 
@@ -64,9 +69,7 @@ def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
     ft.copyImgMetaData(img, imgWER)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgWER)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgWER))
 
     return imgWER
 
@@ -237,9 +240,7 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     imgWET.CopyInformation(imgWER)
 
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        ft.ft_imgAnalyse._displayImageInfo(imgWET)
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgWET))
 
     return imgWET
 
@@ -359,6 +360,9 @@ def calcContours(imgMask, level=0.5, displayInfo: bool = False):
         polygonCoordinatesPx = sph.get_coordinates(contourPolygon)
         polygonCoordinatesRW = ft.transformContinuousIndexToPhysicalPoint(imgMask, polygonCoordinatesPx)
         contoursPolygon[idx] = sph.set_coordinates(contourPolygon, polygonCoordinatesRW)
+
+    if displayInfo:
+        _logger.info(f"Found {len(contoursPolygon)} contour polygon(s) at level {level}.")
 
     return contoursPolygon
 

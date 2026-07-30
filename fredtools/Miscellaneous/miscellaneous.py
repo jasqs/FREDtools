@@ -359,6 +359,12 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
     """
     import re
 
+    # validate kind
+    if kind.lower() not in {"first", "last", "all"}:
+        error = AttributeError(f"Unrecognized kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
+        _logger.error(error)
+        raise error
+
     with open(fileName, "r") as f:
         fileLines = f.readlines()
 
@@ -386,16 +392,11 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
 
     match kind.lower():
         case "first":
-            output = (int(lineIdx[0]), str(lineString[0]))
-            return output
+            return int(lineIdx[0]), str(lineString[0])
         case "last":
             return lineIdx[-1], lineString[-1]
-        case "all":
-            return tuple(lineIdx), tuple(lineString)
         case _:
-            error = AttributeError(f"Unrecognized kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
-            _logger.error(error)
-            raise error
+            return tuple(lineIdx), tuple(lineString)
 
 
 def getCPUNo(CPUNo: Literal["auto"] | NonNegativeInt = "auto") -> NonNegativeInt:

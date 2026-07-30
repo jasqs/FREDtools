@@ -117,7 +117,7 @@ def fitSpotProfile(pos: ArrayLike, vec: ArrayLike, cutLevel: NonNegativeFloat = 
         error = TypeError(f"The input `pos` and `vec` must be both iterable.")
         _logger.error(error)
         raise error
-    if not np.array(pos).ndim == 1 and np.array(vec).ndim == 1:
+    if np.array(pos).ndim != 1 or np.array(vec).ndim != 1:
         error = TypeError(f"The input `pos` and `vec` must be both one-dimensional vectors.")
         _logger.error(error)
         raise error

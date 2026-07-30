@@ -455,7 +455,7 @@ def getRNIsocenter(fileName: PathLike, displayInfo: bool = False) -> tuple:
         isocenterPosition = isocenterPosition[0]
 
     if displayInfo:
-        _logger.info("Isocenter position [mm]: ", isocenterPosition)
+        _logger.info(f"Isocenter position [mm]: {isocenterPosition}")
 
     return tuple(isocenterPosition)
 
@@ -1195,10 +1195,17 @@ def getPET(fileNames: Iterable[PathLike], SUV: bool = True, displayInfo: bool = 
 
     # Recalculate image to SUV if requested
     if SUV:
-        delta_time = (float(dicomDataset.AcquisitionTime) - float(dicomDataset.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)) / 100  # [min]
-        half_life = dicomDataset.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife / 60  # [min]
-        corrected_dose = dicomDataset.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose * np.exp(-delta_time * np.log(2) / half_life)  # [Bq]
-        SUV_factor = (dicomDataset.RescaleSlope * float(dicomDataset.PatientWeight) * 1000) / (corrected_dose)  # [g/Bq] = [] * [Kg]* 1000[g/kg] / [Bq]
+        # take the tags from the dataset of the first slice in the sorted order (deterministic reference)
+        dicomDatasetRef = dicomsDataset[fileNames.index(fileNamesSorted[0])]
+
+        def parseDicomTime(timeTM: str) -> float:
+            # convert a DICOM TM value (HHMMSS.FFFFFF) to seconds since midnight
+            return int(timeTM[0:2]) * 3600 + int(timeTM[2:4]) * 60 + float(timeTM[4:])
+
+        delta_time = (parseDicomTime(str(dicomDatasetRef.AcquisitionTime)) - parseDicomTime(str(dicomDatasetRef.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime))) / 60  # [min]
+        half_life = dicomDatasetRef.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife / 60  # [min]
+        corrected_dose = dicomDatasetRef.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose * np.exp(-delta_time * np.log(2) / half_life)  # [Bq]
+        SUV_factor = (dicomDatasetRef.RescaleSlope * float(dicomDatasetRef.PatientWeight) * 1000) / (corrected_dose)  # [g/Bq] = [] * [kg] * 1000[g/kg] / [Bq]
         # Create SUV image
         img = img * float(SUV_factor)  # [g/ml] = [Bq/ml] * [g/Bq]
 

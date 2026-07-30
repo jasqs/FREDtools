@@ -1155,7 +1155,7 @@ def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numberic], 3
     return imgBEV
 
 
-def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFraction: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5, CPUNo: Literal["auto"] | int = "auto",
+def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFraction: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5,
                                   relElecDensCalib: Annotated[ArrayLike, Literal["N", 2]] = [[-1024, -1000, -777.82, -495.34, -64.96, -34.39, -3.87, 51.92, 56.99, 226.05, 857.65, 1313, 8513, 12668, 25332],
                                                                                              [0, 0, 0.190, 0.489, 0.949, 0.976, 1, 1.043, 1.053, 1.117, 1.456, 1.696, 3.76, 6.58, 9.09]],
                                   HUrange: Annotated[Iterable[Numberic], 2] = [-2000, 50000], displayInfo: bool = False) -> SITKImage:
@@ -1178,9 +1178,6 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
         Path String to dicom file with structures (RS file).
     areaFraction : scalar, optional
         Fraction of pixel area occupancy to calculate binary mask. See `mapStructToImg` function for more information. (def. 0.5)
-    CPUNo : {'auto', 'none'}, scalar or None, optional
-        Define if the multiprocessing should be used and how many cores should
-        be exploited. See `mapStructToImg` function for more information. (def. 'auto')
     relElecDensCalib : array_like, optional
         2xN iterable (e.g. 2xN numpy array or list of two equal size lists) describing
         the calibration between HU values and relative electronic density. The first element (column)

@@ -40,16 +40,16 @@ def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **k
         raise TypeError(f"The contour must be an instance of a shapely Polygon class.")
 
     # validate algorithm
-    if not algorithm.lower() in {"regular", "reg", "hexagonal", "hex"}:
-        raise ValueError(f"Can not recognize the '{algorithm}' algorithm. Only 'regular' or 'hexagonal' are possible.")
+    if not algorithm.lower() in {"regular", "reg", "hexagonal", "hex", "concentric", "con", "delaunay", "del"}:
+        raise ValueError(f"Can not recognize the '{algorithm}' algorithm. Only 'regular', 'hexagonal', 'concentric' or 'delaunay' are possible, of which 'concentric' and 'delaunay' are not implemented yet.")
 
     if algorithm.lower() in ["regular", "reg"]:
-        beamPositions = optimiseBeamPositionsRegular(contourPolygon, spotDistance)
+        beamPositions = optimiseBeamPositionsRegular(contourPolygon, spotDistance, **kwargs)
     elif algorithm.lower() in ["hexagonal", "hex"]:
         beamPositions = optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, **kwargs)
     elif algorithm.lower() in ["concentric", "con"]:
         beamPositions = optimiseBeamPositionsConcentric(contourPolygon, spotDistance, **kwargs)
-    elif algorithm.lower() in ["delaunay", "del"]:
+    else:
         beamPositions = optimiseBeamPositionsDelaunay(contourPolygon, spotDistance, **kwargs)
 
     return beamPositions
@@ -214,7 +214,7 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
     return beamPosition
 
 
-def optimiseBeamPositionsConcentric(contourPolygon, spotDistance):
+def optimiseBeamPositionsConcentric(contourPolygon, spotDistance, **kwargs):
     """Calculate the beam positions using the concentric rings algorithm.
 
     The function is intended to calculate beam positions in a contour defined
@@ -240,7 +240,7 @@ def optimiseBeamPositionsConcentric(contourPolygon, spotDistance):
     raise NotImplementedError("The method is not yet implemented")
 
 
-def optimiseBeamPositionsDelaunay(contourPolygon, spotDistance):
+def optimiseBeamPositionsDelaunay(contourPolygon, spotDistance, **kwargs):
     """Calculate the beam positions using the Delaunay triangulation algorithm.
 
     The function is intended to calculate beam positions in a contour defined

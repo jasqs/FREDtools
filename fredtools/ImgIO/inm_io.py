@@ -113,7 +113,7 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
                     _logger.error(error)
                     raise error
 
-        strLog = [f"Imn file version: {InmFREDVersion}",
+        strLog = [f"Inm file version: {InmFREDVersion}",
                   f"Number of PBs: {inmInfo.PBID.size}",
                   f"Number of fields: {inmInfo.FID.unique().size}",
                   f"Number of components: {componentNo}",
@@ -258,7 +258,7 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
         # get FoR of the Inm image and pencil beam number
         match InmFREDVersion:
             case 2.0 | 3.0:
-                [InmFREDVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
+                [_, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, offsetX, offsetY, offsetZ, componentNo, pencilBeamNo] = struct.unpack("<4i6f2i", file_h.read(48))
                 shape = np.array([sizeX, sizeY, sizeZ])
                 spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=4) * 10
                 offset = np.around(np.array([offsetX, offsetY, offsetZ]), decimals=4) * 10
@@ -270,7 +270,7 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
                 imgBase.SetSpacing(spacing)
             case 2.1 | 3.1:
                 transformMatrix = np.zeros((3, 3)).flatten()
-                [InmFREDVersion, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, originX, originY, originZ, *transformMatrix, componentNo, pencilBeamNo] = struct.unpack("<4i6f9f2i", file_h.read(84))
+                [_, sizeX, sizeY, sizeZ, spacingX, spacingY, spacingZ, originX, originY, originZ, *transformMatrix, componentNo, pencilBeamNo] = struct.unpack("<4i6f9f2i", file_h.read(84))
                 shape = np.array([sizeX, sizeY, sizeZ])
                 spacing = np.around(np.array([spacingX, spacingY, spacingZ]), decimals=4) * 10
                 origin = np.around(np.array([originX, originY, originZ]), decimals=4) * 10

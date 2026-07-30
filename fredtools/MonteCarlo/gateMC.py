@@ -1,3 +1,7 @@
+from fredtools import getLogger
+_logger = getLogger(__name__)
+
+
 def readGATE_HITSActor(fileName):
     """Read GATE hits data for active volume.
 
@@ -190,10 +194,10 @@ def readGATEStat(fileNameLogOut, displayInfo: bool = False):
             else:
                 simStat[key] = float(value)
     if displayInfo:
-        print(f"### {ft.currentFuncName()} ###")
-        print("# Number of events: {:d}".format(simStat["NumberOfEvents"]))
-        print("# Elapsed Time (total):   {:2f} s".format(simStat["ElapsedTime"]))
-        print("# Elapsed Time (no init): {:2f} s".format(simStat["ElapsedTimeWoInit"]))
-        print("# Average Tracking Rate:  {:.3E} prim/s".format(simStat["PPS"]))
-        print("#" * len(f"### {ft.currentFuncName()} ###"))
+        strLog = ["Number of events: {:d}".format(simStat["NumberOfEvents"]),
+                  "Elapsed Time (total):   {:2f} s".format(simStat["ElapsedTime"]),
+                  "Elapsed Time (no init): {:2f} s".format(simStat["ElapsedTimeWoInit"]),
+                  "Average Tracking Rate:  {:.3E} prim/s".format(simStat["PPS"]),
+                  ]
+        _logger.info("\n\t".join(strLog))
     return simStat

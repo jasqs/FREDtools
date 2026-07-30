@@ -135,7 +135,7 @@ def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | 
     if not axesImage:
         error = AttributeError(f"Cannot display the image slice.")
         _logger.error(error)
-        raise
+        raise error
 
     # show ROIs slice
     if imgROIs:

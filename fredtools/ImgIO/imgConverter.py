@@ -34,15 +34,11 @@ def ITK2SITK(imgITK: ITKImage) -> SITKImage:
 
 def img2vec(img: SITKImage) -> NDArray:
     """Convert an image to a vector."""
-    import cupy as cp
     import SimpleITK as sitk
     import fredtools as ft
 
     ft._imgTypeChecker.isSITK(img, raiseError=True)
-    xp = cp.get_array_module(img)
 
-    vec = xp.swapaxes(sitk.GetArrayViewFromImage(img), 0, -1).flatten(order='F')
-
-    vec = xp.asarray(vec)
+    vec = np.swapaxes(sitk.GetArrayViewFromImage(img), 0, -1).flatten(order='F')
 
     return vec

@@ -158,7 +158,6 @@ class braggPeak:
             error = ValueError(f"Spline order must be a scalar in range 0-5.")
             _logger.error(error)
             raise error
-        print(splineOrder)
         self.__splineOrder = splineOrder
         self.__reset__()
 
@@ -722,8 +721,8 @@ class braggPeak:
         fig, ax = plt.subplots(figsize=[20, 10])
 
         ax.plot(self.__bp[0], self.__bp[1], "r.", label="original profile")
-        ax.plot(self.bpBort[0], self.bpBort[1], "b-", label="interpolated profile")
-        ax.plot(self.bpInterp[0], self.bpInterp[1], "g-", label="Bortfeld fit profile")
+        ax.plot(self.bpBort[0], self.bpBort[1], "b-", label="Bortfeld fit profile")
+        ax.plot(self.bpInterp[0], self.bpInterp[1], "g-", label="interpolated profile")
         ax.grid()
         ax.legend()
         ax.set_xlabel("depth [$mm$]")
