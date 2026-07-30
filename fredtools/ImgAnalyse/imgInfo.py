@@ -90,17 +90,22 @@ def _generateExtentString(axisExtent: tuple[float, float]) -> str:
 
 
 def _displayImageInfo(img: SITKImage, metadata: bool = True) -> str:
-    """Display some information about the image without the name of the function.
+    """Generate a formatted string with information about the image.
 
-    The function displays information about an image given as a SimpleITK image object.
-    The information is displayed without the function name.
+    The function generates a formatted, multi-line string with information
+    about an image given as a SimpleITK image object.
 
     Parameters
     ----------
     img : SimpleITK Image
         An object of a SimpleITK image.
     metadata : bool, optional
-        Display additional metadata. (def. True)
+        Include additional metadata. (def. True)
+
+    Returns
+    -------
+    str
+        A formatted, multi-line string with information about the image.
     """
     import SimpleITK as sitk
     import numpy as np
@@ -170,16 +175,16 @@ def _displayImageInfo(img: SITKImage, metadata: bool = True) -> str:
     nonAirVoxels = (arr[~np.isnan(arr)] > -1000).sum()
 
     if ft._imgTypeChecker.isSITK_profile(img):
-        imageInfo.append("non-zero (dose=0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e1) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose>0)  values  = {:d} ({:.2%}) => {:.2f} cm".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e1) + ("(sum of vectors)" if isVector else ""))
         imageInfo.append("non-air (HU>-1000) values  = {:d} ({:.2%}) => {:.2f} cm".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e1) + ("(sum of vectors)" if isVector else ""))
     elif ft._imgTypeChecker.isSITK_slice(img):
-        imageInfo.append("non-zero (dose=0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose>0)  pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e2) + ("(sum of vectors)" if isVector else ""))
         imageInfo.append("non-air (HU>-1000) pixels  = {:d} ({:.2%}) => {:.2f} cm²".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e2) + ("(sum of vectors)" if isVector else ""))
     elif ft._imgTypeChecker.isSITK_volume(img):
-        imageInfo.append("non-zero (dose=0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose>0)  voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
         imageInfo.append("non-air (HU>-1000) voxels  = {:d} ({:.2%}) => {:.2f} l".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
     elif ft._imgTypeChecker.isSITK_timevolume(img):
-        imageInfo.append("non-zero (dose=0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
+        imageInfo.append("non-zero (dose>0)  time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonZeroVoxels, nonZeroVoxels / arr.size, np.prod(realVoxelSize) * nonZeroVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
         imageInfo.append("non-air (HU>-1000) time voxels  = {:d} ({:.2%}) => {:.2f} l*s".format(nonAirVoxels, nonAirVoxels / arr.size, np.prod(realVoxelSize) * nonAirVoxels / 1e6) + ("(sum of vectors)" if isVector else ""))
 
     if img.GetMetaDataKeys() and metadata:
@@ -229,7 +234,7 @@ def displayImageInfo(img: SITKImage, metadata: bool = True) -> None:
     # data type:  16-bit signed integer
     # range: from  -1024  to  3071
     # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 l
+    # non-zero (dose>0)  voxels  = 46188861 (99.91%) => 25.90 l
     # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
     # Additional metadata:
     ########################
@@ -253,7 +258,7 @@ def displayImageInfo(img: SITKImage, metadata: bool = True) -> None:
     # data type:  16-bit signed integer
     # range: from  -1024  to  3071
     # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 l
+    # non-zero (dose>0)  voxels  = 46188861 (99.91%) => 25.90 l
     # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
     # Additional metadata:
     ###############

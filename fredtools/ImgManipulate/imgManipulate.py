@@ -12,7 +12,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     and size) as the `img` with values larger than 0 for voxels inside the contour
     and values 0 outside. In primary usage, the function produces floating masks, i.e., the value
     of each voxel describes its fractional occupancy by the structure.
-    It is assumed that the image is 3D and has a unitary direction, which means that
+    It is assumed that the image is 3D and has an identity direction, which means that
     the axes describe X, Y and Z directions, respectively. The frame of reference of
     the `img` is not specified, in particular, the Z-spacing does not have to be
     the same as the structure Z-spacing.
@@ -54,13 +54,13 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     done in 2D, meaning slice by slice. The resulting image has  the voxel size and shape the same as 
     the input `img` in X and Y directions. The voxel size  in the Z direction is calculated based on 
     the contour slice distances, taking into account gaps, holes and detached contours. The shape of 
-    the image in the Z direction is equal to the contour boundings in the Z direction, enlarged 
-    by 1 px (``sliceAddNo`` parameter). Such image mask is then resampled to the frame of reference of 
+    the image in the Z direction is equal to the contour boundings in the Z direction, enlarged
+    by 2 px. Such image mask is then resampled to the frame of reference of
     the input `img`. In fact, the resampling is applied only to the Z direction, because the frame of 
     reference of X and Y directions are the same as the input `img`.
 
     3. The structures in the structure DICOM file are usually defined for an image with the identity direction.
-    Although the mapping will be done for images with nonunitary direction, the results may be incorrect.
+    Although the mapping will be done for images with non-identity direction, the results may be incorrect.
     """
     import fredtools as ft
     import numpy as np
@@ -131,7 +131,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     # check if all contour vertices are defined inside the image extent
     StructureContoursExtent = np.stack((np.min(np.concatenate(StructureContours, axis=0), axis=0), np.max(np.concatenate(StructureContours, axis=0), axis=0)))
     if not all(tuple([ft.isPointInside(img, StructureContoursExtent)])):
-        _logger.debug(f"Warning: Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
+        _logger.debug(f"Some vertices of the structure '{structName}' are defined outside the image extent.\n" +
                       f"The image extent is {ft.getExtent(img)}\n" +
                       f"and the contour extent is {StructureContoursExtent.T.tolist()}.")
 
@@ -171,7 +171,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
                 StructurePolygons.append(StructurePolygon)
                 StructurePolygonsDepths = np.append(StructurePolygonsDepths, StructureContoursDepth)
         else:
-            _logger.warning(f"Error: The contour at depth {StructureContoursDepth} for the structure '{structName}' is cannot be properly mapped to polygon nor multipolygon, but was mapped to {type(StructurePolygonMultiPolygon)} instead.")
+            _logger.warning(f"The contour at depth {StructureContoursDepth} for the structure '{structName}' is cannot be properly mapped to polygon nor multipolygon, but was mapped to {type(StructurePolygonMultiPolygon)} instead.")
 
     # get contour spacing in Z direction as the minimum spacing between individual contours.
     """
@@ -383,19 +383,21 @@ def floatingToBinaryMask(imgMask: SITKImage, threshold: Annotated[float, Field(s
     Parameters
     ----------
     imgMask : SimpleITK Image
-        An object of a SimpleITK image describing a binary mask.
+        An object of a SimpleITK image describing a floating mask.
     threshold : scalar, optional
         The threshold to calculate the binary mask. (def. 0.5)
     thresholdEqual : bool, optional
-        Determines if the threshold is larger or larger of equal. 
-        If the parameter is true, then the `threshold` must be larger than 0. (def. False)
+        Determines whether voxels with values equal to the `threshold` are included
+        in the binary mask: if True, a greater-than-or-equal comparison is used and
+        the `threshold` must be larger than 0; if False, a greater-than comparison
+        is used. (def. False)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
     SimpleITK Image
-        An object of a SimpleITK image.
+        An object of a SimpleITK image describing a binary mask (0/1 values).
 
     See Also
     --------
@@ -619,7 +621,8 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     img : SimpleITK Image
         An object of a SimpleITK image.
     spacing : array_like
-        New spacing in each direction. The length should be the same as the `img` dimension.
+        New spacing in each direction. The length should be the same as the `img`
+        dimension or as the number of axes of the `img` with the size different than one.
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
@@ -730,7 +733,7 @@ def sumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
     for img in imgs:
         ft._imgTypeChecker.isSITK(img, raiseError=True)
         if not ft.compareImgFoR(img, imgs[0]):
-            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same frame of reference.")
             _logger.error(error)
             raise error
 
@@ -778,11 +781,11 @@ def maximumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImag
     for img in imgs:
         ft._imgTypeChecker.isSITK(img, raiseError=True)
         if not ft.compareImgFoR(img, imgs[0]):
-            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same frame of reference.")
             _logger.error(error)
             raise error
 
-    # sum images
+    # compute the voxel-wise maximum
     img: SITKImage = imgs[0]
     for i in range(1, len(imgs)):
         img = sitk.Maximum(img, imgs[i])
@@ -826,11 +829,11 @@ def minimumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImag
     for img in imgs:
         ft._imgTypeChecker.isSITK(img, raiseError=True)
         if not ft.compareImgFoR(img, imgs[0]):
-            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same frame of reference.")
             _logger.error(error)
             raise error
 
-    # sum images
+    # compute the voxel-wise minimum
     img: SITKImage = imgs[0]
     for i in range(1, len(imgs)):
         img = sitk.Minimum(img, imgs[i])
@@ -874,11 +877,11 @@ def meanImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
     for img in imgs:
         ft._imgTypeChecker.isSITK(img, raiseError=True)
         if not ft.compareImgFoR(img, imgs[0]):
-            error = ValueError(f"Not all images in the input iterable 'imgs' have the same field of reference.")
+            error = ValueError(f"Not all images in the input iterable 'imgs' have the same frame of reference.")
             _logger.error(error)
             raise error
 
-    # sum images
+    # compute the voxel-wise mean
     img: SITKImage = imgs[0]
     for i in range(1, len(imgs)):
         img = sitk.Add(img, imgs[i])
@@ -899,7 +902,7 @@ def divideImg(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -
     must be the same. For a given voxel it returns:
 
         -  NaN value if any of the numerator or denominator voxel value is NaN
-        -  0 value if denominator voxel value is zero
+        -  0 value if the denominator voxel value is less than or equal to zero
         -  Quotient for all other cases
 
     Parameters
@@ -925,7 +928,7 @@ def divideImg(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -
 
     # check if numerator and denominator images have the same FoR
     if not ft.compareImgFoR(imgNum, imgDen):
-        error = ValueError(f"The numerator and denominator images must have the same field of reference.")
+        error = ValueError(f"The numerator and denominator images must have the same frame of reference.")
         _logger.error(error)
         raise error
 
@@ -1164,9 +1167,9 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
     The function searches in a structure RS dicom file for structures with
     the physical property defined, maps each structure to the CT image
     defined as an instance of a SimpleITK 3D image, and replaces the Hounsfield Units (HU)
-    values for voxels inside the structure. Only the relative electronic density physical
+    values for voxels inside the structure. Only the relative electron density physical
     property ('REL_ELEC_DENSITY') is implemented now, and it is converted to a HU value
-    based on relative electronic density to HU calibration, given as `relElecDensCalib`
+    based on relative electron density to HU calibration, given as `relElecDensCalib`
     parameter, whereas the missing values are interpolated linearly and rounded to
     the nearest integer HU value.
 
@@ -1180,11 +1183,11 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
         Fraction of pixel area occupancy to calculate binary mask. See `mapStructToImg` function for more information. (def. 0.5)
     relElecDensCalib : array_like, optional
         2xN iterable (e.g. 2xN numpy array or list of two equal size lists) describing
-        the calibration between HU values and relative electronic density. The first element (column)
-        is describing the HU values and the second the relative electronic density. The missing values
+        the calibration between HU values and relative electron density. The first element (column)
+        is describing the HU values and the second the relative electron density. The missing values
         are interpolated linearly and if the user would like to use a different interpolation
         like spline or polynomial, it is advised to provide it explicitly for each HU value.
-        The structures with the relative electronic density outside the calibration range will be skipped
+        The structures with the relative electron density outside the calibration range will be skipped
         and a warning will be displayed. (def. [[-1024, -1000, -777.82, -495.34, -64.96, -34.39, -3.87, 51.92, 56.99, 226.05, 857.65, 1313, 8513, 12668, 25332]
         , [0, 0, 0.190, 0.489, 0.949, 0.976, 1, 1.043, 1.053, 1.117, 1.456, 1.696, 3.76, 6.58, 9.09]])
     HUrange : 2-element array_like, optional
@@ -1197,7 +1200,7 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
     Returns
     -------
     SimpleITK 3D Image
-        An object of a transformed SimpleITK 3D image.
+        An object of a SimpleITK 3D image with overwritten HU values.
 
     See Also
     --------
@@ -1212,7 +1215,7 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
 
     ft._imgTypeChecker.isSITK3D(img, raiseError=True)
 
-    # check if dicom is RN
+    # check if the dicom is an RS file
     ft.ImgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
 
     # check HURange
@@ -1225,21 +1228,21 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
     structsInfo = ft.getRSInfo(RSfileName)
     structsInfo.dropna(inplace=True)
 
-    # prepare calibration from Rel. Electronic Density to HU
+    # prepare calibration from Rel. Electron Density to HU
     relElecDensCalib = np.array(relElecDensCalib, dtype=float)
     relElecDensCalibInterp = interp1d(relElecDensCalib[1], relElecDensCalib[0], bounds_error=True)
 
-    # check if all Rel. Electronic Density are within the calibration
+    # check if all Rel. Electron Density are within the calibration
     if not structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalibInterp.x.min(), relElecDensCalibInterp.x.max()).all():
-        _logger.warning(f"Warning: some of the structure physical property values are not within the calibration range [{relElecDensCalibInterp.x.min()}, {relElecDensCalibInterp.x.max()}]. They will be skipped.")
+        _logger.warning(f"Some of the structure physical property values are not within the calibration range [{relElecDensCalibInterp.x.min()}, {relElecDensCalibInterp.x.max()}]. They will be skipped.")
         structsInfo = structsInfo[structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalibInterp.x.min(), relElecDensCalibInterp.x.max())]
 
     # check if all ROIPhysicalProperty are ["REL_ELEC_DENSITY"] (only REL_ELEC_DENSITY is supported for now).
     if not all(structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])):
-        _logger.warning(f"Warning: some of the structure physical property are not in the supported list ['REL_ELEC_DENSITY']. They will be skipped.")
+        _logger.warning(f"Some of the structure physical property are not in the supported list ['REL_ELEC_DENSITY']. They will be skipped.")
         structsInfo = structsInfo.loc[structsInfo.ROIPhysicalProperty.isin(["REL_ELEC_DENSITY"])]
 
-    # calculate HU from Rel. Electronic Density
+    # calculate HU from Rel. Electron Density
     structsInfo["ROIPhysicalHUValue"] = np.round(relElecDensCalibInterp(structsInfo.ROIPhysicalPropertyValue.to_list()))
     structsInfo = structsInfo.astype({"ROIPhysicalHUValue": "int"})
 
@@ -1269,7 +1272,7 @@ def setIdentityDirection(img: SITKImage, displayInfo: bool = False) -> SITKImage
     """Set an identity direction for the image.
 
     The function sets an identity direction of an image defined as an instance of a
-    SimpleITK image.
+    SimpleITK image. Note that the input image is modified in place and returned.
 
     Parameters
     ----------
@@ -1281,7 +1284,7 @@ def setIdentityDirection(img: SITKImage, displayInfo: bool = False) -> SITKImage
     Returns
     -------
     SimpleITK Image
-        Object SimpleITK image with identity direction.
+        Object SimpleITK image with identity direction (the same object as the input `img`).
     """
     import numpy as np
     import fredtools as ft
@@ -1469,7 +1472,7 @@ def addGaussMarginToMask(imgMask: SITKImage, gaussSigma: Numeric = 6, fractionAt
 
 
 def addExpMarginToMask(imgMask: SITKImage, exponent: Numeric = 0.25, edgeDist: Numeric = 4, displayInfo: bool = False) -> SITKImage:
-    """Add exponential margin to mask.
+    r"""Add exponential margin to mask.
 
     The function adds an exponential fall-off margin to a binary mask defined as an instance of a SimpleITK 
     image describing a binary mask. The exponential fall-off shape is defined by the `exponent` parameter and 
@@ -1517,7 +1520,7 @@ def addExpMarginToMask(imgMask: SITKImage, exponent: Numeric = 0.25, edgeDist: N
     # add constant margin
     imgMaskConstMargin = sitk.BinaryThreshold(imgMaskDist, lowerThreshold=ft.getStatistics(imgMaskDist).GetMinimum(), upperThreshold=float(edgeDist))
 
-    # add gaussian margin
+    # add exponential margin
     imgMaskConstMarginExp = sitk.ExpNegative(exponent*(imgMaskDist-edgeDist))
     imgMaskConstMarginExp = sitk.Mask(imgMaskConstMarginExp, imgMaskConstMargin, maskingValue=1, outsideValue=1)
 

@@ -226,7 +226,7 @@ def getMaxPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
 
     # check if only one maximum value exists and raise a warning
     if maxPosition.shape[0] != 1:
-        _logger.warning("More than one maximum value were found. The first one was returned.")
+        _logger.warning("More than one maximum value was found. The first one was returned.")
 
     maxPosition = maxPosition[0]
     maxPosition = tuple(maxPosition)
@@ -274,7 +274,7 @@ def getMinPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
 
     # check if only one maximum value exists and raise a warning
     if minPosition.shape[0] != 1:
-        _logger.warning("More than one minimum value were found. The first one was returned.")
+        _logger.warning("More than one minimum value was found. The first one was returned.")
 
     minPosition = minPosition[0]
     minPosition = tuple(minPosition)
@@ -460,7 +460,7 @@ def _getAxesVectorNotUnity(img: SITKImage) -> tuple[int, ...]:
     --------
     Assuming that the `img` shape is [200,1,100,400] (4D image).
 
-    >>> fredtools.ft_imgAnalyse._getAxesVectorNotUnity(img)
+    >>> fredtools.ImgAnalyse.imgAnalyse._getAxesVectorNotUnity(img)
     (1,0,1,1)
     """
     import fredtools as ft
@@ -491,7 +491,7 @@ def _getAxesNumberNotUnity(img: SITKImage) -> tuple[int, ...]:
     --------
     Assuming that the `img` shape is [200,1,100,400] (4D image).
 
-    >>> fredtools.ft_imgAnalyse._getAxesNumberNotUnity(img)
+    >>> fredtools.ImgAnalyse.imgAnalyse._getAxesNumberNotUnity(img)
     (0, 2, 3)
     """
     import fredtools as ft
@@ -522,8 +522,8 @@ def _getAxesNumberUnity(img: SITKImage) -> tuple[int, ...]:
     --------
     Assuming that the `img` shape is [200,1,100,400] (4D image).
 
-    >>> fredtools.ft_imgAnalyse._getAxesNumberUnity(img)
-    (1)
+    >>> fredtools.ImgAnalyse.imgAnalyse._getAxesNumberUnity(img)
+    (1,)
     """
     import fredtools as ft
 
@@ -548,7 +548,7 @@ def _getDirectionArray(img: SITKImage) -> NDArray:
 
     Returns
     -------
-    numpy
+    numpy.ndarray
         A 2D numpy array with direction.
     """
     import numpy as np
@@ -571,7 +571,7 @@ def _isDirectionIdentity(img: SITKImage) -> bool:
         An object of a SimpleITK image.
 
     Returns
-    -------(
+    -------
     bool
         Is it an identity or not.
     """
@@ -1003,7 +1003,7 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInf
         An object of a SimpleITK image.
     img2 : SimpleITK Image
         An object of a SimpleITK image.
-    decimals: int, optional
+    decimal: int, optional
         Use rounding to a given number of decimals when comparing origin and spacing. (def. 3)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -1012,11 +1012,11 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInf
     -------
     bool
         A true/false value describing if the images are the same
-        in the sense of the field of reference.
+        in the sense of the frame of reference.
 
     See Also
     --------
-        SimpleITK.StatisticsImageFilter : more about possible statistics.
+        compareImg : compare two images voxel by voxel.
     """
     import fredtools as ft
     import numpy as np

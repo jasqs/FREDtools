@@ -16,7 +16,7 @@ def pdfLandau(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, amp: Nu
         Point (or points) where to calculate the PDF.
     mpv : scalar
         Position of the most probable value (MPV) of the Landau distribution.
-    xi : float
+    xi : scalar
         Parameter 'xi' of the Landau distribution, it is a measure of its width.
     amp : scalar, optional
         Amplitude of the PDF at MPV. (def. 1)
@@ -78,7 +78,7 @@ def pdfLandauGauss(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, si
         Point (or points) where to calculate the PDF.
     mpv : scalar
         Position of the most probable value (MPV) of the convoluted distribution.
-    xi : float
+    xi : scalar
         Parameter 'xi' of the Landau distribution, it is a measure of its width.
     sigma : scalar, optional
         Standard deviation of the Gaussian distribution. (def. 0)
@@ -87,8 +87,8 @@ def pdfLandauGauss(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, si
 
     Returns
     -------
-    scalar or numpy array
-        Single value or array of values of the Landau convoluted with Gaussian PDF.
+    numpy array
+        Array of values of the Landau convoluted with Gaussian PDF.
 
     See Also
     --------
@@ -166,7 +166,7 @@ def fitLandau(x: Iterable[Numeric], y: Iterable[Numeric], fixAmplitude: bool = F
     y : array_like
         `Y` values.
     fixAmplitude : bool, optional
-        determine if the `amp` parameter of the PDF should be used in the fitting.
+        Determine if the `amp` parameter should be kept fixed (not fitted). (def. False)
 
     Returns
     -------
@@ -213,7 +213,7 @@ def fitLandauGauss(x: Iterable[Numeric], y: Iterable[Numeric], fixAmplitude: boo
     y : array_like
         `Y` values.
     fixAmplitude : bool, optional
-        determine if the `amp` parameter of the PDF should be used in the fitting.
+        Determine if the `amp` parameter should be kept fixed (not fitted). (def. False)
 
     Returns
     -------
@@ -269,9 +269,9 @@ def pdfVavilov(x: Numeric | Iterable[Numeric], mpv: Numeric, kappa: Numeric, bet
     mpv : scalar
         Position of the most probable value (MPV) of the distribution.
     kappa : float
-        Parameter 'kappa' of the Vavilov distribution.
+        Parameter 'kappa' of the Vavilov distribution. It must be in the range 0.01 <= kappa <= 12.
     beta : float
-        Parameter 'beta' of the Vavilov distribution.
+        Parameter 'beta' of the Vavilov distribution. It must be in the range 0 <= beta <= 1.
     scaling : float
         Scaling factor of the distribution.
     amp : scalar, optional
@@ -279,8 +279,8 @@ def pdfVavilov(x: Numeric | Iterable[Numeric], mpv: Numeric, kappa: Numeric, bet
 
     Returns
     -------
-    scalar or numpy array
-        Single value or array of values of the Vavilov PDF.
+    numpy array
+        Array of values of the Vavilov PDF.
 
     See Also
     --------
@@ -366,8 +366,6 @@ def fitVavilov(x: Iterable[Numeric], y: Iterable[Numeric], beta0: Numeric = 0.5,
         `X` values.
     y : array_like
         `Y` values.
-    fixAmplitude : bool, optional
-        determine if the `amp` parameter of the PDF should be used in the fitting.
     beta0 : scalar, optional
         Initial value of `beta` parameter. (def. 0.5)
     kappa0 : scalar, optional
@@ -375,6 +373,8 @@ def fitVavilov(x: Iterable[Numeric], y: Iterable[Numeric], beta0: Numeric = 0.5,
     scaling0 : scalar, optional
         Initial value of `scaling` parameter. If it is less than 0 then
         it is calculated based on the standard deviation of the distribution. (def. -1)
+    fixAmplitude : bool, optional
+        Determine if the `amp` parameter should be kept fixed (not fitted). (def. False)
 
     Returns
     -------

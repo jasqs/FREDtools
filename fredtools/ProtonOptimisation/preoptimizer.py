@@ -89,12 +89,14 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     Parameters
     ----------
     imgWER : SimpleITK Image
-        An object of a SimpleITK image with WER values.
+        An object of a 3D SimpleITK image with WER values. It must have
+        the same frame of reference as `imgMask`.
     SAD : 2-element array_like
-        Z coordinates of the virtual point source for deflection 
+        Z coordinates of the virtual point source for deflection
         in X and Y directions, respectively.
     imgMask : SimpleITK Image or None, optional
-        An object of a SimpleITK image describing a binary mask, or None, 
+        An object of a 3D SimpleITK image describing a binary mask, with
+        the same frame of reference as `imgWER`, or None,
         then all voxel positions will be calculated (def. None)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -103,6 +105,7 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     -------
     SimpleITK Image
         An instance of a SimpleITK image object with WET values.
+        Voxels outside the mask are set to numpy.nan.
 
     See Also
     --------
@@ -254,18 +257,24 @@ def generateIsoLayers(minRange, maxRange, beamParams):
     Parameters
     ----------
     minRange : scalar
-        Minimum range to calculate layers.
+        Minimum range in [mm] to calculate layers.
     maxRange : scalar
-        Maximum range to calculate layers.
+        Maximum range in [mm] to calculate layers.
     beamParams : pandas.DataFrame
-        Parameters of the beam, i.e. dependence of the 
-        beam range and width with nominal energies. Must include 
-        at least columns: "nomEnergy", "rangeProx" and "rangeDist".
+        Parameters of the beam, i.e. dependence of the
+        beam range and width with nominal energies. Must include
+        at least columns: "nomEnergy" (in [MeV]), "rangeProx" and "rangeDist" (in [mm]).
 
     Returns
     -------
     pandas.DataFrame
-        An instance of pandas.DataFrame object describing the iso WET layers.
+        An instance of pandas.DataFrame object describing the iso WET layers,
+        with the ranges in [mm] and the nominal energy ("nomEnergy") in [MeV].
+
+    Notes
+    -----
+    The layer generation loop is capped at 100 iterations, so at most 100 layers
+    are generated even if the proximal range has not reached `minRange`.
     """
     from scipy.interpolate import make_interp_spline
     import pandas as pd
@@ -287,10 +296,8 @@ def generateIsoLayers(minRange, maxRange, beamParams):
     rangeDist2nomEnergy = make_interp_spline(beamParams.rangeDist, beamParams.nomEnergy, k=3)
 
     # distribute iso layers
-    """
-    Calculate consecutive layers between the distal and proximal range, where for each new 
-    layer, the distal range is the proximal range for the previous one.
-    """
+    # Calculate consecutive layers between the distal and proximal range, where for each new
+    # layer, the distal range is the proximal range for the previous one.
     layersInfo = pd.DataFrame({"rangeProx": [float(rangeDist2rangeProx(maxRange))], "rangeDist": [maxRange]})
     for idx in range(1, 100):
         layersInfo = pd.concat([layersInfo, pd.DataFrame({"rangeProx": [float(rangeDist2rangeProx(layersInfo.iloc[idx-1].rangeProx))], "rangeDist": [layersInfo.iloc[idx-1].rangeProx]})], ignore_index=True)
@@ -376,16 +383,17 @@ def convertRayTargetToIsoPlane(rayTarget, SAD):
 
     Parameters
     ----------
-    rayTarget : 3xN array_like
-        Target positions in the format of 3xN iterable.
+    rayTarget : Nx3 array_like
+        Target positions in the format of Nx3 iterable
+        (a single 3-element point is also accepted).
     SAD : 2-element array_like
-        Z coordinates of the virtual point source for deflection 
+        Z coordinates of the virtual point source for deflection
         in X and Y directions, respectively.
 
     Returns
     -------
-    3xN numpy array
-        A 3xN array with the ray position in the isocentre plane.
+    Nx3 numpy array
+        An Nx3 array with the ray positions in the isocentre plane.
 
     Notes
     -----
@@ -397,7 +405,7 @@ def convertRayTargetToIsoPlane(rayTarget, SAD):
         rayTarget = np.expand_dims(rayTarget, 0)
 
     # calculate the ray position at the downstream magnet
-    """It is assumed that the upstream magnet is diverging the beam in X direction and the downstream in Y direction"""
+    # It is assumed that the upstream magnet is diverging the beam in X direction and the downstream in Y direction
     rayPosition = np.zeros((rayTarget.shape[0], 3), dtype=np.float64)
     rayPosition[:, 0] = (SAD[0] - SAD[1]) * rayTarget[:, 0] / (rayTarget[:, 2] + SAD[0])
     rayPosition[:, 2] = -SAD[1]

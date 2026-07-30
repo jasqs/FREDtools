@@ -6,21 +6,25 @@ _logger = getLogger(__name__)
 def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0, spacing: Sequence[Numeric] = [1, 1, 1], origin: Sequence[Numeric] = [0.5, 0.5, 0.5], centred: bool = False, fillRandom: bool = False, displayInfo: bool = False) -> SITKImage:
     """Create an empty image with a given size, spacing, and origin.
 
-    The function creates an empty image, i.e. filled with 0 values, 
-    with a given size, spacing, and origin. The image can be 2D or 3D.
+    The function creates an empty image, i.e. filled with 0 values
+    (or Gaussian noise if `fillRandom` is True), with a given size, spacing,
+    and origin. The image can be 2D or 3D.
 
     Parameters
     ----------
     size : Sequence[int], optional
         The size of the image in each dimension. Must be a sequence of 2 or 3 integers. (def. [10, 20, 30])
     components : NonNegativeInt, optional
-        The number of components per pixel. Must be a non-negative integer. (def. 0)
+        The number of components per pixel. Must be a non-negative integer.
+        The value 0 creates a scalar image and a value greater than or equal to 1
+        creates a vector image with that number of components. (def. 0)
     spacing : Sequence[Numeric], optional
         The spacing between pixels in each dimension. Must be a sequence of numbers. (def. [1, 1, 1])
     origin : Sequence[Numeric], optional
-        The origin of the image in each dimension. Must be a sequence of numbers. (def. [0.5, 0.5, 0.5])
+        The origin of the image in each dimension. Must be a sequence of numbers.
+        It is ignored when `centred` is True. (def. [0.5, 0.5, 0.5])
     centred : bool, optional
-        If True, the origin is centred. (def. False)
+        If True, the origin is centred and the `origin` parameter is ignored. (def. False)
     fillRandom : bool, optional
         If True, the image is filled with random Gaussian white noise (mean=10, std=1). (def. False)
     displayInfo : bool, optional
@@ -41,7 +45,7 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
         mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
-        createCylinderMask: create a cylinder mask.
+        createCylinderMask : create a cylinder mask.
         createConeMask : create a cone mask.
         createEllipseMask : create an ellipse mask.
         createBoxMask : create a box mask.
@@ -100,8 +104,9 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numeric | Sequenc
         An object of a SimpleITK image.
     point : array_like
         A point describing the position of the center of the ellipse. The dimension must match the image dimension.
-    radii : scalar or array_like
-        Radii of the ellipse for each dimension. It might be a scalar, then the same radii will be used in each direction.
+    radii : scalar or sequence (list/tuple)
+        Radii of the ellipse for each dimension in [mm] (physical units, not voxels).
+        It might be a scalar, then the same radii will be used in each direction.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -115,7 +120,7 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numeric | Sequenc
         mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
-        createCylinderMask: create a cylinder mask.
+        createCylinderMask : create a cylinder mask.
         createConeMask : create a cone mask.
         createBoxMask : create a box mask.
     """
@@ -190,9 +195,9 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
     endPoint : array_like
         3-element point describing the position of the center of the second cone base.
     startRadius : scalar
-        Radius of the first cone base.
+        Radius of the first cone base in [mm] (physical units, not voxels).
     endRadius : scalar
-        Radius of the second cone base.
+        Radius of the second cone base in [mm] (physical units, not voxels).
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -206,7 +211,7 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
         mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
-        createCylinderMask: create a cylinder mask.
+        createCylinderMask : create a cylinder mask.
         createEllipseMask : create an ellipse mask.
         createBoxMask : create a box mask.
     """
@@ -278,7 +283,7 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
     endPoint : array_like
         3-element point describing the position of the center of the second cylinder base.
     radius : scalar
-        Radius of the cylinder.
+        Radius of the cylinder in [mm] (physical units, not voxels).
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -292,7 +297,7 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
         mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
-        createConeMask: create a cone mask.
+        createConeMask : create a cone mask.
         createEllipseMask : create an ellipse mask.
         createBoxMask : create a box mask.
     """
@@ -320,8 +325,9 @@ def createBoxMask(img: SITKImage, point: PointLike, size: Numeric | Sequence[Num
         An object of a SimpleITK image.
     point : array_like
         A point describing the position of the center of the box. The dimension must match the image dimension.
-    size : scalar or array_like
-        Size of the box for each dimension. It might be a scalar, then the same size will be used in each direction.
+    size : scalar or sequence (list/tuple)
+        Size of the box for each dimension in [mm] (physical units, not voxels).
+        It might be a scalar, then the same size will be used in each direction.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -335,7 +341,7 @@ def createBoxMask(img: SITKImage, point: PointLike, size: Numeric | Sequence[Num
         mapStructToImg : mapping a structure to an image to create a mask.
         setValueMask : setting values of the image inside/outside a mask.
         cropImgToMask : crop an image to mask.
-        createCylinderMask: create a cylinder mask.
+        createCylinderMask : create a cylinder mask.
         createEllipseMask : create an ellipse mask.
         createConeMask : create a cone mask.
     """

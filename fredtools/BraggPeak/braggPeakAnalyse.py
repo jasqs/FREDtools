@@ -25,15 +25,18 @@ class braggPeak:
         Accuracy of the spline and Bortfeld profiles interpolations. (def. 0.01)
     offset : float, optional
         Distance offset of the Bragg curve points. (def. 0)
-    interpolation : {'spline', 'linear', 'nearest'}, optional
-        Interpolation method. (def. 'spline')
-    splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
     bortCut : float, optional
         The range of the data that the Bortfeld fit will be performed on.
         It is defined as the range of the BP in the proximal region at the fraction
         of the maximum of the spline interpolation. The Bortfeld fit will be
         performed for the input data in the distal of this range. (def. 0.6)
+    **kwargs : keyword arguments, optional
+        Additional keyword arguments:
+
+            interpolation : {'spline', 'linear', 'nearest'}
+                Interpolation method. (def. 'spline')
+            splineOrder : int
+                Order of spline interpolation. Must be in range 0-5. (def. 3)
 
     Examples
     --------
@@ -254,7 +257,7 @@ class braggPeak:
 
         Parameters
         ----------
-        R : float
+        range : float
             Range/depth at which the signal value will be calculated.
 
         Returns
@@ -266,7 +269,7 @@ class braggPeak:
         --------
         Get the maximum value of the interpolation method.
 
-        >>> braggPeak.getDInterp(R=braggPeak.getRInterp(D=1))
+        >>> braggPeak.getDInterp(range=braggPeak.getRInterp(dose=1))
         """
         return self.__getD__(self.__bp, range)
 
@@ -278,7 +281,7 @@ class braggPeak:
 
         Parameters
         ----------
-        R : float
+        range : float
             Range/depth at which the signal value will be calculated.
 
         Returns
@@ -290,7 +293,7 @@ class braggPeak:
         --------
         Get the maximum value of the Bortfeld fit.
 
-        >>> braggPeak.getDBort(R=braggPeak.getRBort(D=1))
+        >>> braggPeak.getDBort(range=braggPeak.getRBort(dose=1))
         """
         return self.__getD__(self.bpBort, range)
 
@@ -299,9 +302,9 @@ class braggPeak:
 
         Parameters
         ----------
-        img : SimpleITK Image
-            An object of a SimpleITK image describing a profile.
-        R : float
+        bp : list of two numpy arrays
+            Bragg peak profile given as [pos, vec] arrays.
+        range : float
             Range/depth at which the signal value will be calculated.
 
         Returns
@@ -324,11 +327,11 @@ class braggPeak:
 
         Parameters
         ----------
-        D : float
+        dose : float
             Absolute or relative signal level.
         side : {'proximal'|'P', 'distal'|'D'}, optional
             Determine the side, proximal or distal to the maximum range, of the BP to calculate the range. (def. 'distal')
-        percentD : bool, optional
+        doseFraction : bool, optional
             Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
 
         Returns
@@ -340,11 +343,11 @@ class braggPeak:
         --------
         Get range at 80 percent of the maximum value of the interpolation at the distal fall-off of the BP.
 
-        >>> braggPeak.getRInterp(D=0.8)
+        >>> braggPeak.getRInterp(dose=0.8)
 
         Get range at 50 percent of the maximum value of the interpolation in the proximal region.
 
-        >>> braggPeak.getRInterp(D=0.5, side='P')
+        >>> braggPeak.getRInterp(dose=0.5, side='P')
         """
         return self.__getR__(self.bpInterp, dose=dose, side=side, doseFraction=doseFraction)
 
@@ -357,11 +360,11 @@ class braggPeak:
 
         Parameters
         ----------
-        D : float
+        dose : float
             Absolute or relative signal level.
         side : {'proximal'|'P', 'distal'|'D'}, optional
             Determine the side, proximal or distal to the maximum range, of the BP to calculate the range. (def. 'distal')
-        percentD : bool, optional
+        doseFraction : bool, optional
             Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
 
         Returns
@@ -373,11 +376,11 @@ class braggPeak:
         --------
         Get a range at 80 percent of the maximum value of the Bortfeld fit at the distal fall-off of the BP.
 
-        >>> braggPeak.getRBort(D=0.8)
+        >>> braggPeak.getRBort(dose=0.8)
 
         Get a range at 50 percent of the maximum value of the Bortfeld fit in the proximal region.
 
-        >>> braggPeak.getRBort(D=0.5, side='P')
+        >>> braggPeak.getRBort(dose=0.5, side='P')
         """
         return self.__getR__(self.bpBort, dose=dose, side=side, doseFraction=doseFraction)
 
@@ -386,13 +389,13 @@ class braggPeak:
 
         Parameters
         ----------
-        img : SimpleITK Image
-            An object of a SimpleITK image describing a profile.
-        D : float
+        bp : list of two numpy arrays
+            Bragg peak profile given as [pos, vec] arrays.
+        dose : float
             Absolute or relative signal level.
         side : {'proximal', 'distal'}
             Determine the side, proximal or distal to the maximum range, of the BP to calculate the range.
-        percentD : bool
+        doseFraction : bool
             Determine if the signal level is relative (True) to the maximum or absolute (False).
 
         Returns
@@ -446,9 +449,9 @@ class braggPeak:
 
         Parameters
         ----------
-        D : float
+        dose : float
             Absolute or relative signal level.
-        percentD : bool, optional
+        doseFraction : bool, optional
             Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
 
         Returns
@@ -460,11 +463,11 @@ class braggPeak:
         --------
         Get width at 50 percent of the maximum value of the interpolation.
 
-        >>> braggPeak.getWInterp(D=0.5)
+        >>> braggPeak.getWInterp(dose=0.5)
 
         This is equivalent to the code.
 
-        >>> braggPeak.getRInterp(D=0.5, side='D') - braggPeak.getRInterp(D=0.5, side='P')
+        >>> braggPeak.getRInterp(dose=0.5, side='D') - braggPeak.getRInterp(dose=0.5, side='P')
         """
         return self.__getW__(self.bpInterp, dose=dose, doseFraction=doseFraction)
 
@@ -477,9 +480,9 @@ class braggPeak:
 
         Parameters
         ----------
-        D : float
+        dose : float
             Absolute or relative signal level.
-        percentD : bool, optional
+        doseFraction : bool, optional
             Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
 
         Returns
@@ -491,11 +494,11 @@ class braggPeak:
         --------
         Get width at 50 percent of the maximum value of the Bortfeld fit.
 
-        >>> braggPeak.getWBort(D=0.5)
+        >>> braggPeak.getWBort(dose=0.5)
 
         This is equivalent to the code.
 
-        >>> braggPeak.getWBort(D=0.5, side='D') - braggPeak.getWBort(D=0.5, side='P')
+        >>> braggPeak.getRBort(dose=0.5, side='D') - braggPeak.getRBort(dose=0.5, side='P')
         """
         return self.__getW__(self.bpBort, dose=dose, doseFraction=doseFraction)
 
@@ -504,12 +507,12 @@ class braggPeak:
 
         Parameters
         ----------
-        bp : SimpleITK Image
-            An object of a SimpleITK image describing a profile.
-        D : float
+        bp : list of two numpy arrays
+            Bragg peak profile given as [pos, vec] arrays.
+        dose : float
             Absolute or relative signal level.
-        percentD : bool, optional
-            Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
+        doseFraction : bool
+            Determine if the signal level is relative (True) to the maximum or absolute (False).
 
         Returns
         -------
@@ -530,11 +533,11 @@ class braggPeak:
 
         Parameters
         ----------
-        Dup : float
+        doseUp : float
             Absolute or relative upper signal level.
-        Dlow : float
+        doseLow : float
             Absolute or relative lower signal level.
-        percentD : bool, optional
+        doseFraction : bool, optional
             Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
 
         Returns
@@ -546,11 +549,11 @@ class braggPeak:
         --------
         Get width of the distal fall-off between 80 and 20 percent of the maximum value of the interpolation.
 
-        >>> braggPeak.getDFOInterp(Dup=0.8, Dlow=0.2)
+        >>> braggPeak.getDFOInterp(doseUp=0.8, doseLow=0.2)
 
         This is equivalent to the code.
 
-        >>> braggPeak.getRInterp(D=0.2, side='D') - braggPeak.getRInterp(D=0.8, side='D')
+        >>> braggPeak.getRInterp(dose=0.2, side='D') - braggPeak.getRInterp(dose=0.8, side='D')
         """
         return self.__getDFO__(self.bpInterp, doseUp=doseUp, doseLow=doseLow, doseFraction=doseFraction)
 
@@ -563,11 +566,11 @@ class braggPeak:
 
         Parameters
         ----------
-        Dup : float
+        doseUp : float
             Absolute or relative upper signal level.
-        Dlow : float
+        doseLow : float
             Absolute or relative lower signal level.
-        percentD : bool, optional
+        doseFraction : bool, optional
             Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
 
         Returns
@@ -579,11 +582,11 @@ class braggPeak:
         --------
         Get width of the distal fall-off between 80 and 20 percent of the maximum value of the Bortfeld fit.
 
-        >>> braggPeak.getDFOBort(Dup=0.8, Dlow=0.2)
+        >>> braggPeak.getDFOBort(doseUp=0.8, doseLow=0.2)
 
         This is equivalent to the code.
 
-        >>> braggPeak.getRBort(D=0.2, side='D') - braggPeak.getRBort(D=0.8, side='D')
+        >>> braggPeak.getRBort(dose=0.2, side='D') - braggPeak.getRBort(dose=0.8, side='D')
         """
         return self.__getDFO__(self.bpBort, doseUp=doseUp, doseLow=doseLow, doseFraction=doseFraction)
 
@@ -592,14 +595,14 @@ class braggPeak:
 
         Parameters
         ----------
-        img : SimpleITK Image
-            An object of a SimpleITK image describing a profile.
-        Dup : float
+        bp : list of two numpy arrays
+            Bragg peak profile given as [pos, vec] arrays.
+        doseUp : float
             Absolute or relative upper signal level.
-        Dlow : float
+        doseLow : float
             Absolute or relative lower signal level.
-        percentD : bool, optional
-            Determine if the signal level is relative (True) to the maximum or absolute (False). (def. True)
+        doseFraction : bool
+            Determine if the signal level is relative (True) to the maximum or absolute (False).
 
         Returns
         -------
@@ -607,7 +610,7 @@ class braggPeak:
             Width of the distal fall-off at signal level.
         """
         if doseUp < doseLow:
-            error = ValueError(f"The parameter Dup must be higher than Dlow.")
+            error = ValueError(f"The parameter doseUp must be higher than doseLow.")
             _logger.error(error)
             raise error
         Rup = self.__getR__(bp, doseUp, side="distal", doseFraction=doseFraction)
@@ -625,7 +628,7 @@ class braggPeak:
 
     @property
     def bortfeldFitParam(self) -> dict:
-        """dict: Physical parameters of the calculated based on the Bortfeld fit."""
+        """dict: Physical parameters calculated from the Bortfeld fit."""
         import numpy as np
 
         bortfeldFit = self.bortfeldFit
@@ -642,8 +645,8 @@ class braggPeak:
     def __fitBortfeld__(self) -> LMFitModelResult:
         """Perform a Bortfeld fit.
 
-        The function is preparing and performing a Bortfeld fit to the original data
-        defined as an instance of a SimpleITK object describing a profile. It uses
+        The function is preparing and performing a Bortfeld fit to the original
+        Bragg peak data given as [pos, vec] arrays. It uses
         the functionality of the lmfit module. The initial parameters for the fit
         are calculated based on the interpolation method.
         """

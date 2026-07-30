@@ -21,7 +21,9 @@ def readOPG(fileName: PathLike, depth: float = 0, displayInfo: bool = False) -> 
     Returns
     -------
     SimpleITK Image
-        An object of a SimpleITK image.
+        An object of a SimpleITK image. The pixel values are converted
+        to dose in [Gy] and the coordinates to [mm], regardless of the
+        data and length units defined in the file.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -122,7 +124,7 @@ def readOPG(fileName: PathLike, depth: float = 0, displayInfo: bool = False) -> 
 
     img = sitk.GetImageFromArray(arr)
     # img.SetSpacing([np.unique(np.diff(Xcoor).round(2))[0], np.unique(np.diff(Ycoor).round(2))[0], 0.1])
-    img.SetSpacing([7.619354838709677, 7.619354838709677, 0.1])  # values set to constant distance of MatriXX PT
+    img.SetSpacing([7.619354838709677, 7.619354838709677, 0.1])  # the detector pitch of the IBA MatriXX PT (7.6194 mm) is hard-coded deliberately, overriding the spacing implied by the file coordinates; the 0.1 mm z-spacing is a placeholder for the pseudo-3D single slice
     img.SetOrigin([Xcoor[0], Ycoor[0], depth])
 
     if displayInfo:
@@ -145,11 +147,12 @@ def readOPD(fileName: PathLike, depth: Numeric = 0, returnImg=["Integral", "Sum"
 
     Parameters
     ----------
-    fileName : string
+    fileName : path
         A path to OPD file.
     depth : scalar, optional
-        A scalar defining the depth of a 3D image. Usually, it is the depth of the measurement. (def. 0)
-    returnImg : string or iterable of strings
+        A scalar defining the depth of a 3D image in [mm] (it becomes the z origin).
+        Usually, it is the depth of the measurement. (def. 0)
+    returnImg : string or iterable of strings, optional
         A string or an iterable of strings determining the type of image to be returned.
         Usually it might take "Snap", "Integral" and/or "Sum". (def. ["Integral", "Sum"])
     raiseWarning : bool, optional

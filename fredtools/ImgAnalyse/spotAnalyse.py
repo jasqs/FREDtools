@@ -96,6 +96,8 @@ def fitSpotProfile(pos: ArrayLike, vec: ArrayLike, cutLevel: NonNegativeFloat = 
         An iterable with the values corresponding to `pos`.
     cutLevel : scalar, optional
         Fraction of the maximum value of `vec` for which the fit will be performed.
+        Only the points with values greater than or equal to max(`vec`)*`cutLevel`
+        are kept for the fit. (def. 0)
     fixAmplitude : bool, optional
         Fix the amplitude to the maximum value of `vec` and do not use it
         in the fitting. (def. False)
@@ -176,6 +178,8 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
         2D SimpleITK image of the spot.
     cutLevel : scalar, optional
         Fraction of the maximum value of `img` for which the fit will be performed.
+        Only the voxels with values greater than or equal to max(`img`)*`cutLevel`
+        are kept for the fit (the others are set to zero). (def. 0)
     fixAmplitude : bool, optional
         Fix the amplitude to the maximum value of `img` and do not use it
         in the fitting. (def. False)
@@ -183,6 +187,7 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
         Fix the centre to zero and do not use it in the fitting. (def. False)
     method : {"singleGauss"}, optional
         Method of the fitting. Only single gaussian fitting is implemented now. (def. "singleGauss")
+
     Returns
     -------
     lmfit.model.ModelResult
@@ -232,7 +237,7 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
 
             params.add("sigmaX", value=initSigma[0], min=1E-6)
             params.add("sigmaY", value=initSigma[1], min=1E-6)
-            params.add("rotation", value=initRotation)  # constrain rotation to [0, 180) degrees
+            params.add("rotation", value=initRotation)  # initial rotation wrapped to [0, 180) degrees; the fitted value is unconstrained
 
             arr = sitk.GetArrayViewFromImage(imgTh)
             PhysicalPointImageSource = sitk.PhysicalPointImageSource()
@@ -259,7 +264,8 @@ def fitSigmaSquaredModel(pos: Iterable[Numeric], beamSize: Iterable[Numeric]) ->
 
     The function fits the sigma squared model to the beam size data provided.
     The model is defined as: σ²(z) = a + b*z + c*z², where σ is the beam size
-    at position x, and a, b, c are the parameters to be fitted. 
+    at position z, and a, b, c are the parameters to be fitted. Note that the
+    fit is performed on the squared beam size, i.e. `beamSize`**2.
 
     Parameters
     ----------

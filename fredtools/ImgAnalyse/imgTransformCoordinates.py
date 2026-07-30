@@ -7,7 +7,7 @@ def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[PointLike]) 
     """Transform indices to physical points.
 
     The function transforms an iterable of indices into a tuple of
-    physical points based on the field of reference (FoR) of an image
+    physical points based on the frame of reference (FoR) of an image
     defined as an instance of a SimpleITK image object. The function is
     a wrapper for `TransformIndexToPhysicalPoint` SimpleITK function, but
     it works for multiple points. The shape of `indices` must be NxD, where N
@@ -29,7 +29,7 @@ def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[PointLike]) 
 
     See Also
     --------
-        transformContinuousIndexToPhysicalPoint : transform indices to physical points.
+        transformContinuousIndexToPhysicalPoint : transform continuous indices to physical points.
         transformPhysicalPointToIndex : transform physical points to indices.
         transformPhysicalPointToContinuousIndex : transform physical points to continuous indices.
     """
@@ -47,7 +47,7 @@ def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[PointLike]) 
 
     # check if type of indices is correct
     if not np.issubdtype(indices.dtype, np.integer):
-        error = AttributeError(f"The 'indices' parameter must of any integer type (int64, uint16, etc.).")
+        error = AttributeError(f"The 'indices' parameter must be of any integer type (int64, uint16, etc.).")
         _logger.error(error)
         raise error
 
@@ -61,10 +61,10 @@ def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[PointLike]) 
 
 
 def transformContinuousIndexToPhysicalPoint(img: SITKImage, indices: Iterable[PointLike]) -> Tuple[Tuple[float, ...], ...]:
-    """Transform indices to physical points.
+    """Transform continuous indices to physical points.
 
     The function transforms an iterable of indices into a tuple of
-    physical points based on the field of reference (FoR) of an image
+    physical points based on the frame of reference (FoR) of an image
     defined as an instance of a SimpleITK image object. The function is
     a wrapper for `TransformContinuousIndexToPhysicalPoint` SimpleITK function, but
     it works for multiple points. The shape of `indices` must be NxD, where N
@@ -114,7 +114,7 @@ def transformPhysicalPointToIndex(img: SITKImage, points: Iterable[PointLike]) -
     """Transform physical points to indices.
 
     The function transforms an iterable of points into a tuple of
-    indices based on the field of reference (FoR) of an image
+    indices based on the frame of reference (FoR) of an image
     defined as an instance of a SimpleITK image object. The function is
     a wrapper for `TransformPhysicalPointToIndex` SimpleITK function, but
     it works for multiple points. The shape of `points` must be NxD, where N
@@ -136,7 +136,7 @@ def transformPhysicalPointToIndex(img: SITKImage, points: Iterable[PointLike]) -
     See Also
     --------
         transformIndexToPhysicalPoint : transform indices to physical points.
-        transformContinuousIndexToPhysicalPoint : transform indices to physical points.
+        transformContinuousIndexToPhysicalPoint : transform continuous indices to physical points.
         transformPhysicalPointToContinuousIndex : transform physical points to continuous indices.
     """
     import numpy as np
@@ -163,7 +163,7 @@ def transformPhysicalPointToContinuousIndex(img: SITKImage, points: Iterable[Poi
     """Transform physical points to continuous indices.
 
     The function transforms an iterable of points into a tuple of
-    continuous indices based on the field of reference (FoR) of an image
+    continuous indices based on the frame of reference (FoR) of an image
     defined as an instance of a SimpleITK image object. The function is
     a wrapper for `TransformPhysicalPointToContinuousIndex` SimpleITK function, but
     it works for multiple points. The shape of `points` must be NxD, where N
@@ -185,7 +185,7 @@ def transformPhysicalPointToContinuousIndex(img: SITKImage, points: Iterable[Poi
     See Also
     --------
         transformIndexToPhysicalPoint : transform indices to physical points.
-        transformContinuousIndexToPhysicalPoint : transform indices to physical points.
+        transformContinuousIndexToPhysicalPoint : transform continuous indices to physical points.
         transformPhysicalPointToIndex : transform physical points to indices.
     """
     import numpy as np

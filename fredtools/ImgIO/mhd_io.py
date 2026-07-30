@@ -9,7 +9,8 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
     The function writes a SimpleITK image object to the MetaImage file. The function
     extends the functionality of SimpleITK.WriteImage() to write a single file
     MetaImage instead of standard two-files MHD+RAW. It is recommended to use .mhd
-    extension when saving MetaImage.
+    extension when saving MetaImage. Note that metadata keys with empty values
+    are erased from the input image object (in-place side effect) before writing.
 
     Parameters
     ----------
@@ -24,8 +25,9 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
     useCompression : bool, optional
         Determine if a compression will be used when saving the file. (def. False)
     compressionLevel : unsigned int, optional
-        Determine the compression level. For MHD files, the compression level
-        above 10 does not have any effect. (def. 5)
+        Determine the compression level. For MHD files, the useful range
+        is 0-9 (zlib compression levels); higher values do not increase
+        the compression. (def. 5)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -42,7 +44,7 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     if os.path.exists(filePath) and not overwrite:
-        raise ValueError(f"Warning: {filePath} file already exists.")
+        raise ValueError(f"{filePath} file already exists.")
 
     # remove empty metadata keys (empty metadata keys raise a warning of SimpleITK)
     for MetaDataKey in img.GetMetaDataKeys():

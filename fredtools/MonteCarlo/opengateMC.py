@@ -38,7 +38,7 @@ def importBeamModel(beamModel: beamModel, fitOrder: PositiveInt | Literal["auto"
     beamModel : fredtools.beamModel
         The beam model to be imported. It must be an instance of fredtools beamModel.
     fitOrder : PositiveInt or Literal["auto"], optional
-        The order of the polynomial fit for the beam parameters. If "auto", the fit order is set to the number of energies minus one. (def. "auto")
+        The order of the polynomial fit for the beam parameters. If "auto", the fit order is set to the number of interpolation points minus one. (def. "auto")
 
     Returns
     -------
@@ -58,7 +58,7 @@ def importBeamModel(beamModel: beamModel, fitOrder: PositiveInt | Literal["auto"
     BeamlineModel = BeamlineModel()
     BeamlineModel.radiation_types = beamModel.radiationType
 
-    # Nozzle entrance to Isocenter distance
+    # source-to-axis distance (used as nozzle entrance to isocentre distance)
     BeamlineModel.distance_nozzle_iso = beamModel.sourceToAxisDistance  # [mm]
     # SMX to Isocenter distance
     BeamlineModel.distance_stearmag_to_isocenter_x = beamModel.spreadingDeviceDistance[0]
@@ -125,15 +125,17 @@ def addMaterials(sim, beamModel: beamModel):
 
 
 def generateTimeStamps(spotsInfo: DataFrame, timeSpotDuration: float = 0.1, timeBetweenSpots: float = 0.0, timeBetweenFields: float = 30) -> tuple[list[DateTime], list[DateTime]]:
-    """Add start and stop time for each spot in the spotsInfo DataFrame.
+    """Generate start and stop times for each spot in the spotsInfo DataFrame.
 
-    The function calculates the start and stop times for each spot based on the provided duration of a single spot and the time between fields.
-    It returns a DataFrame with the added time information.
+    The function calculates the start and stop times for each spot based on the provided duration of a single spot,
+    the time between consecutive spots, and the time between fields.
+    It returns two lists of `datetime.timedelta` objects with the start and stop times of each spot.
 
     Parameters
     ----------
     spotsInfo : DataFrame
-        The DataFrame containing spot information.
+        The DataFrame containing spot information. It must contain the `FDeliveryNo` column,
+        which is used to group the spots by field delivery.
     timeSpotDuration : float, optional
         The duration of a single spot in seconds (def. 0.1).
     timeBetweenSpots : float, optional
@@ -143,8 +145,8 @@ def generateTimeStamps(spotsInfo: DataFrame, timeSpotDuration: float = 0.1, time
 
     Returns
     -------
-    tuple[list[DateTime], list[DateTime]]
-        A tuple containing two lists: the start times and stop times for each spot.
+    tuple[list[datetime.timedelta], list[datetime.timedelta]]
+        A tuple containing two lists of `datetime.timedelta` objects: the start times and stop times for each spot.
     """
     from datetime import timedelta
 
@@ -188,7 +190,8 @@ def addIonPencilBeamSources(sim, spotsInfo: DataFrame, beamModel: beamModel, pri
     spotsInfoMC["PBGantryRotation"] = [Rotation.from_euler("z", FGantryAngle, degrees=True) for FGantryAngle in spotsInfoMC.FGantryAngle]  # gantry rotates around Z axis
 
     # calculate translation and rotation of each spot
-    """The calculation is based on the ray position and direction versor, which assumes the ray basic direction along +Z axis. After recalculation below, the basic beam direction is along +Y axis."""
+    # The calculation is based on the ray position and direction versor, which assumes the ray basic direction along +Z axis.
+    # After recalculation below, the basic beam direction is along +Y axis.
     PBPos = spotsInfoMC[["PBPosX", "PBPosY"]].copy()
     PBPos["PBPosZ"] = 0
     PBPos = PBPos.to_numpy() * np.array([1, -1, 1])

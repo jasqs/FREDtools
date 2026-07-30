@@ -20,7 +20,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     point : array_like
         Point to generate the 2D slice through. It should have the length
         of the image dimension. A warning will be generated if the point is
-        not inside the image extent.
+        not inside the image extent and `displayInfo` is True.
     plane : str, optional
         Plane to generate the 2D slice given as a string. The string
         should have the form of two letters from [XYZT] set with +/- signs
@@ -206,15 +206,15 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
     img : SimpleITK Image
         An object of a SimpleITK image.
     point : array_like
-        Point to generate the 2D slice through. It should have the length
+        Point to generate the 1D profile through. It should have the length
         of the image dimension. A warning will be generated if the point is
-        not inside the image extent.
+        not inside the image extent and `displayInfo` is True.
     axis : str, optional
         Axis to generate the 1D profile given as a string. The string
         should have the form of one letter from [XYZT] set with +/- signs
         (if no sign is provided, then + is assumed). For instance, it can be:
         `X`,`Y`,`-Z`, etc. If the minus sign is found, then the
-        image is flipped in the following direction.
+        image is flipped in the following direction. (def. 'X')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
     **kwargs : 
@@ -325,7 +325,7 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
         _logger.error(error)
         raise error
 
-    # remove all signs from the plane definition
+    # remove all signs from the axis definition
     axisSimple = re.sub("[-+]", "", axis)
 
     # determine available axis names based on img dimension
@@ -389,7 +389,7 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
     point : array_like
         Point to generate the value. It should have the length of the image
         dimension. A warning will be generated if the point is not inside
-        the image extent.
+        the image extent and `displayInfo` is True.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
     **kwargs : 
@@ -515,7 +515,8 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
     from an image defined as a SimpleITK image object. The integral profile is
     returned as an instance of a SimpleITK image object of the same dimension
     but describing a profile (the dimension of only one axes is different than one).
-    The integral means the sum of the voxel values multiplied by the voxel volume.
+    The integral means the sum of the voxel values multiplied by the voxel size
+    along the accumulated directions.
     The routine is useful to calculate integral depth dose (IDD) distributions.
 
     Parameters
@@ -565,7 +566,7 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
     # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 litre
     # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 litre
     ###############
-    >>> in1D = fredtools.getProfile(img3D, axis='Y', displayInfo=True)
+    >>> in1D = fredtools.getInteg(img3D, axis='Y', displayInfo=True)
     ### getInteg ###
     # Axis: 'Y'
     # dims (xyz) =  [  1 415   1]
@@ -612,7 +613,7 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
         _logger.error(error)
         raise error
 
-    # remove all signs from the plane definition
+    # remove all signs from the axis definition
     axisSimple = re.sub("[-+]", "", axis)
 
     # determine available axis names based on img dimension
@@ -675,7 +676,8 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
     Returns
     -------
     SimpleITK Image
-        Instance of a SimpleITK image object describing a profile.
+        Instance of a SimpleITK image object describing the cumulative sum image
+        (same size as `img`).
 
     See Also
     --------
@@ -712,7 +714,7 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
     axisxyz = [i for i, x in enumerate([axis.upper() == i for i in axesNameAvailable]) if x][0]  # in xyz convention for simpleITK
     axisijk = [i for i, x in enumerate([axis.upper() == i for i in axesNameAvailable[::-1]]) if x][0]  # in ijk convention for numpy
 
-    # calculate CT WET along axisWET
+    # calculate the cumulative sum along the requested axis
     arr = sitk.GetArrayFromImage(img)
     arrCumSum = np.cumsum(arr, axis=axisijk)
     imgCumSum = sitk.GetImageFromArray(arrCumSum)
@@ -821,13 +823,15 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
                 Determine the interpolation method. (def. 'linear')
             splineOrder : int
                 Order of spline interpolation. Must be in range 0-5. (def. 3)
+
     Returns
     -------
     Tuple[tuple, tuple]
         positions : tuple
             The positions along the profile line.
         values : tuple
-            The interpolated values at the profile points.
+            The interpolated values at the profile points. The points outside
+            the image extent get numpy.nan values.
     """
     import fredtools as ft
     import numpy as np

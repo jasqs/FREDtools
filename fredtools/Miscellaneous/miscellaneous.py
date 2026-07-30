@@ -26,8 +26,8 @@ def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, remo
 
     Returns
     -------
-    mergedPDFFileName
-        Absolute path string where the merged PDF will be saved.
+    str
+        Absolute path of the saved merged PDF.
     """
     import fitz  # from pymupdf
     import os
@@ -87,7 +87,7 @@ def getHistogram(dataX: Iterable[Numeric], dataY: Iterable[Numeric] | None = Non
         pandas DataFrame, pandas Series, 1D numpy array, 1D list, 1D tuple etc. (def. None)
     bins : 1D array_like, optional
         1D array-like iterable with the bins' edges to calculate histogram.
-        If none, then the bins will be generated automatically between
+        If None, then the bins will be generated automatically between
         the minimum and maximum value of `dataX` in 100 steps linearly. (def. None)
     kind : {'mean', 'sum', 'std', 'median', 'min', 'max', 'mean-std', 'mean+std'}, optional
         Determine the `dataY` quantity evaluation for a differential histogram.
@@ -99,7 +99,7 @@ def getHistogram(dataX: Iterable[Numeric], dataY: Iterable[Numeric] | None = Non
 
     Returns
     -------
-    List of two ndarrays
+    tuple of two ndarrays
         A two-element tuple of 1D numpy ndarrays, where the first element
         is a list of bin centres (or edges) and the second is a list of
         histogram values.
@@ -217,13 +217,13 @@ def sigma2fwhm(sigma: Numeric | Iterable[Numeric]) -> Numeric | Iterable[Numeric
 
     Parameters
     ----------
-    sigma : scalar
-        Sigma value.
+    sigma : scalar or array_like
+        Sigma value(s).
 
     Returns
     -------
-    scalar
-        FWHM value.
+    scalar or array_like
+        FWHM value(s).
 
     See Also
     --------
@@ -253,13 +253,13 @@ def fwhm2sigma(fwhm: Numeric | Iterable[Numeric]) -> Numeric | Iterable[Numeric]
 
     Parameters
     ----------
-    fwhm : scalar
-        FWHM value.
+    fwhm : scalar or array_like
+        FWHM value(s).
 
     Returns
     -------
-    scalar
-        Sigma value.
+    scalar or array_like
+        Sigma value(s).
 
     See Also
     --------
@@ -283,7 +283,8 @@ def wrapAngle(angle: Iterable[Numeric], deg: bool = False) -> Iterable[Numeric]:
 
 def wrapAngle(angle: Numeric | Iterable[Numeric], deg: bool = False) -> Numeric | Iterable[Numeric]:
     """Wrap angle(s) to [0, 2pi) or [0, 360) range.
-    The function wraps angle(s) given in radians [0, 2*pi) range.
+
+    The function wraps angle(s) given in radians to the [0, 2*pi) range.
 
     Parameters
     ----------
@@ -294,8 +295,9 @@ def wrapAngle(angle: Numeric | Iterable[Numeric], deg: bool = False) -> Numeric 
 
     Returns
     -------
-    scalar or iterable of scalars
-        Wrapped angle(s) in the same type as input.
+    numpy.ndarray
+        Wrapped angle(s) as a numpy array
+        (a 0-dimensional array for scalar input).
     """
     import numpy as np
 
@@ -347,11 +349,12 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
 
     Returns
     -------
-    line index, line string
-        If kind='all': a tuple of two tuples where the first is the 
+    tuple or None
+        If kind='all': a tuple of two tuples, where the first is the
         matched line numbers and the second is the line strings.
-        If kind='first' or kind='last': a tuple with the first or last 
-        reached line number and the line string.
+        If kind='first' or kind='last': a two-element tuple with the first or last
+        matched line number and the line string.
+        None is returned if no line matches the pattern.
 
     References
     ----------

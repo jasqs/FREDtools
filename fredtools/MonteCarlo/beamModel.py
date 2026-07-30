@@ -165,7 +165,7 @@ class beamModel:
         """Returns the Source-To-Axis Distance (SAD) in mm.
 
         The Source-To-Axis Distance (SAD) describes the absolute distance of the
-        source to the isocenter.        
+        source to the isocenter.
         """
         return self._sourceToAxisDistance
 
@@ -479,28 +479,28 @@ class beamModel:
     def getGateParams(self, sourceToAxisDistance: NonNegativeFloat, nomEnergy: Numeric | Iterable[Numeric]) -> DataFrame:
         """ Get the beam parameters for GATE simulation.
 
-        This function calculates the beam parameters for GATE simulation based on the nozzle exit position and nominal energy.
-        According to the GATE documentation, the beam propagation parameters are modeled according to the Fermi-Eyges theory 
-        (Techniques of Proton Radiotherapy: Transport Theory B. Gottschalk May 1, 2012), that describes the correlated momentum 
+        This function calculates the beam parameters for GATE simulation based on the source-to-axis distance and nominal energy.
+        According to the GATE documentation, the beam propagation parameters are modeled according to the Fermi-Eyges theory
+        (Techniques of Proton Radiotherapy: Transport Theory B. Gottschalk May 1, 2012), that describes the correlated momentum
         spread of the particle with 4 parameters (each for x and y direction, assuming a beam directed as z):
 
-            - sigma: beam size in [X,Y] directions at the beam production point (`nozzleExit` )
+            - sigma: beam size in [X,Y] directions at the beam production point (`sourceToAxisDistance`)
             - divergence: beam divergence in [X,Y] directions
             - emittance: constant area in phase space in [X,Y] directions
             - convergence: beam convergence in [X,Y] directions
 
         Parameters
         ----------
-        nozzleExit : float
-            The distance from the nozzle exit to the isocenter in mm.
+        sourceToAxisDistance : float
+            The distance from the beam source to the isocenter in mm.
         nomEnergy : float or iterable of floats
             The nominal energy of the beam in MeV or a list of nominal energies.
 
         Returns
         -------
         DataFrame
-            A DataFrame containing the beam parameters for GATE simulation, including:
-            - Energy: nominal energy in [MeV]
+            A DataFrame containing the beam parameters for GATE simulation, indexed by the nominal energy in [MeV], including:
+            - Energy: mean (actual) beam energy in [MeV]
             - dEnergy: energy spread in [MeV]
             - sigmaX: beam size in X direction in [mm]
             - sigmaY: beam size in Y direction in [mm]
@@ -601,18 +601,17 @@ def twiss2SigmaSquared(epsilon: Numeric, alpha: Numeric, beta: Numeric) -> Tuple
 
     Parameters
     ----------
-        epsilon: Numeric
-            Emittance of the beam, preferably in [mm * rad].
-        alpha: Numeric
-            Alpha parameter of the beam, unitless.
-        beta: Numeric
-            Beta parameter of the beam, preferably in [mm].
+    epsilon : Numeric
+        Emittance of the beam, preferably in [mm * rad].
+    alpha : Numeric
+        Alpha parameter of the beam, unitless.
+    beta : Numeric
+        Beta parameter of the beam, preferably in [mm].
 
     Returns
     -------
-        tuple[Numeric, Numeric, Numeric]
-            A tuple containing the parameters (a, b, c) of the sigma squared model.
-            The parameters are in the same units as epsilon and beta.
+    tuple[Numeric, Numeric, Numeric]
+        A tuple containing the parameters (a, b, c) of the sigma squared model.
     """
 
     a = np.asarray(epsilon) * np.asarray(beta)
@@ -636,18 +635,17 @@ def sigmaSquared2Twiss(a: Numeric | Iterable[Numeric], b: Numeric | Iterable[Num
 
     Parameters
     ----------
-        a: Numeric
-            Parameter a of the sigma squared model, preferably in [mm^2].
-        b: Numeric
-            Parameter b of the sigma squared model, preferably in [mm].
-        c: Numeric
-            Parameter c of the sigma squared model, unitless.
+    a : Numeric
+        Parameter a of the sigma squared model, preferably in [mm^2].
+    b : Numeric
+        Parameter b of the sigma squared model, preferably in [mm].
+    c : Numeric
+        Parameter c of the sigma squared model, unitless.
 
     Returns
     -------
-        tuple[Numeric, Numeric, Numeric]
-            A tuple containing the Twiss parameters (epsilon, alpha, beta).
-            The parameters are in the same units as a and b.
+    tuple[Numeric, Numeric, Numeric]
+        A tuple containing the Twiss parameters (epsilon, alpha, beta).
     """
     import numpy as np
 
@@ -791,8 +789,8 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Num
 
     See Also
     --------
-    readBeamModel : read beam model from CSV beam model file.
-    writeBeamModel : write beam model from DataFrame to a nicely formatted CSV.
+    readBeamModel : read beam model from YAML beam model file.
+    writeBeamModel : write beam model to YAML file.
     """
     from scipy.interpolate import interp1d
     import pandas as pd
@@ -840,10 +838,9 @@ def calcRaysVectors(targetPoint: Iterable[Numeric] | Iterable[Iterable[Numeric]]
 
     The function calculates the ray position and direction versor from the target position.
     The target point can be a 3-element iterable or Nx3 iterable for multiple points.
-    The Source-To-Axis Distance (SAD) describes the absolute distances of the spreading
+    The `SAD` parameter describes the absolute distances of the spreading
     devices in order [X, Y]. It does not matter if the first divergence is in X or Y, the function
     takes this information from the distances, but the order [X,Y] must be preserved.
-
 
     Parameters
     ----------

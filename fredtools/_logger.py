@@ -3,12 +3,14 @@ import logging
 
 class customFormatterINFO(logging.Formatter):
     """
-    This class is a subclass of logging.Formatter and it is used to format the log messages in a customised way.
+    Console log formatter with a compact layout for INFO messages.
 
-    The class defines a method format that returns a formatted string based on the level of the log message.
-    The formatting is done using ANSI escape sequences. The class defines a dictionary FORMATS that contains
-    the formatting string for different log levels. The method format returns the formatted string based on the
-    level of the log message.
+    The formatter colours the log messages with ANSI escape sequences based on the log level,
+    using the per-level formatting strings defined in the FORMATS dictionary. INFO records are
+    formatted compactly as 'funcName: message', i.e. without the level name and logger name,
+    whereas all the other levels are formatted as 'LEVEL: name.funcName: message'.
+    No line numbers are included for any level. This formatter is selected by `configureLogging`
+    for the console handler when the logging level is above logging.DEBUG.
     """
     grey = "\x1b[38;21m"
     blue = "\x1b[34m"
@@ -38,12 +40,14 @@ class customFormatterINFO(logging.Formatter):
 
 class customFormatterDEBUG(logging.Formatter):
     """
-    This class is a subclass of logging.Formatter and it is used to format the log messages in a customised way.
+    Console log formatter with a verbose layout including line numbers.
 
-    The class defines a method format that returns a formatted string based on the level of the log message.
-    The formatting is done using ANSI escape sequences. The class defines a dictionary FORMATS that contains
-    the formatting string for different log levels. The method format returns the formatted string based on the
-    level of the log message.
+    The formatter colours the log messages with ANSI escape sequences based on the log level,
+    using the per-level formatting strings defined in the FORMATS dictionary. All the levels,
+    including INFO, are formatted as 'LEVEL: name.funcName:lineno: message', i.e. prefixed with
+    the level name and with the line number appended to the function name. This formatter is
+    selected by `configureLogging` for the console handler when the logging level is
+    logging.DEBUG or lower.
     """
     grey = "\x1b[38;21m"
     blue = "\x1b[34m"
@@ -75,8 +79,10 @@ def getConsoleLogHandler() -> logging.Handler:
     """
     Returns a console log handler that directs log messages to the standard output.
 
-    Returns:
-        logging.Handler: The console log handler.
+    Returns
+    -------
+    logging.Handler
+        The console log handler.
     """
     import sys
     consoleHandler = logging.StreamHandler(sys.stdout)
@@ -129,9 +135,13 @@ def getLogger(name: str | None = None) -> logging.Logger:
 
 
 def configureLogging(level: int = logging.WARNING, console: bool = True, fileName: str | None = None, force: bool = True) -> None:
-    """Configure logging if not configured.
+    """Configure logging for the FREDtools library.
 
-    The function configures logging for the FREDtools library only if not configured already.
+    The function configures logging for the FREDtools library. By default (`force=True`),
+    any existing handlers attached to the root logger are removed and closed before
+    the configuration is carried out, i.e. the logging is always reconfigured.
+    If `force` is False, the configuration is applied only if the root logger
+    has no handlers configured already.
 
     Parameters
     ----------
@@ -173,7 +183,8 @@ def configureLogging(level: int = logging.WARNING, console: bool = True, fileNam
 
 def currentFuncName(n=0):
     """Get name of the function where the currentFuncName() is called.
-    currentFuncName(1) get the name of the caller.
+
+    currentFuncName(1) gets the name of the caller.
     """
     import sys
     return sys._getframe(n + 1).f_code.co_name

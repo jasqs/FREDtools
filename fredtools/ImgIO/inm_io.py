@@ -15,8 +15,8 @@ def getInmFREDVersion(fileName: PathLike) -> float:
 
     Returns
     -------
-    int
-        Version of the FRED influence matrix file.
+    float
+        Version of the FRED influence matrix file (e.g. 2.1).
     """
     import struct
 
@@ -75,8 +75,8 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
 
     See Also
     --------
-        getInmFREDBaseImg : get base image defined in FRED influence matrix.
-        getInmFREDSparse : get sparse matrices of point values from an influence matrix produced by FRED Monte Carlo.
+    getInmFREDBaseImg : get base image defined in FRED influence matrix.
+    getInmFREDSparse : get sparse matrices of point values from an influence matrix produced by FRED Monte Carlo.
     """
     import fredtools as ft
     import numpy as np
@@ -241,8 +241,8 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
 
     See Also
     --------
-        getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
-        getInmFREDSparse : get sparse matrices of point values from an influence matrix produced by FRED Monte Carlo.
+    getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
+    getInmFREDSparse : get sparse matrices of point values from an influence matrix produced by FRED Monte Carlo.
     """
     import fredtools as ft
     import numpy as np
@@ -341,7 +341,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
     # validate points
     points = np.asarray(points)
     if points.ndim != 2 or points.shape[1] != 3:
-        error = TypeError("Parameter 'point' must be an N-element iterable of 3 elements iterables.")
+        error = TypeError("Parameter 'points' must be an N-element iterable of 3 elements iterables.")
         _logger.error(error)
         raise error
     pointsNo = points.shape[0]
@@ -350,7 +350,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
     imgBase = getInmFREDBaseImg(fileName, dtype="uint8")
 
     # convert physical points to indices
-    points = np.round((points-imgBase.GetOrigin())/imgBase.GetSpacing()).astype(int)  # equivalent to transformPhysicalPointToIndex but faster
+    points = np.round((points-imgBase.GetOrigin())/imgBase.GetSpacing()).astype(int)  # equivalent to transformPhysicalPointToIndex but faster (valid only for identity direction matrix)
     indices = np.ravel_multi_index(tuple(np.array(points).T), imgBase.GetSize(), order="F")
 
     # get pencil beams info
@@ -361,7 +361,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
     match InmFREDVersion:
         case 2.0 | 2.1:
             if interpreter == "cupy":
-                _logger.warning("Cupy interpreter is not supported for version 2.0 of the Inm file. The numpy interpreter will be used to read the Imn file and then the result will be uploaded to GPU.")
+                _logger.warning("Cupy interpreter is not supported for version 2.x of the Inm file. The numpy interpreter will be used to read the Inm file and then the result will be uploaded to GPU.")
             listInmSparse = _getInmFREDSparseVersion2(fileName, indices, inmInfo, imgBase)
             if interpreter == "cupy":
                 listInmSparse = [cp.sparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
@@ -385,7 +385,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
 
 
 def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, inmInfo: DataFrame, imgBase: SITKImage) -> Sequence[SparseMatrixCSR]:
-    """Get sparse matrices of point values from the FRED influence matrix file version 2.0."""
+    """Get sparse matrices of point values from the FRED influence matrix file version 2.x."""
     import struct
     import numpy as np
     from scipy import sparse
@@ -437,7 +437,7 @@ def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, inmInfo: D
 
 
 def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, inmInfo: DataFrame, imgBase: SITKImage, interpreter: str = "numpy") -> Sequence[SparseMatrixCSR]:
-    """Get sparse matrices of point values from the FRED influence matrix file version 3.0."""
+    """Get sparse matrices of point values from the FRED influence matrix file version 3.x."""
     import struct
     import numpy as np
     from scipy import sparse

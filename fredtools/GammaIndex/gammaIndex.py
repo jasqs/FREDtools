@@ -8,7 +8,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
     defined SimpleITK image objects, as the reference and evaluation images, respectively.
-    The gamma index test is performed with a defined dose distance (DD) given in [%],
+    The gamma index test is performed with a defined dose difference (DD) given in [%],
     distance to agreement (DTA) given in the same length unit as the reference image
     (in [mm] by default) and is calculated for the dose values greater or equal than
     a fraction of the maximum dose in the reference image, given by the DCO parameter.
@@ -27,7 +27,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     imgEval : SimpleITK Image
         An object of a SimpleITK 2D or 3D image describing the evaluation.
     DD : float
-        Dose distance in [%].
+        Dose difference in [%].
     DTA : float
         Distance-to-agreement, usually in [mm].
     DCO : float
@@ -42,12 +42,15 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         Global normalisation of the input images. If not given or None then the maximum value of
         the reference image is used. (def. None)
     stepSize : float, optional
-        Step size to search for minimum gamma index value. Can be given
-        as an absolute value in the reference length unit (for instance in [mm])
-        or as the fraction of the distance-to-agreement if fractionalStepSize=True. (def. 10)
+        Step size to search for the minimum gamma index value. It can be given
+        as an absolute step in the reference length unit (for instance in [mm])
+        if `fractionalStepSize` is False, or as the number of subdivisions of
+        the distance-to-agreement if `fractionalStepSize` is True, so that
+        the search step is calculated as DTA/stepSize. (def. 10)
     fractionalStepSize : bool, optional
-        Determine if the `stepSize` should be treated as the absolute value (false)
-        or the fraction of the distance-to-agreement (true). (def. True).
+        Determine if the `stepSize` should be treated as the absolute step value (False)
+        or as the number of subdivisions of the distance-to-agreement (True),
+        meaning that the search step is DTA/stepSize. (def. True)
     mode : {'gamma', 'pass-rate'}, optional
         Mode of calculation. (def. 'gamma'):
 
@@ -88,7 +91,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
 
     See Also
     --------
-        getGIstat: calculate the gamma index statistics including the gamma index pass rate.
+    getGIstat : calculate the gamma index statistics including the gamma index pass rate.
 
     Examples
     --------
@@ -131,7 +134,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         _logger.error(error)
         raise error
     if not isinstance(DDType, str) or DDType.lower() not in ["local", "global", "l", "g"]:
-        error = ValueError(f"Dose distance type must be a string and only 'local' or 'global' are supported.")
+        error = ValueError(f"Dose difference type must be a string and only 'local' or 'global' are supported.")
         _logger.error(error)
         raise error
     if not isinstance(DCO, Numeric) or DCO <= 0 or DCO >= 1:
@@ -312,8 +315,11 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
 
     Returns
     -------
-    dict
-        Dictionary with the gamma index statistics.
+    DottedDict
+        A dictionary-like object (DottedDict) with the gamma index statistics
+        with the keys: 'passRate' (gamma index pass rate in [%]), 'mean', 'std',
+        'min' and 'max' of the gamma index values. In the 'pass-rate' mode
+        the 'mean', 'std', 'min' and 'max' values are numpy.nan.
 
     See Also
     --------
@@ -374,8 +380,9 @@ def getGIcmap(maxGI: Numeric, N: NonNegativeInt = 256) -> LinearSegmentedColorma
     Parameters
     ----------
     maxGI : scalar
-        The maximum value of the colormap.
-    N : scalar, optional
+        The maximum value of the colormap. Values less than 1
+        are clamped to 1 (with a warning).
+    N : int, optional
         Number of segments of the colormap. (def. 256)
 
     Returns
@@ -385,7 +392,7 @@ def getGIcmap(maxGI: Numeric, N: NonNegativeInt = 256) -> LinearSegmentedColorma
 
     See Also
     --------
-        calcGammaIndex: calculate the Gamma Index for two images.
+    calcGammaIndex : calculate the Gamma Index for two images.
 
     Examples
     --------
@@ -399,7 +406,7 @@ def getGIcmap(maxGI: Numeric, N: NonNegativeInt = 256) -> LinearSegmentedColorma
     import numpy as np
 
     if maxGI < 1:
-        _logger.warning(f"Warning: the value of the parameter 'maxGI' cannot be less than 1 and a value {maxGI} was given. It was set to 1.")
+        _logger.warning(f"The value of the parameter 'maxGI' cannot be less than 1 and a value {maxGI} was given. It was set to 1.")
         maxGI = 1
 
     colorLowStart = np.array([1, 0, 128]) / 255

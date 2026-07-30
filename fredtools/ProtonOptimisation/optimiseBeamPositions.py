@@ -11,16 +11,20 @@ def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **k
     contourPolygon : shapely Polygon
         Object of the shapely.Polygon.
     spotDistance : scalar
-        The nominal spot distance is to be used to optimize the beam positions.
+        The nominal spot distance, in the polygon coordinate unit (usually [mm]),
+        to be used to optimize the beam positions.
         Depending on the algorithm, the distance between neighboring spots does
         not have to be equal to this parameter. Therefore it describes only
         the nominal distance.
-    algorithm :  {'regular', 'hexagonal', 'concentric', 'delaunay'}, optional
-        Algorithm to be used to optimize the beam positions. Only 'regular'
-        and 'hexagonal' are implemented so far. (def. 'regular')
+    algorithm : {'regular', 'hexagonal', 'concentric', 'delaunay'}, optional
+        Algorithm to be used to optimize the beam positions. The short aliases
+        'reg', 'hex', 'con' and 'del' are also accepted. The 'concentric' and
+        'delaunay' algorithms are not implemented yet and raise
+        NotImplementedError. (def. 'regular')
     **kwargs : keyword args, optional
-        Additional parameters are passed to the given optimization algorithm. Refer
-        to the given algorithm routine for more description. (def. None)
+        Additional parameters passed to the selected optimization algorithm
+        (whichever algorithm is chosen). Refer to the given algorithm routine
+        for more description.
 
     Returns
     -------
@@ -30,8 +34,8 @@ def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **k
 
     See Also
     --------
-        optimiseBeamPositionsRegular: Optimise beam positions in a regular grid.
-        optimiseBeamPositionsHexagonal: Optimise beam positions in a hexagonal grid.
+    optimiseBeamPositionsRegular : Optimise beam positions in a regular grid.
+    optimiseBeamPositionsHexagonal : Optimise beam positions in a hexagonal grid.
     """
     import shapely as sph
 
@@ -68,7 +72,8 @@ def optimiseBeamPositionsRegular(contourPolygon, spotDistance):
     contourPolygon : shapely Polygon
         Object of the shapely.Polygon.
     spotDistance : scalar
-        The spot distance to be used to calculate regular grid beam positions.
+        The spot distance, in the polygon coordinate unit (usually [mm]),
+        to be used to calculate regular grid beam positions.
 
     Returns
     -------
@@ -78,14 +83,15 @@ def optimiseBeamPositionsRegular(contourPolygon, spotDistance):
 
     See Also
     --------
-        optimiseBeamPositions: Optimise beam positions using various algorithms.
+    optimiseBeamPositions : Optimise beam positions using various algorithms.
 
     Notes
     -----
     The regular grid algorithm distributes the beams with the same spacing in X and
     Y directions. The grid size is calculated to fit the given contour polygon and is
     moved so that the central beam is at the polygon centroid. All the beam positions
-    which are not inside the polygon are removed.
+    which are not inside the polygon, enlarged by a buffer of 0.2 (in the polygon
+    coordinate unit) tolerance, are removed.
     """
     import numpy as np
     import shapely as sph
@@ -134,7 +140,8 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
     contourPolygon : shapely Polygon
         Object of the shapely.Polygon.
     spotDistance : scalar
-        The spot distance to be used to calculate hexagonal grid beam positions.
+        The spot distance, in the polygon coordinate unit (usually [mm]),
+        to be used to calculate hexagonal grid beam positions.
     direction : {'X', 'Y'}, optional
         The direction along which the beams should be shifted to create a hexagonal
         grid. This parameter can be used to align the hexagonal direction to the faster
@@ -148,7 +155,7 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
 
     See Also
     --------
-        optimiseBeamPositions: Optimise beam positions using various algorithms.
+    optimiseBeamPositions : Optimise beam positions using various algorithms.
 
     Notes
     -----
@@ -156,7 +163,8 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
     (or in Y) and every second row (or column) of the beam positions is shifted by
     half of the `spotDistance`. The grid size is calculated to fit the given
     contour polygon and is moved so that the central beam is at the polygon centroid.
-    All the beam positions which are not inside the polygon are removed.
+    All the beam positions which are not inside the polygon, enlarged by a buffer
+    of 0.2 (in the polygon coordinate unit) tolerance, are removed.
 
     The user can choose in which direction, X or Y, the hexagonal grid should be aligned.
     This might be important when optimizing the beam positions for a given machine where
@@ -235,7 +243,7 @@ def optimiseBeamPositionsConcentric(contourPolygon, spotDistance, **kwargs):
 
     See Also
     --------
-        optimiseBeamPositions: Optimise beam positions using various algorithms.
+    optimiseBeamPositions : Optimise beam positions using various algorithms.
     """
     raise NotImplementedError("The method is not yet implemented")
 
@@ -261,6 +269,6 @@ def optimiseBeamPositionsDelaunay(contourPolygon, spotDistance, **kwargs):
 
     See Also
     --------
-        optimiseBeamPositions: Optimise beam positions using various algorithms.
+    optimiseBeamPositions : Optimise beam positions using various algorithms.
     """
     raise NotImplementedError("The method is not yet implemented")

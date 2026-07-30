@@ -155,7 +155,7 @@ def _getRNBeamSequence(dicomVar: PathLike | DicomDataset) -> DataElement:
 
 
 def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: bool = False) -> DottedDict:
-    """Sort dicom file names found in the search folder for CT, RS, RN, RD and Unknown.
+    """Sort dicom file names found in the search folder for CT, RS, RN, RD, PET and Unknown.
 
     The function sorts file names found in the `searchFolder`
     (and subfolders if requested) for:
@@ -178,8 +178,10 @@ def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: boo
 
     Returns
     -------
-    dict
-        Dictionary with the sorted file names.
+    DottedDict
+        Dictionary (dotted_dict.DottedDict) with the sorted file names.
+        If only a single file name is found for a given dicom type, then
+        the one-element list is collapsed to a single file name string.
     """
     import glob
     import os
@@ -248,9 +250,10 @@ def _getIonBeamDatasetForFieldNumber(fileName: PathLike, beamNumber: int) -> Dic
 
     Returns
     -------
-    IonBeamDataset
+    IonBeamDataset or None
         Dataset describing the ion beam as an instance of
-        a pydicom.dataset.Dataset.
+        a pydicom.dataset.Dataset, or None if no matching
+        beam number is found.
     """
     import numpy as np
     import pydicom as dicom
@@ -292,13 +295,14 @@ def _getReferencedBeamDatasetForFieldNumber(fileName: PathLike, beamNumber: int)
     fileName : path
         Path string to dicom file with plan (RN file).
     beamNumber : scalar, int
-        The number of the beam to get the IonBeamDataset for.
+        The number of the beam to get the ReferencedBeamDataset for.
 
     Returns
     -------
-    IonBeamDataset
+    ReferencedBeamDataset or None
         Dataset describing the referenced beam as an instance of
-        a pydicom.dataset.Dataset.
+        a pydicom.dataset.Dataset, or None if no matching
+        beam number is found.
     """
     import numpy as np
     import pydicom as dicom
@@ -531,7 +535,7 @@ def getRNSpots(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
             _logger.debug("Could not find ReferencedBeamDataset for field number {:d}.".format(fieldNo))
             continue
 
-        # get fieldDose and field cumulative Meterset Weight
+        # get field meterset (MU) and field cumulative Meterset Weight
         fieldDose = ReferencedBeamDataset.BeamMeterset
         fieldCumMsW = IonBeamDataset.FinalCumulativeMetersetWeight
 
@@ -610,7 +614,7 @@ def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False
     fileName : path
         Path to RN dicom file.
     raiseWarning : bool, optional
-        Raise warnings if the consistency check fails. (def. False)
+        Raise warnings if the consistency check fails. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -647,7 +651,7 @@ def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False
     dicomTags = dicom.dcmread(fileName)
 
     def uniqueValue(groupByDataSet):
-        """Get the unique values for the grouped datasets. If no unique value then `var` is returned."""
+        """Get the unique values for the grouped datasets. If no unique value exists, the literal string "var" is returned."""
         uniqueValue = np.unique(groupByDataSet)
         if len(uniqueValue) > 1:
             return "var"
@@ -700,7 +704,7 @@ def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False
     if raiseWarning:
         # check if the 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' for each field is similar to the sum of 'ScanSpotMetersetWeights' for each pencil beam in the field
         if any(np.abs(spotsInfo.groupby("FDeliveryNo").PBMsW.sum() / fieldsInfo.FCumMsW - 1) > 0.005):  # accuracy 0.5%
-            _logger.warning("Warning: At least for one field the 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is different from the sum of 'ScanSpotMetersetWeights' for each pencil beam.\n\tThe 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is in the output.")
+            _logger.warning("At least for one field the 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is different from the sum of 'ScanSpotMetersetWeights' for each pencil beam.\n\tThe 'FinalCumulativeMetersetWeight' defined in 'IonBeamDataset' is in the output.")
 
     # drop columns with all NaN values
     fieldsInfo.dropna(axis="columns", how="all", inplace=True)
@@ -1060,7 +1064,7 @@ def getCT(fileNames: Iterable[PathLike], displayInfo: bool = False) -> SITKImage
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
         sliceLocationPresent.append("SliceLocation" in dicomSimple)
     if not all(sliceLocationPresent):
-        _logger.warning("Warning: All dicom files are of CT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
+        _logger.warning("All dicom files are of CT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
 
     # get slice location
     if not all(sliceLocationPresent):
@@ -1108,7 +1112,7 @@ def getPET(fileNames: Iterable[PathLike], SUV: bool = True, displayInfo: bool = 
     Returns
     -------
     SimpleITK Image
-        An object of a SimpleITK image of 16-bit integer type.
+        An object of a SimpleITK image of sitk.sitkFloat32 (32-bit float) type.
 
     See Also
     --------
@@ -1172,7 +1176,7 @@ def getPET(fileNames: Iterable[PathLike], SUV: bool = True, displayInfo: bool = 
     for fileName, dicomDataset in zip(fileNames, dicomsDataset):
         sliceLocationPresent.append("SliceLocation" in dicomDataset)
     if not all(sliceLocationPresent):
-        _logger.warning("Warning: All dicom files are of PT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
+        _logger.warning("All dicom files are of PT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
 
     # get slice location
     if not all(sliceLocationPresent):
@@ -1287,7 +1291,7 @@ def _getStructureContoursByName(RSfileName: PathLike, structName: str) -> tuple:
 
     The function reads a dicom with RS structures and returns the contours
     as a list of numpy.array, as well as the contour info, such as: name,
-    index, type and color
+    ROI number, type and color
 
     Parameters
     ----------
@@ -1368,15 +1372,16 @@ def getRDFileNameForFieldNumber(fileNames: Iterable[PathLike], fieldNumber: int,
     ----------
     fileNames : array_like
         An iterable (list, tuple, etc.) of paths to RD dicoms.
-    fieldNumber: scalar, int
+    fieldNumber : scalar, int
         Field number to find the dicom for.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
-    Path string:
-        Path to the RD dose file for the given beam number.
+    path or None
+        Path to the RD dose file for the given beam number,
+        or None if not found.
     """
     import pydicom as dicom
 
@@ -1393,7 +1398,7 @@ def getRDFileNameForFieldNumber(fileNames: Iterable[PathLike], fieldNumber: int,
             fileName = None
 
     if not fileName:
-        _logger.warning(f"Warning: could not find RD dose dicom file for the field number {fieldNumber}.")
+        _logger.warning(f"Could not find RD dose dicom file for the field number {fieldNumber}.")
 
     if displayInfo:
         _logger.info(f"Path to the RD dose dicom with the field number {fieldNumber}: {fileName}")
@@ -1409,9 +1414,9 @@ def anonymizeDicoms(fileNames: Iterable[PathLike] | PathLike, removePrivateTags:
 
     Parameters
     ----------
-    fileNames : array_like
-        An iterable (list, tuple, etc.) of paths to DICOM files.
-    removePrivateTags: bool, optional
+    fileNames : string or array_like
+        A path or an iterable (list, tuple, etc.) of paths to DICOM files.
+    removePrivateTags : bool, optional
         Determine if the private tags should be removed. (def. False)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)

@@ -92,8 +92,13 @@ def readFREDStat(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
 
     Returns
     -------
-    dict
+    DottedDict
         A dictionary with the read data.
+
+    Notes
+    -----
+    Keys suffixed with `_s` hold values in seconds, keys suffixed with `_us` in microseconds,
+    and keys suffixed with `_prim_s` in primaries per second.
     """
     import os
     import re
@@ -280,8 +285,9 @@ def getFREDVersion(version: str = "") -> str:
 
     Parameters
     ----------
-    version : str
-        Version in format #.#.#.
+    version : str, optional
+        Version in format #.#.#. An empty string means the currently
+        active FRED version. (def. '')
 
     Returns
     -------
@@ -329,14 +335,14 @@ def runFRED(fileName: PathLike, version: str = "", params: Iterable[str] = [], d
     params : str or list of strings, optional
         Additional parameters to FRED engine, for instance
         ["-C", "-V5", "-nogpu"] etc. (def. [])
-    displayInfo : bool
+    displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
-    subprocess stdout
-        Standard output of the subprocess method in the form of
-        list of string lines.
+    list of str
+        Standard output of the FRED subprocess in the form of
+        a list of string lines.
 
     See Also
     --------

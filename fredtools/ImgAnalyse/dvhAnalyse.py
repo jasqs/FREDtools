@@ -16,15 +16,16 @@ class DVH(object):
 
         Parameters
         ----------
-        counts : iterable
-            An iterable of absolute or relative volume for each bin.
-        bins : iterable
-            An iterable of a quantity (e.g. dose) bin edges. The size of the bins
-            should be one more than the size of the counts and should be in the
-            increasing order.
+        volume : iterable
+            An iterable of absolute or relative volume for each dose level or bin.
+            The last element must be equal to 0.
+        dose : iterable
+            An iterable of a quantity (e.g. dose) values in the increasing order.
+            For 'cumulative' type, these are the dose levels and the size must be
+            equal to the size of `volume`. For 'differential' type, these are the
+            dose bin edges and the size must be one more than the size of `volume`.
         type : {'cumulative', 'differential'}, optional
             Choice of 'cumulative' or 'differential' type of DVH (def. 'cumulative')
-            Absolute volume units, i.e. 'cm3' or relative units '%'
         dosePrescribed : Numeric or None, optional
             Prescription quantity (e.g. dose) value used to normalize dose bins. If not provided,
             the average dose will be used as the prescription dose. (def. None)
@@ -37,8 +38,8 @@ class DVH(object):
         ------
         AttributeError
             If the 'type' is not 'cumulative' or 'differential'.
-            If the size of the 'bins' is not one more than the size of the 'counts'.
-            If the 'bins' are not in the increasing order.
+            If the size of the 'dose' does not match the size of the 'volume' for the given 'type'.
+            If the 'dose' is not in the increasing order.
 
         Notes
         -----
@@ -69,7 +70,7 @@ class DVH(object):
         # check dose
         dose = np.array(dose)
         if np.diff(dose).min() < 0:
-            error = AttributeError("The 'bins' should be in the increasing order.")
+            error = AttributeError("The 'dose' should be in the increasing order.")
             _logger.error(error)
             raise error
         match type:
@@ -168,22 +169,22 @@ class DVH(object):
 
     @property
     def volumeDiffAbs(self) -> NDArray:
-        """Return a numpy array containing absolute differential counts."""
+        """Return a numpy array containing the absolute differential volume for each bin."""
         return np.asarray(self._volumeDiff)
 
     @property
     def volumeDiffRel(self) -> NDArray:
-        """Return a numpy array containing relative differential counts."""
+        """Return a numpy array containing the relative differential volume for each bin."""
         return np.asarray(self._volumeDiff/self.volume*100)
 
     @property
     def volumeCumAbs(self) -> NDArray:
-        """Return a numpy array containing absolute cumulative counts."""
+        """Return a numpy array containing the absolute cumulative volume for each dose level."""
         return np.asarray(self._volumeCum)
 
     @property
     def volumeCumRel(self) -> NDArray:
-        """Return a numpy array containing relative cumulative counts."""
+        """Return a numpy array containing the relative cumulative volume for each dose level."""
         return np.asarray(self._volumeCum/self.volume*100)
 
     @property
@@ -364,7 +365,7 @@ class DVH(object):
 
         Parameters
         ----------
-        dvh : DVH
+        other : DVH
             DVH instance to compare against.
 
         Raises
@@ -384,14 +385,18 @@ class DVH(object):
             Parameters
             ----------
             attr : string
-                Attribute used for comparison
-            units : string
-                Units used for the value
+                Attribute or statistic name used for comparison
+            ref : DVH, optional
+                Reference DVH instance. (def. self)
+            comp : DVH, optional
+                DVH instance to compare against the reference. (def. other)
 
             Returns
             -------
             tuple
-                tuple used in a string formatter
+                5-element tuple used in a string formatter: the attribute label
+                (with a trailing colon), the reference value, the compared value,
+                the relative difference in percent and the absolute difference.
             """
             if attr in ['volume', 'max', 'min', 'mean', 'stdDev']:
                 val = ref.__getattribute__(attr)
@@ -480,8 +485,6 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
         Object of a SimpleITK 3D image describing the binary or floating mask.
     dosePrescribed : scalar
         Target prescription dose.
-    doseLevelStep : scalar, optional
-        Size of dose bins. (def. 0.01)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -567,7 +570,7 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
             _logger.debug(f"Stopped adaptive dose level stage after reaching max iterations.")
     _logger.debug(f"Performed {iter} iterations in adaptive dose level stage to calculate DVH.")
 
-    # calculate volume in real units [mm3]
+    # calculate volume in real units [cm3]
     volumeCumAbs = volumeCumAbs * np.prod(img.GetSpacing()) / 1E3
 
     # get color and name
@@ -593,6 +596,7 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
     The image can be resampled before mapping to increase the resolution. The routine
     exploits and returns DVH class to hold the DVH. The class has been adapted
     from dicompyler-core DVH module (https://dicompyler-core.readthedocs.io/en/latest/index.html)
+
     Parameters
     ----------
     img : SimpleITK Image
@@ -603,8 +607,6 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
         Name of the structure to calculate the DVH in.
     dosePrescribed : scalar
         Target prescription dose.
-    doseLevelStep : scalar, optional
-        Size of dose bins. (def. 0.01)
     resampleImg : scalar, array_like or None, optional
         Define if and how to resample the image while mapping the structure.
         Can be a scalar, then the same number will be used for each axis,
@@ -615,12 +617,11 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
 
     Returns
     -------
-    dicompylercore DVH
-        An instance of a dicompylercore.dvh.DVH class holding the DVH.
+    DVH
+        An instance of a DVH class holding the DVH.
 
     See Also
     --------
-        dicompylercore : more information about the dicompylercore.dvh.DVH.
         resampleImg : resample image.
         mapStructToImg : map structure to image (refer for more information about mapping algorithms).
         getDVHMask : calculate DVH for a mask.
@@ -655,7 +656,7 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
         else:
             resampleImg = list(resampleImg)
             if not len(resampleImg) == img.GetDimension():
-                error = ValueError(f"Shape of 'spacing' is {resampleImg} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
+                error = ValueError(f"Shape of 'resampleImg' is {resampleImg} but must match the dimension of 'img' {img.GetDimension()} or be a scalar.")
                 _logger.error(error)
                 raise error
 
