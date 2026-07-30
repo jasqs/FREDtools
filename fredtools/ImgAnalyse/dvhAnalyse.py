@@ -6,7 +6,7 @@ _logger = getLogger(__name__)
 class DVH(object):
     """Class that stores dose volume histogram (DVH) data."""
 
-    def __init__(self, volume: Iterable[Numberic], dose: Iterable[Numberic], type: Literal['cumulative', 'differential'] = 'cumulative', dosePrescribed: Numberic | None = None, name: str | None = None, color: str | Sequence[Numberic] | None = None):
+    def __init__(self, volume: Iterable[Numeric], dose: Iterable[Numeric], type: Literal['cumulative', 'differential'] = 'cumulative', dosePrescribed: Numeric | None = None, name: str | None = None, color: str | Sequence[Numeric] | None = None):
         """DVH class to store dose volume histogram data.
 
         The class stores the DVH data in the form of counts and bins. The counts
@@ -25,7 +25,7 @@ class DVH(object):
         type : {'cumulative', 'differential'}, optional
             Choice of 'cumulative' or 'differential' type of DVH (def. 'cumulative')
             Absolute volume units, i.e. 'cm3' or relative units '%'
-        dosePrescribed : Numberic or None, optional
+        dosePrescribed : Numeric or None, optional
             Prescription quantity (e.g. dose) value used to normalize dose bins. If not provided,
             the average dose will be used as the prescription dose. (def. None)
         name : str | None, optional
@@ -131,7 +131,7 @@ class DVH(object):
             return False
         return np.allclose(self._volumeCum, other._volumeCum) and np.allclose(self._doseCum, other._doseCum)
 
-    def __getattr__(self, name: str) -> Numberic | Self:
+    def __getattr__(self, name: str) -> Numeric | Self:
         """Method used to dynamically determine dose or volume stats.
 
         Parameters
@@ -141,7 +141,7 @@ class DVH(object):
 
         Returns
         -------
-        Numberic
+        Numeric
             Value from the dose or volume statistic calculation.
         """
         if len(name) > 1 and name[0] == '_':
@@ -225,7 +225,7 @@ class DVH(object):
         """Return the volume of the structure."""
         return self._volumeDiff.sum()
 
-    def volumeConstraint(self, dose: Numberic, absolute: bool = False) -> float:
+    def volumeConstraint(self, dose: Numeric, absolute: bool = False) -> float:
         """Calculate volume constraint for a specific dose.
 
         The method calculates the volume that receives at least a specific relative or absolute dose.
@@ -233,7 +233,7 @@ class DVH(object):
 
         Parameters
         ----------
-        dose : Numberic
+        dose : Numeric
             Dose value used to determine minimum volume that receives
             this dose. Can either be in relative or absolute dose units.
         absolute : bool, optional
@@ -241,7 +241,7 @@ class DVH(object):
 
         Returns
         -------
-        Numberic
+        Numeric
             Volume that receives at least a specific dose.
         """
         # check if dose is positive
@@ -256,7 +256,7 @@ class DVH(object):
 
         return float(np.interp(float(dose), self._doseDiffCenters, self._volumeCum-self._volumeDiff/2, left=self.volume, right=0))
 
-    def doseConstraint(self, volume: Numberic, absolute: bool = False) -> float:
+    def doseConstraint(self, volume: Numeric, absolute: bool = False) -> float:
         """Calculate dose constraint for a specific volume.
 
         The method calculates the maximum dose that a specific absolute or relative volume receives.
@@ -264,7 +264,7 @@ class DVH(object):
 
         Parameters
         ----------
-        volume : Numberic
+        volume : Numeric
             Volume used to determine the maximum dose that the volume receives.
             Can either be in relative or absolute volume units.
         absolute : bool, optional
@@ -303,7 +303,7 @@ class DVH(object):
 
         Returns
         -------
-        Numberic
+        Numeric
             Value from the dose or volume statistic calculation.
 
         Raises
@@ -378,7 +378,7 @@ class DVH(object):
             _logger.error(error)
             raise error
 
-        def fmtcmp(attr: str, ref: Self = self, comp: Self = other) -> Tuple[str, Numberic, Numberic, Numberic, Numberic]:
+        def fmtcmp(attr: str, ref: Self = self, comp: Self = other) -> Tuple[str, Numeric, Numeric, Numeric, Numeric]:
             """Generate arguments for string formatting.
 
             Parameters

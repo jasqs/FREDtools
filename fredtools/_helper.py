@@ -57,7 +57,7 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     return interpolator
 
 
-def get1DInterpolator(x: Iterable[Numberic], y: Iterable[Numberic], interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3):
+def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3):
     from scipy.interpolate import make_interp_spline
     from functools import partial
     import numpy as np

@@ -900,7 +900,7 @@ def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageF
     return stat
 
 
-def getIntegral(img: SITKImage, displayInfo: bool = False) -> Numberic:
+def getIntegral(img: SITKImage, displayInfo: bool = False) -> Numeric:
     """Get integral of image
 
     The function calculates the integral of an image defined as

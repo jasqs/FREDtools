@@ -67,7 +67,7 @@ def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, remo
     return os.path.abspath(mergedPDFFileName)
 
 
-def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = None, bins: Iterable[Numberic] | None = None, kind: str = "mean", returnBinCenters: bool = True) -> tuple[NDArray, NDArray]:
+def getHistogram(dataX: Iterable[Numeric], dataY: Iterable[Numeric] | None = None, bins: Iterable[Numeric] | None = None, kind: str = "mean", returnBinCenters: bool = True) -> tuple[NDArray, NDArray]:
     """Get histogram or differential histogram.
 
     The function creates a histogram data from a given dataX iterable in the defined bins.
@@ -204,12 +204,12 @@ def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = N
 
 
 @overload
-def sigma2fwhm(sigma: Numberic) -> Numberic: ...
+def sigma2fwhm(sigma: Numeric) -> Numeric: ...
 @overload
-def sigma2fwhm(sigma: Iterable[Numberic]) -> Iterable[Numberic]: ...
+def sigma2fwhm(sigma: Iterable[Numeric]) -> Iterable[Numeric]: ...
 
 
-def sigma2fwhm(sigma: Numberic | Iterable[Numberic]) -> Numberic | Iterable[Numberic]:
+def sigma2fwhm(sigma: Numeric | Iterable[Numeric]) -> Numeric | Iterable[Numeric]:
     """Convert sigma to FWHM.
 
     The function recalculates the sigma parameter of a Gaussian distribution
@@ -240,12 +240,12 @@ def sigma2fwhm(sigma: Numberic | Iterable[Numberic]) -> Numberic | Iterable[Numb
 
 
 @overload
-def fwhm2sigma(fwhm: Numberic) -> Numberic: ...
+def fwhm2sigma(fwhm: Numeric) -> Numeric: ...
 @overload
-def fwhm2sigma(fwhm: Iterable[Numberic]) -> Iterable[Numberic]: ...
+def fwhm2sigma(fwhm: Iterable[Numeric]) -> Iterable[Numeric]: ...
 
 
-def fwhm2sigma(fwhm: Numberic | Iterable[Numberic]) -> Numberic | Iterable[Numberic]:
+def fwhm2sigma(fwhm: Numeric | Iterable[Numeric]) -> Numeric | Iterable[Numeric]:
     """Convert FWHM to sigma.
 
     The function recalculates full width at half maximum (FWHM)
@@ -276,12 +276,12 @@ def fwhm2sigma(fwhm: Numberic | Iterable[Numberic]) -> Numberic | Iterable[Numbe
 
 
 @overload
-def wrapAngle(angle: Numberic, deg: bool = False) -> Numberic: ...
+def wrapAngle(angle: Numeric, deg: bool = False) -> Numeric: ...
 @overload
-def wrapAngle(angle: Iterable[Numberic], deg: bool = False) -> Iterable[Numberic]: ...
+def wrapAngle(angle: Iterable[Numeric], deg: bool = False) -> Iterable[Numeric]: ...
 
 
-def wrapAngle(angle: Numberic | Iterable[Numberic], deg: bool = False) -> Numberic | Iterable[Numberic]:
+def wrapAngle(angle: Numeric | Iterable[Numeric], deg: bool = False) -> Numeric | Iterable[Numeric]:
     """Wrap angle(s) to [0, 2pi) or [0, 360) range.
     The function wraps angle(s) given in radians [0, 2*pi) range.
 

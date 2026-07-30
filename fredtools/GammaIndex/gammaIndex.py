@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic, Field(strict=True, ge=0, le=100)], DTA: Numberic, DCO: Annotated[Numberic, Field(strict=True, ge=0, le=1)], DDType: Literal["local", "global"] = "local", globalNorm: Numberic | None = None, stepSize: Numberic = 10, fractionalStepSize: bool = True, mode: Literal["gamma", "pass-rate"] = "gamma", displayInfo: bool = False) -> SITKImage:
+def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric, Field(strict=True, ge=0, le=100)], DTA: Numeric, DCO: Annotated[Numeric, Field(strict=True, ge=0, le=1)], DDType: Literal["local", "global"] = "local", globalNorm: Numeric | None = None, stepSize: Numeric = 10, fractionalStepSize: bool = True, mode: Literal["gamma", "pass-rate"] = "gamma", displayInfo: bool = False) -> SITKImage:
     """Calculate gamma index map.
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
@@ -122,11 +122,11 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic
         raise error
 
     # validate DTA, DD, DDType, DCO and globalNorm
-    if not isinstance(DTA, Numberic) or DTA <= 0:
+    if not isinstance(DTA, Numeric) or DTA <= 0:
         error = ValueError(f"The value of DTA {DTA} is not correct. It must be a positive scalar.")
         _logger.error(error)
         raise error
-    if not isinstance(DD, Numberic) or DD <= 0 or DD >= 100:
+    if not isinstance(DD, Numeric) or DD <= 0 or DD >= 100:
         error = ValueError(f"The value of DD {DD} is not correct. It must be a positive scalar between 0 and 100.")
         _logger.error(error)
         raise error
@@ -134,17 +134,17 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic
         error = ValueError(f"Dose distance type must be a string and only 'local' or 'global' are supported.")
         _logger.error(error)
         raise error
-    if not isinstance(DCO, Numberic) or DCO <= 0 or DCO >= 1:
+    if not isinstance(DCO, Numeric) or DCO <= 0 or DCO >= 1:
         error = ValueError(f"The value of DCO {DCO} is not correct. It must be a positive scalar between 0 and 1.")
         _logger.error(error)
         raise error
-    if not ((isinstance(globalNorm, Numberic) and globalNorm > 0) or globalNorm is None):
+    if not ((isinstance(globalNorm, Numeric) and globalNorm > 0) or globalNorm is None):
         error = ValueError(f"The value of globalNorm {globalNorm} is not correct. It must be a positive scalar or None.")
         _logger.error(error)
         raise error
 
     # validate stepSize
-    if not isinstance(stepSize, Numberic) or stepSize <= 0:
+    if not isinstance(stepSize, Numeric) or stepSize <= 0:
         error = ValueError(f"The value {stepSize} is not correct. It must be a positive scalar.")
         _logger.error(error)
         raise error
@@ -361,7 +361,7 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
     return DottedDict(**GIstat)
 
 
-def getGIcmap(maxGI: Numberic, N: NonNegativeInt = 256) -> LinearSegmentedColormap:
+def getGIcmap(maxGI: Numeric, N: NonNegativeInt = 256) -> LinearSegmentedColormap:
     """Get colormap for Gamma Index images.
 
     The function creates a colormap for Gamma Index (GI) images,

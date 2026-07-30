@@ -61,14 +61,14 @@ class test_CreateCylinderMask(unittest.TestCase):
 
     def test_createCylinderMask(self):
         img = ft.createImg(size=[20, 20, 20])
-        mask = ft.createCylinderMask(img, startPoint=[5, 5, 5], endPoint=[15, 15, 15], radious=5)
+        mask = ft.createCylinderMask(img, startPoint=[5, 5, 5], endPoint=[15, 15, 15], radius=5)
         self.assertEqual(mask.GetSize(), img.GetSize())
         self.assertEqual(mask.GetPixelID(), sitk.sitkUInt8)
 
     def test_createCylinderMask_invalid_points(self):
         img = ft.createImg(size=[20, 20, 20])
         with self.assertRaises(TypeError):
-            ft.createCylinderMask(img, startPoint=[5, 5], endPoint=[15, 15, 15], radious=5)
+            ft.createCylinderMask(img, startPoint=[5, 5], endPoint=[15, 15, 15], radius=5)
 
 
 if __name__ == '__main__':

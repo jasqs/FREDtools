@@ -725,7 +725,7 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
     return imgCumSum
 
 
-def _calcPointsAlongLine(pointA: PointLike, pointB: PointLike, spacing: Numberic) -> NDArray:
+def _calcPointsAlongLine(pointA: PointLike, pointB: PointLike, spacing: Numeric) -> NDArray:
     """Calculate points along a line between two points with given spacing.
 
     Parameters
@@ -787,7 +787,7 @@ def _calcPositionsAlongLine(points: Iterable[PointLike], origin: PointLike) -> N
     return positions
 
 
-def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spacing: Numberic = 1, origin: Literal["start", "center", "image"] | PointLike = "center", displayInfo: bool = False, **kwargs) -> Tuple[tuple, tuple]:
+def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spacing: Numeric = 1, origin: Literal["start", "center", "image"] | PointLike = "center", displayInfo: bool = False, **kwargs) -> Tuple[tuple, tuple]:
     """Get 1D profile between points.
 
     The function gets a profile of an image defined as a SimpleITK
@@ -802,7 +802,7 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
         The starting point of the profile.
     pointB : PointLike
         The ending point of the profile.
-    spacing : Numberic, optional
+    spacing : Numeric, optional
         The spacing between profile points. (def. 1)
     origin : Literal["start", "center", "image"] or PointLike, optional
         The origin point for the profile calculation. (def. "center")
@@ -853,7 +853,7 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
             error = ValueError(f"Origin parameter '{originStr}' is not recognized. Available options are 'start', 'center', 'image' or a point-like object.")
             _logger.error(error)
             raise error
-    elif isinstance(origin, Iterable) and all(isinstance(p, Numberic) for p in origin):
+    elif isinstance(origin, Iterable) and all(isinstance(p, Numeric) for p in origin):
         originPoint = np.array(origin)
         originStr = "point"
         if len(originPoint) != img.GetDimension():

@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def pdfLandau(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic, amp: Numberic = 1) -> Numberic | Iterable[Numberic]:
+def pdfLandau(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, amp: Numeric = 1) -> Numeric | Iterable[Numeric]:
     """Landau probability density function (PDF).
 
     The function generates a Landau probability density with a given most probable
@@ -39,24 +39,24 @@ def pdfLandau(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic, amp
     import numpy as np
 
     # check parameters
-    if not isinstance(mpv, Numberic):
+    if not isinstance(mpv, Numeric):
         error = TypeError(f"The 'mpv' parameter must be a scalar but it is {type(mpv)}")
         _logger.error(error)
         raise error
-    if not isinstance(xi, Numberic):
+    if not isinstance(xi, Numeric):
         error = TypeError(f"The 'xi' parameter must be a scalar but it is {type(xi)}")
         _logger.error(error)
         raise error
-    if not isinstance(amp, Numberic):
+    if not isinstance(amp, Numeric):
         error = TypeError(f"The 'amp' parameter must be a scalar but it is {type(amp)}")
         _logger.error(error)
         raise error
 
-    if not (isinstance(xi, Numberic) and 0 < xi):
+    if not (isinstance(xi, Numeric) and 0 < xi):
         error = ValueError("The 'xi' parameter must be a scalar and xi > 0.")
         _logger.error(error)
         raise error
-    if not (isinstance(amp, Numberic) and 0 <= amp):
+    if not (isinstance(amp, Numeric) and 0 <= amp):
         error = ValueError("The 'amp' parameter must be a scalar and amp >= 0.")
         _logger.error(error)
         raise error
@@ -64,7 +64,7 @@ def pdfLandau(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic, amp
     return amp * landau.pdf(x, x_mpv=mpv, xi=xi) / landau.pdf(mpv, x_mpv=mpv, xi=xi)
 
 
-def pdfLandauGauss(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic, sigma: Numberic = 0, amp: Numberic = 1) -> Numberic | Iterable[Numberic]:
+def pdfLandauGauss(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, sigma: Numeric = 0, amp: Numeric = 1) -> Numeric | Iterable[Numeric]:
     """Probability density function (PDF) of Landau convoluted with a Gaussian.
 
     The function generates a Landau convoluted with a Gaussian probability density with a given
@@ -108,32 +108,32 @@ def pdfLandauGauss(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic
     import numpy as np
 
     # check parameters
-    if not isinstance(mpv, Numberic):
+    if not isinstance(mpv, Numeric):
         error = TypeError(f"The 'mpv' parameter must be a scalar but it is {type(mpv)}")
         _logger.error(error)
         raise error
-    if not isinstance(xi, Numberic):
+    if not isinstance(xi, Numeric):
         error = TypeError(f"The 'xi' parameter must be a scalar but it is {type(xi)}")
         _logger.error(error)
         raise error
-    if not isinstance(amp, Numberic):
+    if not isinstance(amp, Numeric):
         error = TypeError(f"The 'amp' parameter must be a scalar but it is {type(amp)}")
         _logger.error(error)
         raise error
-    if not isinstance(sigma, Numberic):
+    if not isinstance(sigma, Numeric):
         error = TypeError(f"The 'sigma' parameter must be a scalar but it is {type(sigma)}")
         _logger.error(error)
         raise error
 
-    if not (isinstance(xi, Numberic) and 0 < xi):
+    if not (isinstance(xi, Numeric) and 0 < xi):
         error = ValueError("The 'xi' parameter must be a scalar and xi > 0.")
         _logger.error(error)
         raise error
-    if not (isinstance(sigma, Numberic) and 0 <= sigma):
+    if not (isinstance(sigma, Numeric) and 0 <= sigma):
         error = ValueError("The 'sigma' parameter must be a scalar and sigma >= 0.")
         _logger.error(error)
         raise error
-    if not (isinstance(amp, Numberic) and 0 <= amp):
+    if not (isinstance(amp, Numeric) and 0 <= amp):
         error = ValueError("The 'amp' parameter must be a scalar and amp >= 0.")
         _logger.error(error)
         raise error
@@ -153,7 +153,7 @@ def pdfLandauGauss(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic
     return yInternal
 
 
-def fitLandau(x: Iterable[Numberic], y: Iterable[Numberic], fixAmplitude: bool = False) -> LMFitModelResult:
+def fitLandau(x: Iterable[Numeric], y: Iterable[Numeric], fixAmplitude: bool = False) -> LMFitModelResult:
     """Fit Landau distribution.
 
     The function fits Landau distribution to the data given as `x` and `y` values,
@@ -200,7 +200,7 @@ def fitLandau(x: Iterable[Numberic], y: Iterable[Numberic], fixAmplitude: bool =
     return fitResult
 
 
-def fitLandauGauss(x: Iterable[Numberic], y: Iterable[Numberic], fixAmplitude: bool = False) -> LMFitModelResult:
+def fitLandauGauss(x: Iterable[Numeric], y: Iterable[Numeric], fixAmplitude: bool = False) -> LMFitModelResult:
     """Fit Landau convoluted with Gaussian distribution.
 
     The function fits Landau convoluted with Gaussian distribution
@@ -249,7 +249,7 @@ def fitLandauGauss(x: Iterable[Numberic], y: Iterable[Numberic], fixAmplitude: b
     return fitResult
 
 
-def pdfVavilov(x: Numberic | Iterable[Numberic], mpv: Numberic, kappa: Numberic, beta: Numberic, scaling: Numberic, amp: Numberic = 1) -> Numberic | Iterable[Numberic]:
+def pdfVavilov(x: Numeric | Iterable[Numeric], mpv: Numeric, kappa: Numeric, beta: Numeric, scaling: Numeric, amp: Numeric = 1) -> Numeric | Iterable[Numeric]:
     """Probability density function (PDF) of Vavilov.
 
     The function generates a Vavilov probability density with a given
@@ -295,36 +295,36 @@ def pdfVavilov(x: Numberic | Iterable[Numberic], mpv: Numberic, kappa: Numberic,
     import numpy as np
 
     # check parameters
-    if not isinstance(mpv, Numberic):
+    if not isinstance(mpv, Numeric):
         error = TypeError(f"The 'mpv' parameter must be a scalar but it is {type(mpv)}")
         _logger.error(error)
         raise error
-    if not isinstance(kappa, Numberic):
+    if not isinstance(kappa, Numeric):
         error = TypeError(f"The 'kappa' parameter must be a scalar but it is {type(kappa)}")
         _logger.error(error)
         raise error
-    if not isinstance(beta, Numberic):
+    if not isinstance(beta, Numeric):
         error = TypeError(f"The 'beta' parameter must be a scalar but it is {type(beta)}")
         _logger.error(error)
         raise error
-    if not isinstance(amp, Numberic):
+    if not isinstance(amp, Numeric):
         error = TypeError(f"The 'amp' parameter must be a scalar but it is {type(amp)}")
         _logger.error(error)
         raise error
 
-    if not (isinstance(kappa, Numberic) and 0.01 <= kappa <= 12):
+    if not (isinstance(kappa, Numeric) and 0.01 <= kappa <= 12):
         error = ValueError("The 'kappa' parameter must be a scalar in range 0.01 <= kappa <= 12.")
         _logger.error(error)
         raise error
-    if not (isinstance(beta, Numberic) and 0 <= beta <= 1):
+    if not (isinstance(beta, Numeric) and 0 <= beta <= 1):
         error = ValueError("The 'beta' parameter must be a scalar in range 0 <= beta <= 1.")
         _logger.error(error)
         raise error
-    if not (isinstance(amp, Numberic) and 0 <= amp):
+    if not (isinstance(amp, Numeric) and 0 <= amp):
         error = ValueError("The 'amp' parameter must be a scalar amp >= 0.")
         _logger.error(error)
         raise error
-    if not (isinstance(scaling, Numberic) and 0 <= scaling):
+    if not (isinstance(scaling, Numeric) and 0 <= scaling):
         error = ValueError("The 'scaling' parameter must be a scalar scaling >= 0.")
         _logger.error(error)
         raise error
@@ -352,7 +352,7 @@ def pdfVavilov(x: Numberic | Iterable[Numberic], mpv: Numberic, kappa: Numberic,
     return yInternal
 
 
-def fitVavilov(x: Iterable[Numberic], y: Iterable[Numberic], beta0: Numberic = 0.5, kappa0: Numberic = 0.3, scaling0: Numberic = -1, fixAmplitude: bool = False) -> LMFitModelResult:
+def fitVavilov(x: Iterable[Numeric], y: Iterable[Numeric], beta0: Numeric = 0.5, kappa0: Numeric = 0.3, scaling0: Numeric = -1, fixAmplitude: bool = False) -> LMFitModelResult:
     """Fit Vavilov distribution.
 
     The function fits the Vavilov distribution to the data given as `x` and `y` values,
@@ -411,7 +411,7 @@ def fitVavilov(x: Iterable[Numberic], y: Iterable[Numberic], beta0: Numberic = 0
     return fitResult
 
 
-def _getMPV(x: Iterable[Numberic], y: Iterable[Numberic]) -> tuple[Numberic, Numberic]:
+def _getMPV(x: Iterable[Numeric], y: Iterable[Numeric]) -> tuple[Numeric, Numeric]:
     # calculate MPV and the maximum value
     from scipy.interpolate import InterpolatedUnivariateSpline
     import numpy as np

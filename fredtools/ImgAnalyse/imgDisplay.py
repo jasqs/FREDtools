@@ -225,7 +225,7 @@ class showSlices:
     See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
     """
 
-    def __init__(self, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, imgROIs: Iterable[SITKImage] | None = None, point: PointLike | None = None, DCOFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.1, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", figsize: Iterable[Numberic] = (15, 5)):
+    def __init__(self, imgBack: SITKImage | None = None, imgFront: SITKImage | None = None, imgROIs: Iterable[SITKImage] | None = None, point: PointLike | None = None, DCOFront: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.1, cmapBack: str | Colormap = "bone", cmapFront: str | Colormap = "jet", figsize: Iterable[Numeric] = (15, 5)):
         import ipywidgets as ipyw
         from matplotlib import colorbar, colors
         import matplotlib.pyplot as plt

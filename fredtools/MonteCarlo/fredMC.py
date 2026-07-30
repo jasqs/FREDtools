@@ -100,7 +100,7 @@ def readFREDStat(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
     import numpy as np
     import fredtools as ft
 
-    def scaleUnit(unit: str) -> Numberic:
+    def scaleUnit(unit: str) -> Numeric:
         match unit:
             case "ns":
                 return 1e9

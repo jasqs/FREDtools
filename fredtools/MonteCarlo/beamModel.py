@@ -253,12 +253,12 @@ class beamModel:
             raise error
         self._splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = splineOrder
 
-    def interpolateBeamModel(self, nomEnergy: Numberic | Iterable[Numberic]) -> DataFrame:
+    def interpolateBeamModel(self, nomEnergy: Numeric | Iterable[Numeric]) -> DataFrame:
         import pandas as pd
         import fredtools as ft
 
         # validate nominal energy
-        if isinstance(nomEnergy, Numberic):
+        if isinstance(nomEnergy, Numeric):
             nomEnergy = [nomEnergy]
         else:
             nomEnergy = list(nomEnergy)
@@ -462,7 +462,7 @@ class beamModel:
 
         self.materials = materials
 
-    def getSigma(self, distance: Numberic, nomEnergy: Numberic | Iterable[Numberic]) -> Tuple[Numberic, Numberic] | Tuple[List[Numberic], List[Numberic]]:
+    def getSigma(self, distance: Numeric, nomEnergy: Numeric | Iterable[Numeric]) -> Tuple[Numeric, Numeric] | Tuple[List[Numeric], List[Numeric]]:
         import numpy as np
 
         if self._energyModel.empty:
@@ -474,9 +474,9 @@ class beamModel:
         sigmaX = np.sqrt(np.asarray(energyModel["aX"]) + np.asarray(energyModel["bX"]) * float(distance) + np.asarray(energyModel["cX"]) * float(distance) ** 2)
         sigmaY = np.sqrt(np.asarray(energyModel["aY"]) + np.asarray(energyModel["bY"]) * float(distance) + np.asarray(energyModel["cY"]) * float(distance) ** 2)
 
-        return (float(sigmaX[0]), float(sigmaY[0])) if isinstance(nomEnergy, Numberic) else (sigmaX.tolist(), sigmaY.tolist())
+        return (float(sigmaX[0]), float(sigmaY[0])) if isinstance(nomEnergy, Numeric) else (sigmaX.tolist(), sigmaY.tolist())
 
-    def getGateParams(self, sourceToAxisDistance: NonNegativeFloat, nomEnergy: Numberic | Iterable[Numberic]) -> DataFrame:
+    def getGateParams(self, sourceToAxisDistance: NonNegativeFloat, nomEnergy: Numeric | Iterable[Numeric]) -> DataFrame:
         """ Get the beam parameters for GATE simulation.
 
         This function calculates the beam parameters for GATE simulation based on the nozzle exit position and nominal energy.
@@ -587,7 +587,7 @@ class beamModel:
         return beamModel
 
 
-def twiss2SigmaSquared(epsilon: Numberic, alpha: Numberic, beta: Numberic) -> Tuple[Numberic, Numberic, Numberic] | Tuple[List[Numberic], List[Numberic], List[Numberic]]:
+def twiss2SigmaSquared(epsilon: Numeric, alpha: Numeric, beta: Numeric) -> Tuple[Numeric, Numeric, Numeric] | Tuple[List[Numeric], List[Numeric], List[Numeric]]:
     """ Convert Twiss parameters to sigma squared model.
 
     Convert beam propagation parameters defined as Twiss model to sigma squared model parameters.
@@ -622,7 +622,7 @@ def twiss2SigmaSquared(epsilon: Numberic, alpha: Numberic, beta: Numberic) -> Tu
     return (float(np.real(a)), float(b), float(c)) if np.isscalar(a) else (a.tolist(), b.tolist(), c.tolist())
 
 
-def sigmaSquared2Twiss(a: Numberic | Iterable[Numberic], b: Numberic | Iterable[Numberic], c: Numberic | Iterable[Numberic]) -> Tuple[Numberic, Numberic, Numberic] | Tuple[List[Numberic], List[Numberic], List[Numberic]]:
+def sigmaSquared2Twiss(a: Numeric | Iterable[Numeric], b: Numeric | Iterable[Numeric], c: Numeric | Iterable[Numeric]) -> Tuple[Numeric, Numeric, Numeric] | Tuple[List[Numeric], List[Numeric], List[Numeric]]:
     """ Convert sigma squared model parameters to Twiss parameters.
 
     Convert beam propagation parameters defined as sigma squared model to Twiss model parameters.
@@ -766,7 +766,7 @@ def writeBeamModel(beamModel: dict, fileName: PathLike) -> None:
         yaml.dump(beamModelSave, yaml_file, sort_keys=False, width=2000, default_flow_style=False, allow_unicode=True)
 
 
-def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numberic | Iterable[Numberic], interpolation: Literal["linear", "spline", "nearest"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3) -> DataFrame:
+def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Numeric], interpolation: Literal["linear", "spline", "nearest"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3) -> DataFrame:
     """Interpolate beam model for a given nominal energy.
 
     The function interpolates all the beam model parameters for a given nominal energies
@@ -799,7 +799,7 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numberic | Iterable[Nu
     import numpy as np
 
     # validate nominal energy
-    if isinstance(nomEnergy, Numberic):
+    if isinstance(nomEnergy, Numeric):
         nomEnergy = [nomEnergy]
 
     # validate the interpolation method
@@ -835,7 +835,7 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numberic | Iterable[Nu
     return beamModelEnergyInterp
 
 
-def calcRaysVectors(targetPoint: Iterable[Numberic] | Iterable[Iterable[Numberic]], SAD: Iterable[Numberic]) -> Tuple[NDArray, NDArray]:
+def calcRaysVectors(targetPoint: Iterable[Numeric] | Iterable[Iterable[Numeric]], SAD: Iterable[Numeric]) -> Tuple[NDArray, NDArray]:
     """Calculate rays positions and direction versors.
 
     The function calculates the ray position and direction versor from the target position.

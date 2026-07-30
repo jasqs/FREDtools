@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def inmSumVec(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayInfo: bool = False) -> NDArray:
+def inmSumVec(inmSparse: SparseMatrixCSR, weights: Iterable[Numeric], displayInfo: bool = False) -> NDArray:
     """Sum up the influence matrix to a vector.
 
     The function sums up the influence matrix for a given set of pencil beams
@@ -15,9 +15,9 @@ def inmSumVec(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayIn
 
     Parameters
     ----------
-    imnSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
+    inmSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
         Sparse matrix of the influence matrix.
-    weigths : array-like
+    weights : array-like
         Array of weights for each pencil beam.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -43,14 +43,14 @@ def inmSumVec(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayIn
         _logger.error(error)
         raise error
 
-    weigthsArray = xp.asarray(weigths)
-    if inmSparse.shape[0] != weigthsArray.shape[0]:
+    weightsArray = xp.asarray(weights)
+    if inmSparse.shape[0] != weightsArray.shape[0]:
         error = ValueError("Number of weights must be equal to the number of pencil beams in the influence matrix.")
         _logger.error(error)
         raise error
 
     # sum up the influence matrix
-    vecSum = xp.asarray(inmSparse.T.dot(weigthsArray))
+    vecSum = xp.asarray(inmSparse.T.dot(weightsArray))
 
     if displayInfo:
         strLog = [f"Summed {inmSparse.shape[0]} PBs.",
@@ -61,7 +61,7 @@ def inmSumVec(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayIn
     return vecSum
 
 
-def inmSumImg(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], imgBase: SITKImage, displayInfo: bool = False) -> SITKImage:
+def inmSumImg(inmSparse: SparseMatrixCSR, weights: Iterable[Numeric], imgBase: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Sum up the influence matrix and create an image.
 
     The function sums up the influence matrix for a given set of pencil beams
@@ -71,9 +71,9 @@ def inmSumImg(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], imgBase: 
 
     Parameters
     ----------
-    imnSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
+    inmSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
         Sparse matrix of the influence matrix.
-    weigths : array-like
+    weights : array-like
         Array of weights for each pencil beam.
     imgBase : SimpleITK.Image
         Base image for the influence matrix.
@@ -92,7 +92,7 @@ def inmSumImg(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], imgBase: 
     import fredtools as ft
     import SimpleITK as sitk
 
-    vecInmSum = inmSumVec(inmSparse, weigths)
+    vecInmSum = inmSumVec(inmSparse, weights)
 
     if ft._helper.checkGPUcupy():
         import cupy as cp

@@ -49,8 +49,8 @@ from matplotlib.image import AxesImage  # noqa
 # from pandas._typing import Scalar as PDScalar
 # numeric
 import numpy as np  # noqa
-Numberic: TypeAlias = Union[int, float, np.number]
-PointLike: TypeAlias = Iterable[Numberic]
+Numeric: TypeAlias = Union[int, float, np.number]
+PointLike: TypeAlias = Iterable[Numeric]
 
 # path
 import os  # noqa

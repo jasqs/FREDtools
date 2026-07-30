@@ -135,7 +135,7 @@ def readOPG(fileName: PathLike, depth: float = 0, displayInfo: bool = False) -> 
     return img
 
 
-def readOPD(fileName: PathLike, depth: Numberic = 0, returnImg=["Integral", "Sum"], raiseWarning: bool = True, displayInfo: bool = False) -> List[SITKImage]:
+def readOPD(fileName: PathLike, depth: Numeric = 0, returnImg=["Integral", "Sum"], raiseWarning: bool = True, displayInfo: bool = False) -> List[SITKImage]:
     """Read OPD files from OmniPro software.
 
     The function reads a single OPD file saved by OmniPro software (IBA)

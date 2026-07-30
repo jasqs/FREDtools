@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def findSpots(img: SITKImage, DCO: Annotated[Numberic, Field(strict=True, ge=0, le=1)] = 0.1, margin: PositiveFloat | Iterable[PositiveFloat] = 3, displayInfo: bool = False) -> SITKImage:
+def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, le=1)] = 0.1, margin: PositiveFloat | Iterable[PositiveFloat] = 3, displayInfo: bool = False) -> SITKImage:
     """Find spots in 2D SITK image.
 
     The function identifies spots in a 2D SimpleITK image by applying a dose cut-off (DCO) to define the spot 
@@ -14,9 +14,9 @@ def findSpots(img: SITKImage, DCO: Annotated[Numberic, Field(strict=True, ge=0, 
     ----------
     img : SITKImage
         2D SITK image.
-    DCO : Numberic, optional
+    DCO : Numeric, optional
         Dose cut-off to define spot region. (def. 0.1)
-    margin : Numberic | Iterable[Numberic], optional
+    margin : Numeric | Iterable[Numeric], optional
         Margin around spot region in mm. (def. 3)
     displayInfo : bool, optional
         Display information about found spots. (def. False)
@@ -39,7 +39,7 @@ def findSpots(img: SITKImage, DCO: Annotated[Numberic, Field(strict=True, ge=0, 
 
     ft.ImgAnalyse._imgTypeChecker.isSITK2D(img, raiseError=True)
     # check DCO parameter
-    if not isinstance(DCO, Numberic) or DCO <= 0 or DCO >= 1:
+    if not isinstance(DCO, Numeric) or DCO <= 0 or DCO >= 1:
         error = ValueError(f"The value of DCO {DCO} is not correct. It must be a positive scalar between 0 and 1.")
         _logger.error(error)
         raise error
@@ -76,7 +76,7 @@ def findSpots(img: SITKImage, DCO: Annotated[Numberic, Field(strict=True, ge=0, 
     return imgLabel
 
 
-def _single1DGaussModel(pos: ArrayLike, amplitude: Numberic, centre: Numberic, sigma: Numberic) -> NDArray:
+def _single1DGaussModel(pos: ArrayLike, amplitude: Numeric, centre: Numeric, sigma: Numeric) -> NDArray:
     import numpy as np
     pos = np.array(pos)
     return amplitude * np.exp(-((pos - centre) ** 2) / (2 * sigma ** 2))
@@ -155,7 +155,7 @@ def fitSpotProfile(pos: ArrayLike, vec: ArrayLike, cutLevel: NonNegativeFloat = 
             raise error
 
 
-def _single2DGaussModel(x: NDArray, y: NDArray, amplitude: Numberic, centerX: Numberic, centerY: Numberic, sigmaX: Numberic, sigmaY: Numberic, rotation: Numberic) -> NDArray:
+def _single2DGaussModel(x: NDArray, y: NDArray, amplitude: Numeric, centerX: Numeric, centerY: Numeric, sigmaX: Numeric, sigmaY: Numeric, rotation: Numeric) -> NDArray:
     import numpy as np
     rotationRad = np.deg2rad(rotation)
     # rotationRad = ft.wrapAngle(rotationRad)
@@ -249,12 +249,12 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
             raise error
 
 
-def _sigmaSquaredModel(pos: NDArray, a: Numberic, b: Numberic, c: Numberic) -> NDArray:
+def _sigmaSquaredModel(pos: NDArray, a: Numeric, b: Numeric, c: Numeric) -> NDArray:
     import numpy as np
     return a + b * pos + c * pos**2
 
 
-def fitSigmaSquaredModel(pos: Iterable[Numberic], beamSize: Iterable[Numberic]) -> LMFitModelResult:
+def fitSigmaSquaredModel(pos: Iterable[Numeric], beamSize: Iterable[Numeric]) -> LMFitModelResult:
     """Fit sigma squared model to beam size data.
 
     The function fits the sigma squared model to the beam size data provided.
@@ -263,9 +263,9 @@ def fitSigmaSquaredModel(pos: Iterable[Numberic], beamSize: Iterable[Numberic]) 
 
     Parameters
     ----------
-    pos : Iterable[Numberic]
+    pos : Iterable[Numeric]
         Positions where the beam sizes were measured.
-    beamSize : Iterable[Numberic]
+    beamSize : Iterable[Numeric]
         Measured beam sizes at the corresponding positions.
 
     Returns

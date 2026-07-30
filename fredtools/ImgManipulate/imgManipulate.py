@@ -408,7 +408,7 @@ def floatingToBinaryMask(imgMask: SITKImage, threshold: Annotated[float, Field(s
     ft._imgTypeChecker.isSITK_maskFloating(imgMask, raiseError=True)
 
     # check if the threshold is correct
-    if not isinstance(threshold, Numberic):
+    if not isinstance(threshold, Numeric):
         error = TypeError(f"The parameter 'threshold' must be a scalar.")
         _logger.error(error)
         raise error
@@ -504,7 +504,7 @@ def cropImgToMask(img: SITKImage, imgMask: SITKImage, displayInfo: bool = False)
     return imgCrop
 
 
-def setValueMask(img: SITKImage, imgMask: SITKImage, value: Numberic, outside: bool = True, displayInfo: bool = False) -> SITKImage:
+def setValueMask(img: SITKImage, imgMask: SITKImage, value: Numeric, outside: bool = True, displayInfo: bool = False) -> SITKImage:
     """Set value inside/outside mask.
 
     The function sets the values of the `img` defined as an instance of
@@ -565,7 +565,7 @@ def setValueMask(img: SITKImage, imgMask: SITKImage, value: Numberic, outside: b
     return imgMasked
 
 
-def setNaNImg(img: SITKImage, value: Numberic = 0, displayInfo: bool = False) -> SITKImage:
+def setNaNImg(img: SITKImage, value: Numeric = 0, displayInfo: bool = False) -> SITKImage:
     """Replace NaN values in the image.
 
     The function replaces NaN values in the image defined as an instance of a SimpleITK
@@ -1030,7 +1030,7 @@ def _getFORTransformed(img: SITKImage, transform: SITKTransform) -> tuple:
     return sizePX, originRW, spacingRW, directionIdentity
 
 
-def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numberic], 3], gantryAngle: Numberic, couchAngle: Numberic, defaultPixelValue: Numberic | Literal["auto"] = "auto", interpolation:  Literal["linear", "nearest", "spline"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
+def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3], gantryAngle: Numeric, couchAngle: Numeric, defaultPixelValue: Numeric | Literal["auto"] = "auto", interpolation:  Literal["linear", "nearest", "spline"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
     """Transform an image to Beam's Eye View (BEV).
 
     The function transforms a 3D image defined as a SimpleITK 3D image object to
@@ -1158,7 +1158,7 @@ def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numberic], 3
 def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFraction: Annotated[float, Field(strict=True, ge=0, le=1)] = 0.5,
                                   relElecDensCalib: Annotated[ArrayLike, Literal["N", 2]] = [[-1024, -1000, -777.82, -495.34, -64.96, -34.39, -3.87, 51.92, 56.99, 226.05, 857.65, 1313, 8513, 12668, 25332],
                                                                                              [0, 0, 0.190, 0.489, 0.949, 0.976, 1, 1.043, 1.053, 1.117, 1.456, 1.696, 3.76, 6.58, 9.09]],
-                                  HUrange: Annotated[Iterable[Numberic], 2] = [-2000, 50000], displayInfo: bool = False) -> SITKImage:
+                                  HUrange: Annotated[Iterable[Numeric], 2] = [-2000, 50000], displayInfo: bool = False) -> SITKImage:
     """Overwrite HU values in a CT image based on structures' physical properties.
 
     The function searches in a structure RS dicom file for structures with
@@ -1295,7 +1295,7 @@ def setIdentityDirection(img: SITKImage, displayInfo: bool = False) -> SITKImage
     return img
 
 
-def addMarginToMask(imgMask: SITKImage, marginLateral: Numberic, marginProximal: Numberic, marginDistal: Numberic, lateralKernelType: Literal['circular', 'box', 'cross'] = "circular", displayInfo: bool = False) -> SITKImage:
+def addMarginToMask(imgMask: SITKImage, marginLateral: Numeric, marginProximal: Numeric, marginDistal: Numeric, lateralKernelType: Literal['circular', 'box', 'cross'] = "circular", displayInfo: bool = False) -> SITKImage:
     """Add lateral, proximal and distal margins to mask.
 
     The function adds lateral, proximal and/or distal margins to a binary mask defined as an
@@ -1405,7 +1405,7 @@ def addMarginToMask(imgMask: SITKImage, marginLateral: Numberic, marginProximal:
     return imgExt
 
 
-def addGaussMarginToMask(imgMask: SITKImage, gaussSigma: Numberic = 6, fractionAtEdge: Numberic = 0.9, edgeDist: Numberic = 4, displayInfo: bool = False) -> SITKImage:
+def addGaussMarginToMask(imgMask: SITKImage, gaussSigma: Numeric = 6, fractionAtEdge: Numeric = 0.9, edgeDist: Numeric = 4, displayInfo: bool = False) -> SITKImage:
     """Add Gaussian margin to mask.
 
     The function adds a Gaussian margin to a binary mask defined as an instance of a SimpleITK 
@@ -1468,7 +1468,7 @@ def addGaussMarginToMask(imgMask: SITKImage, gaussSigma: Numberic = 6, fractionA
     return imgMaskConstMarginGauss
 
 
-def addExpMarginToMask(imgMask: SITKImage, exponent: Numberic = 0.25, edgeDist: Numberic = 4, displayInfo: bool = False) -> SITKImage:
+def addExpMarginToMask(imgMask: SITKImage, exponent: Numeric = 0.25, edgeDist: Numeric = 4, displayInfo: bool = False) -> SITKImage:
     """Add exponential margin to mask.
 
     The function adds an exponential fall-off margin to a binary mask defined as an instance of a SimpleITK 

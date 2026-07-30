@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0, spacing: Sequence[Numberic] = [1, 1, 1], origin: Sequence[Numberic] = [0.5, 0.5, 0.5], centred: bool = False, fillRandom: bool = False, displayInfo: bool = False) -> SITKImage:
+def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0, spacing: Sequence[Numeric] = [1, 1, 1], origin: Sequence[Numeric] = [0.5, 0.5, 0.5], centred: bool = False, fillRandom: bool = False, displayInfo: bool = False) -> SITKImage:
     """Create an empty image with a given size, spacing, and origin.
 
     The function creates an empty image, i.e. filled with 0 values, 
@@ -15,9 +15,9 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
         The size of the image in each dimension. Must be a sequence of 2 or 3 integers. (def. [10, 20, 30])
     components : NonNegativeInt, optional
         The number of components per pixel. Must be a non-negative integer. (def. 0)
-    spacing : Sequence[Numberic], optional
+    spacing : Sequence[Numeric], optional
         The spacing between pixels in each dimension. Must be a sequence of numbers. (def. [1, 1, 1])
-    origin : Sequence[Numberic], optional
+    origin : Sequence[Numeric], optional
         The origin of the image in each dimension. Must be a sequence of numbers. (def. [0.5, 0.5, 0.5])
     centred : bool, optional
         If True, the origin is centred. (def. False)
@@ -87,7 +87,7 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
     return img
 
 
-def createEllipseMask(img: SITKImage, point: PointLike, radii: Numberic | Sequence[Numberic], displayInfo: bool = False) -> SITKImage:
+def createEllipseMask(img: SITKImage, point: PointLike, radii: Numeric | Sequence[Numeric], displayInfo: bool = False) -> SITKImage:
     """Create an Ellipse mask in the image field of reference.
 
     The function creates an ellipse mask, defined with the center and radii
@@ -174,7 +174,7 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numberic | Sequen
     return imgMask
 
 
-def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, startRadius: Numberic, endRadius: Numberic, displayInfo: bool = False) -> SITKImage:
+def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, startRadius: Numeric, endRadius: Numeric, displayInfo: bool = False) -> SITKImage:
     """Create a cone mask in the image field of reference.
 
     The function creates a cone mask, defined with starting and ending points and radii 
@@ -259,7 +259,7 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
     return imgMask
 
 
-def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, radious: Numberic, displayInfo: bool = False) -> SITKImage:
+def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, radius: Numeric, displayInfo: bool = False) -> SITKImage:
     """Create a cylindrical Mask in the image field of reference
 
     The function creates a cylindrical mask with a given radius and height
@@ -277,7 +277,7 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
         3-element point describing the position of the center of the first cylinder base.
     endPoint : array_like
         3-element point describing the position of the center of the second cylinder base.
-    radious : scalar
+    radius : scalar
         Radius of the cylinder.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -299,7 +299,7 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
     import fredtools as ft
     import numpy as np
 
-    imgMask = ft.createConeMask(img, startPoint, endPoint, radious, radious)
+    imgMask = ft.createConeMask(img, startPoint, endPoint, radius, radius)
 
     if displayInfo:
         _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgMask))
@@ -307,7 +307,7 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
     return imgMask
 
 
-def createBoxMask(img: SITKImage, point: PointLike, size: Numberic | Sequence[Numberic], displayInfo: bool = False) -> SITKImage:
+def createBoxMask(img: SITKImage, point: PointLike, size: Numeric | Sequence[Numeric], displayInfo: bool = False) -> SITKImage:
     """Create a Box mask in the image field of reference.
 
     The function creates a box mask, defined with the center point and size
