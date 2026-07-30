@@ -1,0 +1,69 @@
+import unittest
+import os
+from pathlib import Path
+import fredtools as ft
+from fredtools._typing import *
+import pydicom as dicom
+
+testPath = Path(os.path.dirname(__file__))
+
+
+class test_getSOPInstanceUID(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_getSOPInstanceUID_single_file(self):
+        SOPInstanceUID = ft.Miscellaneous.dicom_uid.getSOPInstanceUID(self.dicomFiles.RSfileNames, displayInfo=True)
+        self.assertIsInstance(SOPInstanceUID, dicom.uid.UID)
+        self.assertTrue(SOPInstanceUID.is_valid)
+
+    def test_getSOPInstanceUID_multiple_files(self):
+        SOPInstanceUIDs = ft.Miscellaneous.dicom_uid.getSOPInstanceUID(self.dicomFiles.CTfileNames, displayInfo=True)
+        self.assertIsInstance(SOPInstanceUIDs, list)
+        self.assertEqual(len(SOPInstanceUIDs), 240)
+        self.assertEqual(len(set(SOPInstanceUIDs)), 240)
+
+    def test_getSOPInstanceUID_single_element_list(self):
+        SOPInstanceUIDs = ft.Miscellaneous.dicom_uid.getSOPInstanceUID([self.dicomFiles.CTfileNames[0]])
+        self.assertIsInstance(SOPInstanceUIDs, list)
+        self.assertEqual(len(SOPInstanceUIDs), 1)
+
+    def test_getSOPInstanceUID_empty_list(self):
+        SOPInstanceUIDs = ft.Miscellaneous.dicom_uid.getSOPInstanceUID([])
+        self.assertIsInstance(SOPInstanceUIDs, list)
+        self.assertEqual(len(SOPInstanceUIDs), 0)
+
+
+class test_getRNReferencedStructureSetUID(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_getRNReferencedStructureSetUID(self):
+        ReferencedStructureSetUID = ft.Miscellaneous.dicom_uid.getRNReferencedStructureSetUID(self.dicomFiles.RNfileNames, displayInfo=True)
+        self.assertIsInstance(ReferencedStructureSetUID, dicom.uid.UID)
+        self.assertEqual(ReferencedStructureSetUID, ft.Miscellaneous.dicom_uid.getSOPInstanceUID(self.dicomFiles.RSfileNames))
+
+    def test_getRNReferencedStructureSetUID_not_RN(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.getRNReferencedStructureSetUID(self.dicomFiles.RSfileNames)
+
+
+class test_getRSReferencedImageUIDs(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_getRSReferencedImageUIDs(self):
+        ReferencedImageUIDs = ft.Miscellaneous.dicom_uid.getRSReferencedImageUIDs(self.dicomFiles.RSfileNames, displayInfo=True)
+        self.assertIsInstance(ReferencedImageUIDs, list)
+        self.assertEqual(sorted(ReferencedImageUIDs), sorted(ft.Miscellaneous.dicom_uid.getSOPInstanceUID(self.dicomFiles.CTfileNames)))
+
+    def test_getRSReferencedImageUIDs_not_RS(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.getRSReferencedImageUIDs(self.dicomFiles.RNfileNames)
+
+
+if __name__ == '__main__':
+    unittest.main()

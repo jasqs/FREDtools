@@ -62,6 +62,7 @@ from datetime import datetime as DateTime  # noqa
 
 # dicom
 from pydicom import Dataset, FileDataset, DataElement  # noqa
+from pydicom.uid import UID as DicomUID  # noqa
 DicomDataset: TypeAlias = Union[Dataset, FileDataset]
 DicomDataElement: TypeAlias = DataElement
 
