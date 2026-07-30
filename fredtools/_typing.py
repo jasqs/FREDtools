@@ -1,3 +1,9 @@
+"""Public type vocabulary of the FREDtools package.
+
+The module gathers and defines the type aliases and typing helpers used
+across the package (e.g. Numeric, PathLike, SITKImage, DicomDataset),
+so that all the modules can import a consistent set of types from a single place.
+"""
 # https://docs.pydantic.dev/latest/concepts/types/
 
 from typing import Any, Iterable, Sequence, Literal, Union, Annotated, TypeVar, List, Tuple, SupportsFloat, NewType, Type, NamedTuple, TypeAlias
@@ -46,8 +52,6 @@ except ImportError:  # cupy is not installed
 from matplotlib.axes import Axes  # noqa
 from matplotlib.image import AxesImage  # noqa
 
-# from pandas._typing import Scalar as PDScalar
-# numeric
 import numpy as np  # noqa
 Numeric: TypeAlias = Union[int, float, np.number]
 PointLike: TypeAlias = Iterable[Numeric]

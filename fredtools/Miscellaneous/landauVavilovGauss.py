@@ -8,7 +8,7 @@ def pdfLandau(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, amp: Nu
 
     The function generates a Landau probability density with a given most probable
     value (`mpv`), width (described with `xi`) and amplitude at `mpv`. It was adapted
-    from [1]_ which was implemented based on the ROOT implementation. See [1]_ and [2]_ for more details.
+    from [landaupy]_ which was implemented based on the ROOT implementation. See [landaupy]_ and [landaupyDocs]_ for more details.
 
     Parameters
     ----------
@@ -26,14 +26,21 @@ def pdfLandau(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, amp: Nu
     scalar or numpy array
         Single value or array of values of the Landau PDF.
 
+    Raises
+    ------
+    TypeError
+        If `mpv`, `xi` or `amp` is not a scalar.
+    ValueError
+        If `xi` is not positive or `amp` is negative.
+
     See Also
     --------
     fitLandau : fit Landau distribution to data.
 
     References
     ----------
-    .. [1] `landaupy python package <https://pypi.org/project/landaupy/>`_
-    .. [2] `landaupy package documentation <https://github.com/SengerM/landaupy>`_
+    .. [landaupy] `landaupy python package <https://pypi.org/project/landaupy/>`_
+    .. [landaupyDocs] `landaupy package documentation <https://github.com/SengerM/landaupy>`_
     """
     from landaupy import landau
     import numpy as np
@@ -69,8 +76,8 @@ def pdfLandauGauss(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, si
 
     The function generates a Landau convoluted with a Gaussian probability density with a given
     most probable value of the convoluted function (`mpv`), the width of Landau (described with `xi`),
-    the standard deviation of Gaussian and amplitude at `mpv`. It was adapted from [3]_ which was implemented
-    based on the ROOT implementation. See [4]_ for more details.
+    the standard deviation of Gaussian and amplitude at `mpv`. It was adapted from [landaupy]_ which was implemented
+    based on the ROOT implementation. See [landaupyDocs]_ for more details.
 
     Parameters
     ----------
@@ -90,6 +97,13 @@ def pdfLandauGauss(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, si
     numpy array
         Array of values of the Landau convoluted with Gaussian PDF.
 
+    Raises
+    ------
+    TypeError
+        If `mpv`, `xi`, `sigma` or `amp` is not a scalar.
+    ValueError
+        If `xi` is not positive, or `sigma` or `amp` is negative.
+
     See Also
     --------
     fitLandauGauss : fit Landau distribution convoluted with a Gaussian to data.
@@ -98,11 +112,6 @@ def pdfLandauGauss(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, si
     -----
     The 'mpv' parameter does not describe the MPV of the landau distribution but the MPV,
     i.e. the position of the maximum value, of the whole Landau-gauss convoluted PDF.
-
-    References
-    ----------
-    .. [3] `landaupy python package <https://pypi.org/project/landaupy/>`_
-    .. [4] `landaupy package documentation <https://github.com/SengerM/landaupy>`_
     """
     from landaupy import langauss
     import numpy as np
@@ -145,7 +154,7 @@ def pdfLandauGauss(x: Numeric | Iterable[Numeric], mpv: Numeric, xi: Numeric, si
     mpvInternal = _getMPV(xInternal, langauss.pdf(xInternal, landau_x_mpv=float(mpv), landau_xi=float(xi), gauss_sigma=float(sigma)))
     xInternal += mpvInternal[0] - mpv
 
-    # normalize PDF to the amplitude
+    # normalise PDF to the amplitude
     yInternal = langauss.pdf(xInternal, landau_x_mpv=float(mpv), landau_xi=float(xi), gauss_sigma=float(sigma))
     yInternal /= mpvInternal[1]
     yInternal *= amp
@@ -254,8 +263,8 @@ def pdfVavilov(x: Numeric | Iterable[Numeric], mpv: Numeric, kappa: Numeric, bet
 
     The function generates a Vavilov probability density with a given
     most probable value (`mpv`), amplitude (`amp`), as well as `kappa`,
-    `beta` and `scaling` parameters. It uses the implementation of pyamtrack library [5]_
-    that adopts the ROOT implementation [6]_. The implemented PDF is not a true Vavilov distribution
+    `beta` and `scaling` parameters. It uses the implementation of pyamtrack library [pyamtrack]_
+    that adopts the ROOT implementation [ROOTVavilov]_. The implemented PDF is not a true Vavilov distribution
     and the `scaling` parameter is not included in the original ROOT implementation. Therefore, the parameters
     `kappa` and `beta` might not describe the real kappa and beta parameters of the ROOT Vavilov.
     Nevertheless, the PDF can be used for fitting the distribution to the measurement data
@@ -282,14 +291,22 @@ def pdfVavilov(x: Numeric | Iterable[Numeric], mpv: Numeric, kappa: Numeric, bet
     numpy array
         Array of values of the Vavilov PDF.
 
+    Raises
+    ------
+    TypeError
+        If `mpv`, `kappa`, `beta` or `amp` is not a scalar.
+    ValueError
+        If `kappa` is not in the range 0.01 <= kappa <= 12, `beta` is not
+        in the range 0 <= beta <= 1, or `amp` or `scaling` is negative.
+
     See Also
     --------
     fitVavilov : fit Vavilov distribution to data.
 
     References
     ----------
-    .. [5] `pyamtrack python package <https://github.com/libamtrack/pyamtrack>`_
-    .. [6] `ROOT Vavilov class reference <https://root.cern/doc/master/classROOT_1_1Math_1_1Vavilov.html>`_
+    .. [pyamtrack] `pyamtrack python package <https://github.com/libamtrack/pyamtrack>`_
+    .. [ROOTVavilov] `ROOT Vavilov class reference <https://root.cern/doc/master/classROOT_1_1Math_1_1Vavilov.html>`_
     """
     from pyamtrack.libAT import AT_Vavilov_PDF
     import numpy as np
@@ -345,7 +362,7 @@ def pdfVavilov(x: Numeric | Iterable[Numeric], mpv: Numeric, kappa: Numeric, bet
 
     AT_Vavilov_PDF(xInternal.tolist(), p_kappa=kappa, p_beta=beta, p_density=yInternal)
 
-    # normalize PDF to the amplitude
+    # normalise PDF to the amplitude
     yInternal /= mpvInternal[1]
     yInternal *= amp
 

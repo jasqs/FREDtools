@@ -20,6 +20,11 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     -------
     interpolator
         An object of a SimpleITK interpolator.
+
+    Raises
+    ------
+    ValueError
+        If the interpolation method cannot be recognised or the spline order is not in range 0-5.
     """
     import SimpleITK as sitk
 
@@ -49,7 +54,7 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
                 case 5:
                     interpolator = sitk.sitkBSplineResamplerOrder5
         case _:
-            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
             _logger.error(error)
             raise error
 
@@ -58,6 +63,40 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
 
 
 def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3):
+    """Get a 1D interpolator for data points.
+
+    The function creates a one-dimensional interpolator for the data points
+    given as `x` and `y` values, using the requested interpolation method.
+    The 'linear' and 'spline' interpolations are implemented with
+    scipy.interpolate.make_interp_spline, whereas the 'nearest' interpolation
+    is implemented locally: the nearest neighbour is selected based on the
+    half-way points between consecutive `x` values, and the indices are clipped
+    at the edges so that positions outside the `x` range map to the first or
+    last data point. Note that a spline of order 0 is not equivalent to the
+    'nearest' interpolation but to the 'previous' interpolation type.
+
+    Parameters
+    ----------
+    x : array_like
+        `X` values of the data points.
+    y : array_like
+        `Y` values of the data points.
+    interpolation : {'linear', 'nearest', 'spline'}, optional
+        Determine the interpolation method. (def. 'linear')
+    splineOrder : int, optional
+        Order of spline interpolation. Must be in range 0-5. (def. 3)
+
+    Returns
+    -------
+    callable
+        A callable interpolator that takes the position (or positions) to
+        interpolate at and returns the interpolated value (or values).
+
+    Raises
+    ------
+    ValueError
+        If the interpolation method cannot be recognised or the spline order is not in range 0-5.
+    """
     from scipy.interpolate import make_interp_spline
     from functools import partial
     import numpy as np
@@ -91,7 +130,7 @@ def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation:
                 case 1:
                     _logger.info("The spline order 1 is equivalent to 'linear' interpolation type.")
         case _:
-            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
             _logger.error(error)
             raise error
 
@@ -100,7 +139,13 @@ def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation:
 
 
 def copyImgMetaData(imgSrc: SITKImage, imgDes: SITKImage) -> SITKImage:
-    """Copy meta data to the image source to the image destination"""
+    """Copy meta data to the image source to the image destination.
+
+    Raises
+    ------
+    TypeError
+        If `imgSrc` or `imgDes` is not an instance of a SimpleITK image object.
+    """
     import fredtools as ft
 
     ft._imgTypeChecker.isSITK(imgSrc, raiseError=True)

@@ -41,6 +41,13 @@ def setFieldsFolderStruct(folderPath: PathLike, RNfileName: PathLike, folderName
     -------
     path
         Path to created folder structure.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the folder given by `folderPath` does not exist.
+    FileExistsError
+        If the simulation folder already exists and `overwrite` is False.
     """
     import shutil
     import os
@@ -94,6 +101,11 @@ def readFREDStat(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
     -------
     DottedDict
         A dictionary with the read data.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file given by `fileName` does not exist.
 
     Notes
     -----
@@ -228,6 +240,11 @@ def getFREDVersions() -> List[str]:
     List of strings
         List of FRED versions.
 
+    Raises
+    ------
+    RuntimeError
+        If the FRED executable reports an error when listing the versions.
+
     See Also
     --------
     checkFREDVersion : check if the FRED version is installed.
@@ -261,6 +278,11 @@ def checkFREDVersion(version: str) -> bool:
     bool
         True if the version is installed.
 
+    Raises
+    ------
+    ValueError
+        If `version` is not a string.
+
     See Also
     --------
     getFREDVersions : list the installed FRED versions.
@@ -293,6 +315,13 @@ def getFREDVersion(version: str = "") -> str:
     -------
     str
         Full version name returned by FRED.
+
+    Raises
+    ------
+    ValueError
+        If the requested FRED version is not installed on the machine.
+    RuntimeError
+        If the FRED executable reports an error when checking the version.
 
     See Also
     --------
@@ -343,6 +372,12 @@ def runFRED(fileName: PathLike, version: str = "", params: Iterable[str] = [], d
     list of str
         Standard output of the FRED subprocess in the form of
         a list of string lines.
+
+    Raises
+    ------
+    ValueError
+        If the requested FRED version is not installed on the machine
+        or if the FRED input file given by `fileName` does not exist.
 
     See Also
     --------

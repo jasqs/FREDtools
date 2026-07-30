@@ -27,6 +27,14 @@ def transformIndexToPhysicalPoint(img: SITKImage, indices: Iterable[PointLike]) 
     tuple
         A NxD tuple of tuples with physical points.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+    AttributeError
+        If `indices` is not of an integer type or is not of the NxD shape,
+        where D is the image dimension.
+
     See Also
     --------
         transformContinuousIndexToPhysicalPoint : transform continuous indices to physical points.
@@ -84,6 +92,13 @@ def transformContinuousIndexToPhysicalPoint(img: SITKImage, indices: Iterable[Po
     tuple
         A NxD tuple of tuples with physical points.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+    AttributeError
+        If `indices` is not of the NxD shape, where D is the image dimension.
+
     See Also
     --------
         transformIndexToPhysicalPoint : transform indices to physical points.
@@ -133,6 +148,13 @@ def transformPhysicalPointToIndex(img: SITKImage, points: Iterable[PointLike]) -
     tuple
         A NxD tuple of tuples with indices.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+    AttributeError
+        If `points` is not of the NxD shape, where D is the image dimension.
+
     See Also
     --------
         transformIndexToPhysicalPoint : transform indices to physical points.
@@ -181,6 +203,13 @@ def transformPhysicalPointToContinuousIndex(img: SITKImage, points: Iterable[Poi
     -------
     tuple
         A NxD tuple of tuples with continuous indices.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+    AttributeError
+        If `points` is not of the NxD shape, where D is the image dimension.
 
     See Also
     --------

@@ -1,8 +1,9 @@
+from fredtools._typing import *
 from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def readGATE_HITSActor(fileName):
+def readGATE_HITSActor(fileName: PathLike) -> DataFrame:
     """Read GATE hits data for active volume.
 
     The function reads hits results of GATE active volume saved
@@ -10,7 +11,7 @@ def readGATE_HITSActor(fileName):
     are read but some of them are renamed:
 
         -  *Edep* is deposited energy in [MeV]
-        -  *PDGCode* is the same as PDG encoding [1]_
+        -  *PDGCode* is the same as PDG encoding [PDGschemeHits]_
 
     Parameters
     ----------
@@ -22,6 +23,12 @@ def readGATE_HITSActor(fileName):
     pandas DataFrame
         Dataframe with the data.
 
+    Raises
+    ------
+    ValueError
+        If the file cannot be read as a numpy pickle or root file,
+        or if the file extension is not '.npy' or '.root'.
+
     See Also
     --------
     readGATE_PSActor : read GATE phase space actor data.
@@ -29,7 +36,7 @@ def readGATE_HITSActor(fileName):
 
     References
     ----------
-    .. [1] `Monte Carlo Particle Numbering Scheme <https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf>`_
+    .. [PDGschemeHits] `Monte Carlo Particle Numbering Scheme <https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf>`_
     """
     import pandas as pd
     import numpy as np
@@ -73,7 +80,7 @@ def readGATE_HITSActor(fileName):
     return hitsActor
 
 
-def readGATE_PSActor(fileName):
+def readGATE_PSActor(fileName: PathLike) -> DataFrame:
     """Read GATE phase space actor data.
 
     The function reads the results of a GATE phase space actor saved
@@ -82,7 +89,7 @@ def readGATE_PSActor(fileName):
 
         -  *Ekine*, *EkinePre* and *EkinePost* are kinetic energies in [MeV]
         -  *Edep* is deposited energy in [MeV]
-        -  *PDGCode* is the same as PDG encoding [2]_
+        -  *PDGCode* is the same as PDG encoding [PDGschemePS]_
 
     The columns are sorted so that those matching the name groups
     ID, PDG, Ekine, Edep, DEDX and Length come first, in this order.
@@ -97,6 +104,12 @@ def readGATE_PSActor(fileName):
     pandas DataFrame
         Dataframe with the data.
 
+    Raises
+    ------
+    ValueError
+        If the file cannot be read as a numpy pickle or root file,
+        or if the file extension is not '.npy' or '.root'.
+
     See Also
     --------
     readGATE_HITSActor : read GATE hits data for active volume.
@@ -104,7 +117,7 @@ def readGATE_PSActor(fileName):
 
     References
     ----------
-    .. [2] `Monte Carlo Particle Numbering Scheme <https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf>`_
+    .. [PDGschemePS] `Monte Carlo Particle Numbering Scheme <https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf>`_
     """
     import pandas as pd
     import numpy as np
@@ -157,15 +170,15 @@ def readGATE_PSActor(fileName):
     return psActor
 
 
-def readGATEStat(fileNameLogOut, displayInfo: bool = False):
+def readGATEStat(fileNameLogOut: PathLike, displayInfo: bool = False) -> dict:
     """Read GATE simulation statistics information from Simulation Statistic Actor.
 
     The function reads some statistics information from the
-    GATE Simulation Statistic Actor output [3]_.
+    GATE Simulation Statistic Actor output [GATEStatActor]_.
 
     Parameters
     ----------
-    fileNameLogOut : string
+    fileNameLogOut : path
         A string path to GATE  Simulation Statistic Actor output.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -177,7 +190,7 @@ def readGATEStat(fileNameLogOut, displayInfo: bool = False):
 
     References
     ----------
-    .. [3] `GATE manual for Simulation Statistic Actor <https://opengate.readthedocs.io/en/latest/tools_to_interact_with_the_simulation_actors.html?highlight=%20Simulation%20Statistic%20Actor#id7>`_
+    .. [GATEStatActor] `GATE manual for Simulation Statistic Actor <https://opengate.readthedocs.io/en/latest/tools_to_interact_with_the_simulation_actors.html?highlight=%20Simulation%20Statistic%20Actor#id7>`_
     """
     import re
     import fredtools as ft

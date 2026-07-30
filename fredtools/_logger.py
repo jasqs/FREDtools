@@ -113,6 +113,8 @@ def getLogger(name: str | None = None) -> logging.Logger:
 
     The function returns a logger with a NullHandler attached. The NullHandler is attached to the logger
     to suppress any logging messages if no handler is attached to the logger.
+    Note that a new NullHandler instance is appended to the logger on every call,
+    so repeated calls with the same name accumulate NullHandler instances.
 
     Parameters
     ----------

@@ -21,6 +21,13 @@ def getDicomTypeName(dicomVar: PathLike | DicomDataset) -> str:
     string
         A string of the SOP Class UID name.
 
+    Raises
+    ------
+    TypeError
+        If `dicomVar` is not an instance of dicom.dataset.FileDataset.
+    ValueError
+        If the 'SOPClassUID' tag cannot be found in the dicom tags.
+
     See Also
     --------
     sortDicoms : sort dicom files in a folder by type.
@@ -165,7 +172,7 @@ def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: boo
         -  RN - dicom files of RT Plan Storage ("RT Plan Storage" or "RT Ion Plan Storage")
         -  RD - dicom files of 1D/2D/3D RT Dose Storage (for instance dose distribution)
         -  PET - dicom files of PET Image Storage ("Positron Emission Tomography Image Storage")
-        -  Unknown - files with *.dcm extension that were not recognized.
+        -  Unknown - files with *.dcm extension that were not recognised.
 
     Parameters
     ----------
@@ -212,7 +219,7 @@ def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: boo
         elif _isDicomPET(dicomFileName):  # PET
             PETfileNames.append(dicomFileName)
         else:
-            UnknownfileNames.append(dicomFileName)  # unrecognized dicoms
+            UnknownfileNames.append(dicomFileName)  # unrecognised dicoms
 
     fileNamesNo = len(CTfileNames) + len(RSfileNames) + len(RNfileNames) + len(RDfileNames) + len(PETfileNames) + len(UnknownfileNames)
     if fileNamesNo == 0:
@@ -356,6 +363,15 @@ def getRNMachineName(fileName: PathLike, displayInfo: bool = False) -> str:
     string
         Treatment machine name.
 
+    Raises
+    ------
+    TypeError
+        If the dicom is not of RN type, or if the beam sequence cannot be
+        recognised as 'RT Plan Storage' or 'RT Ion Plan Storage'.
+    ValueError
+        If the beam sequence cannot be found in the dicom, or if the
+        'TreatmentMachineName' tags are not the same for all TREATMENT beams.
+
     See Also
     --------
     getRNFields : get a summary of parameters for each field defined in the RN plan.
@@ -403,7 +419,7 @@ def getRNIsocenter(fileName: PathLike, displayInfo: bool = False) -> tuple:
     The function retrieves the isocenter position defined in the RN dicom file.
     The isocenter is defined for each field separately but usually, it is the same
     for all fields. If it is not the same then a warning is raised and a geometrical
-    center is returned.
+    centre is returned.
 
     Parameters
     ----------
@@ -416,6 +432,15 @@ def getRNIsocenter(fileName: PathLike, displayInfo: bool = False) -> tuple:
     -------
     tuple
         3-element tuple of XYZ isocenter coordinates in [mm].
+
+    Raises
+    ------
+    TypeError
+        If the dicom is not of RN type, or if the beam sequence cannot be
+        recognised as 'RT Plan Storage' or 'RT Ion Plan Storage'.
+    ValueError
+        If the beam sequence cannot be found in the dicom, or if no
+        isocenter position can be found for any TREATMENT field.
 
     See Also
     --------
@@ -468,7 +493,8 @@ def getRNSpots(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     """Get the parameters of each spot defined in the RN file.
 
     The function retrieves information for each spot defined in the RN dicom file.
-    All spots are listed in the results, including the spots with zero meterset weights.
+    Only the fields with TREATMENT delivery type are included. All spots of those
+    fields are listed in the results, including the spots with zero meterset weights.
 
     Parameters
     ----------
@@ -480,7 +506,34 @@ def getRNSpots(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     Returns
     -------
     pandas DataFrame
-        DataFrame with the spots' parameters.
+        DataFrame with one row per spot and the following columns
+        (columns with no values in the plan are dropped):
+
+            -  *FDeliveryNo* : field delivery number (order in IonBeamSequence).
+            -  *FNo* : field (beam) number.
+            -  *FName* : field (beam) name.
+            -  *FGantryAngle* : gantry angle in [deg].
+            -  *FCouchAngle* : couch (patient support) angle in [deg].
+            -  *FCouchPitchAngle* : couch pitch angle in [deg].
+            -  *FCouchRollAngle* : couch roll angle in [deg].
+            -  *FIsoPos* : isocenter position (3-element XYZ) in [mm].
+            -  *FMagDist* : virtual source-axis distances in [mm].
+            -  *FEnergyNo* : energy layer number within the field.
+            -  *FSpotNo* : spot number within the field.
+            -  *PBRSID* : range shifter ID.
+            -  *PBRSSetting* : range shifter setting.
+            -  *PBSnoutPos* : snout position in [mm].
+            -  *PBnomEnergy* : nominal beam energy in [MeV].
+            -  *PBMsW* : spot meterset weight.
+            -  *PBMU* : spot meterset in [MU].
+            -  *PBPosX*, *PBPosY* : spot positions in [mm].
+            -  *PBTuneID* : scan spot tune ID.
+            -  *PBPainting* : number of paintings.
+
+    Raises
+    ------
+    TypeError
+        If the dicom is not of RN type or not of 'RT Ion Plan Storage' type.
 
     See Also
     --------
@@ -606,6 +659,8 @@ def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False
     """Get the parameters of each field defined in the RN file.
 
     The function retrieves information for each field defined in the RN dicom file.
+    Only the fields with TREATMENT delivery type are included, and the spots with
+    zero (or negative) meterset weight are excluded from the field statistics.
     A consistency check is performed to check the correctness of the parameters written
     in the RN dicom file.
 
@@ -621,7 +676,36 @@ def getRNFields(fileName: PathLike, raiseWarning=True, displayInfo: bool = False
     Returns
     -------
     pandas DataFrame
-        DataFrame with the fields' parameters.
+        DataFrame indexed by *FDeliveryNo* (field delivery number) with one row
+        per TREATMENT field and the following columns (columns with no values in
+        the plan are dropped; a column value is the literal string 'var' when the
+        parameter varies between the spots of the field):
+
+            -  *FNo* : field (beam) number.
+            -  *FName* : field (beam) name.
+            -  *FGantryAngle* : gantry angle in [deg].
+            -  *FCouchAngle* : couch (patient support) angle in [deg].
+            -  *FCouchPitchAngle* : couch pitch angle in [deg].
+            -  *FCouchRollAngle* : couch roll angle in [deg].
+            -  *FIsoPos* : isocenter position (3-element XYZ) in [mm].
+            -  *FRSID* : range shifter ID.
+            -  *FSnoutPos* : snout position in [mm].
+            -  *FEnergyNo* : number of energy layers.
+            -  *FEnergyMin*, *FEnergyMax* : minimum and maximum nominal energy in [MeV].
+            -  *FSpotNo* : number of spots with positive meterset weight.
+            -  *FDose* : field dose in [Gy].
+            -  *FDosePos* : field dose specification point (3-element XYZ) in [mm].
+            -  *FMU* : field meterset in [MU].
+            -  *FCumMsW* : final cumulative meterset weight.
+            -  *FnomRange* : nominal range (private tag (0x300B, 0x1004)).
+            -  *FnomSOBPWidth* : nominal SOBP width (private tag (0x300B, 0x100E)).
+            -  *FsupportID* : patient support ID.
+            -  *FMagDist* : virtual source-axis distances in [mm].
+
+    Raises
+    ------
+    TypeError
+        If the dicom is not of RN type or not of 'RT Ion Plan Storage' type.
 
     See Also
     --------
@@ -752,6 +836,15 @@ def getRNInfo(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
     dict
         Dictionary with the RN treatment plan parameters.
 
+    Raises
+    ------
+    TypeError
+        If the dicom is not of RN type, or if the beam sequence cannot be
+        recognised as 'RT Plan Storage' or 'RT Ion Plan Storage'.
+    ValueError
+        If the beam sequence cannot be found in the dicom, or if the
+        'TreatmentMachineName' tags are not the same for all TREATMENT beams.
+
     See Also
     --------
     getRNFields : get a summary of parameters for each field defined in the RN plan.
@@ -868,6 +961,14 @@ def getRSInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     -------
     DataFrame
         Pandas DataFrame with structures and properties.
+
+    Raises
+    ------
+    TypeError
+        If the dicom is not of RS type.
+    ImportError
+        If the 'StructureSetROISequence', 'ROIContourSequence' or
+        'RTROIObservationsSequence' cannot be found in the dicom.
     """
     import pandas as pd
     import pydicom as dicom
@@ -960,6 +1061,13 @@ def getExternalName(fileName: PathLike, displayInfo: bool = False) -> str:
     string
         String with the name of the structure of type EXTERNAL.
 
+    Raises
+    ------
+    TypeError
+        If the dicom is not of RS type.
+    ValueError
+        If no structure of type EXTERNAL is defined in the RS dicom file.
+
     See Also
     --------
     getRSInfo : getting information about all structures on the RS dicom file.
@@ -1002,6 +1110,16 @@ def getCT(fileNames: Iterable[PathLike], displayInfo: bool = False) -> SITKImage
     -------
     SimpleITK Image
         An object of a SimpleITK image of sitk.sitkInt16 (int16) type.
+
+    Raises
+    ------
+    TypeError
+        If `fileNames` is not an iterable of paths, if any dicom is missing
+        the 'FrameOfReferenceUID' or 'SeriesInstanceUID' tag, or if those
+        tags are not the same for all dicoms.
+    ValueError
+        If any file is not a CT dicom, or if the slice location spacing
+        is not constant.
 
     See Also
     --------
@@ -1113,6 +1231,16 @@ def getPET(fileNames: Iterable[PathLike], SUV: bool = True, displayInfo: bool = 
     -------
     SimpleITK Image
         An object of a SimpleITK image of sitk.sitkFloat32 (32-bit float) type.
+
+    Raises
+    ------
+    TypeError
+        If `fileNames` is not an iterable of paths, if any dicom is missing
+        the 'FrameOfReferenceUID' or 'SeriesInstanceUID' tag, or if those
+        tags are not the same for all dicoms.
+    ValueError
+        If any file is not a PET dicom, or if the slice location spacing
+        is not constant.
 
     See Also
     --------

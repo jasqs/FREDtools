@@ -38,6 +38,19 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     SimpleITK Image
         An object of a SimpleITK image describing a floating or binary mask.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK 3D image object.
+    ValueError
+        If the RS file is not a proper dicom describing structures,
+        if `areaFraction` is not a scalar in the range 0-1,
+        if the structure cannot be found in the RS file, or if not all
+        Z (depth) positions in a contour are the same.
+    RuntimeError
+        If not all contour depths are represented in the created mask,
+        or if the resulting floating or binary mask is incorrect.
+
     See Also
     --------
         cropImgToMask : crop image to mask boundary.
@@ -50,7 +63,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     approach has been implemented
 
     2. The mapping is done for each contour separately. If more than one contour is defined at depth, then 
-    the contours are summed with XOR operation, utilizing the shapely library. The mapping of each contour is 
+    the contours are summed with XOR operation, utilising the shapely library. The mapping of each contour is 
     done in 2D, meaning slice by slice. The resulting image has  the voxel size and shape the same as 
     the input `img` in X and Y directions. The voxel size  in the Z direction is calculated based on 
     the contour slice distances, taking into account gaps, holes and detached contours. The shape of 
@@ -399,6 +412,17 @@ def floatingToBinaryMask(imgMask: SITKImage, threshold: Annotated[float, Field(s
     SimpleITK Image
         An object of a SimpleITK image describing a binary mask (0/1 values).
 
+    Raises
+    ------
+    TypeError
+        If `imgMask` is not an instance of a SimpleITK image object
+        describing a floating mask, or if `threshold` is not a scalar.
+    ValueError
+        If `threshold` is not in the range 0-1 (the range excludes 0
+        when `thresholdEqual` is True).
+    RuntimeError
+        If the resulting binary mask is incorrect.
+
     See Also
     --------
         mapStructToImg : mapping a structure to an image to create a mask.
@@ -471,6 +495,14 @@ def cropImgToMask(img: SITKImage, imgMask: SITKImage, displayInfo: bool = False)
     SimpleITK Image
         An object of a SimpleITK image.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object, or if
+        `imgMask` is not an instance of a SimpleITK image object describing a mask.
+    ValueError
+        If the frames of reference of `img` and `imgMask` are not the same.
+
     See Also
     --------
         mapStructToImg : mapping a structure to an image to create a mask.
@@ -536,6 +568,14 @@ def setValueMask(img: SITKImage, imgMask: SITKImage, value: Numeric, outside: bo
     SimpleITK Image
         An object of a SimpleITK image.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object, or if
+        `imgMask` is not an instance of a SimpleITK image object describing a mask.
+    ValueError
+        If the frames of reference of `img` and `imgMask` are not the same.
+
     See Also
     --------
         mapStructToImg : mapping a structure to an image to create a mask.
@@ -586,6 +626,11 @@ def setNaNImg(img: SITKImage, value: Numeric = 0, displayInfo: bool = False) -> 
     -------
     SimpleITK Image
         An object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object.
     """
     import SimpleITK as sitk
     import fredtools as ft
@@ -612,8 +657,10 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     a specified interpolation method. The assumption is that
     the 'low extent' is not changed, i.e. the coordinates of
     the corner of the first voxel are preserved. The size of
-    the interpolated image is calculated to fit all the voxels' centers
-    in the original image extent. The function exploits the
+    the interpolated image is calculated to fit all the voxels' centres
+    in the original image extent. The voxels of the resampled image
+    falling outside the original image extent are filled with the minimum
+    value of the input image. The function exploits the
     SimpleITK.Resample routine.
 
     Parameters
@@ -634,6 +681,15 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     -------
     SimpleITK Image
         An object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object.
+    ValueError
+        If `img` describes a single point, or if the shape of `spacing`
+        does not match the dimension of `img` or the number of its
+        axes of size different than one.
     """
     import SimpleITK as sitk
     import numpy as np
@@ -677,7 +733,7 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     # calculate the default pixel value as min value of the input image
     """comment: In principle, this value is assigned when using NearestNeighborExtrapolator=False, and a value is to be 
     interpolated outside the 'img' extent. Such a case should not happen because it is assured in the line above that
-    the centers of the most external voxels to be interpolated are inside the original image extent. However, the value
+    the centres of the most external voxels to be interpolated are inside the original image extent. However, the value
     of defaultPixelValue is set to the img minimum value, to avoid the situation that the border voxels have strange values.
     In principle, when a CT image is rescaled, the defaultPixelValue will be -1000 (or -1024) and in case of dose interpolation, 
     the defaultPixelValue will be 0 or any other minimum value in the image."""
@@ -718,6 +774,14 @@ def sumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
     -------
     SimpleITK Image
         An object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If any element of `imgs` is not an instance of a SimpleITK image object.
+    ValueError
+        If the input iterable `imgs` is empty, or if not all images have
+        the same frame of reference.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -766,6 +830,14 @@ def maximumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImag
     -------
     SimpleITK Image
         An object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If any element of `imgs` is not an instance of a SimpleITK image object.
+    ValueError
+        If the input iterable `imgs` is empty, or if not all images have
+        the same frame of reference.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -814,6 +886,14 @@ def minimumImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImag
     -------
     SimpleITK Image
         An object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If any element of `imgs` is not an instance of a SimpleITK image object.
+    ValueError
+        If the input iterable `imgs` is empty, or if not all images have
+        the same frame of reference.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -862,6 +942,14 @@ def meanImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
     -------
     SimpleITK Image
         An object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If any element of `imgs` is not an instance of a SimpleITK image object.
+    ValueError
+        If the input iterable `imgs` is empty, or if not all images have
+        the same frame of reference.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -918,6 +1006,14 @@ def divideImg(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -
     -------
     SimpleITK Image
         An object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If `imgNum` or `imgDen` is not an instance of a SimpleITK image object.
+    ValueError
+        If the numerator and denominator images do not have the same
+        frame of reference.
     """
     import fredtools as ft
     import numpy as np
@@ -968,6 +1064,11 @@ def sumVectorImg(img: SITKImage, displayInfo: bool = False) -> SITKImage:
     -------
     SimpleITK Image
         Object of a SimpleITK image.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK vector image object.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -1068,6 +1169,14 @@ def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3]
     -------
     SimpleITK 3D Image
         An object of a transformed SimpleITK 3D image.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK 3D image object.
+    ValueError
+        If the dimension of `isocentrePosition` does not match the `img`
+        dimension, or if `defaultPixelValue` is not a scalar or 'auto'.
 
     Notes
     -----
@@ -1202,6 +1311,15 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
     SimpleITK 3D Image
         An object of a SimpleITK 3D image with overwritten HU values.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK 3D image object, or
+        if the RS file is not a proper dicom describing structures.
+    ValueError
+        If `HUrange` is not a 2-element iterable with the first element
+        less than or equal to the second.
+
     See Also
     --------
         mapStructToImg : mapping a structure to an image to create a mask.
@@ -1285,6 +1403,11 @@ def setIdentityDirection(img: SITKImage, displayInfo: bool = False) -> SITKImage
     -------
     SimpleITK Image
         Object SimpleITK image with identity direction (the same object as the input `img`).
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object.
     """
     import numpy as np
     import fredtools as ft
@@ -1327,6 +1450,14 @@ def addMarginToMask(imgMask: SITKImage, marginLateral: Numeric, marginProximal: 
     SimpleITK 3D Image
         Object of a SimpleITK 3D image describing the dilated mask.
 
+    Raises
+    ------
+    TypeError
+        If `imgMask` is not an instance of a SimpleITK 3D image object
+        describing a binary mask.
+    ValueError
+        If `lateralKernelType` cannot be recognised.
+
     See Also
     --------
         mapStructToImg : mapping a structure to an image to create a mask.
@@ -1348,7 +1479,7 @@ def addMarginToMask(imgMask: SITKImage, marginLateral: Numeric, marginProximal: 
         case "cross":
             lateralKernelTypeEnum = sitk.sitkCross
         case _:
-            error = ValueError(f"Lateral kernel type '{lateralKernelType}' cannot be recognized. Only 'circular', 'box' and 'cross' are supported.")
+            error = ValueError(f"Lateral kernel type '{lateralKernelType}' cannot be recognised. Only 'circular', 'box' and 'cross' are supported.")
             _logger.error(error)
             raise error
 
@@ -1434,6 +1565,13 @@ def addGaussMarginToMask(imgMask: SITKImage, gaussSigma: Numeric = 6, fractionAt
     SimpleITK Image
         Object of a SimpleITK image describing the mask with a Gaussian margin.
 
+    Raises
+    ------
+    TypeError
+        If `imgMask` is not an instance of a SimpleITK image object
+        describing a binary mask, or if the resulting image is not
+        a proper floating mask.
+
     See Also
     --------
         addExpMarginToMask : add exponential margin to mask.
@@ -1441,7 +1579,7 @@ def addGaussMarginToMask(imgMask: SITKImage, gaussSigma: Numeric = 6, fractionAt
     Notes
     -----
     The distance from the binary mask is calculated with the `SimpleITK.SignedDanielssonDistanceMap <https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1SignedDanielssonDistanceMapImageFilter.html>`_ 
-    routine, which calculates the distance from the nearest mask voxel center and not from the voxel edge.         
+    routine, which calculates the distance from the nearest mask voxel centre and not from the voxel edge.         
     """
     import fredtools as ft
     import numpy as np
@@ -1499,6 +1637,13 @@ def addExpMarginToMask(imgMask: SITKImage, exponent: Numeric = 0.25, edgeDist: N
     SimpleITK Image
         Object of a SimpleITK image describing the mask with an exponential margin.
 
+    Raises
+    ------
+    TypeError
+        If `imgMask` is not an instance of a SimpleITK image object
+        describing a binary mask, or if the resulting image is not
+        a proper floating mask.
+
     See Also
     --------
         addGaussMarginToMask : add Gaussian margin to mask.
@@ -1506,7 +1651,7 @@ def addExpMarginToMask(imgMask: SITKImage, exponent: Numeric = 0.25, edgeDist: N
     Notes
     -----
     The distance from the binary mask is calculated with the `SimpleITK.SignedDanielssonDistanceMap <https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1SignedDanielssonDistanceMapImageFilter.html>`_ 
-    routine, which calculates the distance from the nearest mask voxel center and not from the voxel edge. 
+    routine, which calculates the distance from the nearest mask voxel centre and not from the voxel edge. 
     """
     import fredtools as ft
     import numpy as np

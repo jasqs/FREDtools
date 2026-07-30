@@ -24,6 +24,14 @@ def readOPG(fileName: PathLike, depth: float = 0, displayInfo: bool = False) -> 
         An object of a SimpleITK image. The pixel values are converted
         to dose in [Gy] and the coordinates to [mm], regardless of the
         data and length units defined in the file.
+
+    Raises
+    ------
+    ImportError
+        If any of the required header lines ('Data Factor', 'Data Unit',
+        'Length Unit'), the asciibody section, or the X/Y coordinate lines
+        cannot be found in the file, or if the data or length unit cannot
+        be recognised.
     """
     import fredtools as ft
     import SimpleITK as sitk

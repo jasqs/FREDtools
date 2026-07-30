@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
+def convertCTtoWER(img: SITKImage, HU: ArrayLike, WER: ArrayLike, displayInfo: bool = False) -> SITKImage:
     """Convert CT map to WER map.
 
     The function converts a 3D Computed Tomography (CT) map with Hounsfield 
@@ -27,6 +27,12 @@ def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
     -------
     SimpleITK Image
         An instance of a SimpleITK image object with WER values.
+
+    Raises
+    ------
+    ValueError
+        If the lengths of `HU` and `WER` differ, or if the HU values of the image
+        are outside the range of the `HU` table.
 
     See Also
     --------
@@ -74,7 +80,7 @@ def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
     return imgWER
 
 
-def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
+def calcWETfromWER(imgWER: SITKImage, SAD: Iterable[Numeric], imgMask: SITKImage | None = None, displayInfo: bool = False) -> SITKImage:
     """Calculate WET image from WER image for point-like source.
 
     The function calculates Water-Equivalent Thickness (WET) for each voxel of 
@@ -106,6 +112,14 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     SimpleITK Image
         An instance of a SimpleITK image object with WET values.
         Voxels outside the mask are set to numpy.nan.
+
+    Raises
+    ------
+    ValueError
+        If a parallel beam is requested, which has not been implemented yet.
+    AttributeError
+        If `imgWER` and `imgMask` do not have the same frame of reference,
+        or if `SAD` is not a 2-element iterable.
 
     See Also
     --------
@@ -248,7 +262,7 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     return imgWET
 
 
-def generateIsoLayers(minRange, maxRange, beamParams):
+def generateIsoLayers(minRange: Numeric, maxRange: Numeric, beamParams: DataFrame) -> DataFrame:
     """Calculate iso-WET layers and corresponding energies.
 
     The function calculates iso Water-Equivalent Thickness (WET) layers between
@@ -270,6 +284,12 @@ def generateIsoLayers(minRange, maxRange, beamParams):
     pandas.DataFrame
         An instance of pandas.DataFrame object describing the iso WET layers,
         with the ranges in [mm] and the nominal energy ("nomEnergy") in [MeV].
+
+    Raises
+    ------
+    ValueError
+        If `beamParams` does not contain the required columns, or if `minRange`
+        or `maxRange` is outside the range covered by `beamParams`.
 
     Notes
     -----
@@ -318,7 +338,7 @@ def generateIsoLayers(minRange, maxRange, beamParams):
     return layersInfo
 
 
-def calcContours(imgMask, level=0.5, displayInfo: bool = False):
+def calcContours(imgMask: SITKImage, level: Numeric = 0.5, displayInfo: bool = False) -> List[ShapePolygon]:
     """Calculate contours from 2D binary mask.
 
     The function calculates list of contours from a 2D image defined as
@@ -374,7 +394,7 @@ def calcContours(imgMask, level=0.5, displayInfo: bool = False):
     return contoursPolygon
 
 
-def convertRayTargetToIsoPlane(rayTarget, SAD):
+def convertRayTargetToIsoPlane(rayTarget: NDArray, SAD: Iterable[Numeric]) -> NDArray:
     """Calculate beam position in the isocentre plane.
 
     The function calculates the beam positions in the isocentre plane, 

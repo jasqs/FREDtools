@@ -47,6 +47,14 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     SimpleITK Image
         An instance of a SimpleITK image object describing a slice.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a 3D or 4D SimpleITK image object.
+    AttributeError
+        If the dimension of `point` does not match the `img` dimension,
+        or if the `plane` parameter cannot be recognised.
+
     See Also
     --------
         matplotlib.pyplot.imshow : displaying 2D images.
@@ -122,11 +130,11 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     # check if plane is in proper format
     plane = plane.upper()
     if not {"X", "Y", "Z", "T", "-", "+"}.issuperset(plane):
-        error = AttributeError(f"Plane parameter '{plane}' cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        error = AttributeError(f"Plane parameter '{plane}' cannot be recognised. Only letters 'X','Y','Z','T','-','+' are supported.")
         _logger.error(error)
         raise error
     if len(plane) > 4:
-        error = AttributeError(f"Plane parameter '{plane}' cannot be recognized. The length of the plane parameter should be less than or equal to 4.")
+        error = AttributeError(f"Plane parameter '{plane}' cannot be recognised. The length of the plane parameter should be less than or equal to 4.")
         _logger.error(error)
         raise error
 
@@ -139,7 +147,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     # check if plane definition is correct for img dimension
     for planeSimpleAxis in planeSimple:
         if not planeSimpleAxis in axesNameAvailable:
-            error = AttributeError(f"Axis '{planeSimpleAxis}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+            error = AttributeError(f"Axis '{planeSimpleAxis}' cannot be recognised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
             _logger.error(error)
             raise error
 
@@ -231,10 +239,19 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
     SimpleITK Image
         An object of a SimpleITK image describing a profile.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object, or if it
+        already describes a profile.
+    AttributeError
+        If the dimension of `point` does not match the `img` dimension,
+        or if the `axis` parameter cannot be recognised.
+
     See Also
     --------
         matplotlib.pyplot.plot : displaying profiles.
-        pos : get voxels' centers for axes of size different than one.
+        pos : get voxels' centres for axes of size different than one.
         vec : get a vector with values for the img describing a profile.
 
     Examples
@@ -317,11 +334,11 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
     # check if axis is in proper format
     axis = axis.upper()
     if not {"X", "Y", "Z", "T", "-", "+"}.issuperset(axis):
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognised. Only letters 'X','Y','Z','T','-','+' are supported.")
         _logger.error(error)
         raise error
     if len(axis) > 2:
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should be less than or equal to 2.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognised. The length of the plane parameter should be less than or equal to 2.")
         _logger.error(error)
         raise error
 
@@ -333,7 +350,7 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
-        error = AttributeError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recognised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
         _logger.error(error)
         raise error
 
@@ -405,6 +422,14 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
     -------
     SimpleITK Image
         An instance of a SimpleITK image object describing a point.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object, or if it
+        already describes a point.
+    AttributeError
+        If the dimension of `point` does not match the `img` dimension.
 
     Examples
     --------
@@ -537,10 +562,18 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
     SimpleITK Image
         Instance of a SimpleITK image object describing a profile.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object, or if it
+        already describes a profile.
+    AttributeError
+        If the `axis` parameter cannot be recognised.
+
     See Also
     --------
         matplotlib.pyplot.plot : displaying profiles.
-        pos : get voxels' centers for axes of size different than one.
+        pos : get voxels' centres for axes of size different than one.
         vec : get a vector with values for the img describing a profile.
 
     Examples
@@ -605,11 +638,11 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
     # check if axis is in proper format
     axis = axis.upper()
     if not {"X", "Y", "Z", "T", "-", "+"}.issuperset(axis):
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. Only letters 'X','Y','Z','T','-','+' are supported.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognised. Only letters 'X','Y','Z','T','-','+' are supported.")
         _logger.error(error)
         raise error
     if len(axis) > 2:
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should be less than or equal to 2.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognised. The length of the plane parameter should be less than or equal to 2.")
         _logger.error(error)
         raise error
 
@@ -621,13 +654,13 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
-        error = AttributeError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recognised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
         _logger.error(error)
         raise error
 
     # determine axis to accumulate and axis of integral
     if not axisSimple in axesNameAvailable:
-        error = AttributeError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recognised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
         _logger.error(error)
         raise error
     axesAcc = [i for i, x in enumerate([axisSimple == i for i in axesNameAvailable]) if not x]
@@ -679,6 +712,13 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
         Instance of a SimpleITK image object describing the cumulative sum image
         (same size as `img`).
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object.
+    AttributeError
+        If the `axis` parameter cannot be recognised.
+
     See Also
     --------
         getInteg : get 1D integral profile from an image.
@@ -693,11 +733,11 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
     # check if axis is in proper format
     axis = axis.upper()
     if not {"X", "Y", "Z", "T"}.issuperset(axis):
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. Only letters 'X', 'Y', 'Z', 'T' are supported.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognised. Only letters 'X', 'Y', 'Z', 'T' are supported.")
         _logger.error(error)
         raise error
     if len(axis) > 1:
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should be less than or equal to 1.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognised. The length of the plane parameter should be less than or equal to 1.")
         _logger.error(error)
         raise error
 
@@ -706,7 +746,7 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
 
     # check if the profile definition is correct for img dimension
     if not axis in axesNameAvailable:
-        error = AttributeError(f"Axis '{axis}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axis}' cannot be recognised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
         _logger.error(error)
         raise error
 
@@ -793,29 +833,32 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
     """Get 1D profile between points.
 
     The function gets a profile of an image defined as a SimpleITK
-    image object, between two points, pointA and pointB, with a given step size (spacing).
+    image object, between two points, `pointA` and `pointB`, with a given step size (spacing).
     The values at the given points are interpolated from the image.
 
     Parameters
     ----------
-    img : SITKImage
-        The input image.
-    pointA : PointLike
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    pointA : array_like
         The starting point of the profile.
-    pointB : PointLike
+    pointB : array_like
         The ending point of the profile.
-    spacing : Numeric, optional
+    spacing : scalar, optional
         The spacing between profile points. (def. 1)
-    origin : Literal["start", "center", "image"] or PointLike, optional
-        The origin point for the profile calculation. (def. "center")
-        available options:
-            - "start": positions calculated starting from pointA.
-            - "center": positions calculated with respect to the line center.
-            - "image": positions calculated with respect to the image 0 point.
-        - PointLike: positions calculated with respect to the given point.
+    origin : {'start', 'center', 'image'} or array_like, optional
+        The origin for the calculation of the profile positions.
+        The following options are available:
+
+            -  'start': positions calculated starting from `pointA`.
+            -  'center': positions calculated with respect to the line centre.
+            -  'image': positions calculated with respect to the image 0 point.
+            -  array_like: positions calculated with respect to the given point.
+
+        (def. 'center')
     displayInfo : bool, optional
-        Whether to display information about the profile points, by default False.
-    **kwargs
+        Displays a summary of the function results. (def. False)
+    **kwargs :
         interpolation type, optional
         Determine the interpolation method. The following keyword arguments
         are available:
@@ -826,12 +869,19 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
 
     Returns
     -------
-    Tuple[tuple, tuple]
-        positions : tuple
-            The positions along the profile line.
-        values : tuple
-            The interpolated values at the profile points. The points outside
-            the image extent get numpy.nan values.
+    tuple of two tuples
+        A tuple of the positions along the profile line and a tuple of the
+        interpolated values at the profile points. The points outside
+        the image extent get numpy.nan values.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object.
+    ValueError
+        If the dimension of `pointA`, `pointB` or the origin point does not
+        match the `img` dimension, or if the `origin` parameter cannot be
+        recognised.
     """
     import fredtools as ft
     import numpy as np
@@ -854,7 +904,7 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
     if isinstance(origin, str):
         originStr = origin
         if originStr not in ["start", "center", "image"]:
-            error = ValueError(f"Origin parameter '{originStr}' is not recognized. Available options are 'start', 'center', 'image' or a point-like object.")
+            error = ValueError(f"Origin parameter '{originStr}' is not recognised. Available options are 'start', 'center', 'image' or a point-like object.")
             _logger.error(error)
             raise error
     elif isinstance(origin, Iterable) and all(isinstance(p, Numeric) for p in origin):
@@ -891,7 +941,7 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
             # positions calculated starting from pointA
             positions: NDArray = np.linalg.norm(np.array(points) - pointA, axis=1)
         case "center":
-            # positions calculated with respect to the line center
+            # positions calculated with respect to the line centre
             lineDir = (pointB - pointA) / lineLength
             centerPoint = (pointA + pointB) / 2
             positions: NDArray = np.array([np.linalg.norm(np.array(point) - centerPoint) * np.sign(np.dot(np.array(point) - centerPoint, lineDir)) for point in points])
@@ -903,7 +953,7 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
             lineDir = (pointB - pointA) / lineLength
             positions: NDArray = np.array([np.linalg.norm(np.array(point) - originPoint) * np.sign(np.dot(np.array(point) - originPoint, lineDir)) for point in points])
         case _:
-            error = ValueError(f"Origin parameter '{origin}' is not recognized. Available options are 'start', 'center', 'image' or a point-like object.")
+            error = ValueError(f"Origin parameter '{origin}' is not recognised. Available options are 'start', 'center', 'image' or a point-like object.")
             _logger.error(error)
             raise error
 

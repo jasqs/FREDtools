@@ -44,6 +44,14 @@ def importBeamModel(beamModel: beamModel, fitOrder: PositiveInt | Literal["auto"
     -------
     BeamlineModel : opengate.contrib.beamlines.ionbeamline.BeamlineModel
         The OpenGATE BeamlineModel object containing the imported beam model parameters.
+
+    Raises
+    ------
+    TypeError
+        If `beamModel` is not an instance of fredtools beamModel.
+    ValueError
+        If the beam convergence is not constant for all energies or if `fitOrder`
+        is neither a positive integer nor "auto".
     """
     import numpy as np
     from opengate.contrib.beamlines.ionbeamline import BeamlineModel  # type: ignore
@@ -109,6 +117,12 @@ def addMaterials(sim, beamModel: beamModel):
         The OpenGATE simulation object to which the materials will be added.
     beamModel : fredtools.beamModel
         The beam model containing the materials to be added. It must be an instance of fredtools beamModel.
+
+    Raises
+    ------
+    ValueError
+        If a material in the beam model is based on a material for which
+        the conversion has not been implemented (only 'PMMA' is implemented).
     """
     from opengate import g4_units  # type: ignore
 
@@ -165,7 +179,70 @@ def generateTimeStamps(spotsInfo: DataFrame, timeSpotDuration: float = 0.1, time
 
 
 def addIonPencilBeamSources(sim, spotsInfo: DataFrame, beamModel: beamModel, primNo: PositiveInt, CPUNo: PositiveInt) -> DataFrame:
+    """Add an OpenGATE IonPencilBeamSource for each spot to a simulation.
 
+    The function creates an OpenGATE IonPencilBeamSource, attached to the world volume,
+    for each spot defined in the `spotsInfo` DataFrame. The energy, energy spread and
+    the phase space (optics) parameters of each source are interpolated from the beam
+    model for the nominal energy of the spot, at the beam production point, i.e. at
+    the negative Source-To-Axis Distance upstream of the isocenter. Spots with
+    ``PBMU == 0`` are dropped and are not added to the simulation, therefore the
+    returned DataFrame can have fewer rows than the input `spotsInfo`.
+
+    The `spotsInfo` DataFrame must contain at least the columns:
+
+        - *PBMU*: monitor units of the spot (spots with zero MU are ignored),
+        - *PBnomEnergy*: nominal energy of the spot, used to interpolate the beam model,
+        - *PBPosX*, *PBPosY*: spot position in the isocenter plane,
+        - *FGantryAngle*: gantry angle of the field in degrees,
+        - *timeStart*, *timeStop*: start and stop times of the spot as
+          `datetime.timedelta` objects, as generated, for instance, by
+          the `generateTimeStamps` function (which requires the *FDeliveryNo* column
+          to group the spots by field delivery).
+
+    The spot positions and directions are calculated from the ray position and direction
+    versor, which assume the basic beam direction along the +Z axis. They are then rotated
+    by -90 degrees around the X axis, so that the basic beam direction is along the +Y axis,
+    and finally rotated around the Z axis by the gantry angle of each spot.
+
+    The `primNo` parameter defines the total number of primaries to be simulated. Each
+    source is set to generate ``primNo / CPUNo`` primaries, and the statistical weight of
+    each source is set to the number of primaries of the spot (calculated as the spot MU
+    multiplied by the beam model scaling factor) divided by `primNo`.
+
+    Parameters
+    ----------
+    sim : opengate.simulation.Simulation
+        The OpenGATE simulation object to which the sources will be added.
+    spotsInfo : DataFrame
+        The DataFrame with the spots parameters. It must contain at least the columns
+        listed above.
+    beamModel : fredtools.beamModel
+        The beam model used to interpolate the beam parameters for each spot.
+    primNo : PositiveInt
+        The total number of primaries to be simulated.
+    CPUNo : PositiveInt
+        The number of CPUs (threads) the simulation will be run on. Each source
+        will generate ``primNo / CPUNo`` primaries.
+
+    Returns
+    -------
+    DataFrame
+        A copy of `spotsInfo`, excluding the spots with ``PBMU == 0``, extended with
+        the interpolated beam model parameters and the calculated number of primaries,
+        gantry rotation, and translation and rotation of each spot.
+
+    Raises
+    ------
+    ValueError
+        If any of the nominal energies of the spots is outside the nominal energy
+        range of the beam model.
+
+    See Also
+    --------
+    generateTimeStamps : generate start and stop times for each spot.
+    importBeamModel : import a beam model to an OpenGATE BeamlineModel.
+    """
     from datetime import datetime, timedelta
     from scipy.spatial.transform import Rotation
     from fredtools import calcRaysVectors

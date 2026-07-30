@@ -73,6 +73,15 @@ def getInmFREDInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     DataFrame
         Pandas DataFrame with pencil beams and field numbers.
 
+    Raises
+    ------
+    TypeError
+        If the file is not a proper FRED influence matrix file.
+    FileNotFoundError
+        If the file cannot be found.
+    NotImplementedError
+        If the version of the influence matrix file is not supported.
+
     See Also
     --------
     getInmFREDBaseImg : get base image defined in FRED influence matrix.
@@ -239,6 +248,15 @@ def getInmFREDBaseImg(fileName: PathLike, dtype: DTypeLike = float, displayInfo:
     SimpleITK Image
         An object of a SimpleITK image.
 
+    Raises
+    ------
+    TypeError
+        If the file is not a proper FRED influence matrix file.
+    FileNotFoundError
+        If the file cannot be found.
+    NotImplementedError
+        If the version of the influence matrix file is not supported.
+
     See Also
     --------
     getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
@@ -317,6 +335,23 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
     -------
     list[scipy.sparse.csr_matrix] or list[cupy.sparse.csr_matrix]
         List of sparse matrices of point values for each component.
+
+    Raises
+    ------
+    TypeError
+        If the file is not a proper FRED influence matrix file, or if
+        `points` is not an N-element iterable of 3-element iterables.
+    FileNotFoundError
+        If the file cannot be found.
+    ValueError
+        If the interpreter is not supported.
+    NotImplementedError
+        If the version of the influence matrix file is not supported.
+
+    See Also
+    --------
+    getInmFREDInfo : get information from an influence matrix produced by FRED Monte Carlo.
+    getInmFREDBaseImg : get base image defined in FRED influence matrix.
     """
     import numpy as np
 

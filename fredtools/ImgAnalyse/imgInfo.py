@@ -30,15 +30,15 @@ def _generatePositionString(pos: tuple[float, ...], description: str = "position
 
 
 def _generateSpatialCentresString(pixelCentres: tuple[float, ...]) -> str:
-    """Generate voxels' centers string
+    """Generate voxels' centres string
 
-    The function generates a formatted string with voxels' centers in one direction.
+    The function generates a formatted string with voxels' centres in one direction.
     This routine is useful for displaying image information.
 
     Parameters
     ----------
     pixelCentres : array_like
-        A one-dimensional, array-like object of centers to be converted to a string.
+        A one-dimensional, array-like object of centres to be converted to a string.
 
     Returns
     -------
@@ -143,7 +143,7 @@ def _displayImageInfo(img: SITKImage, metadata: bool = True) -> str:
     imageInfo.append(f"voxel size [mm] = {np.array(img.GetSpacing())}")
     imageInfo.append(f"origin [mm]     = {np.array(img.GetOrigin())}")
     for vox, axisName in zip(voxelCentres, axesNames):
-        imageInfo.append(f"{axisName}-spatial voxel center [mm] = {_generateSpatialCentresString(vox)}")
+        imageInfo.append(f"{axisName}-spatial voxel centre [mm] = {_generateSpatialCentresString(vox)}")
     for ext, axisName in zip(extent_mm, axesNames):
         imageInfo.append(f"{axisName}-spatial extent [mm] = {_generateExtentString(ext)}")
 
@@ -204,6 +204,7 @@ def displayImageInfo(img: SITKImage, metadata: bool = True) -> None:
     """Display some image information.
 
     The function displays information about an image given as a SimpleITK image object.
+    The information is logged with the module logger at the INFO level.
 
     Parameters
     ----------
@@ -212,56 +213,38 @@ def displayImageInfo(img: SITKImage, metadata: bool = True) -> None:
     metadata : bool, optional
         Display additional metadata. (def. True)
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+
+    Notes
+    -----
+    The function sets the level of the module logger to INFO as a side effect,
+    so that the image information is always displayed, regardless of the
+    logging level configured before the call.
+
     Examples
     --------
     Reading image from file and displaying the image information.
 
     >>> imgCT=fredtools.readMHD('CT.mhd')
     >>> fredtools.displayImageInfo(imgCT)
-    ### displayImageInfo ###
-    # 3D image describing volume (3D)
-    # dims (xyz) =  [511 415 218]
-    # voxel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
-    # x-spatial voxel center [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
-    # y-spatial voxel center [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
-    # z-spatial voxel center [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]
-    # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
-    # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm³  =>  25.92 l
-    # voxel volume = 0.56 mm³  =>  0.56 ul
-    # data type:  16-bit signed integer
-    # range: from  -1024  to  3071
-    # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose>0)  voxels  = 46188861 (99.91%) => 25.90 l
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
-    # Additional metadata:
-    ########################
+    displayImageInfo: Image info:
+        3D image describing a volume (3D)
+        dims (xyz)      = [511 415 218]
+        voxel size [mm] = [0.68359375 0.68359375 1.2       ]
+        origin [mm]     = [-174.65820312 -354.28710938 -785.6       ]
+        x-spatial voxel centre [mm] = [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
+        ...
+        data type: 16-bit signed integer
+        range: from -1024 to 3071
+        ...
 
-    The same can be displayed when reading the image.
+    The same can be displayed when reading the image with `displayInfo=True`,
+    for instance:
 
     >>> imgCT=fredtools.readMHD('CT.mhd', displayInfo=True)
-    ### readMHD ###
-    # 3D image describing volume (3D)
-    # dims (xyz) =  [511 415 218]
-    # voxel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
-    # x-spatial voxel center [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
-    # y-spatial voxel center [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
-    # z-spatial voxel center [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]
-    # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
-    # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm³  =>  25.92 l
-    # voxel volume = 0.56 mm³  =>  0.56 ul
-    # data type:  16-bit signed integer
-    # range: from  -1024  to  3071
-    # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose>0)  voxels  = 46188861 (99.91%) => 25.90 l
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 l
-    # Additional metadata:
-    ###############
     """
     import fredtools as ft
     logger = ft.getLogger(__name__)

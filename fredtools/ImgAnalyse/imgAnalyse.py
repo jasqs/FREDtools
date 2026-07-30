@@ -15,12 +15,17 @@ def getExtent(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[float, f
     img : SimpleITK Image
         An object of a SimpleITK image.
     displayInfo : bool, optional
-        If True, a summary of the function results will be displayed. (default: False)
+        If True, a summary of the function results will be displayed. (def. False)
 
     Returns
     -------
     tuple
         A tuple of extent values in the form ((xmin, xmax), (ymin, ymax), ...)
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -68,12 +73,17 @@ def getSize(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
     img : SimpleITK Image
         An object of a SimpleITK image.
     displayInfo : bool, optional
-        If True, displays a summary of the function results. (default: False)
+        If True, displays a summary of the function results. (def. False)
 
     Returns
     -------
     tuple
         A tuple of sizes in each direction in the form (xSize, ySize, ...)
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -113,6 +123,11 @@ def getImageCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     tuple
         A Tuple of image centre coordinates in form (xCenter,yCenter,...)
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+
     See Also
     --------
     getMassCenter : get the centre of mass of an image.
@@ -125,20 +140,20 @@ def getImageCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     if not _isDirectionIdentity(img):
-        _logger.debug("The image direction array is not identity. The image center may be incorrect.")
+        _logger.debug("The image direction array is not identity. The image centre may be incorrect.")
 
     imgCenter = tuple(np.mean(np.array(getExtent(img)), 1).tolist())
 
     if displayInfo:
-        _logger.info("Image center:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(imgCenter, "center"))
+        _logger.info("Image centre:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(imgCenter, "centre"))
 
     return imgCenter
 
 
 def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...]:
-    """Get the center of mass of an image.
+    """Get the centre of mass of an image.
 
-    The function calculates the center of mass of an image defined as
+    The function calculates the centre of mass of an image defined as
     a SimpleITK image object in each direction. It is assumed that
     the coordinate system is in [mm]. Any NaN values are replaced with zeros.
 
@@ -152,7 +167,12 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...
     Returns
     -------
     tuple
-        A tuple of image center of mass coordinates in form (xMassCenter,yMassCenter,...)
+        A tuple of image centre of mass coordinates in form (xMassCenter,yMassCenter,...)
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -178,7 +198,7 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...
 
     # check if the image is filled with zeros only
     if np.all(sitk.GetArrayViewFromImage(img) == 0):
-        _logger.debug("Total mass of the image is zero (image filled with zeros). Returning image center as the mass center.")
+        _logger.debug("Total mass of the image is zero (image filled with zeros). Returning image centre as the mass centre.")
         massCenter = getImageCenter(img)
     else:
         imgITK = ft.SITK2ITK(img)
@@ -187,7 +207,7 @@ def getMassCenter(img: SITKImage, displayInfo: bool = False) -> tuple[float, ...
         massCenter = tuple(moments.GetCenterOfGravity())
 
     if displayInfo:
-        _logger.info("Image mass center:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(massCenter, "mass center"))
+        _logger.info("Image mass centre:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(massCenter, "mass centre"))
 
     return massCenter
 
@@ -210,6 +230,11 @@ def getMaxPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     -------
     tuple
         A Tuple of image maximum voxel coordinates in form (xPosition,yPosition,...).
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -259,6 +284,11 @@ def getMinPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     tuple
         A Tuple of image minimum voxel coordinates in form (xPosition,yPosition,...).
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+
     See Also
     --------
     getImageCenter : get the centre of an image.
@@ -283,7 +313,7 @@ def getMinPosition(img: SITKImage, displayInfo: bool = False) -> tuple[float, ..
     # minPosition = img.TransformIndexToPhysicalPoint([int(pos) for pos in minPosition])
 
     if displayInfo:
-        _logger.info("Image maximum position:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(minPosition, "max position"))
+        _logger.info("Image minimum position:\n" + ft.ImgAnalyse.imgInfo._generatePositionString(minPosition, "min position"))
 
     return minPosition
 
@@ -308,6 +338,11 @@ def getVoxelCentres(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[fl
         A tuple of tuples with voxels' centres in each
         direction in form ([x0,x1,...],[y0,y1,...],...)
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+
     See Also
     --------
     getVoxelEdges : get voxel edges.
@@ -328,8 +363,8 @@ def getVoxelCentres(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[fl
         axesNames = ["x", "y", "z", "t"]
         strLog = []
         for vox, axisName in zip(voxelCentres, axesNames):
-            strLog.append(f"{axisName}-spatial voxel centers [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
-        _logger.info("Image voxel centers:\n\t" + "\n\t".join(strLog))
+            strLog.append(f"{axisName}-spatial voxel centres [mm] = " + ft.ImgAnalyse.imgInfo._generateSpatialCentresString(vox))
+        _logger.info("Image voxel centres:\n\t" + "\n\t".join(strLog))
 
     return tuple(voxelCentres)
 
@@ -353,6 +388,11 @@ def getVoxelEdges(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[floa
     tuple
         A tuple of tuples with voxels' edges in each
         direction in form ([x0,x1,...],[y0,y1,...],...)
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -401,8 +441,14 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo
     Returns
     -------
     NxD numpy.array
-        A numpy array of size NxD where N is the number of voxel 
+        A numpy array of size NxD where N is the number of voxel
         and D is the axis.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image, or if `insideMask`
+        is True and `img` does not describe a binary mask.
 
     See Also
     --------
@@ -603,6 +649,11 @@ def getExtMpl(img: SITKImage) -> tuple[float, float, float, float]:
     tuple
         A tuple of extent values in the form (left, right, bottom, top).
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image describing a slice.
+
     See Also
     --------
         matplotlib.pyplot.imshow : displaying 2D images.
@@ -647,6 +698,11 @@ def pos(img: SITKImage) -> Union[tuple[float, ...], tuple[tuple[float, ...], ...
         A tuple with voxels' centres for the image describing a profile
         (the size in only one direction is greater than one) or list of tuples
         for all directions for which the size is greater than one.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -699,6 +755,11 @@ def arr(img: SITKImage) -> NDArray:
     numpy array
         A numpy array with no unitary dimensions.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
+
     See Also
     --------
         pos : get voxels' centres for axes of size different than one.
@@ -739,6 +800,11 @@ def vec(img: SITKImage) -> NDArray:
     numpy array
         A 1D numpy array.
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image describing a profile.
+
     See Also
     --------
         pos : get voxels' centres for axes of the size different than one.
@@ -776,13 +842,18 @@ def isPointInside(img: SITKImage, point: PointLike | Iterable[PointLike], displa
         An iterable (numpy array, list of lists, etc) of N points.
         Every point must be of the image dimension size.
     displayInfo : bool, optional
-        Displays a summary of the function results. (default: False)
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
     bool | tuple[bool, ...]
         A single boolean value if a single point is provided,
         or a tuple of boolean values if a list of points is provided.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -848,6 +919,9 @@ def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageF
     The function gets basic statistics of an image defined as
     a SimpleITK image object. It is a wrapper for
     SimpleITK.StatisticsImageFilter routine executed on the image.
+    If the image is a vector image, it is silently converted to a scalar
+    image being the sum of the vector components (with `fredtools.sumVectorImg`)
+    and a warning is logged; the statistics are then calculated for the sum of vectors.
 
     Parameters
     ----------
@@ -860,6 +934,11 @@ def getStatistics(img: SITKImage, displayInfo: bool = False) -> StatisticsImageF
     -------
     SimpleITK filter
         SimpleITK image filter with image statistics.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -905,7 +984,12 @@ def getIntegral(img: SITKImage, displayInfo: bool = False) -> Numeric:
 
     The function calculates the integral of an image defined as
     a SimpleITK image object. The integral is calculated as the sum
-    of all voxel values multiplied by the voxel volume.
+    of all voxel values multiplied by the voxel volume, where the voxel
+    volume is the product of the image spacing (assumed to be in mm), hence
+    the integral is expressed in the voxel value units times mm³.
+    If the image is a vector image, it is converted to a scalar image being
+    the sum of the vector components (with `fredtools.sumVectorImg`) and
+    a warning is logged; the integral is then calculated for the sum of vectors.
 
     Parameters
     ----------
@@ -918,6 +1002,11 @@ def getIntegral(img: SITKImage, displayInfo: bool = False) -> Numeric:
     -------
     float
         A float value with the integral of the image.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image.
 
     See Also
     --------
@@ -965,6 +1054,11 @@ def compareImg(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInfo: 
     bool
         A true/false value describing if the images are the same
         in the sense of the pixel values.
+
+    Raises
+    ------
+    TypeError
+        If `img1` or `img2` is not an instance of a SimpleITK image.
     """
     import fredtools as ft
     import numpy as np
@@ -1013,6 +1107,11 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInf
     bool
         A true/false value describing if the images are the same
         in the sense of the frame of reference.
+
+    Raises
+    ------
+    TypeError
+        If `img1` or `img2` is not an instance of a SimpleITK image.
 
     See Also
     --------

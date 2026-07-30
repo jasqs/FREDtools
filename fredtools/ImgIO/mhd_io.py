@@ -31,6 +31,18 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object.
+    ValueError
+        If the file exists and `overwrite` is False, or if the
+        'ElementDataFile' tag cannot be found in the written MHD file
+        when converting to a single file.
+    IOError
+        If the raw data file cannot be read or attached to the MHD file
+        when converting to a single file.
+
     See Also
     --------
     SimpleITK.WriteImage : SimpleITK routine for writing files.

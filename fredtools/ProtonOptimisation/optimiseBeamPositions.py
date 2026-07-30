@@ -1,8 +1,11 @@
-def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **kwargs):
-    """Calculate and optimize the beam positions in a contour.
+from fredtools._typing import *
 
-    The function calculates optimized beam positions in a contour defined
-    as an instance of the shapely.Polygon object. Various optimization
+
+def optimiseBeamPositions(contourPolygon: ShapePolygon, spotDistance: Numeric, algorithm: Literal["regular", "reg", "hexagonal", "hex", "concentric", "con", "delaunay", "del"] = "regular", **kwargs) -> NDArray:
+    """Calculate and optimise the beam positions in a contour.
+
+    The function calculates optimised beam positions in a contour defined
+    as an instance of the shapely.Polygon object. Various optimisation
     algorithms are implemented. Refer to 'See Also' section to read more about
     each algorithm.
 
@@ -12,17 +15,17 @@ def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **k
         Object of the shapely.Polygon.
     spotDistance : scalar
         The nominal spot distance, in the polygon coordinate unit (usually [mm]),
-        to be used to optimize the beam positions.
-        Depending on the algorithm, the distance between neighboring spots does
+        to be used to optimise the beam positions.
+        Depending on the algorithm, the distance between neighbouring spots does
         not have to be equal to this parameter. Therefore it describes only
         the nominal distance.
     algorithm : {'regular', 'hexagonal', 'concentric', 'delaunay'}, optional
-        Algorithm to be used to optimize the beam positions. The short aliases
+        Algorithm to be used to optimise the beam positions. The short aliases
         'reg', 'hex', 'con' and 'del' are also accepted. The 'concentric' and
         'delaunay' algorithms are not implemented yet and raise
         NotImplementedError. (def. 'regular')
     **kwargs : keyword args, optional
-        Additional parameters passed to the selected optimization algorithm
+        Additional parameters passed to the selected optimisation algorithm
         (whichever algorithm is chosen). Refer to the given algorithm routine
         for more description.
 
@@ -31,6 +34,16 @@ def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **k
     numpy array (Nx2)
         Numpy array of size (Nx2) describing the position of N beams, where the first
         column is X and the second Y directions.
+
+    Raises
+    ------
+    TypeError
+        If `contourPolygon` is not an instance of a shapely Polygon.
+    ValueError
+        If `algorithm` cannot be recognised.
+    NotImplementedError
+        If the 'concentric' or 'delaunay' algorithm is requested, as they
+        have not been implemented yet.
 
     See Also
     --------
@@ -45,7 +58,7 @@ def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **k
 
     # validate algorithm
     if not algorithm.lower() in {"regular", "reg", "hexagonal", "hex", "concentric", "con", "delaunay", "del"}:
-        raise ValueError(f"Can not recognize the '{algorithm}' algorithm. Only 'regular', 'hexagonal', 'concentric' or 'delaunay' are possible, of which 'concentric' and 'delaunay' are not implemented yet.")
+        raise ValueError(f"Can not recognise the '{algorithm}' algorithm. Only 'regular', 'hexagonal', 'concentric' or 'delaunay' are possible, of which 'concentric' and 'delaunay' are not implemented yet.")
 
     if algorithm.lower() in ["regular", "reg"]:
         beamPositions = optimiseBeamPositionsRegular(contourPolygon, spotDistance, **kwargs)
@@ -59,12 +72,12 @@ def optimiseBeamPositions(contourPolygon, spotDistance, algorithm="regular", **k
     return beamPositions
 
 
-def optimiseBeamPositionsRegular(contourPolygon, spotDistance):
+def optimiseBeamPositionsRegular(contourPolygon: ShapePolygon, spotDistance: Numeric) -> NDArray:
     """Calculate the beam positions using regular grid algorithm.
 
     The function calculates beam positions in a contour defined
     as an instance of the shapely.Polygon object using
-    regular grid algorithm. The algorithm is optimized to place
+    regular grid algorithm. The algorithm is optimised to place
     the central beam position at the polygon centroid.
 
     Parameters
@@ -127,12 +140,12 @@ def optimiseBeamPositionsRegular(contourPolygon, spotDistance):
     return beamPosition
 
 
-def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
+def optimiseBeamPositionsHexagonal(contourPolygon: ShapePolygon, spotDistance: Numeric, direction: Literal["X", "Y"] = "X") -> NDArray:
     """Calculate the beam positions using the hexagonal grid algorithm.
 
     The function calculates beam positions in a contour defined
     as an instance of the shapely.Polygon object using
-    hexagonal grid algorithm. The algorithm is optimized to place
+    hexagonal grid algorithm. The algorithm is optimised to place
     the central beam position at the polygon centroid.
 
     Parameters
@@ -153,6 +166,11 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
         Numpy array of size (Nx2) describing the position of N beams, where the first
         column is X and the second Y directions.
 
+    Raises
+    ------
+    ValueError
+        If `direction` is not 'X' or 'Y'.
+
     See Also
     --------
     optimiseBeamPositions : Optimise beam positions using various algorithms.
@@ -167,7 +185,7 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
     of 0.2 (in the polygon coordinate unit) tolerance, are removed.
 
     The user can choose in which direction, X or Y, the hexagonal grid should be aligned.
-    This might be important when optimizing the beam positions for a given machine where
+    This might be important when optimising the beam positions for a given machine where
     the scanning is faster in one direction than in the other.
     """
     import numpy as np
@@ -222,7 +240,7 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
     return beamPosition
 
 
-def optimiseBeamPositionsConcentric(contourPolygon, spotDistance, **kwargs):
+def optimiseBeamPositionsConcentric(contourPolygon: ShapePolygon, spotDistance: Numeric, **kwargs):
     """Calculate the beam positions using the concentric rings algorithm.
 
     The function is intended to calculate beam positions in a contour defined
@@ -248,7 +266,7 @@ def optimiseBeamPositionsConcentric(contourPolygon, spotDistance, **kwargs):
     raise NotImplementedError("The method is not yet implemented")
 
 
-def optimiseBeamPositionsDelaunay(contourPolygon, spotDistance, **kwargs):
+def optimiseBeamPositionsDelaunay(contourPolygon: ShapePolygon, spotDistance: Numeric, **kwargs):
     """Calculate the beam positions using the Delaunay triangulation algorithm.
 
     The function is intended to calculate beam positions in a contour defined

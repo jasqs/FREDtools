@@ -58,6 +58,15 @@ def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | 
         Foreground image (or background image if the foreground image
         is not given) attached to the axis `ax`.
 
+    Raises
+    ------
+    AttributeError
+        If neither `imgBack` nor `imgFront` is given, or if the image slice cannot be displayed.
+    ValueError
+        If `cmapBack` or `cmapFront` colormap cannot be recognised.
+    TypeError
+        If any of the `imgROIs` is not an instance of a SimpleITK image describing a binary or floating mask.
+
     See Also
     --------
         showSlices: show three projections of a 3D image, also interactively.
@@ -220,6 +229,26 @@ class showSlices:
     figsize : 2-element list, optional
         Width and height of the figure in inches. (def. [15, 5])
 
+    Raises
+    ------
+    AttributeError
+        If neither `imgBack` nor `imgFront` is given.
+    ValueError
+        If `point` is not a 3-element vector, or if `cmapBack` or `cmapFront`
+        colormap cannot be recognised.
+
+    Notes
+    -----
+    1. The foreground image is thresholded destructively on the instance: the `imgFront`
+    attribute stores a copy of the foreground image in which all values below
+    `DCOFront` times the image maximum are replaced with NaN (the image object
+    passed by the caller is not modified).
+
+    2. The interactive slicing (sliders, mouse wheel and mouse button with Shift pressed)
+    is only activated when the matplotlib backend is 'widget' or 'ipympl' (i.e. in Jupyter
+    with the ipympl backend). For any other backend, the three static slices going
+    through `point` are displayed.
+
     Examples
     --------
     See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
@@ -351,14 +380,17 @@ class showSlices:
             self.showSliceAX0(Z=self.point[2])
 
     def scrollEventShiftPress(self, event):
+        """Enable the interactive scroll/click mode when the Shift key is pressed."""
         if event.key == "shift":
             self.scrollEventShift = True
 
     def scrollEventShiftRelease(self, event):
+        """Disable the interactive scroll/click mode when the Shift key is released."""
         if event.key == "shift":
             self.scrollEventShift = False
 
     def mouseButtonPressEvent(self, event):
+        """Move the slices to the clicked point (with Shift pressed) by updating the sliders of the other two axes."""
         if self.scrollEventShift:
             if event.inaxes == self.axs[0] and event.button == 1:
                 self.sliderY.value = event.ydata
@@ -371,6 +403,7 @@ class showSlices:
                 self.sliderX.value = event.xdata
 
     def scrollEvent(self, event):
+        """Move the slice of the axis under the cursor by one voxel per mouse-wheel step (with Shift pressed)."""
         if self.scrollEventShift:
             if event.inaxes == self.axs[1]:
                 if event.button == "up":
@@ -389,11 +422,13 @@ class showSlices:
                     self.sliderZ.value = self.point[2] - self.imgSlider.GetSpacing()[2]
 
     def removeArtist(self, ax):
+        """Remove all line and collection artists (contours and point lines) as well as the legend from an axis."""
         for artist in ax.lines + ax.collections:
             artist.remove()
         ax.legend_ = None
 
     def replotPointLines(self):
+        """Redraw the crosshair lines marking the current point position on all three axes."""
         for artist in self.axs[0].lines + self.axs[1].lines + self.axs[2].lines:
             artist.remove()
         self.axs[0].axvline(self.point[0])
@@ -404,6 +439,7 @@ class showSlices:
         self.axs[2].axhline(self.point[2])
 
     def showSliceAX0(self, Z):
+        """Replot the first (left) axis with the 'XY' plane slice, driven by the Z coordinate."""
         import fredtools as ft
 
         self.point[2] = Z
@@ -423,6 +459,7 @@ class showSlices:
         self.fig.canvas.draw()
 
     def showSliceAX1(self, X):
+        """Replot the second (middle) axis with the 'ZY' plane slice, driven by the X coordinate."""
         import fredtools as ft
 
         self.point[0] = X
@@ -442,6 +479,7 @@ class showSlices:
         self.fig.canvas.draw()
 
     def showSliceAX2(self, Y):
+        """Replot the third (right) axis with the 'X-Z' (reversed Z) plane slice, driven by the Y coordinate."""
         import fredtools as ft
 
         self.point[1] = Y

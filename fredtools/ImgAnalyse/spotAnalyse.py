@@ -6,9 +6,14 @@ _logger = getLogger(__name__)
 def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, le=1)] = 0.1, margin: PositiveFloat | Iterable[PositiveFloat] = 3, displayInfo: bool = False) -> SITKImage:
     """Find spots in 2D SITK image.
 
-    The function identifies spots in a 2D SimpleITK image by applying a dose cut-off (DCO) to define the spot 
-    region, followed by morphological operations to refine the regions. The identified spots are then 
-    labeled and returned as a labeled image.
+    The function identifies spots in a 2D SimpleITK image by applying a dose cut-off (DCO) to define the spot
+    region, followed by morphological operations to refine the regions. The identified spots are then
+    labelled and returned as a labelled image. In detail, the image is first smoothed with a median filter
+    of a fixed 5x5 voxel kernel and binarised at `DCO` times the image maximum. The binary regions are dilated
+    by `margin` (converted from mm to voxels), labelled as fully connected components with holes filled,
+    and components smaller than 20 voxels are dropped. The remaining labels are sorted by size (the largest
+    component gets label 1), and finally each label region is replaced by its axis-aligned bounding box,
+    so each spot is described by a rectangular label region.
 
     Parameters
     ----------
@@ -24,14 +29,15 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
     Returns
     -------
     SITKImage
-        Labeled image of found spots.
+        Labelled image of found spots.
 
     Raises
     ------
+    TypeError
+        If `img` is not a 2D SimpleITK image.
+        If margin is not a scalar or an iterable.
     ValueError
         If DCO is not a positive scalar between 0 and 1.
-    TypeError
-        If margin is not a scalar or an iterable.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -110,6 +116,14 @@ def fitSpotProfile(pos: ArrayLike, vec: ArrayLike, cutLevel: NonNegativeFloat = 
     -------
     lmfit.model.ModelResult
         An instance of lmfit.model.ModelResult class.
+
+    Raises
+    ------
+    TypeError
+        If `pos` or `vec` is not iterable, is not a one-dimensional vector,
+        or if `pos` and `vec` are not of the same length.
+    ValueError
+        If the `method` is not recognised.
     """
     from lmfit import Model
     import numpy as np
@@ -152,7 +166,7 @@ def fitSpotProfile(pos: ArrayLike, vec: ArrayLike, cutLevel: NonNegativeFloat = 
             result = gmodel.fit(data=prof[1], pos=prof[0], amplitude=initAmplitude, centre=initCentre, sigma=initSigma)
             return result
         case _:
-            error = ValueError(f"The method '{method}' can not be recognized. Only 'singleGauss' is available at the moment.")
+            error = ValueError(f"The method '{method}' can not be recognised. Only 'singleGauss' is available at the moment.")
             _logger.error(error)
             raise error
 
@@ -192,6 +206,13 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
     -------
     lmfit.model.ModelResult
         An instance of lmfit.model.ModelResult class.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not a 2D SimpleITK image.
+    ValueError
+        If the `method` is not recognised.
     """
     from lmfit import Model
     import numpy as np
@@ -249,7 +270,7 @@ def fitSpotImg(img: SITKImage, cutLevel: NonNegativeFloat = 0, fixAmplitude: boo
             return result
 
         case _:
-            error = ValueError(f"The method '{method}' can not be recognized. Only 'singleGauss' is available at the moment.")
+            error = ValueError(f"The method '{method}' can not be recognised. Only 'singleGauss' is available at the moment.")
             _logger.error(error)
             raise error
 

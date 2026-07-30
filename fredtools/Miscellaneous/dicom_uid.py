@@ -30,6 +30,11 @@ def getSOPInstanceUID(fileNames: PathLike | Iterable[PathLike], displayInfo: boo
         A single UID if a single path was given, or a list of UIDs (possibly
         empty) if an iterable of paths was given.
 
+    Raises
+    ------
+    ValueError
+        If the tag 'SOPInstanceUID' cannot be found in any of the dicom files.
+
     See Also
     --------
     getRNReferencedStructureSetUID : get the SOPInstanceUID of the structure set (RS) referenced in a plan (RN) dicom.
@@ -85,6 +90,13 @@ def getRNReferencedStructureSetUID(fileName: PathLike, displayInfo: bool = False
     UID
         The SOPInstanceUID of the referenced structure set.
 
+    Raises
+    ------
+    TypeError
+        If the dicom file is not of an RT plan (RN) type.
+    ValueError
+        If no 'ReferencedStructureSetSequence' item can be found in the dicom file.
+
     See Also
     --------
     getSOPInstanceUID : get the SOPInstanceUID from dicom files.
@@ -136,6 +148,13 @@ def getRSReferencedImageUIDs(fileName: PathLike, displayInfo: bool = False) -> L
     -------
     list of UIDs
         A list (possibly empty) of the SOPInstanceUIDs of the referenced images.
+
+    Raises
+    ------
+    TypeError
+        If the dicom file is not of a structure set (RS) type.
+    ValueError
+        If the tag 'ReferencedFrameOfReferenceSequence' cannot be found in the dicom file.
 
     See Also
     --------

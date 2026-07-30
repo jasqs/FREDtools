@@ -4,6 +4,45 @@ _logger = getLogger(__name__)
 
 
 class beamModel:
+    """Container describing a pencil beam scanning beam model.
+
+    The class stores a complete description of a beam model, including:
+
+        - beam model description fields: `name`, `creationTime`, `radiationType`
+          (one of 'proton', 'carbon' or 'helium'), `siteName`, `machineName`,
+          `machineVendor`, `machineModel` and free-text `notes`;
+        - machine parameters: `spreadingDeviceDistance`, i.e. the absolute distances
+          of the spreading devices in mm in the order [X, Y], and
+          `sourceToAxisDistance` (SAD) in mm;
+        - energy model: a pandas DataFrame (`energyModel`), indexed by the nominal
+          energy `nomEnergy`, with the columns 'Energy' and 'dEnergy' (mean energy and
+          energy spread in MeV), 'aX', 'bX', 'cX', 'aY', 'bY', 'cY' (sigma squared model
+          parameters of the beam envelope in X and Y) and 'scalingFactor' (dosimetric
+          calibration in p/MU), together with the `interpolation` method
+          ('linear', 'nearest' or 'spline') and `splineOrder` used for interpolation;
+        - range shifter model: a pandas DataFrame (`rsModel`) with at least the columns
+          'name', 'L' and 'material';
+        - nozzle materials: a pandas DataFrame (`materials`) with at least the columns
+          'name', 'density' and 'basedOn'.
+
+    A beam model can be loaded from a YAML file with the `fromYAML` method or from
+    a pickle file with the `fromPickle` class method, and saved to a pickle file with
+    the `toPickle` method. The energy model can be interpolated for any nominal energy
+    with the `interpolateBeamModel` method, whereas the `getSigma` and `getGateParams`
+    methods calculate the beam envelope and GATE/OpenGATE beam parameters, respectively.
+    The `displayInfo` method logs a summary of the beam model.
+
+    Raises
+    ------
+    AttributeError
+        Raised by the property setters when an invalid value is assigned, for instance
+        a wrong type of `name`, `creationTime`, `siteName`, `machineName`,
+        `machineVendor`, `machineModel`, `spreadingDeviceDistance`,
+        `sourceToAxisDistance`, `interpolation` or `splineOrder`, or when the DataFrame
+        assigned to `energyModel`, `rsModel` or `materials` does not contain
+        the required columns.
+    """
+
     def __init__(self):
         from datetime import datetime
         import pandas as pd
@@ -254,6 +293,38 @@ class beamModel:
         self._splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = splineOrder
 
     def interpolateBeamModel(self, nomEnergy: Numeric | Iterable[Numeric]) -> DataFrame:
+        """Interpolate the energy model for given nominal energies.
+
+        The method interpolates all the parameters of the energy model for the given
+        nominal energies, which must be in the range of the nominal energies defined
+        in the energy model. The interpolation is performed with the method defined
+        by the `interpolation` property ('linear', 'nearest' or 'spline') and,
+        for splines, with the order defined by the `splineOrder` property.
+
+        Parameters
+        ----------
+        nomEnergy : scalar or iterable of scalars
+            The nominal energy or energies to interpolate the energy model parameters for.
+
+        Returns
+        -------
+        DataFrame
+            A pandas DataFrame, indexed by the nominal energy, with all the energy model
+            parameters interpolated.
+
+        Raises
+        ------
+        AttributeError
+            If the energy model has not been defined.
+        ValueError
+            If any of the given nominal energies is outside the nominal energy
+            range of the energy model.
+
+        See Also
+        --------
+        fredtools.MonteCarlo.beamModel.interpolateBeamModel : module-level function
+            interpolating a beam model defined as a DataFrame.
+        """
         import pandas as pd
         import fredtools as ft
 
@@ -383,6 +454,12 @@ class beamModel:
         ----------
         fileName : PathLike
             The path to the YAML file containing the beam model.
+
+        Raises
+        ------
+        AttributeError
+            If the energy model imported from the YAML file does not contain
+            the required columns.
         """
         import numpy as np
         import yaml
@@ -463,6 +540,38 @@ class beamModel:
         self.materials = materials
 
     def getSigma(self, distance: Numeric, nomEnergy: Numeric | Iterable[Numeric]) -> Tuple[Numeric, Numeric] | Tuple[List[Numeric], List[Numeric]]:
+        """Calculate the beam sigma in X and Y at a given distance from the isocenter.
+
+        The method calculates the beam envelope, i.e. the beam sigma in X and Y directions,
+        at a given distance from the isocenter, based on the sigma squared model
+        (sigma^2 = a + b*distance + c*distance^2) of the energy model, interpolated
+        for the given nominal energies.
+
+        Parameters
+        ----------
+        distance : scalar
+            The distance from the isocenter in mm, at which to calculate the beam sigma.
+            The distance is defined along the beam direction with zero at the isocenter,
+            negative values upstream (towards the source) and positive values downstream.
+            For instance, the beam sigma at the source position is obtained for
+            a negative Source-To-Axis Distance, i.e. ``distance=-sourceToAxisDistance``.
+        nomEnergy : scalar or iterable of scalars
+            The nominal energy or energies to calculate the beam sigma for.
+
+        Returns
+        -------
+        tuple of two scalars or tuple of two lists
+            A tuple (sigmaX, sigmaY) with the beam sigma in mm in X and Y directions.
+            The elements are scalars if `nomEnergy` is a scalar, or lists if `nomEnergy`
+            is an iterable. If the energy model is empty, a warning is logged and
+            the tuple (0, 0) is returned.
+
+        Raises
+        ------
+        ValueError
+            If any of the given nominal energies is outside the nominal energy
+            range of the energy model.
+        """
         import numpy as np
 
         if self._energyModel.empty:
@@ -480,7 +589,7 @@ class beamModel:
         """ Get the beam parameters for GATE simulation.
 
         This function calculates the beam parameters for GATE simulation based on the source-to-axis distance and nominal energy.
-        According to the GATE documentation, the beam propagation parameters are modeled according to the Fermi-Eyges theory
+        According to the GATE documentation, the beam propagation parameters are modelled according to the Fermi-Eyges theory
         (Techniques of Proton Radiotherapy: Transport Theory B. Gottschalk May 1, 2012), that describes the correlated momentum
         spread of the particle with 4 parameters (each for x and y direction, assuming a beam directed as z):
 
@@ -511,6 +620,12 @@ class beamModel:
             - convergenceX: convergence in X direction (usually True)
             - convergenceY: convergence in Y direction (usually True)
             - scalingFactor: scaling factor for the beam model (in [p/MU])
+
+        Raises
+        ------
+        ValueError
+            If any of the given nominal energies is outside the nominal energy
+            range of the energy model.
         """
         import numpy as np
         import pandas as pd
@@ -568,7 +683,14 @@ class beamModel:
         Returns
         -------
         Self
-            An instance of the beamModel class loaded from the pickle file. 
+            An instance of the beamModel class loaded from the pickle file.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the file does not exist.
+        TypeError
+            If the file does not contain a valid beamModel object.
         """
         import pickle as pkl
         if not os.path.exists(fileName):
@@ -646,6 +768,12 @@ def sigmaSquared2Twiss(a: Numeric | Iterable[Numeric], b: Numeric | Iterable[Num
     -------
     tuple[Numeric, Numeric, Numeric]
         A tuple containing the Twiss parameters (epsilon, alpha, beta).
+
+    Raises
+    ------
+    ValueError
+        If the calculated epsilon squared is negative, which may indicate that
+        the input parameters do not represent a valid beam propagation model.
     """
     import numpy as np
 
@@ -787,6 +915,13 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Num
     Pandas DataFrame
         Pandas DataFrame with all parameters interpolated.
 
+    Raises
+    ------
+    ValueError
+        If the interpolation method cannot be recognised, if the spline order is
+        not in range 0-5, or if any of the given nominal energies is outside
+        the beam model nominal energy range.
+
     See Also
     --------
     readBeamModel : read beam model from YAML beam model file.
@@ -802,7 +937,7 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Num
 
     # validate the interpolation method
     if not interpolation.lower() in ["linear", "nearest", "spline"]:
-        error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+        error = ValueError(f"Interpolation type '{interpolation}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
         _logger.error(error)
         raise error
 
@@ -853,6 +988,12 @@ def calcRaysVectors(targetPoint: Iterable[Numeric] | Iterable[Iterable[Numeric]]
     -------
     (Nx3 numpy.array, Nx3 numpy.array)
         A tuple with two Nx3 arrays, where the first is the ray position and the second is the ray direction versor.
+
+    Raises
+    ------
+    AttributeError
+        If `targetPoint` is not an iterable of shape Nx3 or if `SAD` is not
+        a 2-element iterable.
     """
     from collections.abc import Iterable
     import numpy as np

@@ -28,6 +28,13 @@ def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, remo
     -------
     str
         Absolute path of the saved merged PDF.
+
+    Raises
+    ------
+    TypeError
+        If `PDFFileNames` is a single path instead of a list of paths.
+    FileNotFoundError
+        If any of the PDF files to be merged does not exist.
     """
     import fitz  # from pymupdf
     import os
@@ -95,7 +102,7 @@ def getHistogram(dataX: Iterable[Numeric], dataY: Iterable[Numeric] | None = Non
         value or mean +/- standard deviation. (def. 'mean')
     returnBinCenters : bool, optional
         Determine if the first element of the returned list is going to
-        be the bin centers (True) or bin edges (False). (def. True)
+        be the bin centres (True) or bin edges (False). (def. True)
 
     Returns
     -------
@@ -103,6 +110,14 @@ def getHistogram(dataX: Iterable[Numeric], dataY: Iterable[Numeric] | None = Non
         A two-element tuple of 1D numpy ndarrays, where the first element
         is a list of bin centres (or edges) and the second is a list of
         histogram values.
+
+    Raises
+    ------
+    TypeError
+        If `dataX`, `dataY` or `bins` is not an iterable.
+    ValueError
+        If `dataX` or `dataY` is not one-dimensional, `dataY` is not
+        of the same length as `dataX`, or the `kind` parameter cannot be recognised.
     """
     import numpy as np
 
@@ -326,7 +341,7 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
 
     The function searches an ASCII file for lines matching a pattern and returns
     the line or lines number and the line strings. The pattern follows the Python
-    regular expression [7]_.
+    regular expression [PythonRe]_.
 
     Parameters
     ----------
@@ -356,15 +371,20 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
         matched line number and the line string.
         None is returned if no line matches the pattern.
 
+    Raises
+    ------
+    AttributeError
+        If the `kind` parameter cannot be recognised.
+
     References
     ----------
-    .. [7] `Regular expression operations <https://docs.python.org/3/library/re.html>`_
+    .. [PythonRe] `Regular expression operations <https://docs.python.org/3/library/re.html>`_
     """
     import re
 
     # validate kind
     if kind.lower() not in {"first", "last", "all"}:
-        error = AttributeError(f"Unrecognized kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
+        error = AttributeError(f"Unrecognised kind = '{kind}' parameter. Only 'first', 'last', and 'all' are supported.")
         _logger.error(error)
         raise error
 
@@ -405,7 +425,7 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
 def getCPUNo(CPUNo: Literal["auto"] | NonNegativeInt = "auto") -> NonNegativeInt:
     """Get a number of CPU cores.
 
-    The function returns the number of CPU cores. Usually, it is used in functions utilizing
+    The function returns the number of CPU cores. Usually, it is used in functions utilising
     multiprocessing.
 
     Parameters
@@ -417,6 +437,12 @@ def getCPUNo(CPUNo: Literal["auto"] | NonNegativeInt = "auto") -> NonNegativeInt
     -------
     integer
         Number of CPU cores.
+
+    Raises
+    ------
+    ValueError
+        If the number of CPU cores could not be determined automatically,
+        or the `CPUNo` parameter cannot be recognised.
     """
     from os import cpu_count
     import fredtools as ft
@@ -435,6 +461,6 @@ def getCPUNo(CPUNo: Literal["auto"] | NonNegativeInt = "auto") -> NonNegativeInt
         return CPUNo
 
     else:
-        error = ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognized. Only a positive integer or 'auto' are possible.")
+        error = ValueError(f"The parameter CPUno '{CPUNo}' cannot be recognised. Only a positive integer or 'auto' are possible.")
         logger.error(error)
         raise error

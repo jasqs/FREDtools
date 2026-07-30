@@ -18,7 +18,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         -  *pass-rate*: each voxel represents passing (1) or failing (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
     The gamma index calculation is performed by an external C++ library compiled as a Linux shared library.
-    The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys [1]_ python library.
+    The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys [PyMedPhys]_ python library.
 
     Parameters
     ----------
@@ -68,6 +68,15 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
 
     Raises
     ------
+    TypeError
+        If `imgRef` or `imgEval` is not an instance of a SimpleITK image object
+        describing a 3D volume or 2D slice.
+    ValueError
+        If the value of `DD`, `DTA`, `DCO`, `globalNorm` or `stepSize` is out of range,
+        or `DDType` or `mode` cannot be recognised.
+    OSError
+        If the function is run on a platform other than Linux (only the Linux
+        shared library is implemented).
     RuntimeError
         Run time error is raised when the execution of the gamma calculation failed.
         The following error codes can be raised:
@@ -95,12 +104,12 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
 
     Examples
     --------
-    See example jupyter notebook at [2]_
+    See example jupyter notebook at [GITutorial]_
 
     References
     ----------
-    .. [1] https://docs.pymedphys.com/
-    .. [2] `Jupyter notebook of Gamma Index Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Gamma%20Index%20analysis%20Tutorial.ipynb>`_
+    .. [PyMedPhys] https://docs.pymedphys.com/
+    .. [GITutorial] `Jupyter notebook of Gamma Index Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Gamma%20Index%20analysis%20Tutorial.ipynb>`_
     """
     import sys
     import os
@@ -183,7 +192,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         libFredGI.fredGI_version(ctypes.c_char_p(libFredGIVersion))
         libFredGIVersion = libFredGIVersion.decode("utf-8")
 
-        # set interpolation dose values using neighboring voxels
+        # set interpolation dose values using neighbouring voxels
         libFredGI.fredGI_setInterpolation(ctypes.c_int(1))
 
         # set DTA, DD, DDType, DCO and globalNorm
@@ -301,7 +310,7 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
 
     The function calculates Gamma Index statistics from an image defined
     as a SimpleITK image object. Two modes of the gamma index calculation
-    are recognized automatically based on the image type:
+    are recognised automatically based on the image type:
 
         -  *gamma* (float): each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1 or numpy.nan.
         -  *pass-rate* (integer): each voxel represents passing (1) or failing (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
@@ -321,6 +330,15 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
         'min' and 'max' of the gamma index values. In the 'pass-rate' mode
         the 'mean', 'std', 'min' and 'max' values are numpy.nan.
 
+    Raises
+    ------
+    TypeError
+        If `imgGI` is not an instance of a SimpleITK image object,
+        or the image is neither of integer nor float type.
+    ValueError
+        If the image is of integer type ('pass-rate' mode) but contains
+        unique values other than -1, 0 and 1.
+
     See Also
     --------
     calcGammaIndex : calculate the Gamma Index map for two images.
@@ -333,7 +351,7 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
     GIstat = {}
     if np.issubdtype(arrGI.dtype, np.integer):
         if not set(np.unique(arrGI)).issubset(set([-1, 0, 1])):
-            error = ValueError(f"The calculation mode was recognized as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0, 1] unique values and the uniques are {np.unique(arrGI)}")
+            error = ValueError(f"The calculation mode was recognised as 'pass-rate' because the input image is of integer type but it should contain only [-1, 0, 1] unique values and the uniques are {np.unique(arrGI)}")
             _logger.error(error)
             raise error
         mode = "pass-rate"

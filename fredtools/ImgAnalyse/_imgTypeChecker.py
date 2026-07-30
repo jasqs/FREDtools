@@ -128,6 +128,8 @@ def isSITK(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_point(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a point (0D), i.e. all axes
+    are of size one, regardless of the image dimension, and raise error if requested."""
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 0):
         return True
@@ -142,6 +144,8 @@ def isSITK_point(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_profile(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a profile (1D), i.e. exactly one
+    axis is of size greater than one, regardless of the image dimension, and raise error if requested."""
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 1):
         return True
@@ -156,6 +160,8 @@ def isSITK_profile(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_slice(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a slice (2D), i.e. exactly two
+    axes are of size greater than one, regardless of the image dimension, and raise error if requested."""
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 2):
         return True
@@ -170,6 +176,8 @@ def isSITK_slice(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_volume(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a volume (3D), i.e. exactly three
+    axes are of size greater than one, regardless of the image dimension, and raise error if requested."""
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 3):
         return True
@@ -184,6 +192,8 @@ def isSITK_volume(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_timevolume(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a time volume (4D), i.e. exactly four
+    axes are of size greater than one, regardless of the image dimension, and raise error if requested."""
 
     if isSITK(img, raiseError=raiseError) and img.GetSize().count(1) == (img.GetDimension() - 4):
         return True
@@ -198,6 +208,8 @@ def isSITK_timevolume(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_vector(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object of a vector pixel type
+    (i.e. 'vector' is present in the pixel ID type string) and raise error if requested."""
 
     if isSITK(img, raiseError=raiseError) and "vector" in img.GetPixelIDTypeAsString():
         return True
@@ -212,6 +224,7 @@ def isSITK_vector(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_transform(img: SITKTransform, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Transform object and raise error if requested."""
 
     if isinstance(img, SITKTransform):
         return True
@@ -228,6 +241,8 @@ def isSITK_transform(img: SITKTransform, raiseError: bool = False) -> bool:
 
 
 def isSITK_maskBinary(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a binary mask, i.e. of '8-bit unsigned integer'
+    pixel type with the minimum and maximum voxel values equal to 0 or 1, and raise error if requested."""
     import fredtools as ft
     from SimpleITK import sitkUInt8
 
@@ -246,6 +261,8 @@ def isSITK_maskBinary(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_maskFloating(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a floating mask, i.e. of '32-bit float'
+    or '64-bit float' pixel type with all voxel values in the range 0-1, and raise error if requested."""
     import fredtools as ft
     from SimpleITK import sitkFloat32, sitkFloat64
 
@@ -264,6 +281,8 @@ def isSITK_maskFloating(img: Any, raiseError: bool = False) -> bool:
 
 
 def isSITK_mask(img: Any, raiseError: bool = False) -> bool:
+    """Check if input is a SimpleITK.Image object describing a binary or a floating mask
+    and raise error if requested."""
 
     if isSITK(img, raiseError=raiseError) and ((isSITK_maskBinary(img) or isSITK_maskFloating(img))):
         return True
@@ -278,6 +297,8 @@ def isSITK_mask(img: Any, raiseError: bool = False) -> bool:
 
 
 def getMaskType(img: Any) -> str:
+    """Get the mask type of a SimpleITK.Image object describing a mask, returning 'binary', 'floating'
+    or 'unknown'. A TypeError is raised if the input is not a SimpleITK.Image object describing a mask."""
 
     isSITK(img, raiseError=True)
     isSITK_mask(img, raiseError=True)

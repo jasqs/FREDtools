@@ -27,7 +27,7 @@ class DVH(object):
         type : {'cumulative', 'differential'}, optional
             Choice of 'cumulative' or 'differential' type of DVH (def. 'cumulative')
         dosePrescribed : Numeric or None, optional
-            Prescription quantity (e.g. dose) value used to normalize dose bins. If not provided,
+            Prescription quantity (e.g. dose) value used to normalise dose bins. If not provided,
             the average dose will be used as the prescription dose. (def. None)
         name : str | None, optional
             Name of the structure of the DVH. If not provided, it will be set to 'unknown'. (def. None)
@@ -159,7 +159,7 @@ class DVH(object):
 
     @property
     def doseDiffCenters(self) -> NDArray:
-        """Return a numpy array containing the dose bin centers for differential type."""
+        """Return a numpy array containing the dose bin centres for differential type."""
         return np.asarray(self._doseDiffCenters)
 
     @property
@@ -244,6 +244,11 @@ class DVH(object):
         -------
         Numeric
             Volume that receives at least a specific dose.
+
+        Raises
+        ------
+        AttributeError
+            If the dose value is negative.
         """
         # check if dose is positive
         if dose < 0:
@@ -275,6 +280,11 @@ class DVH(object):
         -------
         number
             Absolute dose that a specific volume receives.
+
+        Raises
+        ------
+        AttributeError
+            If the volume value is negative.
         """
         if volume < 0:
             error = AttributeError("The volume value must be positive.")
@@ -493,6 +503,15 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
     DVH
         An instance of a DVH class holding the DVH.
 
+    Raises
+    ------
+    TypeError
+        If `img` or `imgMask` is not an instance of a 3D SimpleITK image,
+        if `imgMask` does not describe a binary or floating mask,
+        or if `img` and `imgMask` do not have the same FoR.
+    ValueError
+        If the image contains NaN values inside the mask.
+
     See Also
     --------
         resampleImg : resample image.
@@ -619,6 +638,16 @@ def getDVHStruct(img: SITKImage, RSfileName: str, structName: str, dosePrescribe
     -------
     DVH
         An instance of a DVH class holding the DVH.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a 3D SimpleITK image,
+        or if `RSfileName` is not a proper dicom file describing structures.
+    AttributeError
+        If the structure `structName` cannot be found in the `RSfileName` dicom file.
+    ValueError
+        If the shape of `resampleImg` does not match the image dimension and is not a scalar.
 
     See Also
     --------

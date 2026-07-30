@@ -9,7 +9,7 @@ class braggPeak:
     This class is holding methods for a Bragg peak (BP) analysis and
     properties of the analysis results. The analysis of a Bragg curve is made
     based on two methods: a simple interpolation with a given method (linear,
-    nearest or spline) and/or a fit of the Bortfeld equation taken from [1]_ (eq. 27).
+    nearest or spline) and/or a fit of the Bortfeld equation taken from [Bortfeld1997]_ (eq. 27).
     For each method, it is possible to obtain such parameters as a range of the BP
     at a given percent of the maximum of the distal fall-off, the value of the signal
     (for instance dose) at a given depth, distal fall-off and width of the BP
@@ -38,14 +38,21 @@ class braggPeak:
             splineOrder : int
                 Order of spline interpolation. Must be in range 0-5. (def. 3)
 
+    Raises
+    ------
+    TypeError
+        If `pos` or `vec` is not iterable, not one-dimensional, or they are not of the same length.
+    ValueError
+        If the interpolation method is not 'linear', 'nearest' or 'spline', or the spline order is not in range 0-5.
+
     Examples
     --------
-    See example jupyter notebook at [2]_
+    See example jupyter notebook at [BPTutorial]_
 
     References
     ----------
-    .. [1] Bortfeld, T. An analytical approximation of the Bragg curve for therapeutic proton beams. Med. Phys. 24, 2024 (1997).
-    .. [2] `Jupyter notebook of Bragg Peak Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Bragg%20Peak%20analysis%20Tutorial.ipynb>`_
+    .. [Bortfeld1997] Bortfeld, T. An analytical approximation of the Bragg curve for therapeutic proton beams. Med. Phys. 24, 2024 (1997).
+    .. [BPTutorial] `Jupyter notebook of Bragg Peak Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Bragg%20Peak%20analysis%20Tutorial.ipynb>`_
     """
 
     def __init__(self, pos: Iterable[Numeric], vec: Iterable[Numeric], accuracy: Numeric = 0.01, offset: Numeric = 0, bortCut: Annotated[Numeric, Field(strict=True, ge=0, le=1)] = 0.6, **kwargs):
@@ -74,7 +81,7 @@ class braggPeak:
         elif isinstance(kwargs["interpolation"], str) and kwargs["interpolation"] in ["linear", "spline", "nearest"]:
             self.__interpolation = cast(Literal["linear", "spline", "nearest"], kwargs["interpolation"])
         else:
-            error = ValueError(f"Interpolation type '{kwargs['interpolation']}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            error = ValueError(f"Interpolation type '{kwargs['interpolation']}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
             _logger.error(error)
             raise error
 
@@ -116,7 +123,13 @@ class braggPeak:
 
     @property
     def offset(self) -> Numeric:
-        """float: Distance offset of the Bragg curve points."""
+        """float: Distance offset of the Bragg curve points.
+
+        Raises
+        ------
+        ValueError
+            If the value assigned is not a scalar.
+        """
         return self.__offset
 
     @offset.setter
@@ -134,7 +147,13 @@ class braggPeak:
 
     @property
     def interpolation(self) -> str:
-        """str: Interpolation method. Available are 'linear', 'nearest' or 'spline'."""
+        """str: Interpolation method. Available are 'linear', 'nearest' or 'spline'.
+
+        Raises
+        ------
+        ValueError
+            If the value assigned is not 'linear', 'nearest' or 'spline'.
+        """
         return self.__interpolation
 
     @interpolation.setter
@@ -142,7 +161,7 @@ class braggPeak:
         # validate argument
         interp = interpolation.lower()
         if interp not in ["linear", "spline", "nearest"]:
-            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            error = ValueError(f"Interpolation type '{interpolation}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
             _logger.error(error)
             raise error
 
@@ -151,7 +170,13 @@ class braggPeak:
 
     @property
     def splineOrder(self) -> int:
-        """int: Order of the spline interpolation. Must be in range 0-5."""
+        """int: Order of the spline interpolation. Must be in range 0-5.
+
+        Raises
+        ------
+        ValueError
+            If the value assigned is not an integer in range 0-5.
+        """
         return self.__splineOrder
 
     @splineOrder.setter
@@ -168,7 +193,7 @@ class braggPeak:
         """str or int: Method of the interpolation defined as `kind` in scipy.interpolate.interp1D."""
         # validate argument
         if self.__interpolation not in ["linear", "spline", "nearest"]:
-            error = ValueError(f"Interpolation type '{self.__interpolation}' cannot be recognized. Only 'linear', 'nearest' and 'spline' are supported.")
+            error = ValueError(f"Interpolation type '{self.__interpolation}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
             _logger.error(error)
             raise error
         if self.__splineOrder > 5 or self.__splineOrder < 0:
@@ -180,7 +205,13 @@ class braggPeak:
 
     @property
     def accuracy(self) -> Numeric:
-        """float: Accuracy of the spline and Bortfeld profiles interpolations."""
+        """float: Accuracy of the spline and Bortfeld profiles interpolations.
+
+        Raises
+        ------
+        ValueError
+            If the value assigned is not a positive scalar.
+        """
         return self.__accuracy
 
     @accuracy.setter
@@ -197,7 +228,13 @@ class braggPeak:
 
     @property
     def bortCut(self) -> Numeric:
-        """float: The range of the data to perform Bortfeld fit on."""
+        """float: The range of the data to perform Bortfeld fit on.
+
+        Raises
+        ------
+        ValueError
+            If the value assigned is not a scalar in range 0-1.
+        """
         return self.__bortCut
 
     @bortCut.setter
@@ -228,7 +265,13 @@ class braggPeak:
 
     @property
     def bpBort(self) -> list[NDArray]:
-        """list of arrays: List of arrays describing `pos` and `vec` of the Bortfeld fit profile."""
+        """list of arrays: List of arrays describing `pos` and `vec` of the Bortfeld fit profile.
+
+        Raises
+        ------
+        ValueError
+            If the Bortfeld fit result does not provide the 'depth' keyword data.
+        """
         import numpy as np
 
         if not self.__bpBort:
@@ -339,6 +382,11 @@ class braggPeak:
         float
             Range at signal level.
 
+        Raises
+        ------
+        ValueError
+            If the `side` parameter cannot be recognised.
+
         Examples
         --------
         Get range at 80 percent of the maximum value of the interpolation at the distal fall-off of the BP.
@@ -371,6 +419,11 @@ class braggPeak:
         -------
         float
             Range at signal level.
+
+        Raises
+        ------
+        ValueError
+            If the `side` parameter cannot be recognised.
 
         Examples
         --------
@@ -409,7 +462,7 @@ class braggPeak:
         sideLocal = side.lower()
         # check if side is in proper format and unify it
         if sideLocal not in ["p", "d", "prox", "dist", "proximal", "distal"]:
-            error = ValueError(f"Parameter `side` {side} cannot be recognized. Only the values `proximal` (or `P`) or `distal` (or `D`) are allowed.")
+            error = ValueError(f"Parameter `side` {side} cannot be recognised. Only the values `proximal` (or `P`) or `distal` (or `D`) are allowed.")
             _logger.error(error)
             raise error
         if sideLocal in ["p", "prox", "proximal"]:
@@ -545,6 +598,11 @@ class braggPeak:
         float
             Width of the distal fall-off at signal level.
 
+        Raises
+        ------
+        ValueError
+            If `doseUp` is lower than `doseLow`.
+
         Examples
         --------
         Get width of the distal fall-off between 80 and 20 percent of the maximum value of the interpolation.
@@ -577,6 +635,11 @@ class braggPeak:
         -------
         float
             Width of the distal fall-off at signal level.
+
+        Raises
+        ------
+        ValueError
+            If `doseUp` is lower than `doseLow`.
 
         Examples
         --------
@@ -687,7 +750,7 @@ class braggPeak:
 
         bortfeldParam = self.__bortfeldParamConstant
         bortfeldParam["R0"] = float(self.getRInterp(0.8, "distal"))  # [mm]
-        bortfeldParam["phi"] = float(self.getDInterp(self.__bp[0].min()))  # [1/mm^2] initial fluence at the beginning of the profile (normalization factor)
+        bortfeldParam["phi"] = float(self.getDInterp(self.__bp[0].min()))  # [1/mm^2] initial fluence at the beginning of the profile (normalisation factor)
         bortfeldParam["E0"] = ((bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) / bortfeldParam["alpha"]) ** (1 / bortfeldParam["p"])  # [MeV] initial energy
         bortfeldParam["sigmaMono"] = (0.012 * (bortfeldParam["R0"] - self.__bp[0].min() - self.__offset) ** 0.935) / 10  # [mm] width of Gaussian range straggling
         bortfeldParam["sigmaE0"] = 0.01 * bortfeldParam["E0"]  # [MeV] width of Gaussian energy spectrum

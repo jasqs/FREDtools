@@ -38,7 +38,8 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
     Raises
     ------
     ValueError
-        If the size is not 2D or 3D, or if components is a negative integer.
+        If the size is not 2D or 3D, if `components` is a negative integer,
+        or if `spacing` does not have the same length as `size`.
 
     See Also
     --------
@@ -94,7 +95,7 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
 def createEllipseMask(img: SITKImage, point: PointLike, radii: Numeric | Sequence[Numeric], displayInfo: bool = False) -> SITKImage:
     """Create an Ellipse mask in the image field of reference.
 
-    The function creates an ellipse mask, defined with the center and radii
+    The function creates an ellipse mask, defined with the centre and radii
     in the frame of reference of an image defined as a SimpleITK image 
     object. Any dimension, i.e. 2D-4D, of the image is supported.
 
@@ -103,7 +104,7 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numeric | Sequenc
     img : SimpleITK Image
         An object of a SimpleITK image.
     point : array_like
-        A point describing the position of the center of the ellipse. The dimension must match the image dimension.
+        A point describing the position of the centre of the ellipse. The dimension must match the image dimension.
     radii : scalar or sequence (list/tuple)
         Radii of the ellipse for each dimension in [mm] (physical units, not voxels).
         It might be a scalar, then the same radii will be used in each direction.
@@ -114,6 +115,14 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numeric | Sequenc
     -------
     SimpleITK Image
         An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object, or if
+        `radii` is not a scalar or an iterable.
+    ValueError
+        If the length of `radii` or `point` does not match the image dimension.
 
     See Also
     --------
@@ -182,18 +191,19 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numeric | Sequenc
 def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, startRadius: Numeric, endRadius: Numeric, displayInfo: bool = False) -> SITKImage:
     """Create a cone mask in the image field of reference.
 
-    The function creates a cone mask, defined with starting and ending points and radii 
+    The function creates a cone mask, defined with starting and ending points and radii
     in the frame of reference of an image defined as a SimpleITK image object describing a 3D image.
-    Only 3D images are supported.
+    Only 3D images are supported. The cone bases are flat, i.e. the ends of
+    the cone are not rounded.
 
     Parameters
     ----------
     img : SimpleITK Image
         Object of a SimpleITK 3D image.
     startPoint : array_like
-        3-element point describing the position of the center of the first cone base.
+        3-element point describing the position of the centre of the first cone base.
     endPoint : array_like
-        3-element point describing the position of the center of the second cone base.
+        3-element point describing the position of the centre of the second cone base.
     startRadius : scalar
         Radius of the first cone base in [mm] (physical units, not voxels).
     endRadius : scalar
@@ -205,6 +215,11 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
     -------
     SimpleITK Image
         An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK 3D image object.
 
     See Also
     --------
@@ -279,9 +294,9 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
     img : SimpleITK Image
         Object of a SimpleITK 3D image.
     startPoint : array_like
-        3-element point describing the position of the center of the first cylinder base.
+        3-element point describing the position of the centre of the first cylinder base.
     endPoint : array_like
-        3-element point describing the position of the center of the second cylinder base.
+        3-element point describing the position of the centre of the second cylinder base.
     radius : scalar
         Radius of the cylinder in [mm] (physical units, not voxels).
     displayInfo : bool, optional
@@ -291,6 +306,11 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
     -------
     SimpleITK Image
         An instance of a SimpleITK image object describing a mask (i.e. type 'uint8' with 0/1 values).
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK 3D image object.
 
     See Also
     --------
@@ -315,7 +335,7 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
 def createBoxMask(img: SITKImage, point: PointLike, size: Numeric | Sequence[Numeric], displayInfo: bool = False) -> SITKImage:
     """Create a Box mask in the image field of reference.
 
-    The function creates a box mask, defined with the center point and size
+    The function creates a box mask, defined with the centre point and size
     in the frame of reference of an image defined as a SimpleITK image
     object. Any dimension, i.e. 2D-4D, of the image is supported.
 
@@ -324,7 +344,7 @@ def createBoxMask(img: SITKImage, point: PointLike, size: Numeric | Sequence[Num
     img : SimpleITK Image
         An object of a SimpleITK image.
     point : array_like
-        A point describing the position of the center of the box. The dimension must match the image dimension.
+        A point describing the position of the centre of the box. The dimension must match the image dimension.
     size : scalar or sequence (list/tuple)
         Size of the box for each dimension in [mm] (physical units, not voxels).
         It might be a scalar, then the same size will be used in each direction.
@@ -335,6 +355,14 @@ def createBoxMask(img: SITKImage, point: PointLike, size: Numeric | Sequence[Num
     -------
     SimpleITK Image
         An instance of a SimpleITK image object describing a binary mask (i.e. type 'uint8' with 0/1 values).
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object, or if
+        `size` is not a scalar or an iterable.
+    ValueError
+        If the length of `size` or `point` does not match the image dimension.
 
     See Also
     --------
@@ -374,7 +402,7 @@ def createBoxMask(img: SITKImage, point: PointLike, size: Numeric | Sequence[Num
         _logger.error(error)
         raise error
 
-    # convert center of box to corner
+    # convert centre of box to corner
     point = np.array(point) - 0.5 * np.array(size)
 
     # create box and mapping objects
