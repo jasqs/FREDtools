@@ -1,7 +1,7 @@
 def convertCTtoWER(img, HU, WER, displayInfo: bool = False):
     """Convert CT map to WER map.
 
-    The function converts a 3D Computed Tomography (CT) map with Houndsfield 
+    The function converts a 3D Computed Tomography (CT) map with Hounsfield 
     Unit (HU) values, defined as a SimpleITK image object, to an image with 
     Water-Equivalent Ratio values (WER). The two parameters, `HU` and `WER`, 
     define the HU to WER conversion, whereas the missing HU values are interpolated 
@@ -122,7 +122,7 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
 
     # check SAD
     if isinstance(SAD, str) and SAD.lower() in ["parallel", "par"]:
-        raise ValueError("The parallel beam is has not been yet implemented.")
+        raise ValueError("The parallel beam has not been implemented yet.")
     if len(SAD) != 2:
         raise AttributeError("The 'SAD' parameter must be a 2-element iterable.")
 
@@ -206,7 +206,7 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     # # calculate ray position at the downstream magnet
     raysPosition, _ = ft.calcRaysVectors(raysTarget, SAD)
 
-    # get volume volume parameters
+    # get volume parameters
     volumeEntrance = imgWER.GetOrigin()[2]-imgWER.GetSpacing()[2]/2  # min Z coordinate of the volume extent
     imgWEROrigin, imgWERSpacing = imgWER.GetOrigin(), imgWER.GetSpacing()
     arrWERView = sitk.GetArrayViewFromImage(imgWER)
@@ -214,7 +214,7 @@ def calcWETfromWER(imgWER, SAD, imgMask=None, displayInfo: bool = False):
     global calcWETRayPool  # make the function global to use it in multiprocessing
 
     def calcWETRayPool(ray):
-        # imgWER and imgVoxelEdges are be shared
+        # imgWER and imgVoxelEdges are shared
         return calcWETRay(ray[0], ray[1], imgWEROrigin, imgWERSpacing, arrWERView, imgVoxelEdges, volumeEntrance)
 
     # run multiprocessing calculation
@@ -257,7 +257,7 @@ def generateIsoLayers(minRange, maxRange, beamParams):
     maxRange : scalar
         Maximum range to calculate layers.
     beamParams : pandas.DataFrame
-        Parameters of the beam, i.e. dependance of the 
+        Parameters of the beam, i.e. dependence of the 
         beam range and width with nominal energies. Must include 
         at least columns: "nomEnergy", "rangeProx" and "rangeDist".
 
@@ -364,7 +364,7 @@ def calcContours(imgMask, level=0.5, displayInfo: bool = False):
 
 
 def convertRayTargetToIsoPlane(rayTarget, SAD):
-    """Calculate beam positon in the isocentre plane.
+    """Calculate beam position in the isocentre plane.
 
     The function calculates the beam positions in the isocentre plane, 
     based on the target position and distance to the virtual point (SAD). 

@@ -354,7 +354,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
     indices = np.ravel_multi_index(tuple(np.array(points).T), imgBase.GetSize(), order="F")
 
     # get pencil beams info
-    imnInfo = getInmFREDInfo(fileName)
+    inmInfo = getInmFREDInfo(fileName)
 
     # read the influence matrix file depending on the version
     InmFREDVersion = getInmFREDVersion(fileName)
@@ -362,12 +362,12 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
         case 2.0 | 2.1:
             if interpreter == "cupy":
                 _logger.warning("Cupy interpreter is not supported for version 2.0 of the Inm file. The numpy interpreter will be used to read the Imn file and then the result will be uploaded to GPU.")
-            listInmSparse = _getInmFREDSparseVersion2(fileName, indices, imnInfo, imgBase)
+            listInmSparse = _getInmFREDSparseVersion2(fileName, indices, inmInfo, imgBase)
             if interpreter == "cupy":
                 listInmSparse = [cp.sparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
 
         case 3.0 | 3.1:
-            listInmSparse = _getInmFREDSparseVersion3(fileName, indices, imnInfo, imgBase, interpreter=interpreter)
+            listInmSparse = _getInmFREDSparseVersion3(fileName, indices, inmInfo, imgBase, interpreter=interpreter)
         case _:
             error = NotImplementedError(f"Version {InmFREDVersion} of the Inm file is not supported.")
             _logger.error(error)
@@ -375,8 +375,8 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
 
     if displayInfo:
         strLog = [f"Number of points: {pointsNo}",
-                  f"Number of PBs: {imnInfo.shape[0]}",
-                  f"Number of fields: {len(imnInfo.FID.unique())}",
+                  f"Number of PBs: {inmInfo.shape[0]}",
+                  f"Number of fields: {len(inmInfo.FID.unique())}",
                   f"Number of components: {len(listInmSparse)}",
                   f"Stored elements per component: {[InmSparse.nnz for InmSparse in listInmSparse]}"]
         _logger.info("\n\t" + "\n\t".join(strLog))
@@ -384,7 +384,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
     return listInmSparse
 
 
-def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, imnInfo: DataFrame, imgBase: SITKImage) -> Sequence[SparseMatrixCSR]:
+def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, inmInfo: DataFrame, imgBase: SITKImage) -> Sequence[SparseMatrixCSR]:
     """Get sparse matrices of point values from the FRED influence matrix file version 2.0."""
     import struct
     import numpy as np
@@ -411,7 +411,7 @@ def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, imnInfo: D
         # list of sparse matrices of point values for each component
         listInmSparse = [sparse.lil_array((pencilBeamNo, np.prod(imgBase.GetSize())), dtype=np.float32) for _ in range(componentNo)]
 
-        for PBIdx, inmInfoRow in imnInfo.iterrows():
+        for PBIdx, inmInfoRow in inmInfo.iterrows():
             # skip the header of PB with PBtag and number of voxels
             file_h.seek(8, 1)
 
@@ -436,7 +436,7 @@ def _getInmFREDSparseVersion2(fileName: PathLike, indices: ArrayLike, imnInfo: D
     return [sparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
 
 
-def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, imnInfo: DataFrame, imgBase: SITKImage, interpreter: str = "numpy") -> Sequence[SparseMatrixCSR]:
+def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, inmInfo: DataFrame, imgBase: SITKImage, interpreter: str = "numpy") -> Sequence[SparseMatrixCSR]:
     """Get sparse matrices of point values from the FRED influence matrix file version 3.0."""
     import struct
     import numpy as np

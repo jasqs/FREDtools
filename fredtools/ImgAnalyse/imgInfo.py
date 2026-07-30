@@ -98,7 +98,7 @@ def _displayImageInfo(img: SITKImage, metadata: bool = True) -> str:
     Parameters
     ----------
     img : SimpleITK Image
-        An object of a SimpleITK image.1
+        An object of a SimpleITK image.
     metadata : bool, optional
         Display additional metadata. (def. True)
     """

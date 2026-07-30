@@ -15,9 +15,9 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic
     The gamma index can be calculated for `local` or `global` dose difference in two modes:
 
         -  *gamma*: each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.
-        -  *pass-rate*: each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
+        -  *pass-rate*: each voxel represents passing (1) or failing (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
-    The gamma index calculation is performed by an external C++ library complied as a Linux shared library.
+    The gamma index calculation is performed by an external C++ library compiled as a Linux shared library.
     The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys [1]_ python library.
 
     Parameters
@@ -52,7 +52,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic
         Mode of calculation. (def. 'gamma'):
 
             -  'gamma': each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.
-            -  'pass-rate': each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
+            -  'pass-rate': each voxel represents passing (1) or failing (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -75,10 +75,10 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic
         - -21 : value is nan error
         - -22 : value is inf error
         - -29 : null pointer error
-        - -50 : illdefined vector
-        - -51 : illdefined dimensions
-        - -52 : illdefined spacing
-        - -53 : illdefined offset
+        - -50 : ill-defined vector
+        - -51 : ill-defined dimensions
+        - -52 : ill-defined spacing
+        - -53 : ill-defined offset
         - -100 : computation ongoing
         - -101 : setup not complete
         - -102 : criteria not defined
@@ -123,7 +123,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numberic
 
     # validate DTA, DD, DDType, DCO and globalNorm
     if not isinstance(DTA, Numberic) or DTA <= 0:
-        error = ValueError(f"The value od DTA {DTA} is not correct. It must be a positive scalar.")
+        error = ValueError(f"The value of DTA {DTA} is not correct. It must be a positive scalar.")
         _logger.error(error)
         raise error
     if not isinstance(DD, Numberic) or DD <= 0 or DD >= 100:
@@ -301,7 +301,7 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
     are recognized automatically based on the image type:
 
         -  *gamma* (float): each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1 or numpy.nan.
-        -  *pass-rate* (integer): each voxel represents passing (1) or falling (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
+        -  *pass-rate* (integer): each voxel represents passing (1) or failing (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
     Parameters
     ----------

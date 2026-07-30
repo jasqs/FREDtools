@@ -48,7 +48,7 @@ def setFieldsFolderStruct(folderPath: PathLike, RNfileName: PathLike, folderName
 
     # check if folderPath exists
     if not os.path.exists(folderPath):
-        raise FileNotFoundError(f"The folder {folderPath} dose not exist.")
+        raise FileNotFoundError(f"The folder {folderPath} does not exist.")
 
     simFolder = os.path.join(folderPath, folderName)
 
@@ -124,7 +124,7 @@ def readFREDStat(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
 
     # check if file exists
     if not os.path.isfile(fileName):
-        error = FileNotFoundError(f"The file {fileName} dose not exist.")
+        error = FileNotFoundError(f"The file {fileName} does not exist.")
         _logger.error(error)
         raise error
 
@@ -214,7 +214,7 @@ def readFREDStat(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
 
 
 def getFREDVersions() -> List[str]:
-    """List the installed FRED varions.
+    """List the installed FRED versions.
 
     The function lists the FRED versions installed on the machine.
 
@@ -258,7 +258,7 @@ def checkFREDVersion(version: str) -> bool:
 
     See Also
     --------
-    getFREDVersions : list the installed FRED varions.
+    getFREDVersions : list the installed FRED versions.
     """
     import re
     import fredtools as ft
@@ -290,7 +290,7 @@ def getFREDVersion(version: str = "") -> str:
 
     See Also
     --------
-    getFREDVersions : list the installed FRED varions.
+    getFREDVersions : list the installed FRED versions.
     """
     import subprocess
     import fredtools as ft
@@ -342,7 +342,7 @@ def runFRED(fileName: PathLike, version: str = "", params: Iterable[str] = [], d
     --------
     readFREDStat : read FRED simulation statistics information from logfile.
     checkFREDVersion : check if the FRED version is installed.
-    getFREDVersions : list the installed FRED varions.
+    getFREDVersions : list the installed FRED versions.
     """
     import os
     import subprocess
@@ -357,7 +357,7 @@ def runFRED(fileName: PathLike, version: str = "", params: Iterable[str] = [], d
 
     # check if the fred.inp exists
     if not os.path.exists(fileName):
-        raise ValueError(f"The file '{fileName}' dose not exist.")
+        raise ValueError(f"The file '{fileName}' does not exist.")
 
     # get absolute folder name sim. file name
     fileName = os.path.abspath(fileName)

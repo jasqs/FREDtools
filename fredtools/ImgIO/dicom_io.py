@@ -6,7 +6,7 @@ _logger = getLogger(__name__)
 def getDicomTypeName(dicomVar: PathLike | DicomDataset) -> str:
     r"""Check the type of the dicom given as a path or tags.
 
-    The function return the name of the SOP Class UID tag of a dicom
+    The function returns the name of the SOP Class UID tag of a dicom
     file given as a file name or dicom tags. The description of the
     SOP Class UID names can be found in [1]_.
 
@@ -336,7 +336,16 @@ def _getReferencedBeamDatasetForFieldNumber(fileName: PathLike, beamNumber: int)
 def getRNMachineName(fileName: PathLike, displayInfo: bool = False) -> str:
     """Get the machine name defined in the RN plan.
 
-    The function retrieves the machine name defined in the RN dicom fdicomVar["IonBeamSequence"]
+    The function retrieves the machine name defined in the RN dicom file.
+    The name is read from the 'TreatmentMachineName' tag of each TREATMENT
+    beam and it is validated that it is the same for all of them.
+
+    Parameters
+    ----------
+    fileName : path
+        Path to RN dicom file.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
 
     Returns
     -------
@@ -393,7 +402,7 @@ def getRNIsocenter(fileName: PathLike, displayInfo: bool = False) -> tuple:
     center is returned.
 
     Parameters
-    ----------dicomVar["IonBeamSequence"]
+    ----------
     fileName : path
         Path to RN dicom file.
     displayInfo : bool, optional
@@ -402,7 +411,7 @@ def getRNIsocenter(fileName: PathLike, displayInfo: bool = False) -> tuple:
     Returns
     -------
     tuple
-        3-elements list of XYZ isocenter coordinates
+        3-element tuple of XYZ isocenter coordinates in [mm].
 
     See Also
     --------
@@ -573,7 +582,7 @@ def getRNSpots(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     # drop columns with all NaN values
     spotsInfo.dropna(axis="columns", how="all", inplace=True)
 
-    # fill nan values with the lat valid value
+    # fill nan values with the last valid value
     spotsInfo.ffill(inplace=True)
 
     # reset index
@@ -711,13 +720,23 @@ def getRNInfo(fileName: PathLike, displayInfo: bool = False) -> DottedDict:
         -  *RNFileName* : absolute path to the RN file.
         -  *dosePrescribed* : dose prescribed to the target (see notes below).
         -  *fractionNo* : number of the fractions planned.
-        -  *targetStructName* : name of the structure which the plan was prepared for (dose not work for all RN dicoms).
+        -  *targetStructName* : name of the structure which the plan was prepared for (does not work for all RN dicoms).
         -  *planLabel* : name of the treatment plan (can be empty for anonymized DICOM).
         -  *planDate* : date of the plan creation (can be empty for anonymized DICOM).
         -  *planTime* : time of the plan creation (can be empty for anonymized DICOM).
         -  *patientName* : name of the patient (can be empty for anonymized DICOM).
         -  *patientBirthDate* : birth date of the patient (can be empty for anonymized DICOM).
-        -  *patientID* : ID of the patient (can be emptyDottedDict
+        -  *patientID* : ID of the patient (can be empty for anonymized DICOM).
+        -  *manufacturer* : manufacturer of the treatment planning system.
+        -  *softwareVersions* : version of the treatment planning system.
+        -  *stationName* : name of the station on which the plan was prepared.
+        -  *machineName* : name of the treatment machine.
+        -  *totalFieldsNumber* : total number of fields defined in the plan.
+        -  *treatmentFieldsNumber* : number of fields with TREATMENT delivery type.
+        -  *setupFieldsNumber* : number of fields with SETUP delivery type.
+        -  *otherFieldsNumber* : number of fields with other delivery types.
+
+    Parameters
     ----------
     fileName : path
         Path to RN dicom file.
@@ -868,7 +887,7 @@ def getRSInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
         _logger.error(error)
         raise error
 
-    # fill the ROI infor table
+    # fill the ROI info table
     ROITable = pd.DataFrame(columns=["ROIID", "ROIType", "ROIName", "ROIColor", "ROIPhysicalProperty", "ROIPhysicalPropertyValue"])
     ROIType = None
     ROIColor = None
@@ -1037,14 +1056,14 @@ def getCT(fileNames: Iterable[PathLike], displayInfo: bool = False) -> SITKImage
             raise error
 
     # check if all dicoms have Slice Location tag
-    sliceLosationPresent = []
+    sliceLocationPresent = []
     for fileName, dicomSimple in zip(fileNames, dicomSeries):
-        sliceLosationPresent.append("SliceLocation" in dicomSimple)
-    if not all(sliceLosationPresent):
+        sliceLocationPresent.append("SliceLocation" in dicomSimple)
+    if not all(sliceLocationPresent):
         _logger.warning("Warning: All dicom files are of CT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
 
     # get slice location
-    if not all(sliceLosationPresent):
+    if not all(sliceLocationPresent):
         slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.ImagePositionPatient[2]), dicomSeries))
     else:
         slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomSeries))
@@ -1149,14 +1168,14 @@ def getPET(fileNames: Iterable[PathLike], SUV: bool = True, displayInfo: bool = 
             raise error
 
     # check if all dicoms have Slice Location tag
-    sliceLosationPresent = []
+    sliceLocationPresent = []
     for fileName, dicomDataset in zip(fileNames, dicomsDataset):
-        sliceLosationPresent.append("SliceLocation" in dicomDataset)
-    if not all(sliceLosationPresent):
+        sliceLocationPresent.append("SliceLocation" in dicomDataset)
+    if not all(sliceLocationPresent):
         _logger.warning("Warning: All dicom files are of PT type but not all have 'SliceLocation' tag. The last element of 'ImagePositionPatient' tag will be used as the slice location.")
 
     # get slice location
-    if not all(sliceLosationPresent):
+    if not all(sliceLocationPresent):
         slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.ImagePositionPatient[2]), dicomsDataset))
     else:
         slicesLocation = list(map(lambda dicomSimple: float(dicomSimple.SliceLocation), dicomsDataset))
@@ -1333,7 +1352,7 @@ def _getStructureContoursByName(RSfileName: PathLike, structName: str) -> tuple:
 
 
 def getRDFileNameForFieldNumber(fileNames: Iterable[PathLike], fieldNumber: int, displayInfo: bool = False) -> PathLike | None:
-    """Get the file name of the RD dose dicom of for the given field number.
+    """Get the file name of the RD dose dicom for the given field number.
 
     The function searches for the RD dose dicom file for a given
     field number (beam number) and returns its file name.

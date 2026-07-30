@@ -134,7 +134,7 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
     contourPolygon : shapely Polygon
         Object of the shapely.Polygon.
     spotDistance : scalar
-        The spot distance is to be used to calculate regular grid beam positions.
+        The spot distance to be used to calculate hexagonal grid beam positions.
     direction : {'X', 'Y'}, optional
         The direction along which the beams should be shifted to create a hexagonal
         grid. This parameter can be used to align the hexagonal direction to the faster
@@ -215,88 +215,52 @@ def optimiseBeamPositionsHexagonal(contourPolygon, spotDistance, direction="X"):
 
 
 def optimiseBeamPositionsConcentric(contourPolygon, spotDistance):
-    """Calculate the beam positions using the hexagonal grid algorithm.
+    """Calculate the beam positions using the concentric rings algorithm.
 
-    The function calculates beam positions in a contour defined
-    as an instance of the shapely.Polygon object using
-    hexagonal grid algorithm. The algorithm is optimized to place
-    the central beam position at the polygon centroid.
+    The function is intended to calculate beam positions in a contour defined
+    as an instance of the shapely.Polygon object using a concentric rings
+    algorithm. The algorithm has not been implemented yet.
 
     Parameters
     ----------
     contourPolygon : shapely Polygon
         Object of the shapely.Polygon.
     spotDistance : scalar
-        The spot distance is to be used to calculate regular grid beam positions.
-    direction : {'X', 'Y'}, optional
-        The direction along which the beams should be shifted to create a hexagonal
-        grid. This parameter can be used to align the hexagonal direction to the faster
-        direction of the pencil beam scanning. (def. 'X')
+        The spot distance to be used to calculate the beam positions.
 
-    Returns
-    -------
-    numpy array (Nx2)
-        Numpy array of size (Nx2) describing the position of N beams, where the first
-        column is X and the second Y directions.
+    Raises
+    ------
+    NotImplementedError
+        The algorithm has not been implemented yet.
 
     See Also
     --------
         optimiseBeamPositions: Optimise beam positions using various algorithms.
-
-    Notes
-    -----
-    The hexagonal grid algorithm distributes the beams with the same spacing in X
-    (or in Y) and every second row (or column) of the beam positions is shifted by
-    half of the `spotDistance`. The grid size is calculated to fit the given
-    contour polygon and is moved so that the central beam is at the polygon centroid.
-    All the beam positions which are not inside the polygon are removed.
-
-    The user can choose in which direction, X or Y, the hexagonal grid should be aligned.
-    This might be important when optimizing the beam positions for a given machine where
-    the scanning is faster in one direction than in the other.
     """
     raise NotImplementedError("The method is not yet implemented")
 
 
 def optimiseBeamPositionsDelaunay(contourPolygon, spotDistance):
-    """Calculate the beam positions using the hexagonal grid algorithm.
+    """Calculate the beam positions using the Delaunay triangulation algorithm.
 
-    The function calculates beam positions in a contour defined
-    as an instance of the shapely.Polygon object using
-    hexagonal grid algorithm. The algorithm is optimized to place
-    the central beam position at the polygon centroid.
+    The function is intended to calculate beam positions in a contour defined
+    as an instance of the shapely.Polygon object using a Delaunay triangulation
+    algorithm. The algorithm has not been implemented yet.
 
     Parameters
     ----------
     contourPolygon : shapely Polygon
         Object of the shapely.Polygon.
     spotDistance : scalar
-        The spot distance is to be used to calculate regular grid beam positions.
-    direction : {'X', 'Y'}, optional
-        The direction along which the beams should be shifted to create a hexagonal
-        grid. This parameter can be used to align the hexagonal direction to the faster
-        direction of the pencil beam scanning. (def. 'X')
+        The spot distance to be used to calculate the beam positions.
 
-    Returns
-    -------
-    numpy array (Nx2)
-        Numpy array of size (Nx2) describing the position of N beams, where the first
-        column is X and the second Y directions.
+    Raises
+    ------
+    NotImplementedError
+        The algorithm has not been implemented yet.
 
     See Also
     --------
         optimiseBeamPositions: Optimise beam positions using various algorithms.
-
-    Notes
-    -----
-    The hexagonal grid algorithm distributes the beams with the same spacing in X
-    (or in Y) and every second row (or column) of the beam positions is shifted by
-    half of the `spotDistance`. The grid size is calculated to fit the given
-    contour polygon and is moved so that the central beam is at the polygon centroid.
-    All the beam positions which are not inside the polygon are removed.
-
-    The user can choose in which direction, X or Y, the hexagonal grid should be aligned.
-    This might be important when optimizing the beam positions for a given machine where
-    the scanning is faster in one direction than in the other.
     """
     raise NotImplementedError("The method is not yet implemented")

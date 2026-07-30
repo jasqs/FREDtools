@@ -46,7 +46,7 @@ def showSlice(ax: Axes, imgBack: SITKImage | None = None, imgFront: SITKImage | 
         Maximum value of the foreground dose map. If None then the
         maximum value of the 3D foreground image will be used. (def. None)
     alphaFront : float, optional
-        Alpha value pf the transparency of the foreground image. (def. 0.7)
+        Alpha value of the transparency of the foreground image. (def. 0.7)
     showLegend : bool, optional
         Show legend of the ROI contour names if they exist. (def. True)
     fontsize : scalar, optional
@@ -188,7 +188,7 @@ class showSlices:
     going through `point`, of a 3D image describing foreground
     overlapped on a background image. The class can display in
     an interactive mode exploiting ipywidgets functionality,
-    allowing to move slices with a mouse well or move slices to
+    allowing to move slices with a mouse wheel or move slices to
     the point when the mouse button is pressed. All those interactive
     features work with Shift pressed.
 
@@ -219,7 +219,7 @@ class showSlices:
         Colormap to display the foreground image slice. (def. 'jet')
     figsize : 2-element list, optional
         Width and height of the figure in inches. (def. [15, 5])
-t
+
     Examples
     --------
     See `Jupyter notebook of Image Display Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Image%20Display%20Tutorial.ipynb>`_.
@@ -343,7 +343,7 @@ t
             self.fig.canvas.mpl_connect("scroll_event", self.scrollEvent)
             self.fig.canvas.mpl_connect("key_press_event", self.scrollEventShiftPress)
             self.fig.canvas.mpl_connect("key_release_event", self.scrollEventShiftRelease)
-            self.fig.canvas.mpl_connect("button_press_event", self.mouseButtomPressEvent)
+            self.fig.canvas.mpl_connect("button_press_event", self.mouseButtonPressEvent)
             self.scrollEventShift = False
         else:
             self.showSliceAX1(X=self.point[0])
@@ -358,7 +358,7 @@ t
         if event.key == "shift":
             self.scrollEventShift = False
 
-    def mouseButtomPressEvent(self, event):
+    def mouseButtonPressEvent(self, event):
         if self.scrollEventShift:
             if event.inaxes == self.axs[0] and event.button == 1:
                 self.sliderY.value = event.ydata

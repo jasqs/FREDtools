@@ -205,7 +205,7 @@ class beamModel:
             _logger.error(error)
             raise error
         if "scalingFactor" not in energyModel.reset_index().keys():
-            error = AttributeError("The dosimatric callibration of the energy model must contain the 'scalingFactor' column.")
+            error = AttributeError("The dosimetric calibration of the energy model must contain the 'scalingFactor' column.")
             _logger.error(error)
             raise error
 
@@ -218,7 +218,7 @@ class beamModel:
     def nomEnergies(self) -> tuple:
         """Returns the nominal energies the beam model is defined for.
 
-        The nomional energies are usually the ones defined by the TPS. 
+        The nominal energies are usually the ones defined by the TPS. 
         """
         if self._energyModel.empty:
             _logger.warning("The energy model is empty.")
@@ -263,7 +263,7 @@ class beamModel:
         else:
             nomEnergy = list(nomEnergy)
 
-        # check it the beam model was defined
+        # check if the beam model was defined
         if self._energyModel is None:
             error = AttributeError("The beam model was not defined. Please set the energy model first.")
             _logger.error(error)
@@ -409,7 +409,7 @@ class beamModel:
                 if ("row" in beamModel[key][-1]) and ("column" in beamModel[key][-1]):  # the key is a pandas DataFrame
                     beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), sep=r'\s+(?![^\[]*[\]])', engine="python")
                     beamModel[key] = beamModel[key].map(numpyArray)  # map data in square brackets to numpy
-                    beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first cloumn as index
+                    beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first column as index
 
         if "Description" not in beamModel.keys():
             beamModel["Description"] = beamModel["BM Description"]
@@ -680,7 +680,7 @@ def readBeamModel(fileName: PathLike) -> dict:
     Returns
     -------
     dict
-        A dictionary with the beam model and required kays.
+        A dictionary with the beam model and required keys.
 
     See Also
     --------
@@ -712,7 +712,7 @@ def readBeamModel(fileName: PathLike) -> dict:
             if ("row" in beamModel[key][-1]) and ("column" in beamModel[key][-1]):  # the key is a pandas DataFrame
                 beamModel[key] = pd.read_csv(StringIO("\n".join(beamModel[key][:-1])), sep=r'\s+(?![^\[]*[\]])', engine="python")
                 beamModel[key] = beamModel[key].map(numpyArray)  # map data in square brackets to numpy
-                beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first cloumn as index
+                beamModel[key].set_index(beamModel[key].keys()[0], inplace=True)  # always set the first column as index
 
     return beamModel
 
@@ -745,7 +745,7 @@ def writeBeamModel(beamModel: dict, fileName: PathLike) -> None:
 
     beamModelSave = deepcopy(beamModel)
 
-    # convert all dataFrames to a nicely formated list of strings
+    # convert all dataFrames to a nicely formatted list of strings
     for key in beamModelSave.keys():
         if isinstance(beamModelSave[key], pd.DataFrame):
             beamModelSave[key].reset_index(inplace=True)
@@ -872,7 +872,7 @@ def calcRaysVectors(targetPoint: Iterable[Numberic] | Iterable[Iterable[Numberic
 
     # validate SAD
     if not isinstance(SAD, Iterable) or len(list(SAD)) != 2:
-        error = AttributeError("The SAD parameterm must be an iterable with two elements.")
+        error = AttributeError("The SAD parameter must be an iterable with two elements.")
         _logger.error(error)
         raise error
 

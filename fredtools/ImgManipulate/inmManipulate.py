@@ -11,7 +11,7 @@ def inmSumVec(inmSparse: SparseMatrixCSR, weigths: Iterable[Numberic], displayIn
     returns a summed influence matrix as a numpy array. The sparse matrix can be given
     as an instance of a scipy.sparse.csr_matrix or cupy.sparse.csr_matrix object. 
     In case of the cupy.sparse.csr_matrix object, the multiplication and summing 
-    will be perfoemd on GPU.   
+    will be performed on GPU.   
 
     Parameters
     ----------

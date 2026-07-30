@@ -93,7 +93,7 @@ def fitSpotProfile(pos: ArrayLike, vec: ArrayLike, cutLevel: NonNegativeFloat = 
     pos : array_like 1xN
         An iterable with the positions of the values.
     vec : array_like 1xN
-        An iterable with the values correcponding to `pos`.
+        An iterable with the values corresponding to `pos`.
     cutLevel : scalar, optional
         Fraction of the maximum value of `vec` for which the fit will be performed.
     fixAmplitude : bool, optional

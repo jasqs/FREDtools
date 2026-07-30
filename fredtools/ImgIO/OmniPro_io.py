@@ -21,7 +21,7 @@ def readOPG(fileName: PathLike, depth: float = 0, displayInfo: bool = False) -> 
     Returns
     -------
     SimpleITK Image
-        An object a SimpleITK image.
+        An object of a SimpleITK image.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -138,9 +138,10 @@ def readOPG(fileName: PathLike, depth: float = 0, displayInfo: bool = False) -> 
 def readOPD(fileName: PathLike, depth: Numberic = 0, returnImg=["Integral", "Sum"], raiseWarning: bool = True, displayInfo: bool = False) -> List[SITKImage]:
     """Read OPD files from OmniPro software.
 
-    The function reads a single OPG file saved by OmniPro software (IBA)
-    and creates an instance of a SimpleITK object. Only the files saved in
-    video mode are handled now and the last saved integral is read.
+    The function reads a single OPD file saved by OmniPro software (IBA)
+    and creates a list of SimpleITK image objects. All the "Snap", "Integral"
+    and "Sum" records found in the file are parsed and the images whose type
+    matches `returnImg` are returned, in the order they appear in the file.
 
     Parameters
     ----------
@@ -149,17 +150,17 @@ def readOPD(fileName: PathLike, depth: Numberic = 0, returnImg=["Integral", "Sum
     depth : scalar, optional
         A scalar defining the depth of a 3D image. Usually, it is the depth of the measurement. (def. 0)
     returnImg : string or iterable of strings
-        A strung or an iterable of strings determining the type of image to be returned.
+        A string or an iterable of strings determining the type of image to be returned.
         Usually it might take "Snap", "Integral" and/or "Sum". (def. ["Integral", "Sum"])
     raiseWarning : bool, optional
-        Raise warnings. (def. False)
+        Raise warnings. (def. True)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
     Returns
     -------
-    SimpleITK Image
-        An object a SimpleITK image.
+    list of SimpleITK Images
+        A list of SimpleITK image objects matching `returnImg`.
 
     Notes
     -----

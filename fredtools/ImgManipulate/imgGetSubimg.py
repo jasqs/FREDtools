@@ -29,7 +29,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
         image is flipped in the following direction. The order of the axis is
         important and the output will be generated in this way to be consistent
         with the axes displayed with matplotlib.pyplot.imshow. For instance,
-        plane `Z-X` will display Z-axis on X-axis in imshow and Y-axis of
+        plane `Z-X` will display Z-axis on X-axis in imshow and Y-axis
         of imshow will be a reversed X-axis of the image. (def. 'XY')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -126,7 +126,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
         _logger.error(error)
         raise error
     if len(plane) > 4:
-        error = AttributeError(f"Plane parameter '{plane}' cannot be recognized. The length of the plane parameter should less or equal than 4.")
+        error = AttributeError(f"Plane parameter '{plane}' cannot be recognized. The length of the plane parameter should be less than or equal to 4.")
         _logger.error(error)
         raise error
 
@@ -139,7 +139,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     # check if plane definition is correct for img dimension
     for planeSimpleAxis in planeSimple:
         if not planeSimpleAxis in axesNameAvailable:
-            error = AttributeError(f"Axis '{planeSimpleAxis}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+            error = AttributeError(f"Axis '{planeSimpleAxis}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
             _logger.error(error)
             raise error
 
@@ -228,10 +228,10 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
 
     Returns
     -------
-    SimpleITK Image        cumsum_img = ft.getCumSum(self.img3D, axis='X', displayInfo=True)
-        self.assertEqual(cumsum_img.GetDimension(), 3)
-        self.assertEqual(cumsum_img.GetSize(), self.img3D.GetSize())
+    SimpleITK Image
+        An object of a SimpleITK image describing a profile.
 
+    See Also
     --------
         matplotlib.pyplot.plot : displaying profiles.
         pos : get voxels' centers for axes of size different than one.
@@ -321,7 +321,7 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
         _logger.error(error)
         raise error
     if len(axis) > 2:
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should less or equal to 2.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should be less than or equal to 2.")
         _logger.error(error)
         raise error
 
@@ -333,7 +333,7 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
-        error = AttributeError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
         _logger.error(error)
         raise error
 
@@ -608,7 +608,7 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
         _logger.error(error)
         raise error
     if len(axis) > 2:
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should less or equal to 2.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should be less than or equal to 2.")
         _logger.error(error)
         raise error
 
@@ -620,7 +620,7 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
 
     # check if profile definition is correct for img dimension
     if not axisSimple in axesNameAvailable:
-        error = AttributeError(f"Axis '{axisSimple}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axisSimple}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
         _logger.error(error)
         raise error
 
@@ -695,7 +695,7 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
         _logger.error(error)
         raise error
     if len(axis) > 1:
-        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should less or equal to 1.")
+        error = AttributeError(f"Axis parameter '{axis}' cannot be recognized. The length of the plane parameter should be less than or equal to 1.")
         _logger.error(error)
         raise error
 
@@ -704,7 +704,7 @@ def getCumSum(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SIT
 
     # check if the profile definition is correct for img dimension
     if not axis in axesNameAvailable:
-        error = AttributeError(f"Axis '{axis}' cannot be recongised for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
+        error = AttributeError(f"Axis '{axis}' cannot be recognized for 'img' of dimension {img.GetDimension()}. Only {axesNameAvailable} are possible.")
         _logger.error(error)
         raise error
 
@@ -790,7 +790,7 @@ def _calcPositionsAlongLine(points: Iterable[PointLike], origin: PointLike) -> N
 def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spacing: Numberic = 1, origin: Literal["start", "center", "image"] | PointLike = "center", displayInfo: bool = False, **kwargs) -> Tuple[tuple, tuple]:
     """Get 1D profile between points.
 
-    The function get a profile of an image defined as a SimpleITK
+    The function gets a profile of an image defined as a SimpleITK
     image object, between two points, pointA and pointB, with a given step size (spacing).
     The values at the given points are interpolated from the image.
 

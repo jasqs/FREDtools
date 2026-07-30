@@ -8,7 +8,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
 
     The function reads a `structName` structure from the RS dicom file and maps it to
     the frame of reference of `img` defined as a SimpleITK image object. The created
-    mask is an image with the same frame of reference (origin. spacing, direction
+    mask is an image with the same frame of reference (origin, spacing, direction
     and size) as the `img` with values larger than 0 for voxels inside the contour
     and values 0 outside. In primary usage, the function produces floating masks, i.e., the value
     of each voxel describes its fractional occupancy by the structure.
@@ -124,7 +124,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     # check if all Z positions are the same for each contour
     for StructureContour in StructureContours:
         if not len(np.unique(StructureContour[:, 2])) == 1:
-            error = ValueError(f"Not all Z (depth) position in controur are the same.")
+            error = ValueError(f"Not all Z (depth) position in contour are the same.")
             _logger.error(error)
             raise error
 
@@ -196,7 +196,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
 
     # verify if all contour depths are present in the mask depths
     if not set(StructurePolygonsDepths).issubset(np.round(ft.getVoxelCentres(imgMaskBase)[2], 6)):
-        raise RuntimeError(f"Not all depths defined in coutour are represented in the created mask.")
+        raise RuntimeError(f"Not all depths defined in contour are represented in the created mask.")
 
     # Crop the structure polygons to fit in the image mask
     imgMaskExtent = ft.getExtent(imgMaskBase)
@@ -435,7 +435,7 @@ def floatingToBinaryMask(imgMask: SITKImage, threshold: Annotated[float, Field(s
     try:
         ft._imgTypeChecker.isSITK_maskBinary(imgMaskBinary, raiseError=True)
     except TypeError:
-        error = RuntimeError("The the input image is a floating mask but the binary mask is incorrect.")
+        error = RuntimeError("The input image is a floating mask but the binary mask is incorrect.")
         _logger.error(error)
         raise error
 
@@ -639,7 +639,7 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     ft._imgTypeChecker.isSITK(img, raiseError=True)
 
     if ft._imgTypeChecker.isSITK_point(img):
-        error = ValueError(f"The 'img' is an instance of SimleITK image but describes a single point (size of 'img' is {img.GetSize()}). Interpolation cannot be performed on images describing a single point.")
+        error = ValueError(f"The 'img' is an instance of SimpleITK image but describes a single point (size of 'img' is {img.GetSize()}). Interpolation cannot be performed on images describing a single point.")
         _logger.error(error)
         raise error
 
@@ -894,7 +894,7 @@ def meanImg(imgs: Iterable[SITKImage], displayInfo: bool = False) -> SITKImage:
 def divideImg(imgNum: SITKImage, imgDen: SITKImage, displayInfo: bool = False) -> SITKImage:
     """Divide two images.
 
-    The function divides two images images defined as instances 
+    The function divides two images defined as instances 
     of a SimpleITK image object. The frame of references of both images 
     must be the same. For a given voxel it returns:
 
@@ -1221,7 +1221,7 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
     # check HURange
     HUrange = list(HUrange)
     if not len(HUrange) == 2 or not HUrange[0] <= HUrange[1]:
-        error = ValueError(f"The 'HUrange' parameter must be a 2-element iterable were the first element is less or equal to the second.")
+        error = ValueError(f"The 'HUrange' parameter must be a 2-element iterable where the first element is less or equal to the second.")
         _logger.error(error)
         raise error
     # get structures' info
@@ -1232,7 +1232,7 @@ def overwriteCTPhysicalProperties(img: SITKImage, RSfileName: PathLike, areaFrac
     relElecDensCalib = np.array(relElecDensCalib, dtype=float)
     relElecDensCalibInterp = interp1d(relElecDensCalib[1], relElecDensCalib[0], bounds_error=True)
 
-    # check if all Rel. Electronic Density are withing the calibration
+    # check if all Rel. Electronic Density are within the calibration
     if not structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalibInterp.x.min(), relElecDensCalibInterp.x.max()).all():
         _logger.warning(f"Warning: some of the structure physical property values are not within the calibration range [{relElecDensCalibInterp.x.min()}, {relElecDensCalibInterp.x.max()}]. They will be skipped.")
         structsInfo = structsInfo[structsInfo.ROIPhysicalPropertyValue.between(relElecDensCalibInterp.x.min(), relElecDensCalibInterp.x.max())]
@@ -1325,7 +1325,7 @@ def addMarginToMask(imgMask: SITKImage, marginLateral: Numberic, marginProximal:
     Returns
     -------
     SimpleITK 3D Image
-        Object of a SimpleITK 3D image describing the diluted mask.
+        Object of a SimpleITK 3D image describing the dilated mask.
 
     See Also
     --------
@@ -1348,7 +1348,7 @@ def addMarginToMask(imgMask: SITKImage, marginLateral: Numberic, marginProximal:
         case "cross":
             lateralKernelTypeEnum = sitk.sitkCross
         case _:
-            error = ValueError(f"Lateral Kernel Type type '{lateralKernelType}' cannot be recognized. Only 'circular', 'box' and 'cross' are supported.")
+            error = ValueError(f"Lateral kernel type '{lateralKernelType}' cannot be recognized. Only 'circular', 'box' and 'cross' are supported.")
             _logger.error(error)
             raise error
 

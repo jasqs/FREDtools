@@ -91,7 +91,7 @@ def createEllipseMask(img: SITKImage, point: PointLike, radii: Numberic | Sequen
     """Create an Ellipse mask in the image field of reference.
 
     The function creates an ellipse mask, defined with the center and radii
-    in the frame of references of an image defined as a SimpleITK image 
+    in the frame of reference of an image defined as a SimpleITK image 
     object. Any dimension, i.e. 2D-4D, of the image is supported.
 
     Parameters
@@ -178,7 +178,7 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
     """Create a cone mask in the image field of reference.
 
     The function creates a cone mask, defined with starting and ending points and radii 
-    in the frame of references of an image defined as a SimpleITK image object describing a 3D image.
+    in the frame of reference of an image defined as a SimpleITK image object describing a 3D image.
     Only 3D images are supported.
 
     Parameters
@@ -190,9 +190,9 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
     endPoint : array_like
         3-element point describing the position of the center of the second cone base.
     startRadius : scalar
-        Radious of the first cone base.
+        Radius of the first cone base.
     endRadius : scalar
-        Radious of the second cone base.
+        Radius of the second cone base.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -223,7 +223,7 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
     if isinstance(endPoint, Sequence):
         endPoint = list(endPoint)
 
-    # define tube spatial object woth two points
+    # define tube spatial object with two points
     TubeSpatialObject = itk.TubeSpatialObject[3].New()  # type: ignore
 
     TubeSpatialObjectPoints = [itk.TubeSpatialObjectPoint[3](),  # type: ignore
@@ -262,7 +262,7 @@ def createConeMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, s
 def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLike, radious: Numberic, displayInfo: bool = False) -> SITKImage:
     """Create a cylindrical Mask in the image field of reference
 
-    The function creates a cylindrical mask with a given radious and height
+    The function creates a cylindrical mask with a given radius and height
     calculated from the starting and ending points of the cylinder in the frame of
     references of an image defined as a SimpleITK image object describing a 3D image.
     Only 3D images are supported. For instance, the routine might help make
@@ -278,7 +278,7 @@ def createCylinderMask(img: SITKImage, startPoint: PointLike, endPoint: PointLik
     endPoint : array_like
         3-element point describing the position of the center of the second cylinder base.
     radious : scalar
-        Radious of the cylinder.
+        Radius of the cylinder.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -311,7 +311,7 @@ def createBoxMask(img: SITKImage, point: PointLike, size: Numberic | Sequence[Nu
     """Create a Box mask in the image field of reference.
 
     The function creates a box mask, defined with the center point and size
-    in the frame of references of an image defined as a SimpleITK image
+    in the frame of reference of an image defined as a SimpleITK image
     object. Any dimension, i.e. 2D-4D, of the image is supported.
 
     Parameters

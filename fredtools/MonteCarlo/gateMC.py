@@ -1,11 +1,10 @@
 def readGATE_HITSActor(fileName):
-    """read GATE hits data for active volume.
+    """Read GATE hits data for active volume.
 
     The function reads hits results of GATE active volume saved
     to numpy pickle (.npy) or root (.root) file. All the columns
     are read but some of them are renamed:
 
-        -  *ds* is a step length in [cm]
         -  *Edep* is deposited energy in [MeV]
         -  *PDGCode* is the same as PDG encoding [1]_
 
@@ -21,7 +20,8 @@ def readGATE_HITSActor(fileName):
 
     See Also
     --------
-    readFREDStat : read FRED simulation statistics information from logfile.
+    readGATE_PSActor : read GATE phase space actor data.
+    readGATEStat : read GATE simulation statistics information from Simulation Statistic Actor output.
 
     References
     ----------
@@ -47,7 +47,7 @@ def readGATE_HITSActor(fileName):
         except ValueError:
             raise ValueError(f"Can not read file {fileName} as root file.")
     else:
-        raise ValueError(f"Can not recognise type of the file {fileName}. Only 'root' or 'npy' extentions are possible.")
+        raise ValueError(f"Can not recognise type of the file {fileName}. Only 'root' or 'npy' extensions are possible.")
 
     # uncapitalize each column name
     def uncapitalize(word):
@@ -70,15 +70,18 @@ def readGATE_HITSActor(fileName):
 
 
 def readGATE_PSActor(fileName):
-    """read GATE hits data for active volume.
+    """Read GATE phase space actor data.
 
-    The function reads hits results of GATE active volume saved
+    The function reads the results of a GATE phase space actor saved
     to numpy pickle (.npy) or root (.root) file. All the columns
     are read but some of them are renamed:
 
-        -  *ds* is a step length in [cm]
+        -  *Ekine*, *EkinePre* and *EkinePost* are kinetic energies in [MeV]
         -  *Edep* is deposited energy in [MeV]
         -  *PDGCode* is the same as PDG encoding [2]_
+
+    The columns are sorted so that those matching the name groups
+    ID, PDG, Ekine, Edep, DEDX and Length come first, in this order.
 
     Parameters
     ----------
@@ -92,7 +95,8 @@ def readGATE_PSActor(fileName):
 
     See Also
     --------
-    readFREDStat : read FRED simulation statistics information from logfile.
+    readGATE_HITSActor : read GATE hits data for active volume.
+    readGATEStat : read GATE simulation statistics information from Simulation Statistic Actor output.
 
     References
     ----------
@@ -118,7 +122,7 @@ def readGATE_PSActor(fileName):
         except ValueError:
             raise ValueError(f"Can not read file {fileName} as root file.")
     else:
-        raise ValueError(f"Can not recognise type of the file {fileName}. Only 'root' or 'npy' extentions are possible.")
+        raise ValueError(f"Can not recognise type of the file {fileName}. Only 'root' or 'npy' extensions are possible.")
 
     # uncapitalize each column name
     def uncapitalize(word):

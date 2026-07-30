@@ -42,7 +42,7 @@ class DVH(object):
 
         Notes
         -----
-        The class has been prepared based on the iomplementation in the dicompyler-core package.
+        The class has been prepared based on the implementation in the dicompyler-core package.
         """
         import numpy as np
 
@@ -194,14 +194,14 @@ class DVH(object):
     @property
     def max(self) -> float:
         """Return the maximum dose."""
-        # Find the the maximum non-zero dose bin
+        # Find the maximum non-zero dose bin
         # return float(self._doseDiffCenters[np.nonzero(self._volumeCum)[0][-1]])
         return float(self._doseDiffEdges[np.nonzero(self._volumeDiff)[0][-1]+1])
 
     @property
     def min(self) -> float:
         """Return the minimum dose."""
-        # Find the the minimum non-zero dose bin
+        # Find the minimum non-zero dose bin
         # return float(self._doseDiffEdges[np.nonzero(self._volumeDiff)[0][0]])
         return float(self._doseDiffEdges[np.nonzero(self._volumeDiff)[0][0]])
 
@@ -330,7 +330,7 @@ class DVH(object):
             # Absolute Volume Constraints (e.g. V20Gy)
             return self.volumeConstraint(float(c[1]), absolute=True)
         elif c[0] == ('d'):
-            # Relavive Dose Constraints (e.g. D90)
+            # Relative Dose Constraints (e.g. D90)
             if len(c) == 2:
                 return self.doseConstraint(float(c[1]), absolute=False)
             # Absolute Dose Constraints (e.g. D2cc)
@@ -414,7 +414,7 @@ class DVH(object):
                   "{:18} {:9.2f} {:17.2f} {:+14.2f}% {:+14.2f}".format(*fmtcmp('V95')),
                   "{:18} {:9.2f} {:17.2f} {:+14.2f}% {:+14.2f}".format(*fmtcmp('D05')),
                   ]
-        _logger.info(f"Comparizon of the basic DVH parameters for structures '{self.name}' and '{other.name}':\n\t" + "\n\t".join(strLog))
+        _logger.info(f"Comparison of the basic DVH parameters for structures '{self.name}' and '{other.name}':\n\t" + "\n\t".join(strLog))
 
         try:
             import matplotlib.pyplot as plt
@@ -465,7 +465,7 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
     """Calculate DVH for the mask.
 
     The function calculates a dose-volume histogram (DVH) for voxels inside
-    a mask with the same field of reference (FoR). The mask must defined as
+    a mask with the same field of reference (FoR). The mask must be defined as
     a SimpleITK image object describing a binary or floating mask.
     The routine exploits and returns DVH class to hold the DVH. The class
     has been adapted from dicompyler-core DVH module (https://dicompyler-core.readthedocs.io/en/latest/index.html)
@@ -475,7 +475,7 @@ def getDVHMask(img: SITKImage, imgMask: SITKImage, dosePrescribed: NonNegativeFl
     img : SimpleITK Image
         Object of a SimpleITK 3D image.
     imgMask : SimpleITK Image
-        Object of a SimpleITK 3D image describing the binary of floating mask.
+        Object of a SimpleITK 3D image describing the binary or floating mask.
     dosePrescribed : scalar
         Target prescription dose.
     doseLevelStep : scalar, optional

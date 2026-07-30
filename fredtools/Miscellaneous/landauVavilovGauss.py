@@ -8,7 +8,7 @@ def pdfLandau(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic, amp
 
     The function generates a Landau probability density with a given most probable
     value (`mpv`), width (described with `xi`) and amplitude at `mpv`. It was adapted
-    from 3 which was implemented based on the ROOT implementation. See [1]_ and [2]_ for more details.
+    from [1]_ which was implemented based on the ROOT implementation. See [1]_ and [2]_ for more details.
 
     Parameters
     ----------
@@ -38,7 +38,7 @@ def pdfLandau(x: Numberic | Iterable[Numberic], mpv: Numberic, xi: Numberic, amp
     from landaupy import landau
     import numpy as np
 
-    # check para3eters
+    # check parameters
     if not isinstance(mpv, Numberic):
         error = TypeError(f"The 'mpv' parameter must be a scalar but it is {type(mpv)}")
         _logger.error(error)
@@ -253,7 +253,7 @@ def pdfVavilov(x: Numberic | Iterable[Numberic], mpv: Numberic, kappa: Numberic,
     """Probability density function (PDF) of Vavilov.
 
     The function generates a Vavilov probability density with a given
-    most probable value function (`mpv`), amplitude (`amp`), as well as `kappa`,
+    most probable value (`mpv`), amplitude (`amp`), as well as `kappa`,
     `beta` and `scaling` parameters. It uses the implementation of pyamtrack library [5]_
     that adopts the ROOT implementation [6]_. The implemented PDF is not a true Vavilov distribution
     and the `scaling` parameter is not included in the original ROOT implementation. Therefore, the parameters

@@ -18,7 +18,7 @@ def writeMHD(img: SITKImage, filePath: PathLike, singleFile: bool = True, overwr
     filePath : path
         Path to file to be saved.
     singleFile : bool, optional
-        Determine if the MHD is a single file of two files MHD+RAW. (def. True)
+        Determine if the MHD is a single file or two files MHD+RAW. (def. True)
     overwrite : bool, optional
         Overwrite the file if it exists, otherwise, raise an error. (def. True)
     useCompression : bool, optional
@@ -133,7 +133,7 @@ def readMHD(fileNames: Iterable[PathLike] | PathLike, displayInfo: bool = False)
 
 
 def convertMHDtoSingleFile(fileName: PathLike, displayInfo: bool = False) -> None:
-    """Convert two-files MetaImage to two-files.
+    """Convert two-file MetaImage to a single file.
 
     The function reads a MetaImage file (two- or single-file) and saves it as
     a single file MetaImage (MHD) with the same file name.
@@ -163,10 +163,10 @@ def convertMHDtoSingleFile(fileName: PathLike, displayInfo: bool = False) -> Non
 
 
 def convertMHDtoDoubleFiles(fileName: PathLike, displayInfo: bool = False) -> None:
-    """Convert single file MetaImage to double- file.
+    """Convert single file MetaImage to double-file.
 
     The function reads a MetaImage file (two- or single-file) and saves it as
-    a two-file file MetaImage (mhd/raw) with the same file name.
+    a two-file MetaImage (mhd/raw) with the same file name.
 
     Parameters
     ----------

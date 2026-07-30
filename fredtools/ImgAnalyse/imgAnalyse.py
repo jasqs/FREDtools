@@ -393,7 +393,7 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo
     img : SimpleITK Image
         An object of a SimpleITK image.
     insideMask : bool, optional
-        Determine if only the voxels' positions inside the mask shuld be returned. 
+        Determine if only the voxels' positions inside the mask should be returned. 
         The `img` must describe a binary mask. (def. False)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
@@ -401,7 +401,7 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo
     Returns
     -------
     NxD numpy.array
-        A munpy array of size NxD where N is the number of voxel 
+        A numpy array of size NxD where N is the number of voxel 
         and D is the axis.
 
     See Also
@@ -823,7 +823,7 @@ def isPointInside(img: SITKImage, point: PointLike | Iterable[PointLike], displa
     extents = ft.getExtent(img)
 
     if not _isDirectionIdentity(img):
-        _logger.debug("The image direction array is not identity. The point may be incorrecty interpreted as inside/outside.")
+        _logger.debug("The image direction array is not identity. The point may be incorrectly interpreted as inside/outside.")
 
     # convert tuple of tuples to list of lists and sort each sublist
     extents = [list(sorted(x)) for x in extents]

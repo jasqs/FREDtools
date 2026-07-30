@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 re_number: str = r"[-+]?[\d]+\.?[\d]*[Ee]?(?:[-+]?[\d]+)?"
-'''Regular expression for a number in almost any notation inlcuding the scientific notation.'''
+'''Regular expression for a number in almost any notation including the scientific notation.'''
 
 
 def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, removeSource: bool = False, displayInfo: bool = False) -> str:
@@ -42,7 +42,7 @@ def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, remo
     # check if all files to be merged exist
     for PDFFileName in PDFFileNames:
         if not os.path.exists(PDFFileName):
-            error = FileNotFoundError(f"The file {PDFFileName} dose not exist.")
+            error = FileNotFoundError(f"The file {PDFFileName} does not exist.")
             _logger.error(error)
             raise error
 
@@ -73,7 +73,7 @@ def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = N
     The function creates a histogram data from a given dataX iterable in the defined bins.
     It is possible to generate a differential histogram where the values of the histogram
     (usually Y-axis on a plot) are a given quantity, instead of frequency of `dataX` values
-    occurrance.
+    occurrence.
 
     Parameters
     ----------
@@ -155,7 +155,7 @@ def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = N
         _logger.error(error)
         raise error
 
-    # make shure that bins is iterable
+    # make sure that bins is iterable
     if not isinstance(bins, Iterable):
         error = TypeError(f"The variable 'bins' is not an iterable. It must be a 1D iterable.")
         _logger.error(error)
@@ -197,7 +197,7 @@ def getHistogram(dataX: Iterable[Numberic], dataY: Iterable[Numberic] | None = N
     if returnBinCenters:
         hist[0] = hist[0][:-1] + np.diff(hist[0]) / 2
 
-    # convert hist[1] to float (useful for postprocessing normalistion)
+    # convert hist[1] to float (useful for postprocessing normalisation)
     hist[1] = hist[1].astype("float")
 
     return hist[0], hist[1]
@@ -320,9 +320,9 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['last'], sta
 
 
 def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'first', 'last'] = "all", startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[tuple[int, ...], tuple[str, ...]] | tuple[int, str] | None:
-    """Read the line and line number from an ASCI file.
+    """Read the line and line number from an ASCII file.
 
-    The function searches an ASCI file for lines matching a pattern and returns
+    The function searches an ASCII file for lines matching a pattern and returns
     the line or lines number and the line strings. The pattern follows the Python
     regular expression [7]_.
 
@@ -330,9 +330,9 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
     ----------
     pattern : string
         A string describing the regular expression. It is recommended
-        the string be a row string, starting with r'...'.
+        the string be a raw string, starting with r'...'.
     fileName : string
-        Path String to ASCI file.
+        Path String to ASCII file.
     kind : {'all', 'first', 'last'}, optional
         Determine which line is to be returned: the first only, the last, or 
         all the lines. (def. 'all')
@@ -341,7 +341,7 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
     removeEoL : bool, optional
         Determine if the end-of-line should be removed from 
         each returned line. (def. True)
-    comment : strung, optional
+    comment : string, optional
         If not None or an empty string, then no lines starting with this
         string (leading white spaces are removed) will be returned. (def. '#')
 
@@ -375,7 +375,7 @@ def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all', 'firs
 
         if re.findall(pattern, line):
             lineIdx.append(i)
-            # remove end-of-line sign '\n' if reqiested
+            # remove end-of-line sign '\n' if requested
             if removeEoL:
                 line = line.replace("\n", "")
             lineString.append(line)
