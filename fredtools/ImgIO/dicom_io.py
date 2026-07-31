@@ -172,7 +172,7 @@ def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: boo
         -  RN - dicom files of RT Plan Storage ("RT Plan Storage" or "RT Ion Plan Storage")
         -  RD - dicom files of 1D/2D/3D RT Dose Storage (for instance dose distribution)
         -  PET - dicom files of PET Image Storage ("Positron Emission Tomography Image Storage")
-        -  Unknown - files with *.dcm extension that were not recognised.
+        -  Unknown - files with \*.dcm extension that were not recognised.
 
     Parameters
     ----------
