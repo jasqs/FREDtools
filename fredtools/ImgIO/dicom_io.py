@@ -1043,6 +1043,138 @@ def getRSInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     return ROITable
 
 
+def checkDicomsUID(RNfileName: PathLike, RSfileName: PathLike, CTfileNames: PathLike | Iterable[PathLike], RDfileNames: PathLike | Iterable[PathLike] | None = None, displayInfo: bool = False) -> DottedDict:
+    r"""Check the UID matching of all the dicoms describing a single patient plan.
+
+    The function performs all the UID consistency checks for the dicoms
+    describing a single patient treatment plan, i.e. a single plan (RN) dicom,
+    a single structure set (RS) dicom, the CT image dicoms and, optionally,
+    the dose (RD) dicoms. The following checks are performed:
+
+        -  UIDRNtoRS: the RN dicom references the RS dicom (checkUID_RNtoRS).
+        -  UIDRStoCT: the RS dicom references exactly the given CT dicoms (checkUID_RStoCT).
+        -  UIDRNtoRD: every RD dicom references the RN dicom (checkUID_RNtoRD). None if no RD dicoms were provided.
+        -  UIDFoR: all the dicoms share the same FrameOfReferenceUID (getFrameOfReferenceUID).
+        -  RDbeamNumbers: the beam number referenced in every RD dicom is defined in the RN dicom. None if no RD dicoms were provided.
+
+    The checks are implemented in the fredtools.Miscellaneous.dicom_uid module.
+    Any error raised by the checks (e.g. a wrong dicom type or a missing tag)
+    is propagated to the calling code.
+
+    Parameters
+    ----------
+    RNfileName : path
+        Path to a dicom file with an RT plan (RN file).
+    RSfileName : path
+        Path to a dicom file with a structure set (RS file).
+    CTfileNames : path or iterable of paths
+        A path or an iterable of paths to CT image dicom files.
+    RDfileNames : path or iterable of paths, optional
+        A path or an iterable of paths to dose (RD) dicom files. If None or
+        empty, the RD checks are skipped. (def. None)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    dict
+        Dictionary with the check results, with keys 'UIDRNtoRS', 'UIDRStoCT',
+        'UIDRNtoRD', 'UIDFoR' and 'RDbeamNumbers', each holding True/False,
+        or None for the checks skipped due to no RD dicoms provided.
+
+    Raises
+    ------
+    TypeError
+        If any of the given files is not a dicom of the expected type.
+    ValueError
+        If no single RN or RS file name is provided, if no CT file names are
+        provided, or if a required tag cannot be found in a dicom file.
+    FileNotFoundError
+        If any of the given files does not exist.
+
+    See Also
+    --------
+    sortDicoms : sort dicom files in a folder by type.
+    getRNInfo : get some information from the RN plan from RN dicom file.
+    getRSInfo : get some information from the RS structures from RS dicom file.
+    """
+    import os
+    import pydicom as dicom
+    from fredtools.Miscellaneous import dicom_uid
+
+    # validate that single existing RN and RS files are given
+    for fileName, dicomType in [(RNfileName, "RN"), (RSfileName, "RS")]:
+        if not isinstance(fileName, PathLike) or not str(fileName):
+            error = ValueError(f"A single {dicomType} file name must be provided but the value of '{dicomType}fileName' is '{fileName}'.")
+            _logger.error(error)
+            raise error
+        if not os.path.isfile(fileName):
+            error = FileNotFoundError(f"The {dicomType} file {fileName} does not exist.")
+            _logger.error(error)
+            raise error
+
+    # normalize CTfileNames to a list (sortDicoms squashes a single-file result to a bare string) and validate
+    CTfileNames = [CTfileNames] if isinstance(CTfileNames, PathLike) else list(CTfileNames)
+    if len(CTfileNames) == 0:
+        error = ValueError("No CT file names were provided.")
+        _logger.error(error)
+        raise error
+    for CTfileName in CTfileNames:
+        if not os.path.isfile(CTfileName):
+            error = FileNotFoundError(f"The CT file {CTfileName} does not exist.")
+            _logger.error(error)
+            raise error
+
+    # normalize RDfileNames to a list (None or empty means no RD checks) and validate
+    RDfileNames = [] if RDfileNames is None else [RDfileNames] if isinstance(RDfileNames, PathLike) else list(RDfileNames)
+    for RDfileName in RDfileNames:
+        if not os.path.isfile(RDfileName):
+            error = FileNotFoundError(f"The RD file {RDfileName} does not exist.")
+            _logger.error(error)
+            raise error
+
+    # check UID matching between the dicoms
+    UIDRNtoRS = dicom_uid.checkUID_RNtoRS(RNfileName, RSfileName)
+    UIDRStoCT = dicom_uid.checkUID_RStoCT(RSfileName, CTfileNames)
+    UIDRNtoRD = dicom_uid.checkUID_RNtoRD(RNfileName, RDfileNames) if RDfileNames else None
+
+    # check that all the dicoms share the same frame of reference
+    FoRUIDs = set(dicom_uid.getFrameOfReferenceUID([RNfileName, RSfileName] + CTfileNames + RDfileNames))
+    UIDFoR = len(FoRUIDs) == 1
+    if not UIDFoR:
+        _logger.debug(f"Found {len(FoRUIDs)} distinct FrameOfReferenceUIDs among the dicoms: {FoRUIDs}.")
+
+    # check that the beam number referenced in every RD dicom is defined in the RN dicom
+    RDbeamNumbers = None
+    if RDfileNames:
+        RNbeamNumbers = [int(beamDataset.BeamNumber) for beamDataset in _getRNBeamSequence(RNfileName)]
+
+        RDbeamNumbers = True
+        for RDfileName in RDfileNames:
+            dicomTagsRD = dicom.dcmread(RDfileName, specific_tags=["ReferencedRTPlanSequence", "DoseSummationType"], stop_before_pixels=True)
+            try:
+                referencedBeamNumber = int(dicomTagsRD.ReferencedRTPlanSequence[0].ReferencedFractionGroupSequence[0].ReferencedBeamSequence[0].ReferencedBeamNumber)
+            except (AttributeError, IndexError):
+                _logger.warning(f"Cannot find the referenced beam number in the RD dicom {RDfileName} of DoseSummationType '{dicomTagsRD.get('DoseSummationType', 'unknown')}'. The RD dicom was skipped in the beam number check.")
+                continue
+            if referencedBeamNumber not in RNbeamNumbers:
+                _logger.debug(f"The beam number {referencedBeamNumber} referenced in the RD dicom {RDfileName} is not defined in the RN dicom {RNfileName}.")
+                RDbeamNumbers = False
+
+    checkResults = DottedDict({"UIDRNtoRS": UIDRNtoRS, "UIDRStoCT": UIDRStoCT, "UIDRNtoRD": UIDRNtoRD, "UIDFoR": UIDFoR, "RDbeamNumbers": RDbeamNumbers})
+
+    if displayInfo:
+        skippedRD = "skipped (no RD dicoms provided)"
+        _logger.info("Findings of the dicoms UID check:" +
+                     f"\n\tRN to RS matching: {checkResults.UIDRNtoRS}" +
+                     f"\n\tRS to CT matching: {checkResults.UIDRStoCT}" +
+                     f"\n\tRN to RD matching: {skippedRD if checkResults.UIDRNtoRD is None else checkResults.UIDRNtoRD}" +
+                     f"\n\tFrame of Reference matching: {checkResults.UIDFoR}" +
+                     f"\n\tRD beam numbers in RN: {skippedRD if checkResults.RDbeamNumbers is None else checkResults.RDbeamNumbers}")
+
+    return checkResults
+
+
 def getExternalName(fileName: PathLike, displayInfo: bool = False) -> str:
     """Get the name of the EXTERNAL structure from RS dicom file.
 

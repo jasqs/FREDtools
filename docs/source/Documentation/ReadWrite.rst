@@ -46,6 +46,8 @@ DICOM files (\*.dcm, \*.dicom)
 
 .. autofunction:: fredtools.getRSInfo
 
+.. autofunction:: fredtools.checkDicomsUID
+
 .. autofunction:: fredtools.getExternalName
 
 .. autofunction:: fredtools.getCT

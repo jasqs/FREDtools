@@ -362,5 +362,40 @@ class test_getStructureContoursByName(unittest.TestCase):
             ft.ImgIO.dicom_io._getStructureContoursByName(self.dicomFiles.RNfileNames, 'PTV_cubic')
 
 
+class test_checkDicomsUID(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_checkDicomsUID_with_RD(self):
+        checkResults = ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, self.dicomFiles.RDfileNames, displayInfo=True)
+        self.assertTrue(checkResults.UIDRNtoRS)
+        self.assertTrue(checkResults.UIDRStoCT)
+        self.assertTrue(checkResults.UIDRNtoRD)
+        self.assertTrue(checkResults.UIDFoR)
+        self.assertTrue(checkResults.RDbeamNumbers)
+
+    def test_checkDicomsUID_without_RD(self):
+        for RDfileNames in [None, []]:
+            checkResults = ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, RDfileNames, displayInfo=True)
+            self.assertTrue(checkResults.UIDRNtoRS)
+            self.assertTrue(checkResults.UIDRStoCT)
+            self.assertIsNone(checkResults.UIDRNtoRD)
+            self.assertTrue(checkResults.UIDFoR)
+            self.assertIsNone(checkResults.RDbeamNumbers)
+
+    def test_checkDicomsUID_empty_CT(self):
+        with self.assertRaises(ValueError):
+            ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, [])
+
+    def test_checkDicomsUID_nonexistent_RN(self):
+        with self.assertRaises(FileNotFoundError):
+            ft.checkDicomsUID('invalid_file.dcm', self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames)
+
+    def test_checkDicomsUID_RN_not_single_file(self):
+        with self.assertRaises(ValueError):
+            ft.checkDicomsUID([self.dicomFiles.RNfileNames], self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames)  # type: ignore
+
+
 if __name__ == '__main__':
     unittest.main()

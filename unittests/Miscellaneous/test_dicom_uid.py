@@ -65,6 +65,37 @@ class test_getRSReferencedImageUIDs(unittest.TestCase):
             ft.Miscellaneous.dicom_uid.getRSReferencedImageUIDs(self.dicomFiles.RNfileNames)
 
 
+class test_getRDReferencedPlanUID(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_getRDReferencedPlanUID(self):
+        ReferencedPlanUID = ft.Miscellaneous.dicom_uid.getRDReferencedPlanUID(self.dicomFiles.RDfileNames[0], displayInfo=True)
+        self.assertIsInstance(ReferencedPlanUID, dicom.uid.UID)
+        self.assertEqual(ReferencedPlanUID, ft.Miscellaneous.dicom_uid.getSOPInstanceUID(self.dicomFiles.RNfileNames))
+
+    def test_getRDReferencedPlanUID_not_RD(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.getRDReferencedPlanUID(self.dicomFiles.RNfileNames)
+
+
+class test_getFrameOfReferenceUID(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_getFrameOfReferenceUID_single_file(self):
+        FrameOfReferenceUID = ft.Miscellaneous.dicom_uid.getFrameOfReferenceUID(self.dicomFiles.RNfileNames, displayInfo=True)
+        self.assertIsInstance(FrameOfReferenceUID, dicom.uid.UID)
+
+    def test_getFrameOfReferenceUID_multiple_files(self):
+        FrameOfReferenceUIDs = ft.Miscellaneous.dicom_uid.getFrameOfReferenceUID([self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames[0], self.dicomFiles.RDfileNames[0]])
+        self.assertIsInstance(FrameOfReferenceUIDs, list)
+        self.assertEqual(len(FrameOfReferenceUIDs), 4)
+        self.assertEqual(len(set(FrameOfReferenceUIDs)), 1)
+
+
 class test_checkUID_RNtoRS(unittest.TestCase):
     def setUp(self):
         self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
@@ -100,6 +131,35 @@ class test_checkUID_RStoCT(unittest.TestCase):
     def test_checkUID_RStoCT_not_CT(self):
         with self.assertRaises(TypeError):
             ft.Miscellaneous.dicom_uid.checkUID_RStoCT(self.dicomFiles.RSfileNames, self.dicomFiles.RNfileNames)
+
+    def test_checkUID_RStoCT_duplicated_CT_warning(self):
+        with self.assertLogs(ft.Miscellaneous.dicom_uid._logger, level='WARNING') as logsContext:
+            self.assertFalse(ft.Miscellaneous.dicom_uid.checkUID_RStoCT(self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames + [self.dicomFiles.CTfileNames[0]]))
+        self.assertTrue(any("duplicated SOPInstanceUIDs" in logMessage for logMessage in logsContext.output))
+
+
+class test_checkUID_RNtoRD(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_checkUID_RNtoRD_matching(self):
+        self.assertTrue(ft.Miscellaneous.dicom_uid.checkUID_RNtoRD(self.dicomFiles.RNfileNames, self.dicomFiles.RDfileNames))
+
+    def test_checkUID_RNtoRD_single_RD_file(self):
+        self.assertTrue(ft.Miscellaneous.dicom_uid.checkUID_RNtoRD(self.dicomFiles.RNfileNames, self.dicomFiles.RDfileNames[0]))
+
+    def test_checkUID_RNtoRD_empty_RD_list(self):
+        with self.assertRaises(ValueError):
+            ft.Miscellaneous.dicom_uid.checkUID_RNtoRD(self.dicomFiles.RNfileNames, [])
+
+    def test_checkUID_RNtoRD_not_RN(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.checkUID_RNtoRD(self.dicomFiles.RSfileNames, self.dicomFiles.RDfileNames)
+
+    def test_checkUID_RNtoRD_not_RD(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.checkUID_RNtoRD(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames)
 
 
 if __name__ == '__main__':

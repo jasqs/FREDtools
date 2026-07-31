@@ -27,7 +27,7 @@ from .ImgAnalyse.spotAnalyse import (fitSpotProfile, fitSpotImg, findSpots, fitS
 
 
 from . import ImgIO
-from .ImgIO.dicom_io import (getDicomTypeName, sortDicoms, getRNMachineName, getRNIsocenter, getRNSpots, getRNFields, getRNInfo, getRSInfo, getExternalName, getCT, getPET, getRD, getRDFileNameForFieldNumber, anonymizeDicoms)
+from .ImgIO.dicom_io import (getDicomTypeName, sortDicoms, getRNMachineName, getRNIsocenter, getRNSpots, getRNFields, getRNInfo, getRSInfo, checkDicomsUID, getExternalName, getCT, getPET, getRD, getRDFileNameForFieldNumber, anonymizeDicoms)
 from .ImgIO.imgConverter import (SITK2ITK, ITK2SITK, img2vec)
 from .ImgIO.inm_io import (getInmFREDBaseImg, getInmFREDSparse, getInmFREDInfo)
 from .ImgIO.mhd_io import (writeMHD, readMHD, convertMHDtoSingleFile, convertMHDtoDoubleFiles)
