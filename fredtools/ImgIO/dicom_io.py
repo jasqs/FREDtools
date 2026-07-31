@@ -589,7 +589,7 @@ def getRNSpots(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
             continue
 
         # get field meterset (MU) and field cumulative Meterset Weight
-        fieldDose = ReferencedBeamDataset.BeamMeterset
+        fieldMU = ReferencedBeamDataset.BeamMeterset
         fieldCumMsW = IonBeamDataset.FinalCumulativeMetersetWeight
 
         # get spots parameters from IonControlPointSequence
@@ -624,7 +624,7 @@ def getRNSpots(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
             sliceInfo["PBSnoutPos"] = [IonControlPointDataset.SnoutPosition.real] * spotsNo if "SnoutPosition" in IonControlPointDataset else np.nan
             sliceInfo["PBnomEnergy"] = [IonControlPointDataset.NominalBeamEnergy.real] * spotsNo if "NominalBeamEnergy" in IonControlPointDataset else np.nan
             sliceInfo["PBMsW"] = IonControlPointDataset.ScanSpotMetersetWeights
-            sliceInfo["PBMU"] = np.array(IonControlPointDataset.ScanSpotMetersetWeights) / fieldCumMsW * fieldDose
+            sliceInfo["PBMU"] = np.array(IonControlPointDataset.ScanSpotMetersetWeights) / fieldCumMsW * fieldMU
             sliceInfo["PBPosX"] = IonControlPointDataset.ScanSpotPositionMap[0::2]
             sliceInfo["PBPosY"] = IonControlPointDataset.ScanSpotPositionMap[1::2]
             sliceInfo["PBTuneID"] = [IonControlPointDataset.ScanSpotTuneID] * spotsNo
