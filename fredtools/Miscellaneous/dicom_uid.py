@@ -202,3 +202,111 @@ def getRSReferencedImageUIDs(fileName: PathLike, displayInfo: bool = False) -> L
         _logger.info(f"Found {len(ReferencedSOPInstanceUIDs)} referenced image{'' if len(ReferencedSOPInstanceUIDs) == 1 else 's'} in {referencedSeriesNo} referenced series.")
 
     return ReferencedSOPInstanceUIDs
+
+
+def checkUID_RNtoRS(RNfileName: PathLike, RSfileName: PathLike) -> bool:
+    r"""Check if the structure set referenced by a plan dicom matches a structure set dicom.
+
+    The function validates that the given files are of the correct dicom type,
+    then compares the ReferencedSOPInstanceUID of the structure set (RS) dicom
+    referenced in the plan (RN) dicom, obtained with getRNReferencedStructureSetUID,
+    with the SOPInstanceUID of the given RS dicom, obtained with getSOPInstanceUID.
+    The comparison result is logged at the debug level only; no info or warning
+    is logged by this function, so it is up to the calling code to log accordingly.
+
+    Parameters
+    ----------
+    RNfileName : path
+        Path to a dicom file with an RT plan (RN file).
+    RSfileName : path
+        Path to a dicom file with a structure set (RS file).
+
+    Returns
+    -------
+    bool
+        True if the RN dicom references the given RS dicom, False otherwise.
+
+    Raises
+    ------
+    TypeError
+        If RNfileName is not an RT plan dicom, or RSfileName is not a structure set dicom.
+    ValueError
+        If the RN dicom does not contain a ReferencedStructureSetSequence, or if
+        the SOPInstanceUID tag cannot be found in the RS dicom.
+
+    See Also
+    --------
+    checkUID_RStoCT : check if the images referenced by a structure set dicom match a set of CT dicoms.
+    getRNReferencedStructureSetUID : get the SOPInstanceUID of the structure set referenced in a plan dicom.
+    getSOPInstanceUID : get the SOPInstanceUID from dicom files.
+    """
+    import fredtools as ft
+
+    # validate modality of both dicoms explicitly (getSOPInstanceUID below does not check modality on its own)
+    ft.ImgIO.dicom_io._isDicomRN(RNfileName, raiseError=True)
+    ft.ImgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
+
+    referencedRSUID = getRNReferencedStructureSetUID(RNfileName)
+    RSUID = getSOPInstanceUID(RSfileName)
+    matching = referencedRSUID == RSUID
+    _logger.debug(f"RN {RNfileName} references structure set UID '{referencedRSUID}'; RS {RSfileName} has UID '{RSUID}'. Matching: {matching}.")
+
+    return matching
+
+
+def checkUID_RStoCT(RSfileName: PathLike, CTfileNames: PathLike | Iterable[PathLike]) -> bool:
+    r"""Check if the images referenced by a structure set dicom match a set of CT dicoms.
+
+    The function validates that the given files are of the correct dicom type,
+    then compares the SOPInstanceUIDs of the images referenced in the contour
+    image sequences of the structure set (RS) dicom, obtained with
+    getRSReferencedImageUIDs, with the SOPInstanceUIDs of the given CT dicoms,
+    obtained with getSOPInstanceUID. The comparison is order-independent (both
+    UID lists are sorted before comparing). The comparison result is logged at
+    the debug level only; no info or warning is logged by this function, so it
+    is up to the calling code to log accordingly.
+
+    Parameters
+    ----------
+    RSfileName : path
+        Path to a dicom file with a structure set (RS file).
+    CTfileNames : path or iterable of paths
+        A path or an iterable of paths to CT image dicom files.
+
+    Returns
+    -------
+    bool
+        True if the set of CT dicoms exactly matches the images referenced by
+        the RS dicom, False otherwise.
+
+    Raises
+    ------
+    TypeError
+        If RSfileName is not a structure set dicom, or any of CTfileNames is
+        not a CT image dicom.
+    ValueError
+        If the RS dicom does not contain a ReferencedFrameOfReferenceSequence,
+        or if the SOPInstanceUID tag cannot be found in a CT dicom.
+
+    See Also
+    --------
+    checkUID_RNtoRS : check if the structure set referenced by a plan dicom matches a structure set dicom.
+    getRSReferencedImageUIDs : get the SOPInstanceUIDs of the images referenced in a structure set dicom.
+    getSOPInstanceUID : get the SOPInstanceUID from dicom files.
+    """
+    import fredtools as ft
+
+    # normalize CTfileNames to a list (sortDicoms squashes a single-file result to a bare string)
+    CTfileNames = [CTfileNames] if isinstance(CTfileNames, PathLike) else list(CTfileNames)
+
+    # validate modality of the RS dicom and every CT dicom explicitly
+    ft.ImgIO.dicom_io._isDicomRS(RSfileName, raiseError=True)
+    for CTfileName in CTfileNames:
+        ft.ImgIO.dicom_io._isDicomCT(CTfileName, raiseError=True)
+
+    referencedImageUIDs = sorted(getRSReferencedImageUIDs(RSfileName))
+    CTUIDs = sorted(getSOPInstanceUID(CTfileNames))
+    matching = referencedImageUIDs == CTUIDs
+    _logger.debug(f"RS {RSfileName} references {len(referencedImageUIDs)} image UIDs; found {len(CTUIDs)} CT UIDs. Matching: {matching}.")
+
+    return matching

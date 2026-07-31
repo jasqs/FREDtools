@@ -65,5 +65,42 @@ class test_getRSReferencedImageUIDs(unittest.TestCase):
             ft.Miscellaneous.dicom_uid.getRSReferencedImageUIDs(self.dicomFiles.RNfileNames)
 
 
+class test_checkUID_RNtoRS(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_checkUID_RNtoRS_matching(self):
+        self.assertTrue(ft.Miscellaneous.dicom_uid.checkUID_RNtoRS(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames))
+
+    def test_checkUID_RNtoRS_not_RN(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.checkUID_RNtoRS(self.dicomFiles.RSfileNames, self.dicomFiles.RSfileNames)
+
+    def test_checkUID_RNtoRS_not_RS(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.checkUID_RNtoRS(self.dicomFiles.RNfileNames, self.dicomFiles.RNfileNames)
+
+
+class test_checkUID_RStoCT(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_checkUID_RStoCT_matching(self):
+        self.assertTrue(ft.Miscellaneous.dicom_uid.checkUID_RStoCT(self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames))
+
+    def test_checkUID_RStoCT_single_CT_file_not_matching(self):
+        self.assertFalse(ft.Miscellaneous.dicom_uid.checkUID_RStoCT(self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames[0]))
+
+    def test_checkUID_RStoCT_not_RS(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.checkUID_RStoCT(self.dicomFiles.RNfileNames, self.dicomFiles.CTfileNames)
+
+    def test_checkUID_RStoCT_not_CT(self):
+        with self.assertRaises(TypeError):
+            ft.Miscellaneous.dicom_uid.checkUID_RStoCT(self.dicomFiles.RSfileNames, self.dicomFiles.RNfileNames)
+
+
 if __name__ == '__main__':
     unittest.main()
