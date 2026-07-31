@@ -1,7 +1,10 @@
-Optimisation Tools
+Proton Optimisation Tools
 =================================
 
-A collection of functions useful for treatment plan optimisation.
+A collection of functions useful for proton treatment plan optimisation, implemented in the ``fredtools.ProtonOptimisation`` subpackage. The functions are not exported to the top-level ``fredtools`` namespace and must be called with the full module path, e.g. ``fredtools.ProtonOptimisation.preoptimizer.convertCTtoWER``.
+
+Pre-optimisation
+------------------------------------------------
 
 .. autofunction:: fredtools.ProtonOptimisation.preoptimizer.convertCTtoWER
 
@@ -13,6 +16,9 @@ A collection of functions useful for treatment plan optimisation.
 
 .. autofunction:: fredtools.ProtonOptimisation.preoptimizer.convertRayTargetToIsoPlane
 
+Beam position optimisation
+------------------------------------------------
+
 .. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositions
 
 .. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositionsRegular
@@ -22,4 +28,3 @@ A collection of functions useful for treatment plan optimisation.
 .. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositionsConcentric
 
 .. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositionsDelaunay
-

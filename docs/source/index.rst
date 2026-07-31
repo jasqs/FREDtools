@@ -44,22 +44,17 @@ The FRED tools documentation is written in reStructuredText format and build wit
    Introduction/Citation
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Documentation:
 
-   Documentation/ReadWrite
-   Documentation/ImageAnalyse
-   Documentation/spotAnalyse
-   Documentation/dvhAnalyse
-   Documentation/gammaIndexAnalyse
-   Documentation/braggPeakAnalyse
-   Documentation/InmAnalyse
-   Documentation/GettingSubimage
-   Documentation/ImageManipulate
-   Documentation/displayImage
-   Documentation/simTools
-   Documentation/optimisationTools
-   Documentation/misc
+   Documentation/ImgIO
+   Documentation/ImgAnalyse
+   Documentation/ImgManipulate
+   Documentation/BraggPeak
+   Documentation/GammaIndex
+   Documentation/MonteCarlo
+   Documentation/ProtonOptimisation
+   Documentation/Miscellaneous
 
 Support
 ----------------------------

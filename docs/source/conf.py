@@ -44,7 +44,7 @@ needs_sphinx = '4.0'
 extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
-    'sphinx.ext.imgmath',
+    'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
     'sphinx_copybutton',
     # 'numpydoc',

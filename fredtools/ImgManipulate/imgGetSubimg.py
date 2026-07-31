@@ -63,44 +63,8 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     The example below shows how to generate and display a 2D slice along 'ZX'
     (with reversed X) axes from a 3D image through a specified point of the 3D image.
 
-    >>> img3D = fredtools.readMHD('imageCT.mhd', displayInfo = True)
-    ### readMHD ###
-    # dims (xyz) =  [511 415 218]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
-    # x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
-    # y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
-    # z-spatial voxel centre [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]
-    # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
-    # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 litre
-    # data type:  16-bit signed integer
-    # range: from  -1024  to  3071
-    # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 litre
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 litre
-    ###############
+    >>> img3D = fredtools.readMHD('imageCT.mhd')
     >>> sl2D = fredtools.getSlice(img3D, point=[0,-212.42,-654.8], plane='Z-X', displayInfo=True)
-    ### getSlice ###
-    # Point:  [   0.   -212.42 -654.8 ]
-    # Plane: 'Z-X'
-    # dims (xyz) =  [218   1 511]
-    # pixel size [mm] =  [1.2        0.68359375 0.68359375]
-    # origin [mm]     =  [-174.65820312 -212.42       -525.2       ]
-    # x-spatial voxel centre [mm] =  [  -525.200000,  -526.400000, ...,  -784.400000,  -785.600000 ]
-    # y-spatial voxel centre [mm] =  [  -212.420000 ]
-    # z-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
-    # x-spatial extent [mm] =  [  -524.600000 ,  -786.200000 ] =>   261.600000
-    # y-spatial extent [mm] =  [  -212.761797 ,  -212.078203 ] =>     0.683594
-    # z-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
-    # volume = 62467.60 mm3  =>  0.06 litre
-    # data type:  16-bit signed integer
-    # range: from  -1024  to  1803
-    # sum = -53645122 , mean = -481.56270310059426 ( 559.2583473799535 )
-    # non-zero (dose=0)  voxels  = 111051 (99.69%) => 0.06 litre
-    # non-air (HU>-1000) voxels  = 57831 (51.91%) => 0.03 litre
-    ################
     >>> matplotlib.pyplot.imshow(fredtools.arr(sl2D), extent=fredtools.getExtMpl(sl2D))
     >>> matplotlib.pyplot.xlabel('Z [mm]')
     >>> matplotlib.pyplot.ylabel('X [mm] (reversed)')
@@ -253,44 +217,8 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
     The example below shows how to generate and display a 1D profile along 'Y'
     (reversed) axis from a 3D image through a specified point of the 3D image.
 
-    >>> img3D = fredtools.readMHD('imageCT.mhd', displayInfo = True)
-    ### readMHD ###
-    # dims (xyz) =  [511 415 218]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
-    # x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
-    # y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
-    # z-spatial voxel centre [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]
-    # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
-    # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 litre
-    # data type:  16-bit signed integer
-    # range: from  -1024  to  3071
-    # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 litre
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 litre
-    ###############
+    >>> img3D = fredtools.readMHD('imageCT.mhd')
     >>> pr1D = fredtools.getProfile(img3D, point=[0,-212.42,-654.8], axis='-Y', displayInfo=True)
-    ### getProfile ###
-    # Point:  [   0.   -212.42 -654.8 ]
-    # Axis: '-Y'
-    # dims (xyz) =  [  1 415   1]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [   0.          -71.27929688 -654.8       ]
-    # x-spatial voxel centre [mm] =  [     0.000000 ]
-    # y-spatial voxel centre [mm] =  [   -71.279297,   -71.962891, ...,  -353.603516,  -354.287109 ]
-    # z-spatial voxel centre [mm] =  [  -654.800000 ]
-    # x-spatial extent [mm] =  [    -0.341797 ,     0.341797 ] =>     0.683594
-    # y-spatial extent [mm] =  [   -70.937500 ,  -354.628906 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -655.400000 ,  -654.200000 ] =>     1.200000
-    # volume = 232.72 mm3  =>  0.00 litre
-    # data type:  16-bit signed integer
-    # range: from  -1023  to  1336
-    # sum = -131818 , mean = -317.63373493975905 ( 487.9811134201045 )
-    # non-zero (dose=0)  voxels  = 414 (99.76%) => 0.00 litre
-    # non-air (HU>-1000) voxels  = 354 (85.30%) => 0.00 litre
-    ##################
     >>> matplotlib.pyplot.plot(fredtools.pos(pr1D), fredtools.vec(pr1D))
     >>> matplotlib.pyplot.xlabel('Y [mm] (reversed)')
     >>> matplotlib.pyplot.ylabel('Values')
@@ -427,45 +355,9 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
     The example below shows how to generate a point value for various interpolation
     types from a 3D image in a specified point of the 3D image.
 
-    >>> img3D = fredtools.readMHD('imageCT.mhd', displayInfo = True)
-    ### readMHD ###
-    # dims (xyz) =  [511 415 218]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
-    # x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
-    # y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
-    # z-spatial voxel centre [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]
-    # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
-    # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 litre
-    # data type:  16-bit signed integer
-    # range: from  -1024  to  3071
-    # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 litre
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 litre
-    ###############
-    >>> pointValue = fredtools.getPoint(img3D, point=[0,-212.42,-654.8], displayInfo=True)
-    ### getPoint ###
-    # Point:  [   0.   -212.42 -654.8 ]
-    # Value:  45
-    # dims (xyz) =  [1 1 1]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [   0.   -212.42 -654.8 ]
-    # x-spatial voxel centre [mm] =  [     0.000000 ]
-    # y-spatial voxel centre [mm] =  [  -212.420000 ]
-    # z-spatial voxel centre [mm] =  [  -654.800000 ]
-    # x-spatial extent [mm] =  [    -0.341797 ,     0.341797 ] =>     0.683594
-    # y-spatial extent [mm] =  [  -212.761797 ,  -212.078203 ] =>     0.683594
-    # z-spatial extent [mm] =  [  -655.400000 ,  -654.200000 ] =>     1.200000
-    # volume = 0.56 mm3  =>  0.00 litre
-    # data type:  16-bit signed integer
-    # range: from  45  to  45
-    # sum = 45 , mean = 45.0 ( 0.0 )
-    # non-zero (dose=0)  voxels  = 1 (100.00%) => 0.00 litre
-    # non-air (HU>-1000) voxels  = 1 (100.00%) => 0.00 litre
-    ################
-    >>> ft.arr(pointValue)
+    >>> img3D = fredtools.readMHD('imageCT.mhd')
+    >>> pointValue = fredtools.getPoint(img3D, point=[0,-212.42,-654.8])
+    >>> fredtools.arr(pointValue)
     array(45, dtype=int16)
     >>> fredtools.arr(fredtools.getPoint(img3D, point=[0,-212.42,-654.8], interpolation='nearest'))
     array(37, dtype=int16)
@@ -572,43 +464,8 @@ def getInteg(img: SITKImage, axis: str = "X", displayInfo: bool = False) -> SITK
     The example below shows how to generate and display a 1D integral profile
     along Y axis from a 3D image.
 
-    >>> img3D = fredtools.readMHD('imageCT.mhd', displayInfo = True)
-    ### readMHD ###
-    # dims (xyz) =  [511 415 218]
-    # pixel size [mm] =  [0.68359375 0.68359375 1.2       ]
-    # origin [mm]     =  [-174.65820312 -354.28710938 -785.6       ]
-    # x-spatial voxel centre [mm] =  [  -174.658203,  -173.974609, ...,   173.291016,   173.974609 ]
-    # y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
-    # z-spatial voxel centre [mm] =  [  -785.600000,  -784.400000, ...,  -526.400000,  -525.200000 ]
-    # x-spatial extent [mm] =  [  -175.000000 ,   174.316406 ] =>   349.316406
-    # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -786.200000 ,  -524.600000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 litre
-    # data type:  16-bit signed integer
-    # range: from  -1024  to  3071
-    # sum = -33870013138 , mean = -732.6387321958799 ( 468.4351806663016 )
-    # non-zero (dose=0)  voxels  = 46188861 (99.91%) => 25.90 litre
-    # non-air (HU>-1000) voxels  = 15065800 (32.59%) => 8.45 litre
-    ###############
+    >>> img3D = fredtools.readMHD('imageCT.mhd')
     >>> in1D = fredtools.getInteg(img3D, axis='Y', displayInfo=True)
-    ### getInteg ###
-    # Axis: 'Y'
-    # dims (xyz) =  [  1 415   1]
-    # pixel size [mm] =  [349.31640625   0.68359375 261.6       ]
-    # origin [mm]     =  [ 1.46800622e+09 -3.54287109e+02 -7.85000000e+02]
-    # x-spatial voxel centre [mm] =  [ 1468006225.000000 ]
-    # y-spatial voxel centre [mm] =  [  -354.287109,  -353.603516, ...,   -71.962891,   -71.279297 ]
-    # z-spatial voxel centre [mm] =  [  -785.000000 ]
-    # x-spatial extent [mm] =  [ 1468006050.341797 , 1468006399.658203 ] =>   349.316406
-    # y-spatial extent [mm] =  [  -354.628906 ,   -70.937500 ] =>   283.691406
-    # z-spatial extent [mm] =  [  -915.800000 ,  -654.200000 ] =>   261.600000
-    # volume = 25924053.15 mm3  =>  25.92 litre
-    # data type:  64-bit float
-    # range: from  -91384297.26562846  to  -43597831.757814154
-    # sum = -27783995152.26668 , mean = -66949385.90907634 ( 17496118.62771702 )
-    # non-zero (dose=0)  voxels  = 415 (100.00%) => 25.92 litre
-    # non-air (HU>-1000) voxels  = 0 (0.00%) => 0.00 litre
-    ################
     >>> matplotlib.pyplot.plot(fredtools.pos(in1D), fredtools.vec(in1D))
     >>> matplotlib.pyplot.xlabel('Y [mm]')
     >>> matplotlib.pyplot.ylabel('Values per unitary volume')
