@@ -29,6 +29,10 @@ A collection of useful functions for image analysis. The image must be an instan
 
 .. autofunction:: fredtools.getStatistics
 
+.. autofunction:: fredtools.getIntegral
+
+.. autofunction:: fredtools.compareImg
+
 .. autofunction:: fredtools.compareImgFoR
 
 .. autofunction:: fredtools.pos

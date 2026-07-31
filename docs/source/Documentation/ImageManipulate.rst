@@ -11,19 +11,31 @@ A collection of useful functions to manipulate and change images. The image must
 
 .. autofunction:: fredtools.setValueMask
 
+.. autofunction:: fredtools.setNaNImg
+
 .. autofunction:: fredtools.resampleImg
 
 .. autofunction:: fredtools.sumImg
 
-.. autofunction:: fredtools.imgDivide
+.. autofunction:: fredtools.divideImg
 
 .. autofunction:: fredtools.sumVectorImg
+
+.. autofunction:: fredtools.maximumImg
+
+.. autofunction:: fredtools.minimumImg
+
+.. autofunction:: fredtools.meanImg
 
 .. autofunction:: fredtools.createEllipseMask
 
 .. autofunction:: fredtools.createConeMask
 
 .. autofunction:: fredtools.createCylinderMask
+
+.. autofunction:: fredtools.createBoxMask
+
+.. autofunction:: fredtools.createImg
 
 .. autofunction:: fredtools.getImgBEV
 

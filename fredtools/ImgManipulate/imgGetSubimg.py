@@ -33,14 +33,11 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
         of imshow will be a reversed X-axis of the image. (def. 'XY')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
-    **kwargs : 
-        interpolation type, optional
-        Determine the interpolation method. The following keyword arguments
-        are available:
-            interpolation : {'linear', 'nearest', 'spline'}
-                Determine the interpolation method. (def. 'linear')
-            splineOrder : int
-                Order of spline interpolation. Must be in range 0-5. (def. 3)
+    **kwargs : optional
+        Additional keyword arguments determining the interpolation method:
+
+            -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
     -------
@@ -225,14 +222,11 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
         image is flipped in the following direction. (def. 'X')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
-    **kwargs : 
-        interpolation type, optional
-        Determine the interpolation method. The following keyword arguments
-        are available:
-            interpolation : {'linear', 'nearest', 'spline'}
-                Determine the interpolation method. (def. 'linear')
-            splineOrder : int
-                Order of spline interpolation. Must be in range 0-5. (def. 3)
+    **kwargs : optional
+        Additional keyword arguments determining the interpolation method:
+
+            -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
     -------
@@ -409,14 +403,11 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
         the image extent and `displayInfo` is True.
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
-    **kwargs : 
-        interpolation type, optional
-        Determine the interpolation method. The following keyword arguments
-        are available:
-            interpolation : {'linear', 'nearest', 'spline'}
-                Determine the interpolation method. (def. 'linear')
-            splineOrder : int
-                Order of spline interpolation. Must be in range 0-5. (def. 3)
+    **kwargs : optional
+        Additional keyword arguments determining the interpolation method:
+
+            -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
     -------
@@ -858,14 +849,11 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
         (def. 'center')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
-    **kwargs :
-        interpolation type, optional
-        Determine the interpolation method. The following keyword arguments
-        are available:
-            interpolation : {'linear', 'nearest', 'spline'}
-                Determine the interpolation method. (def. 'linear')
-            splineOrder : int
-                Order of spline interpolation. Must be in range 0-5. (def. 3)
+    **kwargs : optional
+        Additional keyword arguments determining the interpolation method:
+
+            -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
     -------

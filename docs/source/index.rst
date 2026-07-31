@@ -17,33 +17,17 @@ A simple `tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/FREDto
 
 Installation
 ----------------------------
-The stable version of FRED tools is available via pip.
+FRED tools is not yet published on PyPI. It is available by cloning the repository from GitHub.
 
 .. code:: bash
 
-   $ pip install fredtools
+   $ git clone https://github.com/jasqs/FREDtools.git
 
-To update existing installation:
-
-.. code:: bash
-
-   $ pip install --upgrade fredtools
-
-The development version is available on GitHub.
+To update an existing clone:
 
 .. code:: bash
 
-   $ git clone jasqs/FREDtools
-
-.. .. caution:: There is an installation issue for python 3.10.4 (natively installed in Ubuntu 22.04 LTS). FREDtools requires ITK in 5.2.1 version which cannot be built for python 3.10. But the prerelease ITK 5.3rc4 can be built. It is recommended to install this prerelease prior to FREDtools installation by:
-
-..    .. code:: bash
-
-..       $ pip install scikit-build
-
-..       $ pip install --pre itk
-
-..    FREDtools should be installed normally when the prerelease ITK becomes normal release.
+   $ git pull
 
 
 Development

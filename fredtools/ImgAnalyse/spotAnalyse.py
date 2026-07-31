@@ -286,7 +286,7 @@ def fitSigmaSquaredModel(pos: Iterable[Numeric], beamSize: Iterable[Numeric]) ->
     The function fits the sigma squared model to the beam size data provided.
     The model is defined as: σ²(z) = a + b*z + c*z², where σ is the beam size
     at position z, and a, b, c are the parameters to be fitted. Note that the
-    fit is performed on the squared beam size, i.e. `beamSize`**2.
+    fit is performed on the squared beam size, i.e. ``beamSize**2``.
 
     Parameters
     ----------

@@ -18,19 +18,13 @@ A simple [tutorial](https://github.com/jasqs/FREDtools/blob/main/examples/FREDto
 
 Installation
 ----------------------------
-The stable version of FRED tools is available via pip.
+FRED tools is not yet published on PyPI. It is available by cloning the repository from GitHub.
 
-For new installation:
+  $ git clone https://github.com/jasqs/FREDtools.git
 
-  $ pip install fredtools
+To update an existing clone:
 
-To update existing installation:
-
-$ pip install --upgrade fredtools
-
-The development version is available on GitHub.
-
-   $ git clone jasqs/FREDtools
+  $ git pull
 
 
 Development

@@ -13,6 +13,9 @@ A collection of useful functions for Monte Carlo simulations.
 
 .. autofunction:: fredtools.interpolateBeamModel
 
+.. autoclass:: fredtools.beamModel
+    :members:
+
 .. autofunction:: fredtools.getFREDVersions
 
 .. autofunction:: fredtools.checkFREDVersion

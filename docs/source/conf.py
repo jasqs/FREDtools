@@ -36,7 +36,7 @@ release = __version__
 # -- General configuration ---------------------------------------------------
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = sphinx.__version__
+needs_sphinx = '4.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -50,7 +50,6 @@ extensions = [
     # 'numpydoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.autodoc',
-    'sphinx.ext.imgmath',
 ]
 
 # Napoleon settings
@@ -100,7 +99,6 @@ html_static_path = ['_static']
 html_logo = os.path.join(html_static_path[0], 'FREDtools_logo.png')
 html_theme_options = {
     'logo_only': False,
-    'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
     'style_nav_header_background': '#00007fff',

@@ -6,15 +6,15 @@ A collection of useful functions for reading and manipulating with influence mat
 .. note::
     The binary influence matrix file format had changed from the FRED 3.70.99 version. The function has been aligned with this format but will not work with the previous format. Use FREDtools v. 0.7.6 to read the old binary influence matrix file format or contact the FREDtools developers.
 
-.. autofunction:: fredtools.getInmFREDSumImage
-
-.. autofunction:: fredtools.getInmFREDPoint
-
-.. autofunction:: fredtools.getInmFREDPointSparse
-
 .. autofunction:: fredtools.getInmFREDInfo
 
 .. autofunction:: fredtools.getInmFREDBaseImg
+
+.. autofunction:: fredtools.getInmFREDSparse
+
+.. autofunction:: fredtools.inmSumVec
+
+.. autofunction:: fredtools.inmSumImg
 
 
 

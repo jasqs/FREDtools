@@ -3,19 +3,23 @@ Optimisation Tools
 
 A collection of functions useful for treatment plan optimisation.
 
-.. autofunction:: fredtools.ft_optimisation.convertCTtoWER
+.. autofunction:: fredtools.ProtonOptimisation.preoptimizer.convertCTtoWER
 
-.. autofunction:: fredtools.ft_optimisation.calcWETfromWER
+.. autofunction:: fredtools.ProtonOptimisation.preoptimizer.calcWETfromWER
 
-.. autofunction:: fredtools.ft_optimisation.generateIsoLayers
+.. autofunction:: fredtools.ProtonOptimisation.preoptimizer.generateIsoLayers
 
-.. autofunction:: fredtools.ft_optimisation.calcContours
+.. autofunction:: fredtools.ProtonOptimisation.preoptimizer.calcContours
 
-.. autofunction:: fredtools.ft_optimisation.convertRayTargetToIsoPlane
+.. autofunction:: fredtools.ProtonOptimisation.preoptimizer.convertRayTargetToIsoPlane
 
-.. autofunction:: fredtools.ft_optimisation.optimiseBeamPositions
+.. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositions
 
-.. autofunction:: fredtools.ft_optimisation.optimiseBeamPositionsRegular
+.. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositionsRegular
 
-.. autofunction:: fredtools.ft_optimisation.optimiseBeamPositionsHexagonal
+.. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositionsHexagonal
+
+.. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositionsConcentric
+
+.. autofunction:: fredtools.ProtonOptimisation.optimiseBeamPositions.optimiseBeamPositionsDelaunay
 
