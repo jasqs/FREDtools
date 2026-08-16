@@ -40,8 +40,8 @@ from scipy.sparse import spmatrix, csr_matrix
 
 
 try:  # cupy is optional, so we try to import it
-    from cupy.sparse import spmatrix as cp_spmatrix
-    from cupy.sparse import csr_matrix as cp_csr_matrix
+    from cupyx.scipy.sparse import spmatrix as cp_spmatrix
+    from cupyx.scipy.sparse import csr_matrix as cp_csr_matrix
     SparseMatrix: TypeAlias = Union[spmatrix, cp_spmatrix]  # type: ignore
     SparseMatrixCSR: TypeAlias = Union[csr_matrix, cp_csr_matrix]  # type: ignore
 except ImportError:  # cupy is not installed

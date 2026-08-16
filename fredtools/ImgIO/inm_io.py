@@ -333,7 +333,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
 
     Returns
     -------
-    list[scipy.sparse.csr_matrix] or list[cupy.sparse.csr_matrix]
+    list[scipy.sparse.csr_matrix] or list[cupyx.scipy.sparse.csr_matrix]
         List of sparse matrices of point values for each component.
 
     Raises
@@ -359,19 +359,21 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
 
     _isInmFRED(fileName, raiseError=True)
 
-    # validate interpreter
-    if interpreter.lower() not in ["numpy", "cupy"]:
-        error = ValueError(f"Interpreter '{interpreter}' is not supported. Use 'numpy' for CPU or 'cupy' for GPU implementation.")
-        _logger.error(error)
-        raise error
-
-    # validate cupy
-    if interpreter.lower() == "cupy":
-        if not checkGPUcupy():
-            _logger.warning("Cupy is not available. The numpy interpreter will be used.")
-            interpreter = "numpy"
-        else:
+    # determine interpreter
+    match interpreter.lower():
+        case "cupy":
             import cupy as cp
+            from cupyx.scipy import sparse
+            xp = cp
+            xsparse = sparse
+        case "numpy":
+            from scipy import sparse
+            xp = np
+            xsparse = sparse
+        case _:
+            error = ValueError(f"Interpreter '{interpreter}' is not supported. Use 'numpy' for CPU or 'cupy' for GPU implementation.")
+            _logger.error(error)
+            raise error
 
     # validate points
     points = np.asarray(points)
@@ -399,7 +401,7 @@ def getInmFREDSparse(fileName: PathLike, points: Iterable[PointLike], interprete
                 _logger.warning("Cupy interpreter is not supported for version 2.x of the Inm file. The numpy interpreter will be used to read the Inm file and then the result will be uploaded to GPU.")
             listInmSparse = _getInmFREDSparseVersion2(fileName, indices, inmInfo, imgBase)
             if interpreter == "cupy":
-                listInmSparse = [cp.sparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
+                listInmSparse = [xsparse.csr_matrix(InmSparse) for InmSparse in listInmSparse]
 
         case 3.0 | 3.1:
             listInmSparse = _getInmFREDSparseVersion3(fileName, indices, inmInfo, imgBase, interpreter=interpreter)
@@ -475,18 +477,21 @@ def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, inmInfo: D
     """Get sparse matrices of point values from the FRED influence matrix file version 3.x."""
     import struct
     import numpy as np
-    from scipy import sparse
 
     # determine interpreter
     match interpreter.lower():
         case "cupy":
             import cupy as cp
+            from cupyx.scipy import sparse
             xp = cp
+            xsparse = sparse
             indices = cp.asarray(indices)
         case "numpy":
+            from scipy import sparse
             xp = np
+            xsparse = sparse
         case _:
-            error = ValueError(f"Interpreter '{interpreter}' is not supported.")
+            error = ValueError(f"Interpreter '{interpreter}' is not supported. Use 'numpy' for CPU or 'cupy' for GPU implementation.")
             _logger.error(error)
             raise error
 
@@ -528,9 +533,9 @@ def _getInmFREDSparseVersion3(fileName: PathLike, indices: ArrayLike, inmInfo: D
             voxelData = voxelData[voxelIdxRequestedMask]
 
             if interpreter == "numpy":
-                inmPointSparse = sparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
+                inmPointSparse = xsparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
             elif interpreter == "cupy":
-                inmPointSparse = cp.sparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
+                inmPointSparse = xsparse.csr_matrix((voxelData, (pbIdx, voxelIdx)), shape=(pencilBeamNo, size))
             else:
                 error = NotImplementedError(f"Interpreter '{interpreter}' is not supported.")
                 _logger.error(error)

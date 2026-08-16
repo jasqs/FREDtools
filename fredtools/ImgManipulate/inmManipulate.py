@@ -9,13 +9,13 @@ def inmSumVec(inmSparse: SparseMatrixCSR, weights: Iterable[Numeric], displayInf
     The function sums up the influence matrix for a given set of pencil beams
     and their weights. The influence matrix must be a sparse matrix. The function
     returns a summed influence matrix as an array. The sparse matrix can be given
-    as an instance of a scipy.sparse.csr_matrix or cupy.sparse.csr_matrix object.
-    In case of the cupy.sparse.csr_matrix object, the multiplication and summing
+    as an instance of a scipy.sparse.csr_matrix or cupyx.scipy.sparse.csr_matrix object.
+    In case of the cupyx.scipy.sparse.csr_matrix object, the multiplication and summing
     will be performed on GPU.
 
     Parameters
     ----------
-    inmSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
+    inmSparse : scipy.sparse.csr_matrix or cupyx.scipy.sparse.csr_matrix
         Sparse matrix of the influence matrix.
     weights : array_like
         Array of weights for each pencil beam.
@@ -83,7 +83,7 @@ def inmSumImg(inmSparse: SparseMatrixCSR, weights: Iterable[Numeric], imgBase: S
 
     Parameters
     ----------
-    inmSparse : scipy.sparse.csr_matrix or cupy.sparse.csr_matrix
+    inmSparse : scipy.sparse.csr_matrix or cupyx.scipy.sparse.csr_matrix
         Sparse matrix of the influence matrix.
     weights : array_like
         Array of weights for each pencil beam.

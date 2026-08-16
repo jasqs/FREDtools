@@ -82,7 +82,7 @@ Image creation
 Influence matrix manipulation
 ------------------------------------------------
 
-Functions for manipulating influence matrices read with :func:`fredtools.getInmFREDSparse`. The influence matrix is defined as an instance of a scipy.sparse.csr_matrix or cupy.sparse.csr_matrix object. In case of the cupy.sparse.csr_matrix object, the calculations are performed on a GPU.
+Functions for manipulating influence matrices read with :func:`fredtools.getInmFREDSparse`. The influence matrix is defined as an instance of a scipy.sparse.csr_matrix or cupyx.scipy.sparse.csr_matrix object. In case of the cupyx.scipy.sparse.csr_matrix object, the calculations are performed on a GPU.
 
 .. autofunction:: fredtools.inmSumVec
 

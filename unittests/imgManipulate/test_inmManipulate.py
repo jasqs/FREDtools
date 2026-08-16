@@ -28,10 +28,10 @@ class test_inmManipulate(unittest.TestCase):
         if not ft._helper.checkGPUcupy():
             self.skipTest("No GPU available")
         else:
-            import cupy as cp
+            from cupyx.scipy import sparse as cpSparse
 
         vecRef = np.swapaxes(sitk.GetArrayViewFromImage(self.imgRef), 0, 2).flatten(order='F')
-        vecSum = ft.inmSumVec(cp.sparse.csr_matrix(self.inmBase), self.weights, displayInfo=True)
+        vecSum = ft.inmSumVec(cpSparse.csr_matrix(self.inmBase), self.weights, displayInfo=True)
         self.assertTrue(np.isclose(vecSum, vecRef, rtol=0, atol=1E-6).all())
 
     def test_inmSumImg_CPU(self):
@@ -43,9 +43,9 @@ class test_inmManipulate(unittest.TestCase):
         if not ft._helper.checkGPUcupy():
             self.skipTest("No GPU available")
         else:
-            import cupy as cp
+            from cupyx.scipy import sparse as cpSparse
 
-        imgSum = ft.inmSumImg(cp.sparse.csr_matrix(self.inmBase), self.weights, self.imgBase, displayInfo=True)
+        imgSum = ft.inmSumImg(cpSparse.csr_matrix(self.inmBase), self.weights, self.imgBase, displayInfo=True)
         self.assertTrue(ft.compareImgFoR(imgSum, self.imgRef))
         self.assertTrue(ft.compareImg(imgSum, self.imgRef))
 
