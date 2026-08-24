@@ -108,6 +108,32 @@ class test_FWHM2Sigma(unittest.TestCase):
         self.assertAlmostEqual(sigma, 1.0, places=5)
 
 
+class test_roundToMultiple(unittest.TestCase):
+
+    def test_roundToMultiple_scalar(self):
+        self.assertEqual(ft.roundToMultiple(3.03, 0.25), 3.0)
+        self.assertEqual(ft.roundToMultiple(3.17, 0.25), 3.25)
+        self.assertEqual(ft.roundToMultiple(-3.17, 0.25), -3.25)
+        self.assertEqual(ft.roundToMultiple(3.03, 0.1), 3.0)
+        self.assertEqual(ft.roundToMultiple(7.3, 2), 8.0)
+        self.assertIsInstance(ft.roundToMultiple(3.03, 0.25), float)
+
+    def test_roundToMultiple_iterable(self):
+        np.testing.assert_array_equal(ft.roundToMultiple([3.03, 3.17, -3.17], 0.25), np.array([3.0, 3.25, -3.25]))
+        np.testing.assert_array_equal(ft.roundToMultiple(np.array([0.9, 1.1]), 0.5), np.array([1.0, 1.0]))
+        np.testing.assert_array_equal(ft.roundToMultiple((10, 20, 34), 25), np.array([0.0, 25.0, 25.0]))
+
+    def test_roundToMultiple_invalid_parameters(self):
+        with self.assertRaises(TypeError):
+            ft.roundToMultiple("3.03", 0.25)  # type: ignore
+        with self.assertRaises(TypeError):
+            ft.roundToMultiple(3.03, "0.25")  # type: ignore
+        with self.assertRaises(ValueError):
+            ft.roundToMultiple(3.03, 0)
+        with self.assertRaises(ValueError):
+            ft.roundToMultiple(3.03, -0.25)
+
+
 class test_getLineFromFile(unittest.TestCase):
 
     def setUp(self):

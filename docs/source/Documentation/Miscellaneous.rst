@@ -18,6 +18,8 @@ General purpose
 
 .. autofunction:: fredtools.wrapAngle
 
+.. autofunction:: fredtools.roundToMultiple
+
 .. autofunction:: fredtools.getCPUNo
 
 Landau, Vavilov and Gauss distributions

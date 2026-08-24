@@ -329,6 +329,80 @@ def wrapAngle(angle: Numeric | Iterable[Numeric], deg: bool = False) -> Numeric 
 
 
 @overload
+def roundToMultiple(values: Numeric, roundNumber: Numeric) -> Numeric: ...
+@overload
+def roundToMultiple(values: Iterable[Numeric], roundNumber: Numeric) -> Iterable[Numeric]: ...
+
+
+def roundToMultiple(values: Numeric | Iterable[Numeric], roundNumber: Numeric) -> Numeric | Iterable[Numeric]:
+    """Round number(s) to the nearest multiple of a number.
+
+    The function rounds a single number or an iterable of numbers
+    to the nearest multiple of a given number. For instance, 3.03
+    rounded to the nearest multiple of 0.25 is 3.0, whereas 3.17
+    is rounded to 3.25. Halfway cases are rounded according to
+    the round-half-to-even rule, following the numpy rounding routines.
+
+    Parameters
+    ----------
+    values : scalar or array_like
+        Value(s) to be rounded.
+    roundNumber : scalar
+        A positive number to the nearest multiple of which
+        the value(s) will be rounded.
+
+    Returns
+    -------
+    scalar or numpy.ndarray
+        Rounded value(s) as a float scalar for a scalar input,
+        or a numpy array for an iterable input.
+
+    Raises
+    ------
+    TypeError
+        If `values` is not a scalar or an iterable of scalars,
+        or `roundNumber` is not a scalar.
+    ValueError
+        If `roundNumber` is not positive.
+
+    Examples
+    --------
+    Rounding a single number and an iterable of numbers
+    to the nearest multiple of 0.25.
+
+    >>> fredtools.roundToMultiple(3.03, 0.25)
+    3.0
+    >>> fredtools.roundToMultiple([3.03, 3.17, -3.17], 0.25)
+    array([ 3.  ,  3.25, -3.25])
+    """
+    import numpy as np
+
+    # check if values is a scalar or an iterable of scalars
+    if isinstance(values, str) or not (isinstance(values, Numeric) or isinstance(values, Iterable)):
+        error = TypeError(f"The 'values' parameter must be a scalar or an iterable of scalars but it is {type(values)}")
+        _logger.error(error)
+        raise error
+
+    # check if roundNumber is a positive scalar
+    if not isinstance(roundNumber, Numeric):
+        error = TypeError(f"The 'roundNumber' parameter must be a scalar but it is {type(roundNumber)}")
+        _logger.error(error)
+        raise error
+    if not roundNumber > 0:
+        error = ValueError(f"The 'roundNumber' parameter must be a positive scalar but {roundNumber} was given.")
+        _logger.error(error)
+        raise error
+
+    # round to the nearest multiple of roundNumber and remove the floating-point representation noise
+    rounded = np.round(np.round(np.asarray(values, dtype=float) / roundNumber) * roundNumber, decimals=15)
+
+    if isinstance(values, Iterable):
+        return rounded
+    else:
+        return float(rounded)
+
+
+@overload
 def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['all'], startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[tuple[int, ...], tuple[str, ...]] | None: ...
 @overload
 def getLineFromFile(pattern: str, fileName: PathLike, kind: Literal['first'], startLine: int = 1, removeEoL: bool = True, comment: str = "#") -> tuple[int, str] | None: ...

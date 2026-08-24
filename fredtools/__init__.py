@@ -42,7 +42,7 @@ from .ImgManipulate.inmManipulate import (inmSumVec, inmSumImg)
 
 from . import Miscellaneous
 from .Miscellaneous.landauVavilovGauss import (pdfLandau, pdfLandauGauss, fitLandau, fitLandauGauss, pdfVavilov, fitVavilov)
-from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fwhm2sigma, wrapAngle, getLineFromFile, getCPUNo, re_number)
+from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fwhm2sigma, wrapAngle, roundToMultiple, getLineFromFile, getCPUNo, re_number)
 
 
 from . import MonteCarlo
