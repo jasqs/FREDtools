@@ -163,6 +163,35 @@ class test_sumVectorImg(unittest.TestCase):
         self.assertEqual(ft.arr(imgSumPoint), pointSum)
 
 
+class test_expandDimsImg(unittest.TestCase):
+
+    def setUp(self):
+        self.img = ft.createImg(size=[20, 30], spacing=[0.5, 0.5], centred=True, fillRandom=True)
+
+    def test_expandDimsImg_default(self):
+        imgExpanded = ft.expandDimsImg(self.img, displayInfo=True)
+        self.assertEqual(imgExpanded.GetDimension(), 3)
+        self.assertEqual(imgExpanded.GetSize(), (*self.img.GetSize(), 1))
+        self.assertEqual(imgExpanded.GetSpacing(), (*self.img.GetSpacing(), 1.0))
+        self.assertEqual(imgExpanded.GetOrigin(), (*self.img.GetOrigin(), 0.0))
+        np.testing.assert_array_equal(sitk.GetArrayViewFromImage(imgExpanded)[0], sitk.GetArrayViewFromImage(self.img))
+
+    def test_expandDimsImg_originSpacing(self):
+        imgExpanded = ft.expandDimsImg(self.img, origin=-5.0, spacing=2.0)
+        self.assertEqual(imgExpanded.GetOrigin(), (*self.img.GetOrigin(), -5.0))
+        self.assertEqual(imgExpanded.GetSpacing(), (*self.img.GetSpacing(), 2.0))
+
+    def test_expandDimsImg_3D(self):
+        img3D = ft.createImg(size=[10, 10, 10], spacing=[1, 1, 1], centred=True)
+        imgExpanded = ft.expandDimsImg(img3D)
+        self.assertEqual(imgExpanded.GetDimension(), 4)
+        self.assertEqual(imgExpanded.GetSize(), (10, 10, 10, 1))
+
+    def test_expandDimsImg_invalid_image(self):
+        with self.assertRaises(TypeError):
+            ft.expandDimsImg(np.zeros((10, 10)))  # type: ignore
+
+
 class test_setNaNImg(unittest.TestCase):
 
     def setUp(self):

@@ -1087,6 +1087,52 @@ def sumVectorImg(img: SITKImage, displayInfo: bool = False) -> SITKImage:
     return imgSum
 
 
+def expandDimsImg(img: SITKImage, origin: Numeric = 0, spacing: Numeric = 1, displayInfo: bool = False) -> SITKImage:
+    """Expand image dimension by one.
+
+    The function expands the dimension of an image defined as an instance
+    of a SimpleITK image object by appending a new dimension of a single-voxel
+    size, with a given origin and spacing. For instance, a 2D image of size
+    (xSize, ySize) is expanded to a 3D image of size (xSize, ySize, 1).
+    The direction of the expanded image is set to identity in the new dimension.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image.
+    origin : scalar, optional
+        Origin of the image in the new dimension. (def. 0)
+    spacing : scalar, optional
+        Spacing of the image in the new dimension. (def. 1)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    SimpleITK Image
+        Object of a SimpleITK image with the dimension expanded by one.
+
+    Raises
+    ------
+    TypeError
+        If `img` is not an instance of a SimpleITK image object.
+    """
+    import fredtools as ft
+    import SimpleITK as sitk
+
+    ft._imgTypeChecker.isSITK(img, raiseError=True)
+
+    joinSeries = sitk.JoinSeriesImageFilter()
+    joinSeries.SetOrigin(float(origin))
+    joinSeries.SetSpacing(float(spacing))
+    imgExpanded = joinSeries.Execute([img])
+
+    if displayInfo:
+        _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgExpanded))
+
+    return imgExpanded
+
+
 def _getFORTransformed(img: SITKImage, transform: SITKTransform) -> tuple:
     """Calculate image FOR after transformation.
 

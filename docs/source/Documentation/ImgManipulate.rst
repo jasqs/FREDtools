@@ -24,6 +24,8 @@ Image manipulation
 
 .. autofunction:: fredtools.sumVectorImg
 
+.. autofunction:: fredtools.expandDimsImg
+
 .. autofunction:: fredtools.maximumImg
 
 .. autofunction:: fredtools.minimumImg
