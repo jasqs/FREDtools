@@ -18,7 +18,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         -  *pass-rate*: each voxel represents passing (1) or failing (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
     The gamma index calculation is performed by an external C++ library compiled as a Linux shared library.
-    The gamma index engine was developed by Angelo Schiavi and validated against PyMedPhys [PyMedPhys]_ python library.
+    The gamma index engine was developed by Angelo Schiavi and validated against the PyMedPhys [PyMedPhys]_
+    python library and the plastimatch [Plastimatch]_ gamma index tool (see the :ref:`GammaIndexValidation`).
 
     Parameters
     ----------
@@ -102,6 +103,13 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     --------
     getGIstat : calculate the gamma index statistics including the gamma index pass rate.
 
+    Notes
+    -----
+    The gamma index pass rates calculated with this function agree within 1 percentage point with
+    PyMedPhys and plastimatch. Identical gamma index maps are not expected, because the tools 
+    discretise the search space and interpolate the evaluation dose differently.
+    Refer to the :ref:`GammaIndexValidation` to read more about the validation results.
+
     Examples
     --------
     See example jupyter notebook at [GITutorial]_
@@ -109,6 +117,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     References
     ----------
     .. [PyMedPhys] https://docs.pymedphys.com/
+    .. [Plastimatch] https://plastimatch.org/
     .. [GITutorial] `Jupyter notebook of Gamma Index Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Gamma%20Index%20analysis%20Tutorial.ipynb>`_
     """
     import sys
