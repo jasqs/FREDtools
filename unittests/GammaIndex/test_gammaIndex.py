@@ -159,20 +159,32 @@ class test_calcGammaIndex(unittest.TestCase):
         self.assertEqual(float(imgGIAbsolute.GetMetaData("stepSize")), 0.2)
 
     def test_calcGammaIndex_DDTypeAbbreviation(self):
-        for DDType, DDTypeAbbreviation in [("global", "G"), ("local", "l")]:
-            with self.subTest(DDType=DDType):
-                imgGI = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType=DDType)
-                imgGIAbbreviation = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType=DDTypeAbbreviation)
-                self.assertTrue(ft.compareImg(imgGI, imgGIAbbreviation, decimal=7))
-                self.assertEqual(imgGIAbbreviation.GetMetaData("DDType"), DDType)
+        imgGIGlobal = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global")
+        imgGILocal = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="local")
+        for DDTypeAbbreviation in ["G", "g"]:
+            with self.subTest(DDTypeAbbreviation=DDTypeAbbreviation):
+                imgGIAbbreviation = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType=DDTypeAbbreviation)  # type: ignore
+                self.assertTrue(ft.compareImg(imgGIGlobal, imgGIAbbreviation, decimal=7))
+                self.assertEqual(imgGIAbbreviation.GetMetaData("DDType"), "global")
+        for DDTypeAbbreviation in ["L", "l"]:
+            with self.subTest(DDTypeAbbreviation=DDTypeAbbreviation):
+                imgGIAbbreviation = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType=DDTypeAbbreviation)  # type: ignore
+                self.assertTrue(ft.compareImg(imgGILocal, imgGIAbbreviation, decimal=7))
+                self.assertEqual(imgGIAbbreviation.GetMetaData("DDType"), "local")
 
     def test_calcGammaIndex_modeAbbreviation(self):
-        for mode, modeAbbreviation in [("gamma", "g"), ("pass-rate", "pr"), ("pass-rate", "Pass-Rate")]:
-            with self.subTest(mode=mode, modeAbbreviation=modeAbbreviation):
-                imgGI = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global", mode=mode)
-                imgGIAbbreviation = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global", mode=modeAbbreviation)
-                self.assertTrue(ft.compareImg(imgGI, imgGIAbbreviation, decimal=7))
-                self.assertEqual(imgGIAbbreviation.GetMetaData("mode"), mode)
+        imgGIGamma = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global", mode="gamma")
+        imgGIPassRate = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global", mode="pass-rate")
+        for modeAbbreviation in ["g", "Gamma"]:
+            with self.subTest(modeAbbreviation=modeAbbreviation):
+                imgGIAbbreviation = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global", mode=modeAbbreviation)  # type: ignore
+                self.assertTrue(ft.compareImg(imgGIGamma, imgGIAbbreviation, decimal=7))
+                self.assertEqual(imgGIAbbreviation.GetMetaData("mode"), "gamma")
+        for modeAbbreviation in ["pr", "p", "Pass-Rate"]:
+            with self.subTest(modeAbbreviation=modeAbbreviation):
+                imgGIAbbreviation = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global", mode=modeAbbreviation)  # type: ignore
+                self.assertTrue(ft.compareImg(imgGIPassRate, imgGIAbbreviation, decimal=7))
+                self.assertEqual(imgGIAbbreviation.GetMetaData("mode"), "pass-rate")
 
     def test_calcGammaIndex_identical(self):
         imgGI = ft.calcGammaIndex(self.imgGauss, self.imgGauss, DD=2, DTA=2, DCO=0.05, DDType="global")
@@ -242,11 +254,11 @@ class test_calcGammaIndex(unittest.TestCase):
 
     def test_calcGammaIndex_invalid_imgRef(self):
         with self.assertRaises(TypeError):
-            ft.calcGammaIndex(ft.arr(self.imgGauss), self.imgGaussShifted, DD=2, DTA=2, DCO=0.05)
+            ft.calcGammaIndex(ft.arr(self.imgGauss), self.imgGaussShifted, DD=2, DTA=2, DCO=0.05)  # type: ignore
 
     def test_calcGammaIndex_invalid_imgEval(self):
         with self.assertRaises(TypeError):
-            ft.calcGammaIndex(self.imgGauss, ft.arr(self.imgGaussShifted), DD=2, DTA=2, DCO=0.05)
+            ft.calcGammaIndex(self.imgGauss, ft.arr(self.imgGaussShifted), DD=2, DTA=2, DCO=0.05)  # type: ignore
 
     def test_calcGammaIndex_invalid_vectorImg(self):
         imgVector = sitk.Compose(self.imgGauss, self.imgGauss)
@@ -308,11 +320,11 @@ class test_calcGammaIndex(unittest.TestCase):
 
     def test_calcGammaIndex_invalid_DDType(self):
         with self.assertRaises(ValueError):
-            ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="x")
+            ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="x")  # type: ignore
 
     def test_calcGammaIndex_invalid_mode(self):
         with self.assertRaises(ValueError):
-            ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, mode="x")
+            ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, mode="x")  # type: ignore
 
     def test_calcGammaIndex_invalid_nonFinite(self):
         for value in [np.nan, np.inf]:
@@ -407,7 +419,7 @@ class test_getGIstat(unittest.TestCase):
 
     def test_getGIstat_invalid_img(self):
         with self.assertRaises(TypeError):
-            ft.getGIstat(ft.arr(self.imgGamma))
+            ft.getGIstat(ft.arr(self.imgGamma))  # type: ignore
 
 
 class test_getGIcmap(unittest.TestCase):
