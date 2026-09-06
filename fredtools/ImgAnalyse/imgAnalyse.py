@@ -405,7 +405,7 @@ def getVoxelEdges(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[floa
 
     voxelEdges = []
     for axis, axisSize in enumerate(img.GetSize()):
-        voxelIndices = np.zeros([axisSize + 1, 3], dtype=np.float64)
+        voxelIndices = np.zeros([axisSize + 1, img.GetDimension()], dtype=np.float64)
         voxelIndices[:, axis] = np.arange(axisSize + 1, dtype=np.float64) - 0.5
         voxelEdgesAxis = np.array(ft.transformContinuousIndexToPhysicalPoint(img, voxelIndices))
         voxelEdges.append(tuple(voxelEdgesAxis[:, axis]))
@@ -854,6 +854,8 @@ def isPointInside(img: SITKImage, point: PointLike | Iterable[PointLike], displa
     ------
     TypeError
         If `img` is not an instance of a SimpleITK image.
+    ValueError
+        If `point` is not a point or a list of points of the image dimension size.
 
     See Also
     --------
@@ -889,6 +891,12 @@ def isPointInside(img: SITKImage, point: PointLike | Iterable[PointLike], displa
     # check if it is 1D array and expand to 2D if needed
     if point.ndim == 1:
         point = np.expand_dims(point, 0)
+
+    # validate the points dimension
+    if point.ndim != 2 or point.shape[1] != img.GetDimension():
+        error = ValueError(f"The parameter 'point' must be a point or a list of points of the image dimension size ({img.GetDimension()}) but an array of shape {point.shape} was given.")
+        _logger.error(error)
+        raise error
 
     # get extent of an sitk image
     extents = ft.getExtent(img)
@@ -1130,14 +1138,13 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInf
     # compare size
     sizeMatch = img1.GetSize() == img2.GetSize()
 
-    # compare origin
-    originMatch = np.all(np.round(np.array(img1.GetOrigin()), decimals=decimal) == np.round(np.array(img2.GetOrigin()), decimals=decimal))
-
-    # compare spacing
-    spacingMatch = np.all(np.round(np.array(img1.GetSpacing()), decimals=decimal) == np.round(np.array(img2.GetSpacing()), decimals=decimal))
-
-    # compare direction
-    directionMatch = np.all(np.array(img1.GetDirection()) == np.array(img2.GetDirection()))
+    # compare origin, spacing and direction (only possible for the same dimension)
+    if dimensionMatch:
+        originMatch = bool(np.all(np.round(np.array(img1.GetOrigin()), decimals=decimal) == np.round(np.array(img2.GetOrigin()), decimals=decimal)))
+        spacingMatch = bool(np.all(np.round(np.array(img1.GetSpacing()), decimals=decimal) == np.round(np.array(img2.GetSpacing()), decimals=decimal)))
+        directionMatch = bool(np.all(np.array(img1.GetDirection()) == np.array(img2.GetDirection())))
+    else:
+        originMatch = spacingMatch = directionMatch = False
 
     match = (dimensionMatch and sizeMatch and originMatch and spacingMatch and directionMatch)
 
