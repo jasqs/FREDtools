@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import os
 import shutil
-import fitz  # from pymupdf
+import pymupdf
 
 import fredtools as ft
 
@@ -49,11 +49,11 @@ class test_mergePDF(unittest.TestCase):
 
     def test_mergePDF_page_count(self):
         # Calculate the total number of pages in the source PDFs
-        total_pages = sum(fitz.open(pdf).page_count for pdf in self.filesPath_pdf)
+        total_pages = sum(pymupdf.open(pdf).page_count for pdf in self.filesPath_pdf)
         ft.mergePDF(self.filesPath_pdf, self.filePaths_pdf_output)
         self.assertTrue(self.filePaths_pdf_output.exists())
         # Check the number of pages in the merged PDF
-        merged_pdf = fitz.open(self.filePaths_pdf_output)
+        merged_pdf = pymupdf.open(self.filePaths_pdf_output)
         self.assertEqual(merged_pdf.page_count, total_pages)
 
     def test_mergePDF_single_file(self):

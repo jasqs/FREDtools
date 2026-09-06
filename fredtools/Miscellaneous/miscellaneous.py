@@ -36,7 +36,7 @@ def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, remo
     FileNotFoundError
         If any of the PDF files to be merged does not exist.
     """
-    import fitz  # from pymupdf
+    import pymupdf
     import os
     import fredtools as ft
 
@@ -53,10 +53,10 @@ def mergePDF(PDFFileNames: Iterable[PathLike], mergedPDFFileName: PathLike, remo
             _logger.error(error)
             raise error
 
-    mergedPDF = fitz.open()
+    mergedPDF = pymupdf.open()
 
     for PDFFileName in PDFFileNames:
-        with fitz.open(PDFFileName) as mfile:
+        with pymupdf.open(PDFFileName) as mfile:
             mergedPDF.insert_pdf(mfile)
 
     if removeSource:
