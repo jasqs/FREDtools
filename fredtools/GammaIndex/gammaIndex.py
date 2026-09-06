@@ -7,11 +7,12 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     """Calculate gamma index map.
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
-    defined SimpleITK image objects, as the reference and evaluation images, respectively.
+    defined SimpleITK 3D image objects, as the reference and evaluation images, respectively.
     The gamma index test is performed with a defined dose difference (DD) given in [%],
     distance to agreement (DTA) given in the same length unit as the reference image
     (in [mm] by default) and is calculated for the dose values greater or equal than
-    a fraction of the maximum dose in the reference image, given by the DCO parameter.
+    a fraction of the global normalisation dose (the maximum dose in the reference image
+    by default), given by the DCO parameter.
     The gamma index can be calculated for `local` or `global` dose difference in two modes:
 
         -  *gamma*: each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.
@@ -24,15 +25,19 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     Parameters
     ----------
     imgRef : SimpleITK Image
-        An object of a SimpleITK 2D or 3D image describing the reference.
+        An object of a SimpleITK 3D image describing the reference. The image must have
+        a scalar pixel type and at least two voxels along each axis.
     imgEval : SimpleITK Image
-        An object of a SimpleITK 2D or 3D image describing the evaluation.
+        An object of a SimpleITK 3D image describing the evaluation, with the same
+        requirements as for the `imgRef`. It can have a different size, spacing and origin
+        than the `imgRef` but must have the same direction matrix.
     DD : float
         Dose difference in [%].
     DTA : float
         Distance-to-agreement, usually in [mm].
     DCO : float
-        Lower dose cutoff below which gamma will not be calculated given as the fraction of the maximum reference value.
+        Lower dose cutoff below which gamma will not be calculated given as the fraction of the
+        global normalisation dose (the maximum reference value by default, see `globalNorm`).
     DDType : {'local', 'global'}, optional
         Method of calculating the absolute dose difference criterion. (def. 'local'):
 
@@ -40,8 +45,9 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
             - 'global' : the absolute dose difference calculated as DD percent of the maximum reference value.
 
     globalNorm : float, optional
-        Global normalisation of the input images. If not given or None then the maximum value of
-        the reference image is used. (def. None)
+        Global normalisation dose in the units of the input images, used to calculate the dose
+        cutoff (`DCO`) and the 'global' dose difference criterion (`DD`). If not given or None
+        then the maximum value of the reference image is used. (def. None)
     stepSize : float, optional
         Step size to search for the minimum gamma index value. It can be given
         as an absolute step in the reference length unit (for instance in [mm])
@@ -71,15 +77,22 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     ------
     TypeError
         If `imgRef` or `imgEval` is not an instance of a SimpleITK image object
-        describing a 3D volume or 2D slice.
+        describing a scalar 3D volume (e.g. a vector image).
+    NotImplementedError
+        If `imgRef` or `imgEval` is a 2D image or has an axis of size 1. Such images are
+        not supported by the current version of the gamma index library.
     ValueError
         If the value of `DD`, `DTA`, `DCO`, `globalNorm` or `stepSize` is out of range,
-        or `DDType` or `mode` cannot be recognised.
+        `DDType` or `mode` cannot be recognised, the direction matrices of `imgRef` and
+        `imgEval` do not match, any of the images contains NaN or Inf values, the maximum
+        of the reference image is not positive, or no voxel of the reference image is above
+        the dose cutoff.
     OSError
         If the function is run on a platform other than Linux (only the Linux
         shared library is implemented).
     RuntimeError
-        Run time error is raised when the execution of the gamma calculation failed.
+        Run time error is raised when the execution of the gamma calculation failed
+        or the library returned an invalid result (no voxel analysed).
         The following error codes can be raised:
 
 
@@ -106,9 +119,16 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     Notes
     -----
     The gamma index pass rates calculated with this function agree within 1 percentage point with
-    PyMedPhys and plastimatch. Identical gamma index maps are not expected, because the tools 
+    PyMedPhys and plastimatch. Identical gamma index maps are not expected, because the tools
     discretise the search space and interpolate the evaluation dose differently.
     Refer to the :ref:`GammaIndexValidation` to read more about the validation results.
+
+    The images are required to be 3D and to have the same direction matrix. The calculation is
+    performed in the common index frame of the images, which preserves the distances for any
+    common direction matrix, and the resulting gamma index map is returned in the frame of
+    reference of the `imgRef`. The dose cutoff in dose units is `DCO` times the global
+    normalisation dose and the 'global' dose difference criterion is `DD` percent of the global
+    normalisation dose, which is the maximum of the reference image unless `globalNorm` is given.
 
     Examples
     --------
@@ -128,19 +148,25 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     from numpy.ctypeslib import ndpointer
     import SimpleITK as sitk
 
-    # validate imgRef
-    ft._imgTypeChecker.isSITK(imgRef, raiseError=True)
-    if not ft._imgTypeChecker.isSITK_slice(imgRef, raiseError=False) and not ft._imgTypeChecker.isSITK_volume(imgRef, raiseError=False):
-        error = TypeError(f"The reference image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
-        _logger.error(error)
-        raise error
-
-    # validate imgEval
-    ft._imgTypeChecker.isSITK(imgEval, raiseError=True)
-    if not ft._imgTypeChecker.isSITK_slice(imgEval, raiseError=False) and not ft._imgTypeChecker.isSITK_volume(imgEval, raiseError=False):
-        error = TypeError(f"The evaluation image must be an instance of a SimpleITK image object describing a 3D volume or 2D slice.")
-        _logger.error(error)
-        raise error
+    # validate imgRef and imgEval (scalar 3D images with at least two voxels along each axis)
+    for img, imgName in ((imgRef, "reference"), (imgEval, "evaluation")):
+        ft._imgTypeChecker.isSITK(img, raiseError=True)
+        if ft._imgTypeChecker.isSITK_vector(img, raiseError=False):
+            error = TypeError(f"The {imgName} image must be a scalar SimpleITK image but a vector image of type '{img.GetPixelIDTypeAsString()}' was given.")
+            _logger.error(error)
+            raise error
+        if img.GetDimension() == 2:
+            error = NotImplementedError(f"The {imgName} image is a 2D SimpleITK image. Only 3D images are supported by the current version of the gamma index library (libFredGI).")
+            _logger.error(error)
+            raise error
+        if not ft._imgTypeChecker.isSITK3D(img, raiseError=False):
+            error = TypeError(f"The {imgName} image must be an instance of a SimpleITK image object describing a 3D volume.")
+            _logger.error(error)
+            raise error
+        if 1 in img.GetSize():
+            error = NotImplementedError(f"The {imgName} image of size {img.GetSize()} has an axis of size 1, which is not supported by the current version of the gamma index library (libFredGI). Resample or pad the image to at least two voxels along each axis.")
+            _logger.error(error)
+            raise error
 
     # validate DTA, DD, DDType, DCO and globalNorm
     if not isinstance(DTA, Numeric) or DTA <= 0:
@@ -176,6 +202,32 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         _logger.error(error)
         raise error
 
+    # validate that the direction matrices of the images match (the calculation is done in the common index frame of the images)
+    if not np.allclose(imgRef.GetDirection(), imgEval.GetDirection(), atol=1E-6):
+        error = ValueError(f"The direction matrices of the reference image {imgRef.GetDirection()} and the evaluation image {imgEval.GetDirection()} do not match. Resample one of the images to the frame of reference of the other one.")
+        _logger.error(error)
+        raise error
+
+    # validate the image values (the library returns an undefined result for non-finite values or when no voxel is above the dose cut-off)
+    arrRef = sitk.GetArrayFromImage(imgRef).astype(np.float32)
+    arrEval = sitk.GetArrayFromImage(imgEval).astype(np.float32)
+    for arr, imgName in ((arrRef, "reference"), (arrEval, "evaluation")):
+        if not np.isfinite(arr).all():
+            error = ValueError(f"The {imgName} image contains NaN or Inf values, which are not supported by the gamma index calculation.")
+            _logger.error(error)
+            raise error
+    refMax = float(arrRef.max())
+    if refMax <= 0:
+        error = ValueError(f"The reference image must contain positive values but its maximum is {refMax:g}.")
+        _logger.error(error)
+        raise error
+    globalNormValue = float(globalNorm) if globalNorm is not None else refMax
+    doseCutoff = DCO * globalNormValue
+    if refMax < doseCutoff:
+        error = ValueError(f"No voxel of the reference image is above the dose cut-off {doseCutoff:g} (DCO {DCO:g} of the global normalisation {globalNormValue:g}), because the maximum of the reference image is {refMax:g}.")
+        _logger.error(error)
+        raise error
+
     # validate CPUNo or get it automatically if requested
     CPUNo = ft.getCPUNo(ft.CPUNO)
 
@@ -199,7 +251,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         # get libFredGI version
         libFredGIVersion = b"\0" * 256
         libFredGI.fredGI_version(ctypes.c_char_p(libFredGIVersion))
-        libFredGIVersion = libFredGIVersion.decode("utf-8")
+        libFredGIVersion = libFredGIVersion.decode("utf-8").split("\0", 1)[0].strip()
 
         # set interpolation dose values using neighbouring voxels
         libFredGI.fredGI_setInterpolation(ctypes.c_int(1))
@@ -245,11 +297,11 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
                                             ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
                                             ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),
                                             ]
+        # the lower corner of the image is given in the index frame of the image (direction^T * origin - spacing/2), which is common to both images
         nn = np.array(imgRef.GetSize()).astype(np.int32)
         hs = np.array(imgRef.GetSpacing()).astype(np.float32)
-        x0 = np.array(ft.getExtent(imgRef))[:, 0].astype(np.float32)
-        arr = sitk.GetArrayFromImage(imgRef).astype(np.float32)
-        arr = np.moveaxis(arr, range(arr.ndim), range(arr.ndim)[::-1])
+        x0 = (ft.ImgAnalyse.imgAnalyse._getDirectionArray(imgRef).T @ np.array(imgRef.GetOrigin()) - np.array(imgRef.GetSpacing()) / 2).astype(np.float32)
+        arr = np.moveaxis(arrRef, range(arrRef.ndim), range(arrRef.ndim)[::-1])
         libFredGI.fredGI_setRef(nn, hs, x0, arr)
 
         # set imgEval
@@ -260,15 +312,23 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
                                              ]
         nn = np.array(imgEval.GetSize()).astype(np.int32)
         hs = np.array(imgEval.GetSpacing()).astype(np.float32)
-        x0 = np.array(ft.getExtent(imgEval))[:, 0].astype(np.float32)
-        arr = sitk.GetArrayFromImage(imgEval).astype(np.float32)
-        arr = np.moveaxis(arr, range(arr.ndim), range(arr.ndim)[::-1])
+        x0 = (ft.ImgAnalyse.imgAnalyse._getDirectionArray(imgEval).T @ np.array(imgEval.GetOrigin()) - np.array(imgEval.GetSpacing()) / 2).astype(np.float32)
+        arr = np.moveaxis(arrEval, range(arrEval.ndim), range(arrEval.ndim)[::-1])
         libFredGI.fredGI_setEval(nn, hs, x0, arr)
 
         # start computation
         computationStatus = libFredGI.fredGI_startComputation()
         if not computationStatus == 0:
             error = RuntimeError(f"Gamma Index computation failed with the error code {computationStatus}. Refer to www.fredtools.ifj.edu.pl for more details.")
+            _logger.error(error)
+            raise error
+
+        # get GI pass rate (negative when no voxel was analysed and the result is undefined)
+        GIpassRate = ctypes.c_float()
+        libFredGI.fredGI_getGammaIndexPassRate(ctypes.byref(GIpassRate))
+        GIpassRate = GIpassRate.value
+        if GIpassRate < 0:
+            error = RuntimeError(f"The gamma index library returned an invalid pass rate {GIpassRate}, meaning that no voxel was analysed. Check the dose cut-off and the input images.")
             _logger.error(error)
             raise error
 
@@ -282,20 +342,6 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         if mode == "pass-rate":
             imgGI = sitk.Cast(imgGI, sitk.sitkInt8)
 
-        # get GI pass rate
-        GIpassRate = ctypes.c_float()
-        libFredGI.fredGI_getGammaIndexPassRate(ctypes.byref(GIpassRate))
-        GIpassRate = GIpassRate.value
-        # set additional metadata
-        imgGI.SetMetaData("GIVersion", libFredGIVersion)
-        imgGI.SetMetaData("DD", str(DD))
-        imgGI.SetMetaData("DTA", str(DTA))
-        imgGI.SetMetaData("DDType", DDType)
-        imgGI.SetMetaData("DCO", str(DCO))
-        imgGI.SetMetaData("stepSize", str(stepSize))
-        imgGI.SetMetaData("mode", mode)
-        imgGI.SetMetaData("GIPR", str(GIpassRate))
-
     finally:
         # unload the library
         if sys.platform == "linux" or sys.platform == "linux2":
@@ -307,6 +353,16 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
             raise error
             del libFredGI
             ctypes.windll.kernel32.FreeLibrary(libFredGI_h)
+
+    # set additional metadata
+    imgGI.SetMetaData("GIVersion", libFredGIVersion)
+    imgGI.SetMetaData("DD", str(DD))
+    imgGI.SetMetaData("DTA", str(DTA))
+    imgGI.SetMetaData("DDType", DDType)
+    imgGI.SetMetaData("DCO", str(DCO))
+    imgGI.SetMetaData("stepSize", str(stepSize))
+    imgGI.SetMetaData("mode", mode)
+    imgGI.SetMetaData("GIPR", str(GIpassRate))
 
     if displayInfo:
         _logger.info(ft.ImgAnalyse.imgInfo._displayImageInfo(imgGI))
@@ -354,6 +410,7 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
     """
     import fredtools as ft
     import numpy as np
+    import warnings
     ft._imgTypeChecker.isSITK(imgGI, raiseError=True)
 
     arrGI = ft.arr(imgGI)
@@ -364,7 +421,8 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
             _logger.error(error)
             raise error
         mode = "pass-rate"
-        GIstat["passRate"] = (arrGI == 1).sum() / (arrGI >= 0).sum() * 100
+        with np.errstate(divide="ignore", invalid="ignore"):
+            GIstat["passRate"] = (arrGI == 1).sum() / (arrGI >= 0).sum() * 100
         GIstat["mean"] = np.nan
         GIstat["std"] = np.nan
         GIstat["min"] = np.nan
@@ -373,11 +431,14 @@ def getGIstat(imgGI: SITKImage, displayInfo: bool = False) -> DottedDict:
     elif np.issubdtype(arrGI.dtype, np.floating):
         mode = "gamma"
         arrGI[arrGI < 0] = np.nan
-        GIstat["passRate"] = (arrGI <= 1).sum() / (arrGI >= 0).sum() * 100
-        GIstat["mean"] = np.nanmean(arrGI)
-        GIstat["std"] = np.nanstd(arrGI)
-        GIstat["min"] = np.nanmin(arrGI)
-        GIstat["max"] = np.nanmax(arrGI)
+        # the statistics of an image without any analysed voxel are NaN (no warnings)
+        with np.errstate(divide="ignore", invalid="ignore"), warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            GIstat["passRate"] = (arrGI <= 1).sum() / (arrGI >= 0).sum() * 100
+            GIstat["mean"] = np.nanmean(arrGI)
+            GIstat["std"] = np.nanstd(arrGI)
+            GIstat["min"] = np.nanmin(arrGI)
+            GIstat["max"] = np.nanmax(arrGI)
     else:
         error = TypeError(f"The input image is of type {arrGI.dtype} but it should be either integer or float type.")
         _logger.error(error)
@@ -410,12 +471,17 @@ def getGIcmap(maxGI: Numeric, N: NonNegativeInt = 256) -> LinearSegmentedColorma
         The maximum value of the colormap. Values less than 1
         are clamped to 1 (with a warning).
     N : int, optional
-        Number of segments of the colormap. (def. 256)
+        Number of segments of the colormap, at least 2. (def. 256)
 
     Returns
     -------
     colormap
         An instance of matplotlib.colors.LinearSegmentedColormap object.
+
+    Raises
+    ------
+    ValueError
+        If `N` is not an integer greater than 1.
 
     See Also
     --------
@@ -431,6 +497,11 @@ def getGIcmap(maxGI: Numeric, N: NonNegativeInt = 256) -> LinearSegmentedColorma
     """
     from matplotlib.colors import LinearSegmentedColormap
     import numpy as np
+
+    if not isinstance(N, (int, np.integer)) or N < 2:
+        error = ValueError(f"The number of colormap segments N must be an integer greater than 1 but {N} was given.")
+        _logger.error(error)
+        raise error
 
     if maxGI < 1:
         _logger.warning(f"The value of the parameter 'maxGI' cannot be less than 1 and a value {maxGI} was given. It was set to 1.")

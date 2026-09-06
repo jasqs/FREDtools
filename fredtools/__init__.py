@@ -58,7 +58,7 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-_version = [0, 8, 24]
+_version = [0, 8, 25]
 __version__ = ".".join(map(str, _version))
 
 # configure logging if no root logger configured
