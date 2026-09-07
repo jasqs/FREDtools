@@ -80,14 +80,18 @@ class test_findSpots(unittest.TestCase):
 
     def test_findSpots_margin(self):
         labelSizesDefault = _labelSizes(ft.findSpots(self.imgSpots, margin=3))
+        labelSizesZero = _labelSizes(ft.findSpots(self.imgSpots, margin=0))
         labelSizesSmall = _labelSizes(ft.findSpots(self.imgSpots, margin=0.1))
         labelSizesLarge = _labelSizes(ft.findSpots(self.imgSpots, margin=6))
         labelSizesIterable = _labelSizes(ft.findSpots(self.imgSpots, margin=[6, 1]))
+        labelSizesArray = _labelSizes(ft.findSpots(self.imgSpots, margin=np.array([6, 1])))
         for label in [1, 2, 3]:
             with self.subTest(label=label):
+                self.assertEqual(labelSizesZero[label], labelSizesSmall[label])
                 self.assertLess(labelSizesSmall[label], labelSizesDefault[label])
                 self.assertLess(labelSizesDefault[label], labelSizesLarge[label])
                 self.assertLess(labelSizesIterable[label], labelSizesLarge[label])
+                self.assertEqual(labelSizesIterable[label], labelSizesArray[label])
 
     def test_findSpots_DCO(self):
         self.assertEqual(len(_labelSizes(ft.findSpots(self.imgSpots, DCO=0.1))), 3)
@@ -138,8 +142,14 @@ class test_findSpots(unittest.TestCase):
                     ft.findSpots(self.imgSpots, DCO=DCO)  # type: ignore
 
     def test_findSpots_invalid_margin(self):
-        with self.assertRaises(TypeError):
-            ft.findSpots(self.imgSpots, margin=None)  # type: ignore
+        for margin in [None, "abc", ["3", "1"], [1, 2, 3], [3]]:
+            with self.subTest(margin=margin):
+                with self.assertRaises(TypeError):
+                    ft.findSpots(self.imgSpots, margin=margin)  # type: ignore
+        for margin in [-3, [3, -1]]:
+            with self.subTest(margin=margin):
+                with self.assertRaises(ValueError):
+                    ft.findSpots(self.imgSpots, margin=margin)
 
 
 class test_fitSpotProfile(unittest.TestCase):

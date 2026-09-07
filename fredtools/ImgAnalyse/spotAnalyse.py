@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, le=1)] = 0.1, margin: PositiveFloat | Iterable[PositiveFloat] = 3, displayInfo: bool = False) -> SITKImage:
+def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, le=1)] = 0.1, margin: NonNegativeFloat | Iterable[NonNegativeFloat] = 3, displayInfo: bool = False) -> SITKImage:
     """Find spots in 2D SITK image.
 
     The function identifies spots in a 2D SimpleITK image by applying a dose cut-off (DCO) to define the spot
@@ -23,7 +23,8 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
     DCO : Numeric, optional
         Dose cut-off to define spot region. (def. 0.1)
     margin : Numeric | Iterable[Numeric], optional
-        Margin around spot region in mm. (def. 3)
+        Non-negative margin around spot region in mm, given as a single value for all
+        directions or as an iterable with one value per image dimension. (def. 3)
     displayInfo : bool, optional
         Display information about found spots. (def. False)
 
@@ -37,9 +38,10 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
     ------
     TypeError
         If `img` is not a 2D SimpleITK image.
-        If margin is not a scalar or an iterable.
+        If `margin` is not a scalar or an iterable of scalars with one value per image dimension.
     ValueError
-        If DCO is not a positive scalar between 0 and 1.
+        If `DCO` is not a positive scalar between 0 and 1.
+        If any value of `margin` is negative.
     """
     import fredtools as ft
     import SimpleITK as sitk
@@ -51,13 +53,21 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
         error = ValueError(f"The value of DCO {DCO} is not correct. It must be a positive scalar between 0 and 1.")
         _logger.error(error)
         raise error
-    # check margin parameter
-    if isinstance(margin, Iterable):
-        margin = list(margin)
-    elif np.isscalar(margin):
-        margin = list([margin]*img.GetDimension())
+    # check margin parameter (a non-negative scalar or an iterable of non-negative scalars, one per image dimension)
+    if isinstance(margin, Numeric):
+        marginValues = [margin] * img.GetDimension()
+    elif isinstance(margin, Iterable) and not isinstance(margin, str):
+        marginValues = list(margin)
     else:
-        error = TypeError(f"The `margin` parameter must be a scalar or an iterable. The parameter {margin} was used.")
+        error = TypeError(f"The `margin` parameter must be a scalar or an iterable of scalars. The parameter {margin} was used.")
+        _logger.error(error)
+        raise error
+    if len(marginValues) != img.GetDimension() or not all(isinstance(value, Numeric) for value in marginValues):
+        error = TypeError(f"The `margin` parameter must be a scalar or an iterable of {img.GetDimension()} scalars. The parameter {margin} was used.")
+        _logger.error(error)
+        raise error
+    if any(value < 0 for value in marginValues):
+        error = ValueError(f"The `margin` parameter must be non-negative. The parameter {margin} was used.")
         _logger.error(error)
         raise error
 
@@ -70,8 +80,8 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
         numberOfSpots = 0
     else:
         imgROI = sitk.BinaryThreshold(sitk.Median(img, [5, 5]), lowerThreshold=maxValue * DCO, upperThreshold=maxValue * 1.1)
-        margin = np.array(margin)/np.array(img.GetSpacing())
-        imgROI = sitk.BinaryDilate(imgROI, np.round(margin).astype(int).tolist())
+        marginVoxels = np.round(np.array(marginValues) / np.array(img.GetSpacing())).astype(int).tolist()
+        imgROI = sitk.BinaryDilate(imgROI, marginVoxels)
 
         imgLabel = sitk.BinaryImageToLabelMap(imgROI, fullyConnected=True)
         imgLabel = sitk.Cast(imgLabel, sitk.sitkUInt8)
