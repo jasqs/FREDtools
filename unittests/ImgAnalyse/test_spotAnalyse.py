@@ -105,6 +105,21 @@ class test_findSpots(unittest.TestCase):
         self.assertEqual(self._getLabelAtPoint(imgLabel, (0.0, 0.0)), 1)
         self.assertEqual(self._getLabelAtPoint(imgLabel, (6.0, 0.0)), 1)
 
+    def test_findSpots_zero_image(self):
+        imgZeros = ft.createImg([50, 40], spacing=[0.5, 0.5], origin=[0.0, 0.0])
+        with self.assertLogs(ft.ImgAnalyse.spotAnalyse._logger, level="WARNING"):
+            imgLabel = ft.findSpots(imgZeros, displayInfo=True)
+        self.assertEqual(imgLabel.GetPixelIDTypeAsString(), "8-bit unsigned integer")
+        self.assertTrue(ft.compareImgFoR(imgZeros, imgLabel))
+        self.assertEqual(_labelSizes(imgLabel), {})
+
+    def test_findSpots_negative_image(self):
+        imgNegative = ft.createImg([50, 40], spacing=[0.5, 0.5], origin=[0.0, 0.0]) - 5.0
+        with self.assertLogs(ft.ImgAnalyse.spotAnalyse._logger, level="WARNING"):
+            imgLabel = ft.findSpots(imgNegative)
+        self.assertTrue(ft.compareImgFoR(imgNegative, imgLabel))
+        self.assertEqual(_labelSizes(imgLabel), {})
+
     def test_findSpots_OmniPro(self):
         imgLabel = ft.findSpots(self.imgOmniPro, DCO=0.5, margin=8, displayInfo=True)
         self.assertEqual(list(_labelSizes(imgLabel).keys()), [1])

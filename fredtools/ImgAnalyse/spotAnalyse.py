@@ -13,7 +13,8 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
     by `margin` (converted from mm to voxels), labelled as fully connected components with holes filled,
     and components smaller than 20 voxels are dropped. The remaining labels are sorted by size (the largest
     component gets label 1), and finally each label region is replaced by its axis-aligned bounding box,
-    so each spot is described by a rectangular label region.
+    so each spot is described by a rectangular label region. If the image has no positive values (its maximum
+    is not positive), no spots can be identified: a warning is logged and an empty label image is returned.
 
     Parameters
     ----------
@@ -29,7 +30,8 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
     Returns
     -------
     SITKImage
-        Labelled image of found spots.
+        Labelled image of found spots, of '8-bit unsigned integer' type and in the frame of reference
+        of `img`. The voxels outside the spots are 0, so the image is filled with zeros if no spot was found.
 
     Raises
     ------
@@ -59,24 +61,33 @@ def findSpots(img: SITKImage, DCO: Annotated[Numeric, Field(strict=True, ge=0, l
         _logger.error(error)
         raise error
 
-    imgROI = sitk.BinaryThreshold(sitk.Median(img, [5, 5]), lowerThreshold=ft.getStatistics(img).GetMaximum() * DCO, upperThreshold=ft.getStatistics(img).GetMaximum()*1.1)
-    margin = np.array(margin)/np.array(img.GetSpacing())
-    imgROI = sitk.BinaryDilate(imgROI, np.round(margin).astype(int).tolist())
+    # no spots can be identified in an image without positive values (the threshold at DCO*maximum would accept all voxels or be ill-defined)
+    maxValue = ft.getStatistics(img).GetMaximum()
+    if maxValue <= 0:
+        _logger.warning(f"The maximum value of the image is {maxValue:g}, which is not positive. No spots can be identified and an empty label image is returned.")
+        imgLabel = sitk.Image(img.GetSize(), sitk.sitkUInt8)
+        imgLabel.CopyInformation(img)
+        numberOfSpots = 0
+    else:
+        imgROI = sitk.BinaryThreshold(sitk.Median(img, [5, 5]), lowerThreshold=maxValue * DCO, upperThreshold=maxValue * 1.1)
+        margin = np.array(margin)/np.array(img.GetSpacing())
+        imgROI = sitk.BinaryDilate(imgROI, np.round(margin).astype(int).tolist())
 
-    imgLabel = sitk.BinaryImageToLabelMap(imgROI, fullyConnected=True)
-    imgLabel = sitk.Cast(imgLabel, sitk.sitkUInt8)
-    imgLabel = sitk.BinaryFillhole(imgLabel, fullyConnected=True)
-    imgLabel = sitk.RelabelComponent(imgLabel, minimumObjectSize=20, sortByObjectSize=True)
+        imgLabel = sitk.BinaryImageToLabelMap(imgROI, fullyConnected=True)
+        imgLabel = sitk.Cast(imgLabel, sitk.sitkUInt8)
+        imgLabel = sitk.BinaryFillhole(imgLabel, fullyConnected=True)
+        imgLabel = sitk.RelabelComponent(imgLabel, minimumObjectSize=20, sortByObjectSize=True)
 
-    # label irregular mask to box mask
-    labelShapeStatistics = sitk.LabelShapeStatisticsImageFilter()
-    labelShapeStatistics.Execute(imgLabel)
-    for label in labelShapeStatistics.GetLabels():
-        boundingBox = labelShapeStatistics.GetBoundingBox(label)
-        imgLabel[boundingBox[0]:(boundingBox[0]+boundingBox[2]+1), boundingBox[1]:(boundingBox[1]+boundingBox[3]+1)] = label
+        # label irregular mask to box mask
+        labelShapeStatistics = sitk.LabelShapeStatisticsImageFilter()
+        labelShapeStatistics.Execute(imgLabel)
+        for label in labelShapeStatistics.GetLabels():
+            boundingBox = labelShapeStatistics.GetBoundingBox(label)
+            imgLabel[boundingBox[0]:(boundingBox[0]+boundingBox[2]+1), boundingBox[1]:(boundingBox[1]+boundingBox[3]+1)] = label
+        numberOfSpots = labelShapeStatistics.GetNumberOfLabels()
 
     if displayInfo:
-        strLog = [f"Found {labelShapeStatistics.GetNumberOfLabels()} spots. Label image:"]
+        strLog = [f"Found {numberOfSpots} spots. Label image:"]
         _logger.info("\n\t".join(strLog) + "\n\t" + ft.ImgAnalyse.imgInfo._displayImageInfo(imgLabel))
 
     return imgLabel
