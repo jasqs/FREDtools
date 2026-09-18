@@ -60,10 +60,11 @@ def getDicomTypeName(dicomVar: PathLike | DicomDataset) -> str:
 def _isDicomCT(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of CT type and raise an error if requested."""
 
-    instanceBool = "CT Image Storage" in getDicomTypeName(dicomVar)
+    dicomTypeName = getDicomTypeName(dicomVar)
+    instanceBool = "CT Image Storage" in dicomTypeName
 
     if raiseError and not instanceBool:
-        error = TypeError(f"The dicom is not a CT type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a CT type but has SOP class UID name '{dicomTypeName}'.")
         _logger.error(error)
         raise error
 
@@ -73,10 +74,11 @@ def _isDicomCT(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> b
 def _isDicomRS(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of RS type and raise an error if requested."""
 
-    instanceBool = "Structure Set Storage" in getDicomTypeName(dicomVar)
+    dicomTypeName = getDicomTypeName(dicomVar)
+    instanceBool = "Structure Set Storage" in dicomTypeName
 
     if raiseError and not instanceBool:
-        error = TypeError(f"The dicom is not a RS type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a RS type but has SOP class UID name '{dicomTypeName}'.")
         _logger.error(error)
         raise error
 
@@ -86,10 +88,11 @@ def _isDicomRS(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> b
 def _isDicomRN(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of RN type and raise an error if requested."""
 
-    instanceBool = "Plan Storage" in getDicomTypeName(dicomVar)  # ("RT Plan Storage" or "RT Ion Plan Storage")
+    dicomTypeName = getDicomTypeName(dicomVar)
+    instanceBool = "Plan Storage" in dicomTypeName  # ("RT Plan Storage" or "RT Ion Plan Storage")
 
     if raiseError and not instanceBool:
-        error = TypeError(f"The dicom is not a RN type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a RN type but has SOP class UID name '{dicomTypeName}'.")
         _logger.error(error)
         raise error
 
@@ -99,10 +102,11 @@ def _isDicomRN(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> b
 def _isDicomRD(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of RD type and raise an error if requested."""
 
-    instanceBool = "Dose Storage" in getDicomTypeName(dicomVar)
+    dicomTypeName = getDicomTypeName(dicomVar)
+    instanceBool = "Dose Storage" in dicomTypeName
 
     if raiseError and not instanceBool:
-        error = TypeError(f"The dicom is not a RD type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a RD type but has SOP class UID name '{dicomTypeName}'.")
         _logger.error(error)
         raise error
 
@@ -112,10 +116,11 @@ def _isDicomRD(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> b
 def _isDicomPET(dicomVar: PathLike | DicomDataset, raiseError: bool = False) -> bool:
     r"""Check if the dicom is of PET type and raise an error if requested."""
 
-    instanceBool = "Positron Emission Tomography Image Storage" in getDicomTypeName(dicomVar)
+    dicomTypeName = getDicomTypeName(dicomVar)
+    instanceBool = "Positron Emission Tomography Image Storage" in dicomTypeName
 
     if raiseError and not instanceBool:
-        error = TypeError(f"The dicom is not a PET type but has SOP class UID name '{getDicomTypeName(dicomVar)}'.")
+        error = TypeError(f"The dicom is not a PET type but has SOP class UID name '{dicomTypeName}'.")
         _logger.error(error)
         raise error
 
@@ -189,57 +194,28 @@ def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: boo
         Dictionary (dotted_dict.DottedDict) with the sorted file names.
         If only a single file name is found for a given dicom type, then
         the one-element list is collapsed to a single file name string.
+
+    See Also
+    --------
+    getDicomsInfo : read the identity and the references of all the dicoms in a folder in a single pass.
+    sortDicomsFromInfo : group the dicoms information by the dicom type.
+
+    Notes
+    -----
+    The function is a thin wrapper over getDicomsInfo and sortDicomsFromInfo, which
+    read the type of every dicom only once. The dicom file names are returned in
+    the order they were found in the search folder and are not sorted.
     """
-    import glob
-    import os
-    from dotted_dict import DottedDict
+    from fredtools.Miscellaneous.dicom_uid import getDicomsInfo, sortDicomsFromInfo
 
     _logger.debug(f"Searching for dicoms in folder: {searchFolder}" + (" recursively." if recursive else "."))
 
-    if recursive:
-        dicomFileNames = glob.glob(os.path.join(searchFolder, "**/*.dcm"), recursive=True)
-    else:
-        dicomFileNames = glob.glob(os.path.join(searchFolder, "*.dcm"), recursive=False)
+    dicomsInfo = getDicomsInfo(searchFolder, recursive=recursive, pattern="*.dcm", readReferences=False, readFrameOfReferenceUID=False)
 
-    CTfileNames = []
-    RSfileNames = []
-    RNfileNames = []
-    RDfileNames = []
-    PETfileNames = []
-    UnknownfileNames = []
-    for dicomFileName in dicomFileNames:
-        if _isDicomCT(dicomFileName):  # CT
-            CTfileNames.append(dicomFileName)
-        elif _isDicomRS(dicomFileName):  # RS
-            RSfileNames.append(dicomFileName)
-        elif _isDicomRN(dicomFileName):  # RN ("RT Plan Storage" or "RT Ion Plan Storage")
-            RNfileNames.append(dicomFileName)
-        elif _isDicomRD(dicomFileName):  # RD
-            RDfileNames.append(dicomFileName)
-        elif _isDicomPET(dicomFileName):  # PET
-            PETfileNames.append(dicomFileName)
-        else:
-            UnknownfileNames.append(dicomFileName)  # unrecognised dicoms
-
-    fileNamesNo = len(CTfileNames) + len(RSfileNames) + len(RNfileNames) + len(RDfileNames) + len(PETfileNames) + len(UnknownfileNames)
-    if fileNamesNo == 0:
+    if len(dicomsInfo) == 0:
         _logger.warning(f"No dicoms found in the folder: {searchFolder}")
 
-    if displayInfo:
-        _logger.info(f"Found {fileNamesNo:d} dicoms:" +
-                     (f"\n\t{len(CTfileNames):d} x CT" if len(CTfileNames) > 0 else "") +
-                     (f"\n\t{len(RSfileNames):d} x RS" if len(RSfileNames) > 0 else "") +
-                     (f"\n\t{len(RNfileNames):d} x RN" if len(RNfileNames) > 0 else "") +
-                     (f"\n\t{len(RDfileNames):d} x RD" if len(RDfileNames) > 0 else "") +
-                     (f"\n\t{len(PETfileNames):d} x PET" if len(PETfileNames) > 0 else "") +
-                     (f"\n\t{len(UnknownfileNames):d} x unknown" if len(UnknownfileNames) > 0 else ""))
-
-    dicomFiles = {"CTfileNames": CTfileNames, "RSfileNames": RSfileNames, "RNfileNames": RNfileNames, "RDfileNames": RDfileNames, "PETfileNames": PETfileNames, "Unknown": UnknownfileNames}
-    for dicomType, dicomName in dicomFiles.items():
-        if isinstance(dicomName, list) and len(dicomName) == 1:
-            dicomFiles[dicomType] = dicomName[0]
-
-    return DottedDict(dicomFiles)
+    return sortDicomsFromInfo(dicomsInfo, collapseSingle=True, displayInfo=displayInfo)
 
 
 def _getIonBeamDatasetForFieldNumber(fileName: PathLike, beamNumber: int) -> DicomDataset | None:
@@ -1043,7 +1019,21 @@ def getRSInfo(fileName: PathLike, displayInfo: bool = False) -> DataFrame:
     return ROITable
 
 
-def checkDicomsUID(RNfileName: PathLike, RSfileName: PathLike, CTfileNames: PathLike | Iterable[PathLike], RDfileNames: PathLike | Iterable[PathLike] | None = None, displayInfo: bool = False) -> DottedDict:
+def _getCheckDicomsUIDInfoRows(dicomsInfo: DataFrame, fileNames: Iterable[PathLike]) -> dict:
+    r"""Get the information rows of the given dicom files, raising if any of them is missing."""
+    infoByFileName = dicomsInfo.set_index("fileName").to_dict("index")
+
+    missingFileNames = [str(fileName) for fileName in fileNames if str(fileName) not in infoByFileName]
+    if missingFileNames:
+        error = ValueError(f"The given dicoms information does not hold {len(missingFileNames)} of the given dicom files, e.g. {missingFileNames[0]}.")
+        _logger.error(error)
+        raise error
+
+    return infoByFileName
+
+
+def checkDicomsUID(RNfileName: PathLike, RSfileName: PathLike, CTfileNames: PathLike | Iterable[PathLike], RDfileNames: PathLike | Iterable[PathLike] | None = None,
+                   dicomsInfo: DataFrame | None = None, displayInfo: bool = False) -> DottedDict:
     r"""Check the UID matching of all the dicoms describing a single patient plan.
 
     The function performs all the UID consistency checks for the dicoms
@@ -1072,6 +1062,13 @@ def checkDicomsUID(RNfileName: PathLike, RSfileName: PathLike, CTfileNames: Path
     RDfileNames : path or iterable of paths, optional
         A path or an iterable of paths to dose (RD) dicom files. If None or
         empty, the RD checks are skipped. (def. None)
+    dicomsInfo : DataFrame, optional
+        The dicoms information produced by getDicomsInfo, holding at least all the given
+        dicom files. If it is given, then all the checks are answered from the
+        index and no dicom file is read, which is substantially faster when the
+        checks are performed for many plans of the same patient. The information must
+        have been built with the FrameOfReferenceUID read for the 'UIDFoR' check
+        to be performed, otherwise it is set to None. (def. None)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -1133,33 +1130,67 @@ def checkDicomsUID(RNfileName: PathLike, RSfileName: PathLike, CTfileNames: Path
             _logger.error(error)
             raise error
 
-    # check UID matching between the dicoms
-    UIDRNtoRS = dicom_uid.checkUID_RNtoRS(RNfileName, RSfileName)
-    UIDRStoCT = dicom_uid.checkUID_RStoCT(RSfileName, CTfileNames)
-    UIDRNtoRD = dicom_uid.checkUID_RNtoRD(RNfileName, RDfileNames) if RDfileNames else None
+    # get the identity of every dicom, either from the given index or by reading the dicoms
+    infoByFileName = _getCheckDicomsUIDInfoRows(dicomsInfo, [RNfileName, RSfileName] + CTfileNames + RDfileNames) if dicomsInfo is not None else None
 
-    # check that all the dicoms share the same frame of reference
-    FoRUIDs = set(dicom_uid.getFrameOfReferenceUID([RNfileName, RSfileName] + CTfileNames + RDfileNames))
-    UIDFoR = len(FoRUIDs) == 1
-    if not UIDFoR:
-        _logger.debug(f"Found {len(FoRUIDs)} distinct FrameOfReferenceUIDs among the dicoms: {FoRUIDs}.")
+    if infoByFileName is not None:
+        RNrow = infoByFileName[str(RNfileName)]
+        RSrow = infoByFileName[str(RSfileName)]
 
-    # check that the beam number referenced in every RD dicom is defined in the RN dicom
-    RDbeamNumbers = None
-    if RDfileNames:
-        RNbeamNumbers = [int(beamDataset.BeamNumber) for beamDataset in _getRNBeamSequence(RNfileName)]
+        # check UID matching between the dicoms
+        UIDRNtoRS = bool(RNrow["referencedSOPInstanceUIDs"]) and RNrow["referencedSOPInstanceUIDs"][0] == RSrow["SOPInstanceUID"]
+        UIDRStoCT = sorted(RSrow["referencedSOPInstanceUIDs"]) == sorted(infoByFileName[str(CTfileName)]["SOPInstanceUID"] for CTfileName in CTfileNames)
+        UIDRNtoRD = all(infoByFileName[str(RDfileName)]["referencedSOPInstanceUIDs"][:1] == (RNrow["SOPInstanceUID"],) for RDfileName in RDfileNames) if RDfileNames else None
 
-        RDbeamNumbers = True
-        for RDfileName in RDfileNames:
-            dicomTagsRD = dicom.dcmread(RDfileName, specific_tags=["ReferencedRTPlanSequence", "DoseSummationType"], stop_before_pixels=True)
-            try:
-                referencedBeamNumber = int(dicomTagsRD.ReferencedRTPlanSequence[0].ReferencedFractionGroupSequence[0].ReferencedBeamSequence[0].ReferencedBeamNumber)
-            except (AttributeError, IndexError):
-                _logger.warning(f"Cannot find the referenced beam number in the RD dicom {RDfileName} of DoseSummationType '{dicomTagsRD.get('DoseSummationType', 'unknown')}'. The RD dicom was skipped in the beam number check.")
-                continue
-            if referencedBeamNumber not in RNbeamNumbers:
-                _logger.debug(f"The beam number {referencedBeamNumber} referenced in the RD dicom {RDfileName} is not defined in the RN dicom {RNfileName}.")
-                RDbeamNumbers = False
+        # check that all the dicoms share the same frame of reference
+        FoRUIDs = {infoByFileName[str(fileName)]["FrameOfReferenceUID"] for fileName in [RNfileName, RSfileName] + CTfileNames + RDfileNames}
+        if None in FoRUIDs:
+            _logger.debug("The given dicoms information does not hold the FrameOfReferenceUID of all the dicoms. The 'UIDFoR' check was skipped.")
+            UIDFoR = None
+        else:
+            UIDFoR = len(FoRUIDs) == 1
+
+        # check that the beam number referenced in every RD dicom is defined in the RN dicom
+        RDbeamNumbers = None
+        if RDfileNames:
+            RNbeamNumbers = RNrow["beamNumbers"] or ()
+            RDbeamNumbers = True
+            for RDfileName in RDfileNames:
+                RDrow = infoByFileName[str(RDfileName)]
+                if RDrow["referencedBeamNumber"] is None:
+                    _logger.warning(f"Cannot find the referenced beam number in the RD dicom {RDfileName} of DoseSummationType '{RDrow['doseSummationType'] or 'unknown'}'. The RD dicom was skipped in the beam number check.")
+                    continue
+                if RDrow["referencedBeamNumber"] not in RNbeamNumbers:
+                    _logger.debug(f"The beam number {RDrow['referencedBeamNumber']} referenced in the RD dicom {RDfileName} is not defined in the RN dicom {RNfileName}.")
+                    RDbeamNumbers = False
+    else:
+        # check UID matching between the dicoms
+        UIDRNtoRS = dicom_uid.checkUID_RNtoRS(RNfileName, RSfileName)
+        UIDRStoCT = dicom_uid.checkUID_RStoCT(RSfileName, CTfileNames)
+        UIDRNtoRD = dicom_uid.checkUID_RNtoRD(RNfileName, RDfileNames) if RDfileNames else None
+
+        # check that all the dicoms share the same frame of reference
+        FoRUIDs = set(dicom_uid.getFrameOfReferenceUID([RNfileName, RSfileName] + CTfileNames + RDfileNames))
+        UIDFoR = len(FoRUIDs) == 1
+        if not UIDFoR:
+            _logger.debug(f"Found {len(FoRUIDs)} distinct FrameOfReferenceUIDs among the dicoms: {FoRUIDs}.")
+
+        # check that the beam number referenced in every RD dicom is defined in the RN dicom
+        RDbeamNumbers = None
+        if RDfileNames:
+            RNbeamNumbers = [int(beamDataset.BeamNumber) for beamDataset in _getRNBeamSequence(RNfileName)]
+
+            RDbeamNumbers = True
+            for RDfileName in RDfileNames:
+                dicomTagsRD = dicom.dcmread(RDfileName, specific_tags=["ReferencedRTPlanSequence", "DoseSummationType"], stop_before_pixels=True)
+                try:
+                    referencedBeamNumber = int(dicomTagsRD.ReferencedRTPlanSequence[0].ReferencedFractionGroupSequence[0].ReferencedBeamSequence[0].ReferencedBeamNumber)
+                except (AttributeError, IndexError):
+                    _logger.warning(f"Cannot find the referenced beam number in the RD dicom {RDfileName} of DoseSummationType '{dicomTagsRD.get('DoseSummationType', 'unknown')}'. The RD dicom was skipped in the beam number check.")
+                    continue
+                if referencedBeamNumber not in RNbeamNumbers:
+                    _logger.debug(f"The beam number {referencedBeamNumber} referenced in the RD dicom {RDfileName} is not defined in the RN dicom {RNfileName}.")
+                    RDbeamNumbers = False
 
     checkResults = DottedDict({"UIDRNtoRS": UIDRNtoRS, "UIDRStoCT": UIDRStoCT, "UIDRNtoRD": UIDRNtoRD, "UIDFoR": UIDFoR, "RDbeamNumbers": RDbeamNumbers})
 
@@ -1666,21 +1697,75 @@ def getRDFileNameForFieldNumber(fileNames: Iterable[PathLike], fieldNumber: int,
     return fileName
 
 
-def anonymizeDicoms(fileNames: Iterable[PathLike] | PathLike, removePrivateTags: bool = False, displayInfo: bool = False) -> None:
+# The tags blanked by anonymizeDicoms, in the order they are applied.
+_ANONYMIZED_TAGS = ("PatientName", "PatientBirthDate", "PatientBirthTime", "PatientSex", "ReferringPhysicianName",
+                    "ReviewerName", "ReviewDate", "ReviewTime", "OperatorsName", "PhysiciansOfRecord")
+
+
+def anonymizeDicoms(fileNames: Iterable[PathLike] | PathLike, *, destination: PathLike | Iterable[PathLike] | None = None,
+                    patientName: str | None = None, patientID: str | None = None, tags: dict | None = None,
+                    removePrivateTags: bool = False, displayInfo: bool = False) -> List[str]:
     """Anonymize dicom files.
 
-    The function anonymizes dicom files given as an iterable of file paths.
-    The function overwrites the original files.
+    The function anonymizes dicom files given as an iterable of file paths,
+    by blanking the tags holding the patient and the personnel identity:
+    'PatientName', 'PatientBirthDate', 'PatientBirthTime', 'PatientSex',
+    'ReferringPhysicianName', 'ReviewerName', 'ReviewDate', 'ReviewTime',
+    'OperatorsName' and 'PhysiciansOfRecord'. The original files are overwritten,
+    unless a `destination` is given, in which case each dicom is read once and
+    written anonymized to the destination, leaving the original files untouched.
+
+    The tags of the anonymized dicoms can be additionally set with `patientName`,
+    `patientID` and `tags`, which is useful for instance to replace the patient
+    identity with an anonymous identifier instead of blanking it. Note that the
+    SOPInstanceUID and all the other UIDs are not modified, therefore the dicoms
+    can still be matched to each other after the anonymization.
 
     Parameters
     ----------
     fileNames : string or array_like
         A path or an iterable (list, tuple, etc.) of paths to DICOM files.
+    destination : path or array_like, optional
+        A path to a folder where the anonymized dicoms should be written, keeping
+        their original file names, or an iterable of the destination paths, one
+        for each of `fileNames`. If None, then the original files are overwritten
+        in place. (def. None)
+    patientName : string, optional
+        The value to be set as the 'PatientName' tag, instead of blanking it. (def. None)
+    patientID : string, optional
+        The value to be set as the 'PatientID' tag. The tag is not modified by
+        the anonymization itself. (def. None)
+    tags : dict, optional
+        A dictionary of additional {tagKeyword: value} to be set in the anonymized
+        dicoms, applied after the anonymization, for instance to remove the
+        institution identity. (def. None)
     removePrivateTags : bool, optional
         Determine if the private tags should be removed. (def. False)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    list of strings
+        The paths of the written dicom files.
+
+    Raises
+    ------
+    ValueError
+        If the `destination` is an iterable of a different length than `fileNames`.
+
+    Examples
+    --------
+    Anonymize the dicoms in place, as in the previous versions of the function.
+
+    >>> ft.anonymizeDicoms(fileNames)
+
+    Copy and anonymize the dicoms in a single read/write pass, setting an
+    anonymous patient identity.
+
+    >>> ft.anonymizeDicoms(fileNames, destination=destinationFileNames, patientName='12345', patientID='12345')
     """
+    import os
     import pydicom as dicom
 
     # if fileName is a single string then make it a single element list
@@ -1689,33 +1774,47 @@ def anonymizeDicoms(fileNames: Iterable[PathLike] | PathLike, removePrivateTags:
     else:
         fileNames = list(fileNames)
 
-    for fileName in fileNames:
+    # resolve the destination of each dicom
+    if destination is None:
+        destinationFileNames = [str(fileName) for fileName in fileNames]
+    elif isinstance(destination, PathLike):
+        destinationFileNames = [os.path.join(str(destination), os.path.basename(str(fileName))) for fileName in fileNames]
+    else:
+        destinationFileNames = [str(destinationFileName) for destinationFileName in destination]
+        if len(destinationFileNames) != len(fileNames):
+            error = ValueError(f"The number of the destination file names ({len(destinationFileNames)}) is different than the number of the dicom files ({len(fileNames)}).")
+            _logger.error(error)
+            raise error
+
+    # make sure the destination folders exist
+    for destinationFileName in destinationFileNames:
+        destinationFolderName = os.path.dirname(destinationFileName)
+        if destinationFolderName:
+            os.makedirs(destinationFolderName, exist_ok=True)
+
+    for fileName, destinationFileName in zip(fileNames, destinationFileNames):
+        # the whole dicom is read, as the deferred reading of the large elements would
+        # re-read them from the original file at writing, which fails when the dicom is
+        # anonymized in place
         dicomTags = dicom.dcmread(fileName)
-        if "PatientName" in dicomTags:
-            dicomTags.PatientName = ""
-        if "PatientBirthDate" in dicomTags:
-            dicomTags.PatientBirthDate = ""
-        if "PatientBirthTime" in dicomTags:
-            dicomTags.PatientBirthTime = ""
-        if "PatientSex" in dicomTags:
-            dicomTags.PatientSex = ""
-        if "ReferringPhysicianName" in dicomTags:
-            dicomTags.ReferringPhysicianName = ""
-        if "ReviewerName" in dicomTags:
-            dicomTags.ReviewerName = ""
-        if "ReviewDate" in dicomTags:
-            dicomTags.ReviewDate = ""
-        if "ReviewTime" in dicomTags:
-            dicomTags.ReviewTime = ""
-        if "OperatorsName" in dicomTags:
-            dicomTags.OperatorsName = ""
-        if "PhysiciansOfRecord" in dicomTags:
-            dicomTags.PhysiciansOfRecord = ""
+
+        for tagName in _ANONYMIZED_TAGS:
+            if tagName in dicomTags:
+                setattr(dicomTags, tagName, "")
 
         if removePrivateTags:
             dicomTags.remove_private_tags()
 
-        dicom.dcmwrite(fileName, dicomTags, enforce_file_format=True)
+        if patientName is not None:
+            dicomTags.PatientName = patientName
+        if patientID is not None:
+            dicomTags.PatientID = patientID
+        for tagName, tagValue in (tags or {}).items():
+            setattr(dicomTags, tagName, tagValue)
+
+        dicom.dcmwrite(destinationFileName, dicomTags, enforce_file_format=True)
 
     if displayInfo:
         _logger.info(f"Anonymized {len(fileNames)} file" + ("s" if len(fileNames) > 1 else "") + ".")
+
+    return destinationFileNames

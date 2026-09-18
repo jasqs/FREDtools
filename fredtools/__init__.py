@@ -43,6 +43,8 @@ from .ImgManipulate.inmManipulate import (inmSumVec, inmSumImg)
 from . import Miscellaneous
 from .Miscellaneous.landauVavilovGauss import (pdfLandau, pdfLandauGauss, fitLandau, fitLandauGauss, pdfVavilov, fitVavilov)
 from .Miscellaneous.miscellaneous import (mergePDF, getHistogram, sigma2fwhm, fwhm2sigma, wrapAngle, roundToMultiple, getLineFromFile, getCPUNo, re_number)
+from .Miscellaneous.dicom_uid import (getSOPInstanceUID, getFrameOfReferenceUID, getRNReferencedStructureSetUID, getRSReferencedImageUIDs, getRDReferencedPlanUID,
+                                      checkUID_RNtoRS, checkUID_RStoCT, checkUID_RNtoRD, getDicomsInfo, sortDicomsFromInfo, matchDicomsByUID)
 
 
 from . import MonteCarlo
@@ -58,7 +60,7 @@ from .GammaIndex.gammaIndex import (calcGammaIndex, getGIstat, getGIcmap)
 
 from . import ProtonOptimisation
 
-_version = [0, 8, 25]
+_version = [0, 8, 26]
 __version__ = ".".join(map(str, _version))
 
 # configure logging if no root logger configured

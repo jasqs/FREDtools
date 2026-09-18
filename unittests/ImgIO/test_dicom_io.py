@@ -324,6 +324,116 @@ class test_anonymizeDicoms(unittest.TestCase):
             if "PhysiciansOfRecord" in dicomTags:
                 self.assertEqual(dicomTags.PhysiciansOfRecord, "")
 
+    def test_anonymizeDicoms_returns_written_file_names(self):
+        writtenFileNames = ft.anonymizeDicoms(self.dicomFiles.RDfileNames)
+        self.assertEqual(writtenFileNames, list(self.dicomFiles.RDfileNames))
+
+    def test_anonymizeDicoms_destination_folder(self):
+        destinationFolder = Path.joinpath(testPath, "anonymizeDestinationFolder")
+        writtenFileNames = ft.anonymizeDicoms(self.dicomFiles.RDfileNames, destination=destinationFolder)
+        try:
+            self.assertEqual(len(writtenFileNames), len(self.dicomFiles.RDfileNames))
+            for writtenFileName, sourceFileName in zip(writtenFileNames, self.dicomFiles.RDfileNames):
+                self.assertTrue(os.path.isfile(writtenFileName))
+                self.assertEqual(os.path.basename(writtenFileName), os.path.basename(sourceFileName))
+                self.assertEqual(dicom.dcmread(writtenFileName).PatientName, "")
+                # the source dicoms must not be touched
+                self.assertNotEqual(dicom.dcmread(sourceFileName).PatientName, "")
+        finally:
+            shutil.rmtree(destinationFolder, ignore_errors=True)
+
+    def test_anonymizeDicoms_destination_list(self):
+        destinationFolder = Path.joinpath(testPath, "anonymizeDestinationFolder")
+        destinationFileNames = [str(Path.joinpath(destinationFolder, f"RD.{idx}.dcm")) for idx in range(len(self.dicomFiles.RDfileNames))]
+        try:
+            writtenFileNames = ft.anonymizeDicoms(self.dicomFiles.RDfileNames, destination=destinationFileNames)
+            self.assertEqual(writtenFileNames, destinationFileNames)
+            for destinationFileName in destinationFileNames:
+                self.assertTrue(os.path.isfile(destinationFileName))
+        finally:
+            shutil.rmtree(destinationFolder, ignore_errors=True)
+
+    def test_anonymizeDicoms_destination_length_mismatch(self):
+        with self.assertRaises(ValueError):
+            ft.anonymizeDicoms(self.dicomFiles.RDfileNames, destination=["onlyOneDestination.dcm"])
+
+    def test_anonymizeDicoms_patientName_and_patientID(self):
+        ft.anonymizeDicoms(self.dicomFiles.RDfileNames, patientName="12345", patientID="12345")
+        for dicomFile in self.dicomFiles.RDfileNames:
+            dicomTags = dicom.dcmread(dicomFile)
+            self.assertEqual(dicomTags.PatientName, "12345")
+            self.assertEqual(dicomTags.PatientID, "12345")
+
+    def test_anonymizeDicoms_tags(self):
+        ft.anonymizeDicoms(self.dicomFiles.RDfileNames, tags={"InstitutionName": "anonymous"})
+        for dicomFile in self.dicomFiles.RDfileNames:
+            self.assertEqual(dicom.dcmread(dicomFile).InstitutionName, "anonymous")
+
+    def test_anonymizeDicoms_reads_and_writes_every_dicom_only_once(self):
+        from unittest import mock
+        destinationFolder = Path.joinpath(testPath, "anonymizeDestinationFolder")
+        try:
+            with mock.patch("pydicom.dcmread", wraps=dicom.dcmread) as dcmreadMock, \
+                 mock.patch("pydicom.dcmwrite", wraps=dicom.dcmwrite) as dcmwriteMock:
+                ft.anonymizeDicoms(self.dicomFiles.RDfileNames, destination=destinationFolder, patientID="12345")
+            self.assertEqual(dcmreadMock.call_count, len(self.dicomFiles.RDfileNames))
+            self.assertEqual(dcmwriteMock.call_count, len(self.dicomFiles.RDfileNames))
+        finally:
+            shutil.rmtree(destinationFolder, ignore_errors=True)
+
+
+class test_checkDicomsUIDwithIndex(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+        self.dicomsInfo = ft.getDicomsInfo(self.testDataFolder, recursive=True)
+
+    def test_checkDicomsUID_withIndex_equals_without(self):
+        checkResults = ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, self.dicomFiles.RDfileNames)
+        checkResultsIndexed = ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, self.dicomFiles.RDfileNames,
+                                                dicomsInfo=self.dicomsInfo)
+        self.assertEqual(dict(checkResultsIndexed), dict(checkResults))
+
+    def test_checkDicomsUID_withIndex_does_not_read_any_dicom(self):
+        from unittest import mock
+        with mock.patch("pydicom.dcmread", wraps=dicom.dcmread) as dcmreadMock:
+            ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, self.dicomFiles.RDfileNames,
+                              dicomsInfo=self.dicomsInfo)
+        self.assertEqual(dcmreadMock.call_count, 0)
+
+    def test_checkDicomsUID_withIndex_no_RD(self):
+        checkResults = ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, dicomsInfo=self.dicomsInfo)
+        self.assertIsNone(checkResults.UIDRNtoRD)
+        self.assertIsNone(checkResults.RDbeamNumbers)
+        self.assertTrue(checkResults.UIDRNtoRS)
+        self.assertTrue(checkResults.UIDRStoCT)
+        self.assertTrue(checkResults.UIDFoR)
+
+    def test_checkDicomsUID_withIndex_missing_file(self):
+        dicomsInfo = self.dicomsInfo[self.dicomsInfo.dicomType != "CT"]
+        with self.assertRaises(ValueError):
+            ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, dicomsInfo=dicomsInfo)
+
+    def test_checkDicomsUID_withIndex_without_FrameOfReferenceUID(self):
+        dicomsInfo = ft.getDicomsInfo(self.testDataFolder, recursive=True, readFrameOfReferenceUID=False)
+        checkResults = ft.checkDicomsUID(self.dicomFiles.RNfileNames, self.dicomFiles.RSfileNames, self.dicomFiles.CTfileNames, dicomsInfo=dicomsInfo)
+        self.assertIsNone(checkResults.UIDFoR)
+
+
+class test_isDicomTypeCheckers(unittest.TestCase):
+    def setUp(self):
+        self.testDataFolder = 'unittests/testData/TPSDicoms/TPSPlan'
+        self.dicomFiles = ft.sortDicoms(self.testDataFolder, recursive=True)
+
+    def test_isDicom_raiseError_reads_the_dicom_only_once(self):
+        """The failing type check must not read the dicom a second time to build the error message."""
+        from unittest import mock
+        from fredtools.ImgIO import dicom_io
+        with mock.patch("pydicom.dcmread", wraps=dicom.dcmread) as dcmreadMock:
+            with self.assertRaises(TypeError):
+                dicom_io._isDicomCT(self.dicomFiles.RSfileNames, raiseError=True)
+        self.assertEqual(dcmreadMock.call_count, 1)
+
 
 class test_getStructureContoursByName(unittest.TestCase):
     def setUp(self):

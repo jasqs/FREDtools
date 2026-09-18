@@ -22,6 +22,33 @@ General purpose
 
 .. autofunction:: fredtools.getCPUNo
 
+DICOM UIDs
+------------------------------------------------
+
+Functions for reading the UIDs identifying the dicoms and the references between them, and for checking that the dicoms describing a single patient treatment plan are consistent. When many dicoms are to be matched to each other, it is recommended to read them once with ``getDicomsInfo`` and to answer all the consecutive queries from the returned information, instead of calling the ``checkUID_*`` functions for every pair of dicoms.
+
+.. autofunction:: fredtools.getDicomsInfo
+
+.. autofunction:: fredtools.sortDicomsFromInfo
+
+.. autofunction:: fredtools.matchDicomsByUID
+
+.. autofunction:: fredtools.getSOPInstanceUID
+
+.. autofunction:: fredtools.getFrameOfReferenceUID
+
+.. autofunction:: fredtools.getRNReferencedStructureSetUID
+
+.. autofunction:: fredtools.getRSReferencedImageUIDs
+
+.. autofunction:: fredtools.getRDReferencedPlanUID
+
+.. autofunction:: fredtools.checkUID_RNtoRS
+
+.. autofunction:: fredtools.checkUID_RStoCT
+
+.. autofunction:: fredtools.checkUID_RNtoRD
+
 Landau, Vavilov and Gauss distributions
 ------------------------------------------------
 
