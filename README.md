@@ -1,6 +1,8 @@
 FRED tools repository
 ================================
 
+[![unittests](https://github.com/jasqs/FREDtools/actions/workflows/unittests.yml/badge.svg)](https://github.com/jasqs/FREDtools/actions/workflows/unittests.yml)
+
 FRED tools is a collection of python functions for image manipulation and analysis. The basic methods have been developed for analysis of the images produced by the Monte Carlo FRED (www.fred-mc.org) in MetaImage format (*.mha, *.mhd), but they can be applied for images in other formats, e.g. dicom.
 
 Basic Concept
