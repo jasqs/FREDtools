@@ -1,0 +1,12 @@
+# Packages needed to run the unit tests in unittests/:
+#
+#     pip install -r requirements/requirement_unittest.txt
+#     python -m unittest discover -s unittests -t .   (from the repository root)
+#
+# Used by the GitHub Actions workflow .github/workflows/unittests.yml.
+
+# everything needed to use FREDtools
+-r requirement_lib.txt
+
+# needed only by the tests
+pydvh  # unittests/ImgAnalyse/test_dvhAnalyse.py, reads the TPS DVH export

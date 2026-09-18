@@ -1,3 +1,35 @@
-fredtools==0.7.28
-lmfit==1.3.2
-numpy==2.2.3
+# Packages needed to use FREDtools (cloned from the repository):
+#
+#     pip install -r requirements/requirement_lib.txt
+#
+# The versions are not pinned on purpose, so that a new release of a dependency
+# breaking FREDtools is reported by the unittests workflow. Pin a version here if needed.
+
+# imported at module level by fredtools
+numpy
+scipy
+pandas
+matplotlib
+SimpleITK
+itk
+pydicom
+lmfit
+shapely
+pydantic
+dotted_dict
+typing_extensions ; python_version < '3.11'
+
+# imported inside the functions that need them
+opencv-python-headless  # ImgManipulate.mapStructToImg (only cv2.floodFill is used, no GUI)
+pymupdf                 # Miscellaneous.getPDFInfo
+PyYAML                  # MonteCarlo.beamModel
+ipython                 # _helper.checkJupyterMode, ImgAnalyse.imgDisplay
+ipywidgets              # ImgAnalyse.imgDisplay.showSlices
+
+# Not included, because only single functions need them. Install them separately
+# if those functions are used:
+#   cupy-cuda12x / cupy-cuda13x  GPU paths (ImgIO.inm_io, ImgManipulate.inmManipulate)
+#   uproot                       MonteCarlo.gateMC
+#   opengate                     MonteCarlo.opengateMC
+#   scikit-image                 ProtonOptimisation.preoptimizer
+#   landaupy, pyamtrack          Miscellaneous.landauVavilovGauss

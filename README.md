@@ -26,6 +26,12 @@ To update an existing clone:
 
   $ git pull
 
+The packages needed to use FRED tools are listed in ``requirements/requirement_lib.txt``:
+
+  $ pip install -r requirements/requirement_lib.txt
+
+A few functions need additional packages (e.g. GPU support, GATE or opengate Monte Carlo), which are listed at the end of that file and should be installed separately if those functions are used.
+
 
 Development
 ----------------------------
