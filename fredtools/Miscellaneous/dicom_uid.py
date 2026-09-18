@@ -611,6 +611,8 @@ def _getDicomsInfoFileNames(searchFolder: PathLike | Iterable[PathLike], recursi
     order they were found and are deliberately not sorted, so that the order
     of e.g. sortDicoms results is preserved.
     """
+    import glob
+    import os
     from pathlib import Path
 
     searchFolders = [searchFolder] if isinstance(searchFolder, PathLike) else list(searchFolder)
@@ -618,10 +620,21 @@ def _getDicomsInfoFileNames(searchFolder: PathLike | Iterable[PathLike], recursi
     fileNames = []
     for searchFolderItem in searchFolders:
         searchFolderPath = Path(searchFolderItem)
-        if searchFolderPath.is_dir():
-            fileNames += [str(fileName) for fileName in (searchFolderPath.rglob(pattern) if recursive else searchFolderPath.glob(pattern))]
-        else:
+        if not searchFolderPath.is_dir():
             fileNames.append(str(searchFolderPath))
+            continue
+
+        try:
+            fileNames += [str(fileName) for fileName in (searchFolderPath.rglob(pattern) if recursive else searchFolderPath.glob(pattern))]
+        except OSError as error:
+            # A subfolder which cannot be read, for instance because of a damaged sector on a
+            # network share, terminates the pathlib generator: it cannot be resumed and everything
+            # it had already found is lost, so catching the error alone would silently return an
+            # incomplete result. The folder is therefore walked again with the glob module, which
+            # skips such subfolders. Both walks return the file names in the same order.
+            _logger.warning(f"The folder {searchFolderPath} could not be read completely ({error}). The unreadable subfolders were skipped.")
+            globPattern = os.path.join(str(searchFolderPath), "**", pattern) if recursive else os.path.join(str(searchFolderPath), pattern)
+            fileNames += glob.glob(globPattern, recursive=recursive)
 
     return fileNames
 
