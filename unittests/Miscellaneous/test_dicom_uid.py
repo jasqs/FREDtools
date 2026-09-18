@@ -236,10 +236,14 @@ class test_getDicomsInfo(unittest.TestCase):
         self.assertEqual(dcmreadMock.call_count, 0)
 
     def test_getDicomsInfo_unreadable_file(self):
-        dicomsInfo = ft.getDicomsInfo(self.testDataFolder, recursive=True, pattern='*.txt')
-        self.assertGreater(len(dicomsInfo), 0)
-        self.assertTrue((dicomsInfo.dicomType == 'Unknown').all())
-        self.assertTrue(dicomsInfo.error.notna().all())
+        """A file which is not a readable dicom must be reported, not raised for."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as unreadableFolder:
+            Path(unreadableFolder).joinpath('notADicom.dcm').write_text('this is not a dicom')
+            dicomsInfo = ft.getDicomsInfo(unreadableFolder, recursive=True)
+            self.assertEqual(len(dicomsInfo), 1)
+            self.assertEqual(dicomsInfo.dicomType.iloc[0], 'Unknown')
+            self.assertIsNotNone(dicomsInfo.error.iloc[0])
 
     def test_getDicomsInfo_no_dicoms(self):
         dicomsInfo = ft.getDicomsInfo('unittests/testData/TPSDicoms', recursive=False)

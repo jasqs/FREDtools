@@ -588,6 +588,9 @@ _DICOM_TYPE_REFERENCE_TAGS = {"RS": ["ReferencedFrameOfReferenceSequence", "Stru
                               "RN": ["ReferencedStructureSetSequence", "IonBeamSequence", "BeamSequence", "SeriesInstanceUID", "StudyInstanceUID"],
                               "RD": ["ReferencedRTPlanSequence", "DoseSummationType", "SeriesInstanceUID", "StudyInstanceUID"]}
 
+# the dicoms are always saved with the '.dcm' extension
+_DICOM_FILE_PATTERN = "*.dcm"
+
 _DICOMS_INFO_COLUMNS = ("fileName", "folderName", "SOPClassUID", "dicomTypeName", "dicomType", "SOPInstanceUID",
                         "FrameOfReferenceUID", "referencedSOPInstanceUIDs", "referencedSeriesNo", "beamNumbers",
                         "referencedBeamNumber", "doseSummationType", "structureSetDate", "structureSetTime",
@@ -603,10 +606,10 @@ def _getDicomTypeFromTypeName(dicomTypeName: str) -> str:
     return "Unknown"
 
 
-def _getDicomsInfoFileNames(searchFolder: PathLike | Iterable[PathLike], recursive: bool, pattern: str) -> List[str]:
+def _getDicomsInfoFileNames(searchFolder: PathLike | Iterable[PathLike], recursive: bool) -> List[str]:
     r"""Resolve the dicom file names to be indexed.
 
-    A folder is searched with pathlib for the given pattern, a file is taken as
+    A folder is searched with pathlib for the '*.dcm' files, a file is taken as
     it is, and an iterable may mix both. The file names are returned in the
     order they were found and are deliberately not sorted, so that the order
     of e.g. sortDicoms results is preserved.
@@ -625,7 +628,7 @@ def _getDicomsInfoFileNames(searchFolder: PathLike | Iterable[PathLike], recursi
             continue
 
         try:
-            fileNames += [str(fileName) for fileName in (searchFolderPath.rglob(pattern) if recursive else searchFolderPath.glob(pattern))]
+            fileNames += [str(fileName) for fileName in (searchFolderPath.rglob(_DICOM_FILE_PATTERN) if recursive else searchFolderPath.glob(_DICOM_FILE_PATTERN))]
         except OSError as error:
             # A subfolder which cannot be read, for instance because of a damaged sector on a
             # network share, terminates the pathlib generator: it cannot be resumed and everything
@@ -633,7 +636,7 @@ def _getDicomsInfoFileNames(searchFolder: PathLike | Iterable[PathLike], recursi
             # incomplete result. The folder is therefore walked again with the glob module, which
             # skips such subfolders. Both walks return the file names in the same order.
             _logger.warning(f"The folder {searchFolderPath} could not be read completely ({error}). The unreadable subfolders were skipped.")
-            globPattern = os.path.join(str(searchFolderPath), "**", pattern) if recursive else os.path.join(str(searchFolderPath), pattern)
+            globPattern = os.path.join(str(searchFolderPath), "**", _DICOM_FILE_PATTERN) if recursive else os.path.join(str(searchFolderPath), _DICOM_FILE_PATTERN)
             fileNames += glob.glob(globPattern, recursive=recursive)
 
     return fileNames
@@ -718,7 +721,7 @@ def _getDicomsInfoReferences(fileName: str, dicomType: str, infoRow: dict) -> No
             infoRow["doseSummationType"] = str(dicomTags.DoseSummationType) if "DoseSummationType" in dicomTags else None
 
 
-def getDicomsInfo(searchFolder: PathLike | Iterable[PathLike], recursive: bool = True, pattern: str = "*.dcm",
+def getDicomsInfo(searchFolder: PathLike | Iterable[PathLike], recursive: bool = True,
                   readReferences: bool = True, readFrameOfReferenceUID: bool = True, displayInfo: bool = False) -> DataFrame:
     r"""Read the identity and the references of all the dicoms in a folder in a single pass.
 
@@ -749,8 +752,6 @@ def getDicomsInfo(searchFolder: PathLike | Iterable[PathLike], recursive: bool =
         file, or an iterable mixing both.
     recursive : bool, optional
         Determine if the folders should be searched recursively. (def. True)
-    pattern : str, optional
-        The pattern of the dicom file names to be searched for. (def. '*.dcm')
     readReferences : bool, optional
         Determine if the references of the RS/RN/RD dicoms should be read in
         the second pass. Set to False to only classify the dicoms. (def. True)
@@ -792,7 +793,7 @@ def getDicomsInfo(searchFolder: PathLike | Iterable[PathLike], recursive: bool =
     import os
     import pandas as pd
 
-    fileNames = _getDicomsInfoFileNames(searchFolder, recursive=recursive, pattern=pattern)
+    fileNames = _getDicomsInfoFileNames(searchFolder, recursive=recursive)
 
     infoRows = []
     for fileName in fileNames:

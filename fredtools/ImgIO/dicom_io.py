@@ -210,7 +210,7 @@ def sortDicoms(searchFolder: PathLike, recursive: bool = False, displayInfo: boo
 
     _logger.debug(f"Searching for dicoms in folder: {searchFolder}" + (" recursively." if recursive else "."))
 
-    dicomsInfo = getDicomsInfo(searchFolder, recursive=recursive, pattern="*.dcm", readReferences=False, readFrameOfReferenceUID=False)
+    dicomsInfo = getDicomsInfo(searchFolder, recursive=recursive, readReferences=False, readFrameOfReferenceUID=False)
 
     if len(dicomsInfo) == 0:
         _logger.warning(f"No dicoms found in the folder: {searchFolder}")
