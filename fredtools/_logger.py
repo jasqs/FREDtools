@@ -113,8 +113,8 @@ def getLogger(name: str | None = None) -> logging.Logger:
 
     The function returns a logger with a NullHandler attached. The NullHandler is attached to the logger
     to suppress any logging messages if no handler is attached to the logger.
-    Note that a new NullHandler instance is appended to the logger on every call,
-    so repeated calls with the same name accumulate NullHandler instances.
+    The NullHandler is attached only if the logger does not hold one yet, therefore repeated calls
+    with the same name, for instance in a loop or in a long living worker process, are safe.
 
     Parameters
     ----------
@@ -131,7 +131,11 @@ def getLogger(name: str | None = None) -> logging.Logger:
         name = currentFuncName(1)
 
     logger = logging.getLogger(name)
-    logger.addHandler(logging.NullHandler())
+
+    # attach the NullHandler only once, otherwise repeated calls for the same name
+    # (e.g. in a loop or in a long living worker process) accumulate the handlers
+    if not any(isinstance(handler, logging.NullHandler) for handler in logger.handlers):
+        logger.addHandler(logging.NullHandler())
 
     return logger
 
