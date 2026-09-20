@@ -7,6 +7,8 @@ Using FRED tools, please refer to:
 
 *Gajewski, J., Schiavi, A., Krah, N., Vilches-freixas, G., Rucinski, A., Patera, V., Rinaldi, I. Implementation of a Compact Spot-Scanning Proton Therapy System in a GPU Monte Carlo Code to Support Clinical Routine. Front. Phys. 8, 1–14 (2020)* https://doi.org/10.3389/fphy.2020.578605
 
+*Gajewski, J., Borys, D., De Gregorio, A., Kopeć, R., Krah, N., Krzempek, D., Patera, V., Rinaldi, I., Rydygier, M., Sarrut, D., Schiavi, A., Skóra, T., Stasica-Dudek, P., Rucinski, A. LET spectra scoring for applications in proton radiotherapy. Computers in Biology and Medicine (2025), 196*, 110802. https://doi.org/10.1016/j.compbiomed.2025.110802
+
 *Borys, D., Baran, J., Brzeziński, K., Gajewski, J., Chug, N., Coussat, A., Czerwiński, E., Dadgar, M., Dulski, K., Eliyan, K. V., Gajos, A., Kacprzak, K., Kapłon, Ł., Klimaszewski, K., Konieczka, P., Kopeć, R., Korcyl, G., Kozik, T., Krzemień, W., … Rucinski, A. ProTheRaMon — a GATE simulation framework for proton therapy range monitoring using PET imaging. Physics in Medicine and Biology (2022), 67(22)*. https://doi.org/10.1088/1361-6560/ac944c
 
 *Brzezinski, K. W., Baran, J., Borys, D., Gajewski, J., Chug, N., Coussat, A., Czerwiński, E., Dadgar, M., Dulski, K., Eliyan, K. V., Gajos, A., Kacprzak, K., Kapłon, Ł., Klimaszewski, K., Konieczka, P., Kopec, R., Korcyl, G., Kozik, T., Krzemień, W., … Rucinski, A. Detection of range shifts in proton beam therapy using the J-PET scanner: a patient simulation study. Physics in Medicine and Biology (2023), 68(14)*, 145016. https://doi.org/10.1088/1361-6560/ACDD4C
@@ -18,7 +20,5 @@ Using FRED tools, please refer to:
 *Wochnik, A., Borys, D., Foltyńska, G., Gajewski, J., Garbacz, M., Góra, E., Komenda, W., Krzempek, D., Krzempek, K., Lipa, M., Lomax, A., Skóra, T., Zhang, Y., Kopeć, R., Ruciński, A. Fast Monte Carlo log-based framework for robust 4D dose evaluation in proton therapy. Physics in Medicine and Biology (2025), 70(14)*, 145011. https://doi.org/10.1088/1361-6560/adeb40
 
 *Borys, D., Gajewski, J., Becher, T., Censor, Y., Kopeć, R., Rydygier, M., Schiavi, A., Skóra, T., Spaleniak, A., Wahl, N., Wochnik, A., Ruciński, A. GPU-accelerated FREDopt package for simultaneous dose and LETd proton radiotherapy plan optimization via superiorization methods. Physics in Medicine and Biology (2025), 70(15)*, 155011. https://doi.org/10.1088/1361-6560/ade841
-
-*Gajewski, J., Borys, D., De Gregorio, A., Kopeć, R., Krah, N., Krzempek, D., Patera, V., Rinaldi, I., Rydygier, M., Sarrut, D., Schiavi, A., Skóra, T., Stasica-Dudek, P., Rucinski, A. LET spectra scoring for applications in proton radiotherapy. Computers in Biology and Medicine (2025), 196*, 110802. https://doi.org/10.1016/j.compbiomed.2025.110802
 
 *Komenda, W., Mojżeszek, N., Bałamut, M., Gajewski, J., Jabłoński, H., Kabat, D., Kopeć, R., Krzempek, D., Rogalski, P., Rydygier, M., Spaleniak, A., Stasica-Dudek, P., Ruciński, A. Supporting patient-specific quality assurance with fast Monte Carlo at CCB proton therapy center. Physica Medica (2025), 138*, 105085. https://doi.org/10.1016/j.ejmp.2025.105085
