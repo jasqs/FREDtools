@@ -9,23 +9,20 @@ on:
       - "requirements/**"
       - ".github/workflows/documentation.yml"
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Only list what would be uploaded, without changing the server"
-        type: boolean
-        default: true
 
-# an upload must never be cancelled in the middle, because a partially
-# mirrored site is broken, so a new run waits for the running one
-concurrency:
-  group: documentation
-  cancel-in-progress: false
-
+# the token of the deploy job is allowed to publish the pages, nothing else
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+# a deployment must never be cancelled in the middle, so a new run waits
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  documentation:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -56,7 +53,7 @@ jobs:
       - name: Build the documentation
         env:
           MPLBACKEND: Agg
-        # the doctrees are written outside the html folder, so that they are not uploaded
+        # the doctrees are written outside the html folder, so that they are not published
         run: sphinx-build -b html -d "${RUNNER_TEMP}/doctrees" docs/source docs/html
 
       - name: Check that the documentation was built
@@ -64,88 +61,26 @@ jobs:
           set -euo pipefail
           test -f docs/html/index.html
           test -d docs/html/_static
+          # the file is created by the sphinx.ext.githubpages extension and tells
+          # GitHub not to hide the folders starting with an underscore
+          test -f docs/html/.nojekyll
           echo "built $(find docs/html -type f | wc -l) files, $(du -sh docs/html | cut -f1)"
 
-      - name: Check that the server credentials are configured
-        env:
-          SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SFTP_USER: ${{ secrets.SFTP_USER }}
-          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
-          SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
-          SFTP_KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
-          # the server listens on a non-standard port, 22 is only a fallback
-          SFTP_PORT: ${{ secrets.SFTP_PORT || '22' }}
-        # an unset secret is an empty string, not an error, so it is checked here
-        # rather than letting lftp mirror into the wrong place
-        run: |
-          set -euo pipefail
-          missing=""
-          for name in SFTP_HOST SFTP_USER SFTP_PASSWORD SFTP_REMOTE_DIR SFTP_KNOWN_HOSTS; do
-            if [ -z "${!name:-}" ]; then missing="${missing} ${name}"; fi
-          done
-          if [ -n "${missing}" ]; then
-            echo "::error::missing repository secret(s):${missing}"
-            exit 1
-          fi
-          # mirroring with --delete into the login directory or the root would
-          # remove everything there, so those are refused
-          case "${SFTP_REMOTE_DIR}" in
-            ""|"/"|"."|"~"|"./"|"~/") echo "::error::SFTP_REMOTE_DIR must be a subfolder, got '${SFTP_REMOTE_DIR}'"; exit 1 ;;
-          esac
-          case "${SFTP_PORT}" in
-            ''|*[!0-9]*) echo "::error::SFTP_PORT must be a number, got '${SFTP_PORT}'"; exit 1 ;;
-          esac
-          echo "the documentation will be mirrored to the folder set in SFTP_REMOTE_DIR, port ${SFTP_PORT}"
+      - name: Upload the documentation as a pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/html
 
-      - name: Install the SFTP tools
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends lftp sshpass
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
-      - name: Upload the documentation to the web server
-        env:
-          SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SFTP_USER: ${{ secrets.SFTP_USER }}
-          SSHPASS: ${{ secrets.SFTP_PASSWORD }}
-          SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
-          SFTP_KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
-          SFTP_PORT: ${{ secrets.SFTP_PORT || '22' }}
-          # empty for a push, so that only a manually started run can be a dry run
-          DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
-        run: |
-          set -euo pipefail
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-          # the public key of the server, so that the password is never sent to an impostor
-          printf '%s\n' "${SFTP_KNOWN_HOSTS}" > "${RUNNER_TEMP}/known_hosts"
-
-          # sshpass reads the password from the SSHPASS variable, so it appears
-          # neither in the command line nor in the log; only the password
-          # authentication is attempted and only once, so a wrong password fails
-          # immediately instead of hanging on a second prompt.
-          # the ",unused" password given to lftp below is a placeholder: for sftp
-          # the authentication is done by ssh, but without it lftp tries to ask
-          # for a password on a terminal that does not exist on the runner and
-          # falls back to an anonymous login
-          SSH_CMD="sshpass -e ssh -a -x"
-          SSH_CMD="${SSH_CMD} -o StrictHostKeyChecking=yes"
-          SSH_CMD="${SSH_CMD} -o UserKnownHostsFile=${RUNNER_TEMP}/known_hosts"
-          SSH_CMD="${SSH_CMD} -o PubkeyAuthentication=no"
-          SSH_CMD="${SSH_CMD} -o PreferredAuthentications=password"
-          SSH_CMD="${SSH_CMD} -o NumberOfPasswordPrompts=1"
-          # the port is given to ssh as well as in the url below, because lftp
-          # passes it to the connect program only in some versions
-          SSH_CMD="${SSH_CMD} -p ${SFTP_PORT}"
-
-          if [ -n "${DRY_RUN}" ]; then
-            echo "dry run: nothing on the server will be changed"
-          fi
-
-          lftp -c "
-            set cmd:fail-exit yes;
-            set net:max-retries 2;
-            set net:timeout 30;
-            set net:reconnect-interval-base 5;
-            set sftp:connect-program '${SSH_CMD}';
-            open -u '${SFTP_USER},unused' sftp://${SFTP_HOST}:${SFTP_PORT};
-            mirror --reverse --delete --verbose --parallel=4 ${DRY_RUN} docs/html '${SFTP_REMOTE_DIR}';
-          "
+    steps:
+      - name: Publish to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

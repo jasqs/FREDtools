@@ -95,6 +95,8 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'
+# address the documentation is published at, used for the canonical links
+html_baseurl = 'https://jasqs.github.io/FREDtools/'
 html_static_path = ['_static']
 html_logo = os.path.join(html_static_path[0], 'FREDtools_logo.png')
 html_theme_options = {

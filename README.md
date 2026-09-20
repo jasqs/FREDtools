@@ -13,7 +13,7 @@ Most of the functions have a bool argument ``displayInfo`` (default ``displayInf
 
 Documentation and tutorial
 ----------------------------
-The documentation of the functions implemented in FRED tools is available at [fredtools.ifj.edu.pl](https://www.fredtools.ifj.edu.pl) or on the [GitHub repository](https://github.com/jasqs/FREDtools).
+The documentation of the functions implemented in FRED tools is available at [jasqs.github.io/FREDtools](https://jasqs.github.io/FREDtools/), at [fredtools.ifj.edu.pl](https://fredtools.ifj.edu.pl) which forwards there, or on the [GitHub repository](https://github.com/jasqs/FREDtools).
 
 A simple [tutorial](https://github.com/jasqs/FREDtools/blob/main/examples/FREDtools%20Tutorial.ipynb) has been prepared to help with starting using FRED tools.
 
