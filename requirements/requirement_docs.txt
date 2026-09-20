@@ -1,0 +1,15 @@
+# Packages needed to build the documentation in docs/:
+#
+#     pip install -r requirements/requirement_docs.txt
+#     sphinx-build -b html docs/source docs/html
+#
+# Used by the GitHub Actions workflow .github/workflows/documentation.yml.
+
+# everything needed to use FREDtools, because docs/source/conf.py imports fredtools
+# for the version number and autodoc imports every module
+-r requirement_lib.txt
+
+# needed only to build the documentation
+sphinx              # docs/source/conf.py requires at least 4.0
+sphinx-rtd-theme    # html_theme
+sphinx-copybutton   # extension
