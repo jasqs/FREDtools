@@ -121,7 +121,11 @@ jobs:
           # sshpass reads the password from the SSHPASS variable, so it appears
           # neither in the command line nor in the log; only the password
           # authentication is attempted and only once, so a wrong password fails
-          # immediately instead of hanging on a second prompt
+          # immediately instead of hanging on a second prompt.
+          # the ",unused" password given to lftp below is a placeholder: for sftp
+          # the authentication is done by ssh, but without it lftp tries to ask
+          # for a password on a terminal that does not exist on the runner and
+          # falls back to an anonymous login
           SSH_CMD="sshpass -e ssh -a -x"
           SSH_CMD="${SSH_CMD} -o StrictHostKeyChecking=yes"
           SSH_CMD="${SSH_CMD} -o UserKnownHostsFile=${RUNNER_TEMP}/known_hosts"
@@ -140,7 +144,8 @@ jobs:
             set cmd:fail-exit yes;
             set net:max-retries 2;
             set net:timeout 30;
+            set net:reconnect-interval-base 5;
             set sftp:connect-program '${SSH_CMD}';
-            open -u '${SFTP_USER}' sftp://${SFTP_HOST}:${SFTP_PORT};
+            open -u '${SFTP_USER},unused' sftp://${SFTP_HOST}:${SFTP_PORT};
             mirror --reverse --delete --verbose --parallel=4 ${DRY_RUN} docs/html '${SFTP_REMOTE_DIR}';
           "
