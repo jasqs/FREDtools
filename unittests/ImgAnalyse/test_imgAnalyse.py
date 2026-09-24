@@ -644,6 +644,71 @@ class test_getIntegral(unittest.TestCase):
             ft.getIntegral(ft.arr(self.img3D))  # type: ignore
 
 
+class test_getStructVolume(unittest.TestCase):
+    def setUp(self):
+        # voxel volume 1.0 * 2.0 * 0.5 = 1 mm3; the box edges fall half-way between the voxel centres,
+        # so the box covers exactly 10 x 4 x 8 = 320 voxels whatever the boundary rule
+        self.img3D = ft.createImg([20, 20, 20], spacing=[1.0, 2.0, 0.5], origin=[0.0, 0.0, 0.0])
+        self.maskBinary = ft.createBoxMask(self.img3D, point=[10.5, 21.0, 5.25], size=[10.0, 8.0, 4.0])
+        self.maskFloating = sitk.Cast(self.maskBinary, sitk.sitkFloat32) * 0.5
+        self.maskEmpty = sitk.Cast(self.img3D, sitk.sitkUInt8)
+        self.maskBrain = ft.readMHD("unittests/testData/INMImages/roiBrain.mhd")  # UInt8, 471295 voxels of 1.5 mm
+        self.imgCTlike = sitk.Cast(ft.createImg([10, 10, 10]) - 1000, sitk.sitkInt16)
+        self.imgDoseLike = ft.createImg([10, 10, 10]) + 2.0
+        self.img3D_vector = ft.createImg([4, 4, 4], components=3, spacing=[1.0, 1.0, 1.0])
+        self.imgCT = ft.readMHD("unittests/testData/MHDImages/img3D.mhd")
+        self.RSfileName = ft.sortDicoms("unittests/testData/TPSDicoms/TPSPlan/", recursive=True).RSfileNames
+
+    def test_getStructVolume_binary_mask(self):
+        self.assertEqual(ft.getStatistics(self.maskBinary).GetSum(), 320)
+        volume = ft.getStructVolume(self.maskBinary, displayInfo=True)
+        self.assertIsInstance(volume, float)
+        self.assertAlmostEqual(volume, 0.32)
+
+    def test_getStructVolume_floating_mask(self):
+        self.assertAlmostEqual(ft.getStructVolume(self.maskFloating), 0.16)
+
+    def test_getStructVolume_empty_mask(self):
+        self.assertEqual(ft.getStructVolume(self.maskEmpty), 0.0)
+
+    def test_getStructVolume_real_mask(self):
+        self.assertEqual(ft.getStatistics(self.maskBrain).GetSum(), 471295)
+        self.assertEqual(self.maskBrain.GetSpacing(), (1.5, 1.5, 1.5))
+        self.assertAlmostEqual(ft.getStructVolume(self.maskBrain), 471295 * 1.5**3 / 1e3, places=6)
+
+    def test_getStructVolume_mapped_struct(self):
+        imgMask = ft.mapStructToImg(self.imgCT, self.RSfileName, "testStuct_SphHoleDet")
+        # the same structure is asserted to 130987 mm3 (places=-1) in test_imgManipulate.test_mapStructToImg
+        self.assertAlmostEqual(ft.getStructVolume(imgMask), 130.987, places=2)
+
+    def test_getStructVolume_displayInfo(self):
+        # a mask without the ROIName metadata is reported without a structure name
+        self.assertNotIn("ROIName", self.maskBinary.GetMetaDataKeys())
+        with self.assertLogs(ft.ImgAnalyse.imgAnalyse._logger, level="INFO") as logs:
+            ft.getStructVolume(self.maskBinary, displayInfo=True)
+        self.assertIn("Structure volume: 0.320 cm", logs.output[-1])
+
+    def test_getStructVolume_displayInfo_ROIName(self):
+        # a mask produced by mapStructToImg carries the structure name in the metadata
+        imgMask = ft.mapStructToImg(self.imgCT, self.RSfileName, "testStuct_SphHoleDet")
+        self.assertEqual(imgMask.GetMetaData("ROIName"), "testStuct_SphHoleDet")
+        with self.assertLogs(ft.ImgAnalyse.imgAnalyse._logger, level="INFO") as logs:
+            ft.getStructVolume(imgMask, displayInfo=True)
+        self.assertIn("Volume of the structure 'testStuct_SphHoleDet': 130.9", logs.output[-1])
+
+    def test_getStructVolume_not_a_mask(self):
+        with self.assertRaises(TypeError):
+            ft.getStructVolume(self.imgCTlike)
+        with self.assertRaises(TypeError):
+            ft.getStructVolume(self.imgDoseLike)
+        with self.assertRaises(TypeError):
+            ft.getStructVolume(ft.arr(self.maskBinary))  # type: ignore
+
+    def test_getStructVolume_vector_image(self):
+        with self.assertRaises(TypeError):
+            ft.getStructVolume(self.img3D_vector)
+
+
 class test_compareImgFoR(unittest.TestCase):
     def setUp(self):
         self.img3D = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])

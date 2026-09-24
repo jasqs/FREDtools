@@ -32,6 +32,8 @@ Image analysis
 
 .. autofunction:: fredtools.getIntegral
 
+.. autofunction:: fredtools.getStructVolume
+
 .. autofunction:: fredtools.compareImg
 
 .. autofunction:: fredtools.compareImgFoR

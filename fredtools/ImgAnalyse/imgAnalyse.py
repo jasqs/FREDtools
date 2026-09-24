@@ -1039,6 +1039,61 @@ def getIntegral(img: SITKImage, displayInfo: bool = False) -> Numeric:
     return float(integral)
 
 
+def getStructVolume(imgMask: SITKImage, displayInfo: bool = False) -> float:
+    """Get volume of a structure mask
+
+    The function calculates the volume of a structure described by a binary
+    or a floating mask defined as a SimpleITK image object. The volume is
+    the integral of the mask (see `fredtools.getIntegral`), i.e. the sum of
+    the voxel values multiplied by the voxel volume, where the image spacing
+    is assumed to be in mm, and it is expressed in cm³. For a floating mask,
+    the voxel values describe the fractional occupancy of the voxels by the
+    structure, hence the partial volumes of the voxels at the structure border
+    are taken into account. If the mask holds the 'ROIName' metadata (as the
+    masks produced by `fredtools.mapStructToImg` do), the structure name is
+    included in the displayed summary.
+
+    Parameters
+    ----------
+    imgMask : SimpleITK Image
+        An object of a SimpleITK image describing a binary or a floating mask.
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    float
+        A float value with the volume of the structure in cm³.
+
+    Raises
+    ------
+    TypeError
+        If `imgMask` is not an instance of a SimpleITK image describing
+        a binary or a floating mask.
+
+    See Also
+    --------
+        getIntegral : get the integral of an image.
+        mapStructToImg : map a structure from an RS dicom to an image, producing a mask.
+        getDVHMask : calculate the DVH of a mask, including its volume.
+    """
+    import fredtools as ft
+
+    ft._imgTypeChecker.isSITK_mask(imgMask, raiseError=True)
+
+    # the integral of a mask is the sum of the voxel values times the voxel volume in mm³
+    volume = ft.getIntegral(imgMask) / 1e3
+
+    if displayInfo:
+        # masks produced by mapStructToImg carry the structure name in the metadata
+        if "ROIName" in imgMask.GetMetaDataKeys():
+            _logger.info(f"Volume of the structure '{imgMask.GetMetaData('ROIName')}': {volume:.3f} cm³")
+        else:
+            _logger.info(f"Structure volume: {volume:.3f} cm³")
+
+    return float(volume)
+
+
 def compareImg(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInfo: bool = False) -> bool:
     """Compare two images pixel by pixel.
 

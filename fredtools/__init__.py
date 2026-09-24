@@ -19,7 +19,7 @@ from . import _logger
 from . import ImgAnalyse
 from .ImgAnalyse import _imgTypeChecker
 from .ImgAnalyse.dvhAnalyse import (getDVHMask, getDVHStruct)
-from .ImgAnalyse.imgAnalyse import (getExtent, getSize, getImageCenter, getMassCenter, getMaxPosition, getMinPosition, getVoxelCentres, getVoxelEdges, getVoxelPhysicalPoints, getExtMpl, pos, arr, vec, isPointInside, getStatistics, getIntegral, compareImg, compareImgFoR)
+from .ImgAnalyse.imgAnalyse import (getExtent, getSize, getImageCenter, getMassCenter, getMaxPosition, getMinPosition, getVoxelCentres, getVoxelEdges, getVoxelPhysicalPoints, getExtMpl, pos, arr, vec, isPointInside, getStatistics, getIntegral, getStructVolume, compareImg, compareImgFoR)
 from .ImgAnalyse.imgDisplay import (showSlice, showSlices)
 from .ImgAnalyse.imgInfo import (displayImageInfo)
 from .ImgAnalyse.imgTransformCoordinates import (transformIndexToPhysicalPoint, transformContinuousIndexToPhysicalPoint, transformPhysicalPointToIndex, transformPhysicalPointToContinuousIndex)
