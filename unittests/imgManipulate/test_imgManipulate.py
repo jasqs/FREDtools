@@ -31,6 +31,44 @@ class test_mapStructToImg(unittest.TestCase):
         with self.assertRaises(ValueError):
             ft.mapStructToImg(self.img, self.RSfileName, "testStuct_SphHoleDet", binaryMask=True, areaFraction=1.1, displayInfo=True)
 
+    def test_mapStructToImg_singleSlice(self):
+        """A structure contoured at a single depth is mapped as one image slice thick instead of raising."""
+        import os
+        import shutil
+        import tempfile
+        import pydicom as dicom
+        import shapely as sph
+
+        # build an RS in which 'PTV_sphere' keeps only its middle contour
+        tempDir = tempfile.mkdtemp(prefix="test_mapStructToImg_singleSlice_", dir="unittests/imgManipulate")
+        try:
+            dicomTags = dicom.dcmread(self.RSfileName)
+            ROINumber = next(int(ROI.ROINumber) for ROI in dicomTags.StructureSetROISequence if ROI.ROIName == "PTV_sphere")
+            ROIContour = next(ROIContour for ROIContour in dicomTags.ROIContourSequence if int(ROIContour.ReferencedROINumber) == ROINumber)
+            contour = ROIContour.ContourSequence[len(ROIContour.ContourSequence) // 2]
+            ROIContour.ContourSequence = [contour]
+            RSfileName = os.path.join(tempDir, "RS.singleSlice.dcm")
+            dicomTags.save_as(RSfileName)
+
+            contourPoints = np.array(contour.ContourData, dtype=float).reshape(-1, 3)
+            contourArea = sph.Polygon(contourPoints[:, :2]).area
+            contourDepth = contourPoints[0, 2]
+
+            imgROI = ft.mapStructToImg(self.img, RSfileName, "PTV_sphere", displayInfo=True)
+            self.assertEqual(imgROI.GetSize(), self.img.GetSize())
+            # the mask is one image slice thick, spread over at most two slices by the resampling
+            nonZeroSlices = np.unique(np.nonzero(ft.arr(imgROI))[0])
+            self.assertLessEqual(len(nonZeroSlices), 2)
+            sliceDepths = np.asarray(ft.getVoxelCentres(self.img)[2])[nonZeroSlices]
+            self.assertTrue(np.all(np.abs(sliceDepths - contourDepth) <= self.img.GetSpacing()[2]))
+            # the volume is the contour area times one image slice thickness
+            self.assertAlmostEqual(ft.getStructVolume(imgROI), contourArea * self.img.GetSpacing()[2] / 1e3, delta=0.05 * contourArea * self.img.GetSpacing()[2] / 1e3)
+
+            imgROIbinary = ft.mapStructToImg(self.img, RSfileName, "PTV_sphere", binaryMask=True, areaFraction=0.0)
+            self.assertGreater(ft.getStatistics(imgROIbinary).GetSum(), 0)
+        finally:
+            shutil.rmtree(tempDir, ignore_errors=True)
+
 
 class test_floatingToBinaryMask(unittest.TestCase):
 

@@ -65,8 +65,10 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     2. The mapping is done for each contour separately. If more than one contour is defined at depth, then 
     the contours are summed with XOR operation, utilising the shapely library. The mapping of each contour is 
     done in 2D, meaning slice by slice. The resulting image has  the voxel size and shape the same as 
-    the input `img` in X and Y directions. The voxel size  in the Z direction is calculated based on 
-    the contour slice distances, taking into account gaps, holes and detached contours. The shape of 
+    the input `img` in X and Y directions. The voxel size in the Z direction is calculated based on 
+    the contour slice distances, taking into account gaps, holes and detached contours. If all the contours
+    lie at a single depth, no contour slice distance exists and the voxel size in the Z direction is taken
+    from the input `img`, i.e. the structure is one image slice thick. The shape of
     the image in the Z direction is equal to the contour boundings in the Z direction, enlarged
     by 2 px. Such image mask is then resampled to the frame of reference of
     the input `img`. In fact, the resampling is applied only to the Z direction, because the frame of 
@@ -192,16 +194,25 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     note: more than single spacing (excluding 0) means that a gap exists in the structure
     """
     StructureSpacingZ = np.round(np.diff(StructurePolygonsDepths), decimals=3)
-    StructureSpacingZ = float(np.min(StructureSpacingZ[StructureSpacingZ > 0]))
+    StructureSpacingZ = StructureSpacingZ[StructureSpacingZ > 0]
+    singleDepth = StructureSpacingZ.size == 0
+    if singleDepth:
+        # all the contours lie at a single depth, so no contour spacing exists: the structure is taken to be one image slice thick
+        StructureSpacingZ = float(img.GetSpacing()[2])
+        _logger.debug(f"The structure '{structName}' is defined at a single depth. The image Z spacing of {StructureSpacingZ} mm was used as the structure thickness.")
+    else:
+        StructureSpacingZ = float(np.min(StructureSpacingZ))
 
     # prepare an empty mask
     """
     note: the mask size in Z direction is calculated based on the number of unique depths in the structure enlarged by two slices
+    note: a structure at a single depth gets one more empty slice above, so that the resampling to the image below does not lose
+          the part of the slice which falls between two image slices
     note: the mask size in XY direction is the same as the image size
     note: the mask origin in Z direction is set to the minimum depth of the structure minus the spacing (to include additional slice)
     note: the mask origin in XY direction is the same as the image origin
     """
-    imgMaskBase = ft.createImg(size=[img.GetSize()[0], img.GetSize()[1], int(np.ceil(((StructurePolygonsDepths.max() - StructurePolygonsDepths.min())/StructureSpacingZ))+2)],
+    imgMaskBase = ft.createImg(size=[img.GetSize()[0], img.GetSize()[1], int(np.ceil(((StructurePolygonsDepths.max() - StructurePolygonsDepths.min())/StructureSpacingZ))+2+int(singleDepth))],
                                origin=[img.GetOrigin()[0], img.GetOrigin()[1], StructurePolygonsDepths.min() - StructureSpacingZ],
                                spacing=[img.GetSpacing()[0], img.GetSpacing()[1], StructureSpacingZ],
                                centred=False)
