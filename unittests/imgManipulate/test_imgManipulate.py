@@ -69,6 +69,37 @@ class test_mapStructToImg(unittest.TestCase):
         finally:
             shutil.rmtree(tempDir, ignore_errors=True)
 
+    def test_mapStructToImg_reversedAxes(self):
+        """An image with reversed axes (e.g. a prone CT with direction -1,-1,+1) gives the same mask as the identity-direction image."""
+        imgROIref = ft.mapStructToImg(self.img, self.RSfileName, "testStuct_SphHoleDet")
+        imgROIrefBinary = ft.mapStructToImg(self.img, self.RSfileName, "testStuct_SphHoleDet", binaryMask=True)
+        for flipAxes in ([True, True, False], [False, True, False], [True, True, True]):
+            with self.subTest(flipAxes=flipAxes):
+                # the same image expressed with reversed axes: the voxel arrays are flipped, the physical content is unchanged
+                imgFlipped = sitk.Flip(self.img, flipAxes, flipAboutOrigin=False)
+                self.assertEqual(tuple(np.diag(np.reshape(imgFlipped.GetDirection(), (3, 3)))), tuple(-1.0 if flip else 1.0 for flip in flipAxes))
+
+                imgROI = ft.mapStructToImg(imgFlipped, self.RSfileName, "testStuct_SphHoleDet", displayInfo=True)
+                self.assertEqual(imgROI.GetSize(), imgFlipped.GetSize())
+                self.assertEqual(imgROI.GetOrigin(), imgFlipped.GetOrigin())
+                self.assertEqual(imgROI.GetDirection(), imgFlipped.GetDirection())
+                # flipped back to the original frame, the mask must be the one of the identity-direction image
+                imgROIback = sitk.Flip(imgROI, flipAxes, flipAboutOrigin=False)
+                self.assertEqual(imgROIback.GetOrigin(), imgROIref.GetOrigin())
+                np.testing.assert_allclose(ft.arr(imgROIback), ft.arr(imgROIref), atol=1e-6)
+                self.assertAlmostEqual(ft.getStructVolume(imgROI), ft.getStructVolume(imgROIref), places=6)
+
+                imgROIbinary = ft.mapStructToImg(imgFlipped, self.RSfileName, "testStuct_SphHoleDet", binaryMask=True)
+                np.testing.assert_array_equal(ft.arr(sitk.Flip(imgROIbinary, flipAxes, flipAboutOrigin=False)), ft.arr(imgROIrefBinary))
+
+    def test_mapStructToImg_obliqueDirection(self):
+        """An image with an oblique (non-diagonal) direction cannot be mapped slice by slice and raises."""
+        imgOblique = sitk.Image(self.img)
+        angle = np.radians(10)
+        imgOblique.SetDirection((np.cos(angle), -np.sin(angle), 0, np.sin(angle), np.cos(angle), 0, 0, 0, 1))
+        with self.assertRaises(ValueError):
+            ft.mapStructToImg(imgOblique, self.RSfileName, "testStuct_SphHoleDet")
+
 
 class test_floatingToBinaryMask(unittest.TestCase):
 

@@ -12,8 +12,9 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     and size) as the `img` with values larger than 0 for voxels inside the contour
     and values 0 outside. In primary usage, the function produces floating masks, i.e., the value
     of each voxel describes its fractional occupancy by the structure.
-    It is assumed that the image is 3D and has an identity direction, which means that
-    the axes describe X, Y and Z directions, respectively. The frame of reference of
+    It is assumed that the image is 3D and has a diagonal direction, which means that
+    the axes describe X, Y and Z directions, respectively, each of them possibly reversed
+    (for instance a CT of a patient in the prone position). The frame of reference of
     the `img` is not specified, in particular, the Z-spacing does not have to be
     the same as the structure Z-spacing.
 
@@ -44,9 +45,10 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         If `img` is not an instance of a SimpleITK 3D image object.
     ValueError
         If the RS file is not a proper dicom describing structures,
-        if `areaFraction` is not a scalar in the range 0-1,
-        if the structure cannot be found in the RS file, or if not all
-        Z (depth) positions in a contour are the same.
+        if the image direction is not diagonal (the axes are not aligned
+        with the X, Y and Z directions), if `areaFraction` is not a scalar
+        in the range 0-1, if the structure cannot be found in the RS file,
+        or if not all Z (depth) positions in a contour are the same.
     RuntimeError
         If not all contour depths are represented in the created mask,
         or if the resulting floating or binary mask is incorrect.
@@ -74,8 +76,12 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     the input `img`. In fact, the resampling is applied only to the Z direction, because the frame of 
     reference of X and Y directions are the same as the input `img`.
 
-    3. The structures in the structure DICOM file are usually defined for an image with the identity direction.
-    Although the mapping will be done for images with non-identity direction, the results may be incorrect.
+    3. The mapping is done slice by slice along the image Z axis, therefore the image direction must be
+    diagonal, i.e. the image axes must be aligned with the X, Y and Z directions. Any of the axes may be
+    reversed (e.g. the X and Y axes of a CT of a patient in the prone position): the intermediate mask is
+    created in the frame of reference of the input `img`, including its direction, and the result is the
+    same as for the image expressed with the identity direction. An image with an oblique (non-diagonal)
+    direction raises a ValueError.
     """
     import fredtools as ft
     import numpy as np
@@ -89,8 +95,14 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     if not ft.ImgIO.dicom_io._isDicomRS(RSfileName):
         raise ValueError(f"The file {RSfileName} is not a proper dicom describing structures.")
 
+    # the mapping is done slice by slice along the image Z axis, so the image axes must be aligned with the X, Y and Z directions (any of them may be reversed)
+    imgDirection = ft.ImgAnalyse.imgAnalyse._getDirectionArray(img)
+    if not np.allclose(np.abs(imgDirection), np.identity(img.GetDimension())):
+        error = ValueError(f"The image direction {img.GetDirection()} is not diagonal. Only images with the axes aligned with the X, Y and Z directions (possibly reversed) are supported.")
+        _logger.error(error)
+        raise error
     if not ft.ImgAnalyse.imgAnalyse._isDirectionIdentity(img):
-        _logger.warning("The image direction is not identity. The mapping of the structure to the image may be incorrect.")
+        _logger.debug(f"The image direction {img.GetDirection()} is not identity. The structure is mapped in the frame of reference of the image, including the reversed axes.")
 
     # set the number of CPUs to be used
     CPUNo = ft.getCPUNo(ft.CPUNO)
@@ -209,13 +221,17 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     note: a structure at a single depth gets one more empty slice above, so that the resampling to the image below does not lose
           the part of the slice which falls between two image slices
     note: the mask size in XY direction is the same as the image size
-    note: the mask origin in Z direction is set to the minimum depth of the structure minus the spacing (to include additional slice)
-    note: the mask origin in XY direction is the same as the image origin
+    note: the mask origin in Z direction is set to the minimum depth of the structure minus the spacing (to include additional slice),
+          or to the maximum depth plus the spacing if the image Z axis is reversed, so that the mask grows along the image Z axis
+    note: the mask origin and direction in XY direction are the same as the image origin and direction, so that the mask
+          covers exactly the image extent also for reversed axes (e.g. a CT of a patient in the prone position)
     """
+    imgMaskOriginZ = StructurePolygonsDepths.min() - StructureSpacingZ if imgDirection[2, 2] > 0 else StructurePolygonsDepths.max() + StructureSpacingZ
     imgMaskBase = ft.createImg(size=[img.GetSize()[0], img.GetSize()[1], int(np.ceil(((StructurePolygonsDepths.max() - StructurePolygonsDepths.min())/StructureSpacingZ))+2+int(singleDepth))],
-                               origin=[img.GetOrigin()[0], img.GetOrigin()[1], StructurePolygonsDepths.min() - StructureSpacingZ],
+                               origin=[img.GetOrigin()[0], img.GetOrigin()[1], imgMaskOriginZ],
                                spacing=[img.GetSpacing()[0], img.GetSpacing()[1], StructureSpacingZ],
                                centred=False)
+    imgMaskBase.SetDirection(img.GetDirection())
     imgMaskBase = sitk.Cast(imgMaskBase, sitk.sitkFloat64)
 
     # verify if all contour depths are present in the mask depths
