@@ -109,7 +109,6 @@ class test_mapStructToImg(unittest.TestCase):
         import shapely as sph
 
         # build an RS in which 'PTV_sphere' keeps three contours 18 and 12 mm apart: 12 is not a multiple of 18, the common step is 6 mm
-        # (the top contour is the small cap of the sphere, because the mask above the last contour is cut at half a step instead of fading)
         tempDir = tempfile.mkdtemp(prefix="test_mapStructToImg_irregularDepths_", dir="unittests/imgManipulate")
         try:
             dicomTags = dicom.dcmread(self.RSfileName)

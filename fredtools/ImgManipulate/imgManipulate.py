@@ -77,7 +77,8 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     lie at a single depth, no contour slice distance exists and the voxel size in the Z direction is taken
     from the input `img`, i.e. the structure is one image slice thick. The shape of
     the image in the Z direction is equal to the contour boundings in the Z direction, enlarged
-    by 2 px. Such image mask is then resampled to the frame of reference of
+    by one empty slice at each end, so that the mask fades to zero over one contour step beyond
+    the first and the last contour. Such image mask is then resampled to the frame of reference of
     the input `img`. In fact, the resampling is applied only to the Z direction, because the frame of 
     reference of X and Y directions are the same as the input `img`.
 
@@ -232,9 +233,9 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
 
     # prepare an empty mask
     """
-    note: the mask size in Z direction is calculated based on the number of unique depths in the structure enlarged by two slices
-    note: a structure at a single depth gets one more empty slice above, so that the resampling to the image below does not lose
-          the part of the slice which falls between two image slices
+    note: the mask size in Z direction is the number of steps between the lowest and the highest contour depth enlarged by three slices:
+          the slice of the highest contour and one empty slice at each end, so that the mask fades to zero over one step beyond
+          the first and the last contour (a structure at a single depth gets one empty slice below and one above)
     note: the mask size in XY direction is the same as the image size
     note: the mask origin in Z direction is set to the minimum depth of the structure minus the spacing (to include additional slice),
           or to the maximum depth plus the spacing if the image Z axis is reversed, so that the mask grows along the image Z axis
@@ -242,7 +243,7 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
           covers exactly the image extent also for reversed axes (e.g. a CT of a patient in the prone position)
     """
     imgMaskOriginZ = StructurePolygonsDepths.min() - StructureSpacingZ if imgDirection[2, 2] > 0 else StructurePolygonsDepths.max() + StructureSpacingZ
-    imgMaskBase = ft.createImg(size=[img.GetSize()[0], img.GetSize()[1], int(np.ceil(((StructurePolygonsDepths.max() - StructurePolygonsDepths.min())/StructureSpacingZ))+2+int(singleDepth))],
+    imgMaskBase = ft.createImg(size=[img.GetSize()[0], img.GetSize()[1], int(np.ceil(((StructurePolygonsDepths.max() - StructurePolygonsDepths.min())/StructureSpacingZ))+3)],
                                origin=[img.GetOrigin()[0], img.GetOrigin()[1], imgMaskOriginZ],
                                spacing=[img.GetSpacing()[0], img.GetSpacing()[1], StructureSpacingZ],
                                centred=False)
