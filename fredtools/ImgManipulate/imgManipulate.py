@@ -50,7 +50,8 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         in the range 0-1, if the structure cannot be found in the RS file,
         or if not all Z (depth) positions in a contour are the same.
     RuntimeError
-        If not all contour depths are represented in the created mask,
+        If the contour depths have no common step of at least 0.1 mm,
+        if not all contour depths are represented in the created mask,
         or if the resulting floating or binary mask is incorrect.
 
     See Also
@@ -67,8 +68,12 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     2. The mapping is done for each contour separately. If more than one contour is defined at depth, then 
     the contours are summed with XOR operation, utilising the shapely library. The mapping of each contour is 
     done in 2D, meaning slice by slice. The resulting image has  the voxel size and shape the same as 
-    the input `img` in X and Y directions. The voxel size in the Z direction is calculated based on 
-    the contour slice distances, taking into account gaps, holes and detached contours. If all the contours
+    the input `img` in X and Y directions. The voxel size in the Z direction is the largest step which
+    divides all the distances between consecutive contours, i.e. the contour slice distance for regularly
+    contoured structures, taking into account gaps, holes and detached contours. Contours drawn at depths
+    which are not multiples of the smallest contour distance (e.g. a few marks on arbitrary slices) are
+    mapped as slabs of that step thickness at their own depths, with gaps in between. The distances are
+    taken with a precision of 0.001 mm and a step smaller than 0.1 mm raises a RuntimeError. If all the contours
     lie at a single depth, no contour slice distance exists and the voxel size in the Z direction is taken
     from the input `img`, i.e. the structure is one image slice thick. The shape of
     the image in the Z direction is equal to the contour boundings in the Z direction, enlarged
@@ -200,20 +205,30 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         else:
             _logger.warning(f"The contour at depth {StructureContoursDepth} for the structure '{structName}' is cannot be properly mapped to polygon nor multipolygon, but was mapped to {type(StructurePolygonMultiPolygon)} instead.")
 
-    # get contour spacing in Z direction as the minimum spacing between individual contours.
+    # get contour spacing in Z direction as the largest step which divides all the distances between consecutive contours.
     """
-    note: spacing 0 means that detached contours exist in the structure
-    note: more than single spacing (excluding 0) means that a gap exists in the structure
+    note: distance 0 means that detached contours exist in the structure
+    note: more than a single distance (excluding 0) means that a gap exists in the structure
+    note: the step is the minimum distance for regularly contoured structures; it is smaller only when some contours lie
+          at depths which are not multiples of the minimum distance (e.g. a few marks drawn on arbitrary slices),
+          so that each contour is mapped as a slab of the step thickness at its own depth, with gaps in between
+    note: the distances are taken with a precision of 0.001 mm; a step smaller than 0.1 mm means that the depths are irregular
     """
-    StructureSpacingZ = np.round(np.diff(StructurePolygonsDepths), decimals=3)
-    StructureSpacingZ = StructureSpacingZ[StructureSpacingZ > 0]
-    singleDepth = StructureSpacingZ.size == 0
+    StructureDistancesZ = np.round(np.diff(StructurePolygonsDepths), decimals=3)
+    StructureDistancesZ = StructureDistancesZ[StructureDistancesZ > 0]
+    singleDepth = StructureDistancesZ.size == 0
     if singleDepth:
         # all the contours lie at a single depth, so no contour spacing exists: the structure is taken to be one image slice thick
         StructureSpacingZ = float(img.GetSpacing()[2])
         _logger.debug(f"The structure '{structName}' is defined at a single depth. The image Z spacing of {StructureSpacingZ} mm was used as the structure thickness.")
     else:
-        StructureSpacingZ = float(np.min(StructureSpacingZ))
+        StructureSpacingZ = float(np.gcd.reduce(np.round(StructureDistancesZ * 1000).astype(int))) / 1000
+        if StructureSpacingZ < 0.1:
+            error = RuntimeError(f"The depths of the contours of the structure '{structName}' do not lie on a common grid: the distances between consecutive contours {np.unique(StructureDistancesZ).tolist()} mm have a common step of {StructureSpacingZ} mm, smaller than 0.1 mm.")
+            _logger.error(error)
+            raise error
+        if StructureSpacingZ < np.min(StructureDistancesZ):
+            _logger.debug(f"The distances between consecutive contours of the structure '{structName}' ({np.unique(StructureDistancesZ).tolist()} mm) are not multiples of the minimum distance. The common step of {StructureSpacingZ} mm was used as the structure slice thickness.")
 
     # prepare an empty mask
     """
@@ -234,9 +249,12 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
     imgMaskBase.SetDirection(img.GetDirection())
     imgMaskBase = sitk.Cast(imgMaskBase, sitk.sitkFloat64)
 
-    # verify if all contour depths are present in the mask depths
-    if not set(StructurePolygonsDepths).issubset(np.round(ft.getVoxelCentres(imgMaskBase)[2], 6)):
-        raise RuntimeError(f"Not all depths defined in contour are represented in the created mask.")
+    # verify if all contour depths are present in the mask depths (with the precision of the contour distances)
+    imgMaskBaseDepths = np.asarray(ft.getVoxelCentres(imgMaskBase)[2])
+    if not np.all(np.min(np.abs(np.asarray(StructurePolygonsDepths)[:, np.newaxis] - imgMaskBaseDepths[np.newaxis, :]), axis=1) < 1e-3):
+        error = RuntimeError(f"Not all depths defined in contour are represented in the created mask.")
+        _logger.debug(str(error) + f" Structure depths: {StructurePolygonsDepths}, Mask depths: {imgMaskBaseDepths}")
+        raise error
 
     # Crop the structure polygons to fit in the image mask
     imgMaskExtent = ft.getExtent(imgMaskBase)

@@ -100,6 +100,60 @@ class test_mapStructToImg(unittest.TestCase):
         with self.assertRaises(ValueError):
             ft.mapStructToImg(imgOblique, self.RSfileName, "testStuct_SphHoleDet")
 
+    def test_mapStructToImg_irregularDepths(self):
+        """Contours at depths which are not multiples of the smallest contour distance are mapped as slabs of the common step."""
+        import os
+        import shutil
+        import tempfile
+        import pydicom as dicom
+        import shapely as sph
+
+        # build an RS in which 'PTV_sphere' keeps three contours 18 and 12 mm apart: 12 is not a multiple of 18, the common step is 6 mm
+        # (the top contour is the small cap of the sphere, because the mask above the last contour is cut at half a step instead of fading)
+        tempDir = tempfile.mkdtemp(prefix="test_mapStructToImg_irregularDepths_", dir="unittests/imgManipulate")
+        try:
+            dicomTags = dicom.dcmread(self.RSfileName)
+            ROINumber = next(int(ROI.ROINumber) for ROI in dicomTags.StructureSetROISequence if ROI.ROIName == "PTV_sphere")
+            ROIContour = next(ROIContour for ROIContour in dicomTags.ROIContourSequence if int(ROIContour.ReferencedROINumber) == ROINumber)
+            contours = sorted(ROIContour.ContourSequence, key=lambda contour: float(contour.ContourData[2]))
+            contours = [contours[20], contours[35], contours[45]]
+            ROIContour.ContourSequence = contours
+            RSfileName = os.path.join(tempDir, "RS.irregularDepths.dcm")
+            dicomTags.save_as(RSfileName)
+
+            contourPoints = [np.array(contour.ContourData, dtype=float).reshape(-1, 3) for contour in contours]
+            contourDepths = np.array([points[0, 2] for points in contourPoints])
+            contourAreas = np.array([sph.Polygon(points[:, :2]).area for points in contourPoints])
+            contourDistances = np.diff(contourDepths)
+            self.assertFalse(np.isclose(contourDistances[1] / contourDistances[0], np.round(contourDistances[1] / contourDistances[0])))
+            step = np.gcd.reduce(np.round(contourDistances * 1000).astype(int)) / 1000
+
+            imgROI = ft.mapStructToImg(self.img, RSfileName, "PTV_sphere", displayInfo=True)
+            self.assertEqual(imgROI.GetSize(), self.img.GetSize())
+            # each contour is a slab of the common step thickness at its own depth, with an empty gap between the first two
+            sliceDepths = np.asarray(ft.getVoxelCentres(self.img)[2])
+            sliceSums = ft.arr(imgROI).sum(axis=(1, 2))
+            nonZeroDepths = sliceDepths[sliceSums > 0]
+            self.assertGreater(len(nonZeroDepths), 0)
+            self.assertTrue(np.all(np.min(np.abs(nonZeroDepths[:, np.newaxis] - contourDepths[np.newaxis, :]), axis=1) < step + 1e-6))
+            gapSlices = (sliceDepths > contourDepths[0] + step) & (sliceDepths < contourDepths[1] - step)
+            self.assertGreater(gapSlices.sum(), 0)
+            self.assertTrue(np.all(sliceSums[gapSlices] == 0))
+            # the volume is the sum of the contour areas times the common step
+            expectedVolume = contourAreas.sum() * step / 1e3
+            self.assertAlmostEqual(ft.getStructVolume(imgROI), expectedVolume, delta=0.05 * expectedVolume)
+
+            imgROIbinary = ft.mapStructToImg(self.img, RSfileName, "PTV_sphere", binaryMask=True, areaFraction=0.0)
+            self.assertGreater(ft.getStatistics(imgROIbinary).GetSum(), 0)
+
+            # depths with no common step of at least 0.1 mm raise
+            contours[2].ContourData = [round(float(value) + (0.001 if valueIdx % 3 == 2 else 0), 3) for valueIdx, value in enumerate(contours[2].ContourData)]
+            dicomTags.save_as(RSfileName)
+            with self.assertRaises(RuntimeError):
+                ft.mapStructToImg(self.img, RSfileName, "PTV_sphere")
+        finally:
+            shutil.rmtree(tempDir, ignore_errors=True)
+
 
 class test_floatingToBinaryMask(unittest.TestCase):
 
