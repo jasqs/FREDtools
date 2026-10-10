@@ -6,11 +6,11 @@ import fredtools as ft
 GIImagesPath = "unittests/testData/MHDImages/GIImages"
 
 
-def _createGaussImg(shift=(0, 0, 0)):
-    """Create a 3D Gaussian dose distribution (sigma 8 mm, 10 Gy maximum, 41x41x41 voxels of 1 mm) shifted by `shift` [mm]."""
-    img = ft.createImg([41, 41, 41], spacing=[1, 1, 1], origin=[-20, -20, -20])
+def _createGaussImg(shift=(0, 0, 0), size=41, amplitude=10):
+    """Create a 3D Gaussian dose distribution (sigma 8 mm, `amplitude` [Gy] maximum, `size` voxels of 1 mm along each axis, centred at 0) shifted by `shift` [mm]."""
+    img = ft.createImg([size, size, size], spacing=[1, 1, 1], origin=[-(size // 2)] * 3)
     X, Y, Z = np.meshgrid(*ft.getVoxelCentres(img), indexing="ij")
-    arr = 10 * np.exp(-((X - shift[0])**2 + (Y - shift[1])**2 + (Z - shift[2])**2) / (2 * 8**2))
+    arr = amplitude * np.exp(-((X - shift[0])**2 + (Y - shift[1])**2 + (Z - shift[2])**2) / (2 * 8**2))
     imgGauss = sitk.GetImageFromArray(np.moveaxis(arr, [0, 1, 2], [2, 1, 0]))
     imgGauss.CopyInformation(img)
     return imgGauss
@@ -237,6 +237,13 @@ class test_calcGammaIndex(unittest.TestCase):
         statGI = ft.getGIstat(imgGI)
         self.assertAlmostEqual(statGI.max, 0.5, delta=0.02)
         self.assertEqual(statGI.passRate, 100)
+
+    def test_calcGammaIndex_largeGamma(self):
+        # gamma*DTA (about 99 mm) exceeds the reach of the 9 mm evaluation grid, so the search must end at the grid
+        imgGI = ft.calcGammaIndex(_createGaussImg(size=9), _createGaussImg(size=9, amplitude=0.1), DD=2, DTA=2, DCO=0.05, DDType="global", stepSize=0.5, fractionalStepSize=False)
+        statGI = ft.getGIstat(imgGI)
+        self.assertAlmostEqual(statGI.max, (10 - 0.1) / 0.2, delta=1E-3)
+        self.assertEqual(statGI.passRate, 0)
 
     def test_calcGammaIndex_flippedDirection(self):
         imgGI = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global")
