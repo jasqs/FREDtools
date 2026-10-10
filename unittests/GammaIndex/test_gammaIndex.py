@@ -32,10 +32,8 @@ class test_calcGammaIndex(unittest.TestCase):
     def _assertPassRateMap(self, imgRefGI, imgPR):
         """Check a pass-rate map against the stored gamma map of the same configuration.
 
-        The gamma mode of the library leaves a few voxels at the border of the analysed region unevaluated (-1),
-        whereas the pass-rate mode evaluates all voxels above the dose cutoff. Therefore, the voxels analysed
-        in the gamma mode must be a subset of the voxels analysed in the pass-rate mode, and the pass/fail
-        outcome is compared on the common voxels.
+        Both modes analyse the same voxels (all voxels above the dose cutoff), so the masks of the analysed
+        voxels must be identical and the pass/fail outcome is compared on these voxels.
         """
         arrRefGI = ft.arr(imgRefGI)
         arrPR = ft.arr(imgPR)
@@ -44,8 +42,7 @@ class test_calcGammaIndex(unittest.TestCase):
         self.assertTrue(ft.compareImgFoR(imgRefGI, imgPR))
         self.assertEqual(imgPR.GetPixelIDTypeAsString(), "8-bit signed integer")
         self.assertTrue(set(np.unique(arrPR)).issubset({-1, 0, 1}))
-        self.assertTrue(np.all(analysedPR[analysed]))
-        self.assertLessEqual((analysedPR & ~analysed).sum(), 1E-3 * analysed.sum())
+        self.assertTrue(np.array_equal(analysedPR, analysed))
         self.assertGreaterEqual(np.mean((arrPR[analysed] == 1) == (arrRefGI[analysed] <= 1)), 0.999)
         self.assertAlmostEqual(float(imgPR.GetMetaData("GIPR")), ft.getGIstat(imgRefGI).passRate, delta=1)
         self.assertAlmostEqual(ft.getGIstat(imgPR).passRate, ft.getGIstat(imgRefGI).passRate, delta=1)
@@ -103,6 +100,17 @@ class test_calcGammaIndex(unittest.TestCase):
         self.assertAlmostEqual(float(imgGI.GetMetaData("GIPR")), float(imgRefGI.GetMetaData("GIPR")), delta=1)
         self.assertAlmostEqual(ft.getGIstat(imgGI).passRate, ft.getGIstat(imgRefGI).passRate, delta=1)
         imgPR = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global", stepSize=0.5, fractionalStepSize=False, mode="pass-rate")
+        self._assertPassRateMap(imgRefGI, imgPR)
+
+    def test_calcGammaIndex_DD2_DTA2_local_DCO5_stepSize03abs(self):
+        imgRefGI = ft.readMHD(f"{GIImagesPath}/GI_DD2_DTA2_local_DCO5_stepSize0.3abs.mhd")
+        imgGI = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="local", stepSize=0.3, fractionalStepSize=False)
+        self.assertTrue(ft.compareImgFoR(imgRefGI, imgGI))
+        self.assertTrue(ft.compareImg(imgRefGI, imgGI, decimal=3))
+        self.assertEqual(imgGI.GetPixelIDTypeAsString(), "32-bit float")
+        self.assertAlmostEqual(float(imgGI.GetMetaData("GIPR")), float(imgRefGI.GetMetaData("GIPR")), delta=1)
+        self.assertAlmostEqual(ft.getGIstat(imgGI).passRate, ft.getGIstat(imgRefGI).passRate, delta=1)
+        imgPR = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="local", stepSize=0.3, fractionalStepSize=False, mode="pass-rate")
         self._assertPassRateMap(imgRefGI, imgPR)
 
     def test_calcGammaIndex_DD2_DTA2_global_DCO10(self):
