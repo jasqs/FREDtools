@@ -117,12 +117,11 @@ class test_calcGammaIndex(unittest.TestCase):
         self._assertPassRateMap(imgRefGI, imgPR)
 
     def test_calcGammaIndex_metadata(self):
-        imgRefGI = ft.readMHD(f"{GIImagesPath}/GI_DD2_DTA2_global_DCO5.mhd")
         imgGI = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")
         for key in ["GIVersion", "DD", "DTA", "DDType", "DCO", "stepSize", "mode", "GIPR"]:
             with self.subTest(key=key):
                 self.assertTrue(imgGI.HasMetaDataKey(key))
-        self.assertEqual(imgGI.GetMetaData("GIVersion"), imgRefGI.GetMetaData("GIVersion"))
+        self.assertEqual(imgGI.GetMetaData("GIVersion"), "4.5")
         self.assertNotIn("\0", imgGI.GetMetaData("GIVersion"))
         self.assertEqual(imgGI.GetMetaData("DD"), "2")
         self.assertEqual(imgGI.GetMetaData("DTA"), "2")
@@ -136,6 +135,16 @@ class test_calcGammaIndex(unittest.TestCase):
         imgGI1 = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global")
         imgGI2 = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global")
         self.assertTrue(ft.compareImg(imgGI1, imgGI2, decimal=7))
+
+    def test_calcGammaIndex_interrupted(self):
+        from unittest import mock
+        imgRefGI = ft.readMHD(f"{GIImagesPath}/GI_DD2_DTA2_global_DCO5.mhd")
+        with self.assertLogs(ft.GammaIndex.gammaIndex._logger, level="WARNING"):
+            with self.assertRaises(KeyboardInterrupt):
+                with mock.patch("time.sleep", side_effect=KeyboardInterrupt):
+                    ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")
+        imgGI = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")
+        self.assertTrue(ft.compareImg(imgRefGI, imgGI, decimal=3))
 
     def test_calcGammaIndex_CPUNo(self):
         ft.CPUNO = "auto"

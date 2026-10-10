@@ -91,8 +91,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         If the function is run on a platform other than Linux (only the Linux
         shared library is implemented).
     RuntimeError
-        Run time error is raised when the execution of the gamma calculation failed
-        or the library returned an invalid result (no voxel analysed).
+        Run time error is raised when the execution of the gamma calculation failed,
+        did not finish, or the library returned an invalid result (no voxel analysed).
         The following error codes can be raised:
 
 
@@ -130,6 +130,10 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     normalisation dose and the 'global' dose difference criterion is `DD` percent of the global
     normalisation dose, which is the maximum of the reference image unless `globalNorm` is given.
 
+    The calculation runs in a background thread of the gamma index library and can be interrupted
+    with Ctrl+C (or by interrupting the Jupyter kernel), which stops the calculation and raises
+    `KeyboardInterrupt`.
+
     Examples
     --------
     See example jupyter notebook at [GITutorial]_
@@ -142,6 +146,7 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     """
     import sys
     import os
+    import time
     import fredtools as ft
     import numpy as np
     import ctypes
@@ -316,10 +321,23 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         arr = np.moveaxis(arrEval, range(arrEval.ndim), range(arrEval.ndim)[::-1])
         libFredGI.fredGI_setEval(nn, hs, x0, arr)
 
-        # start computation
+        # start the computation in the background thread of the library
         computationStatus = libFredGI.fredGI_startComputation()
         if not computationStatus == 0:
             error = RuntimeError(f"Gamma Index computation failed with the error code {computationStatus}. Refer to www.fredtools.ifj.edu.pl for more details.")
+            _logger.error(error)
+            raise error
+
+        # wait for the end of the computation, checking for a user interrupt (Ctrl+C) every 10 ms
+        try:
+            while libFredGI.fredGI_isComputing():
+                time.sleep(0.01)
+        except KeyboardInterrupt:
+            _logger.warning("The gamma index computation was interrupted by the user.")
+            raise
+        libFredGI.fredGI_waitForCompletion()  # release the finished thread
+        if not libFredGI.fredGI_hasFinished():
+            error = RuntimeError("The gamma index computation did not finish.")
             _logger.error(error)
             raise error
 
@@ -343,6 +361,9 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
             imgGI = sitk.Cast(imgGI, sitk.sitkInt8)
 
     finally:
+        # stop and release the computation thread of the library (if any) before unloading the library
+        libFredGI.fredGI_abortComputation()
+
         # unload the library
         if sys.platform == "linux" or sys.platform == "linux2":
             del libFredGI
