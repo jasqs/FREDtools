@@ -84,7 +84,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     ValueError
         If the value of `DD`, `DTA`, `DCO`, `globalNorm` or `stepSize` is out of range,
         `DDType` or `mode` cannot be recognised, the direction matrices of `imgRef` and
-        `imgEval` do not match, any of the images contains NaN or Inf values, the maximum
+        `imgEval` do not match, the images do not overlap (detached frames of reference,
+        see :func:`fredtools.compareImgFoROverlap`), any of the images contains NaN or Inf values, the maximum
         of the reference image is not positive, or no voxel of the reference image is above
         the dose cutoff.
     OSError
@@ -210,6 +211,12 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     # validate that the direction matrices of the images match (the calculation is done in the common index frame of the images)
     if not np.allclose(imgRef.GetDirection(), imgEval.GetDirection(), atol=1E-6):
         error = ValueError(f"The direction matrices of the reference image {imgRef.GetDirection()} and the evaluation image {imgEval.GetDirection()} do not match. Resample one of the images to the frame of reference of the other one.")
+        _logger.error(error)
+        raise error
+
+    # validate that the images overlap (the gamma index of detached images is meaningless and its search can take very long)
+    if not ft.compareImgFoROverlap(imgRef, imgEval):
+        error = ValueError("The reference and evaluation images do not overlap (their frames of reference are detached). Check the origins of the images.")
         _logger.error(error)
         raise error
 

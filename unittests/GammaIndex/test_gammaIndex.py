@@ -312,6 +312,16 @@ class test_calcGammaIndex(unittest.TestCase):
         with self.assertRaises(ValueError):
             ft.calcGammaIndex(imgEvalFlipped, self.imgGauss, DD=2, DTA=2, DCO=0.05)
 
+    def test_calcGammaIndex_invalid_noOverlap(self):
+        imgEvalDetached = sitk.Image(self.imgGaussShifted)
+        for shiftX in [100, 41]:  # detached and touching (the images are 41 mm wide)
+            imgEvalDetached.SetOrigin([-20 + shiftX, -20, -20])
+            with self.subTest(shiftX=shiftX):
+                with self.assertRaises(ValueError):
+                    ft.calcGammaIndex(self.imgGauss, imgEvalDetached, DD=2, DTA=2, DCO=0.05)
+                with self.assertRaises(ValueError):
+                    ft.calcGammaIndex(imgEvalDetached, self.imgGauss, DD=2, DTA=2, DCO=0.05)
+
     def test_calcGammaIndex_invalid_DD(self):
         for DD in [0, 100, -1, "2"]:
             with self.subTest(DD=DD):
