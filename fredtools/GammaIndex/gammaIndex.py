@@ -3,6 +3,102 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
+def _libFredGIFileName() -> str:
+    """Get the file name of the gamma index library (libFredGI) for the running platform.
+
+    libFredGI is shipped as libFredGI.so (Linux, x86_64), libFredGI.dll (Windows, x86_64)
+    and libFredGI.dylib (macOS, universal library for Apple Silicon and Intel).
+
+    Raises
+    ------
+    OSError
+        If libFredGI is not available for the platform or Python is not 64-bit.
+    """
+    import sys
+    import platform
+
+    machine = platform.machine().lower()
+    if sys.maxsize > 2**32:  # 64-bit Python (the libraries are 64-bit)
+        if sys.platform.startswith("linux") and machine in ("x86_64", "amd64"):
+            return "libFredGI.so"
+        if sys.platform == "win32" and machine in ("amd64", "x86_64"):
+            return "libFredGI.dll"
+        if sys.platform == "darwin" and machine in ("arm64", "x86_64"):
+            return "libFredGI.dylib"
+    error = OSError(f"The gamma index library is available for 64-bit Python on Linux (x86_64), Windows (x86_64) and macOS, but not on this platform ({sys.platform}, {platform.machine()}, {64 if sys.maxsize > 2**32 else 32}-bit Python).")
+    _logger.error(error)
+    raise error
+
+
+def _loadLibFredGI() -> Any:
+    """Load the gamma index library of the running platform and set the prototypes of its functions."""
+    import os
+    import sys
+    import ctypes
+    from numpy.ctypeslib import ndpointer
+
+    libPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), _libFredGIFileName())
+    try:
+        libFredGI = ctypes.CDLL(libPath)
+    except OSError as loadError:
+        error = OSError(f"The gamma index library {libPath} could not be loaded on this platform ({sys.platform}): {loadError}")
+        _logger.error(error)
+        raise error from loadError
+
+    # argument and return types of the library functions (all return an int: 0 or an error code, or true/false)
+    mapArgtypes = [ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),  # number of voxels
+                   ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),  # spacing
+                   ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),  # lower corner of the image
+                   ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),  # dose values
+                   ]
+    prototypes = {"fredGI_init": [],
+                  "fredGI_reset": [],
+                  "fredGI_version": [ctypes.c_char_p],
+                  "fredGI_setInterpolation": [ctypes.c_bool],
+                  "fredGI_setDTA": [ctypes.c_float],
+                  "fredGI_setDD": [ctypes.c_float],
+                  "fredGI_setDDCriterium": [ctypes.c_int],
+                  "fredGI_setDCO": [ctypes.c_float],
+                  "fredGI_setGlobalNormalization": [ctypes.c_float],
+                  "fredGI_setStepSize": [ctypes.c_float],
+                  "fredGI_setVerbose": [ctypes.c_int],
+                  "fredGI_setComputationMode": [ctypes.c_int],
+                  "fredGI_setNumThreads": [ctypes.c_int],
+                  "fredGI_setRef": mapArgtypes,
+                  "fredGI_setEval": mapArgtypes,
+                  "fredGI_startComputation": [],
+                  "fredGI_isComputing": [],
+                  "fredGI_waitForCompletion": [],
+                  "fredGI_hasFinished": [],
+                  "fredGI_abortComputation": [],
+                  "fredGI_getGammaIndexPassRate": [ctypes.POINTER(ctypes.c_float)],
+                  "fredGI_getGammaIndex3DMap": [ndpointer(ctypes.c_float, flags="F_CONTIGUOUS")],
+                  }
+    for functionName, argtypes in prototypes.items():
+        function = getattr(libFredGI, functionName)
+        function.argtypes = argtypes
+        function.restype = ctypes.c_int
+    return libFredGI
+
+
+def _unloadLibFredGI(libFredGI: Any) -> None:
+    """Unload the gamma index library (its computation thread must have been released before)."""
+    import sys
+    import ctypes
+
+    if sys.platform == "win32":
+        from ctypes import wintypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.FreeLibrary.argtypes = [wintypes.HMODULE]  # a 64-bit handle
+        kernel32.FreeLibrary.restype = wintypes.BOOL
+        kernel32.FreeLibrary(libFredGI._handle)
+    else:
+        libc = ctypes.CDLL(None)
+        libc.dlclose.argtypes = [ctypes.c_void_p]
+        libc.dlclose.restype = ctypes.c_int
+        libc.dlclose(libFredGI._handle)
+
+
 def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric, Field(strict=True, ge=0, le=100)], DTA: Numeric, DCO: Annotated[Numeric, Field(strict=True, ge=0, le=1)], DDType: Literal["local", "global"] = "local", globalNorm: Numeric | None = None, stepSize: Numeric = 10, fractionalStepSize: bool = True, mode: Literal["gamma", "pass-rate"] = "gamma", displayInfo: bool = False) -> SITKImage:
     """Calculate gamma index map.
 
@@ -18,7 +114,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         -  *gamma*: each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.
         -  *pass-rate*: each voxel represents passing (1) or failing (0) of the gamma index test and the voxels excluded from the GI analysis have values -1.
 
-    The gamma index calculation is performed by an external C++ library compiled as a Linux shared library.
+    The gamma index calculation is performed by an external C++ library (libFredGI), compiled for
+    Linux (x86_64), Windows (x86_64) and macOS (Apple Silicon and Intel), and shipped with FREDtools.
     The gamma index engine was developed by Angelo Schiavi and validated against the PyMedPhys [PyMedPhys]_
     python library and the plastimatch [Plastimatch]_ gamma index tool (see the :ref:`GammaIndexValidation`).
 
@@ -89,8 +186,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         of the reference image is not positive, or no voxel of the reference image is above
         the dose cutoff.
     OSError
-        If the function is run on a platform other than Linux (only the Linux
-        shared library is implemented).
+        If the gamma index library is not available for the platform (see above) or
+        cannot be loaded.
     RuntimeError
         Run time error is raised when the execution of the gamma calculation failed,
         did not finish, or the library returned an invalid result (no voxel analysed).
@@ -145,13 +242,10 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     .. [Plastimatch] https://plastimatch.org/
     .. [GITutorial] `Jupyter notebook of Gamma Index Analysis Tutorial <https://github.com/jasqs/FREDtools/blob/main/examples/Gamma%20Index%20analysis%20Tutorial.ipynb>`_
     """
-    import sys
-    import os
     import time
     import fredtools as ft
     import numpy as np
     import ctypes
-    from numpy.ctypeslib import ndpointer
     import SimpleITK as sitk
 
     # validate imgRef and imgEval (scalar 3D images with at least two voxels along each axis)
@@ -243,72 +337,58 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     # validate CPUNo or get it automatically if requested
     CPUNo = ft.getCPUNo(ft.CPUNO)
 
-    # load, init and reset shared library
-    if sys.platform == "linux" or sys.platform == "linux2":
-        dlclose = ctypes.cdll.LoadLibrary("").dlclose
-        dlclose.argtypes = [ctypes.c_void_p]
-        libFredGI = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), "./libFredGI.so"))
-        libFredGI_h = libFredGI._handle
-    elif sys.platform == "win32":
-        error = OSError("Windows version not implemented yet. Only the linux shared library is working now.")
-        _logger.error(error)
-        raise error
-        libFredGI = ctypes.WinDLL("./libFredGI.dll")
-        libFredGI_h = libFredGI._handle
-    libFredGI.fredGI_init()
-    libFredGI.fredGI_reset()
+    # load the gamma index library of the running platform (libFredGI.so, .dll or .dylib)
+    libFredGI = _loadLibFredGI()
 
-    # communicate with the library
+    # communicate with the library (the argument types are set by _loadLibFredGI)
     try:
+        libFredGI.fredGI_init()
+        libFredGI.fredGI_reset()
+
         # get libFredGI version
-        libFredGIVersion = b"\0" * 256
-        libFredGI.fredGI_version(ctypes.c_char_p(libFredGIVersion))
-        libFredGIVersion = libFredGIVersion.decode("utf-8").split("\0", 1)[0].strip()
+        libFredGIVersion = ctypes.create_string_buffer(256)
+        libFredGI.fredGI_version(libFredGIVersion)
+        libFredGIVersion = libFredGIVersion.value.decode("utf-8").strip()
 
         # set interpolation dose values using neighbouring voxels
-        libFredGI.fredGI_setInterpolation(ctypes.c_int(1))
+        libFredGI.fredGI_setInterpolation(True)
 
         # set DTA, DD, DDType, DCO and globalNorm
-        libFredGI.fredGI_setDTA(ctypes.c_float(float(DTA)))
-        libFredGI.fredGI_setDD(ctypes.c_float(float(DD)))
+        libFredGI.fredGI_setDTA(float(DTA))
+        libFredGI.fredGI_setDD(float(DD))
         if DDType.lower() in ["local", "l"]:
             DDType = "local"
-            libFredGI.fredGI_setDDCriterium(ctypes.c_int(2))  # 1 = GLOBAL, 2 = LOCAL
+            libFredGI.fredGI_setDDCriterium(2)  # 1 = GLOBAL, 2 = LOCAL
         elif DDType.lower() in ["global", "g"]:
             DDType = "global"
-            libFredGI.fredGI_setDDCriterium(ctypes.c_int(1))  # 1 = GLOBAL, 2 = LOCAL
-        libFredGI.fredGI_setDCO(ctypes.c_float(DCO * 100))
+            libFredGI.fredGI_setDDCriterium(1)  # 1 = GLOBAL, 2 = LOCAL
+        libFredGI.fredGI_setDCO(DCO * 100)
         if globalNorm:
-            libFredGI.fredGI_setGlobalNormalization(ctypes.c_float(float(globalNorm)))
+            libFredGI.fredGI_setGlobalNormalization(float(globalNorm))
 
         # set stepSize
         if fractionalStepSize:
             stepSize = DTA / stepSize
-        libFredGI.fredGI_setStepSize(ctypes.c_float(float(stepSize)))
+        libFredGI.fredGI_setStepSize(float(stepSize))
 
         # set verbosity
         if displayInfo:
-            libFredGI.fredGI_setVerbose(ctypes.c_int(5))
+            libFredGI.fredGI_setVerbose(5)
         else:
-            libFredGI.fredGI_setVerbose(ctypes.c_int(0))
+            libFredGI.fredGI_setVerbose(0)
 
         # set calculation mode
         if mode.lower() in ["gamma", "g"]:
             mode = "gamma"
-            libFredGI.fredGI_setComputationMode(ctypes.c_int(1))  # 1 = gamma mode ; 2 = pass-rate mode
+            libFredGI.fredGI_setComputationMode(1)  # 1 = gamma mode ; 2 = pass-rate mode
         elif mode.lower() in ["pass-rate", "pr", "p"]:
             mode = "pass-rate"
-            libFredGI.fredGI_setComputationMode(ctypes.c_int(2))  # 1 = gamma mode ; 2 = pass-rate mode
+            libFredGI.fredGI_setComputationMode(2)  # 1 = gamma mode ; 2 = pass-rate mode
 
         # set CPUNo
-        libFredGI.fredGI_setNumThreads(ctypes.c_int(CPUNo))
+        libFredGI.fredGI_setNumThreads(CPUNo)
 
         # set imgRef
-        libFredGI.fredGI_setRef.argtypes = [ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-                                            ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-                                            ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),
-                                            ]
         # the lower corner of the image is given in the index frame of the image (direction^T * origin - spacing/2), which is common to both images
         nn = np.array(imgRef.GetSize()).astype(np.int32)
         hs = np.array(imgRef.GetSpacing()).astype(np.float32)
@@ -317,11 +397,6 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         libFredGI.fredGI_setRef(nn, hs, x0, arr)
 
         # set imgEval
-        libFredGI.fredGI_setEval.argtypes = [ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                             ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-                                             ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
-                                             ndpointer(ctypes.c_float, flags="F_CONTIGUOUS"),
-                                             ]
         nn = np.array(imgEval.GetSize()).astype(np.int32)
         hs = np.array(imgEval.GetSpacing()).astype(np.float32)
         x0 = (ft.ImgAnalyse.imgAnalyse._getDirectionArray(imgEval).T @ np.array(imgEval.GetOrigin()) - np.array(imgEval.GetSpacing()) / 2).astype(np.float32)
@@ -359,7 +434,6 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
 
         # read results and convert to SimpleITK image
         arrGI = np.zeros(imgRef.GetSize(), dtype=np.float32, order="F")
-        libFredGI.fredGI_getGammaIndex3DMap.argtypes = [ndpointer(ctypes.c_float, flags="F_CONTIGUOUS")]
         libFredGI.fredGI_getGammaIndex3DMap(arrGI)
         arrGI = np.moveaxis(arrGI, range(arrGI.ndim), range(arrGI.ndim)[::-1])
         imgGI = sitk.GetImageFromArray(arrGI)
@@ -372,15 +446,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         libFredGI.fredGI_abortComputation()
 
         # unload the library
-        if sys.platform == "linux" or sys.platform == "linux2":
-            del libFredGI
-            dlclose(libFredGI_h)
-        elif sys.platform == "win32":
-            error = OSError("Windows version not implemented yet. Only the linux shared library is working now.")
-            _logger.error(error)
-            raise error
-            del libFredGI
-            ctypes.windll.kernel32.FreeLibrary(libFredGI_h)
+        _unloadLibFredGI(libFredGI)
+        del libFredGI
 
     # set additional metadata
     imgGI.SetMetaData("GIVersion", libFredGIVersion)

@@ -488,5 +488,46 @@ class test_getGIcmap(unittest.TestCase):
                     ft.getGIcmap(3, N=N)
 
 
+class test__libFredGIFileName(unittest.TestCase):
+    """The library file of each platform (sys.platform, platform.machine and the Python word size are patched)."""
+
+    def _fileName(self, sysPlatform, machine, maxsize=2**63 - 1):
+        from unittest import mock
+        with mock.patch("sys.platform", sysPlatform), mock.patch("platform.machine", return_value=machine), mock.patch("sys.maxsize", maxsize):
+            return ft.GammaIndex.gammaIndex._libFredGIFileName()
+
+    def test__libFredGIFileName_supported(self):
+        for sysPlatform, machine, fileName in (("linux", "x86_64", "libFredGI.so"),
+                                               ("win32", "AMD64", "libFredGI.dll"),
+                                               ("darwin", "arm64", "libFredGI.dylib"),
+                                               ("darwin", "x86_64", "libFredGI.dylib")):
+            with self.subTest(platform=sysPlatform, machine=machine):
+                self.assertEqual(self._fileName(sysPlatform, machine), fileName)
+
+    def test__libFredGIFileName_unsupported(self):
+        for sysPlatform, machine, maxsize in (("linux", "aarch64", 2**63 - 1),
+                                              ("win32", "ARM64", 2**63 - 1),
+                                              ("freebsd14", "amd64", 2**63 - 1),
+                                              ("win32", "AMD64", 2**31 - 1)):  # 32-bit Python
+            with self.subTest(platform=sysPlatform, machine=machine, maxsize=maxsize):
+                with self.assertLogs(ft.GammaIndex.gammaIndex._logger, level="ERROR"):
+                    with self.assertRaises(OSError):
+                        self._fileName(sysPlatform, machine, maxsize)
+
+    def test__libFredGIFileName_shipped(self):
+        # the library of the running platform is shipped with FREDtools
+        import os
+        fileName = ft.GammaIndex.gammaIndex._libFredGIFileName()
+        self.assertTrue(os.path.isfile(os.path.join(os.path.dirname(ft.GammaIndex.gammaIndex.__file__), fileName)))
+
+    def test_calcGammaIndex_unsupportedPlatform(self):
+        from unittest import mock
+        imgGauss = _createGaussImg()
+        with mock.patch("sys.platform", "freebsd14"):
+            with self.assertLogs(ft.GammaIndex.gammaIndex._logger, level="ERROR"):
+                with self.assertRaises(OSError):
+                    ft.calcGammaIndex(imgGauss, imgGauss, DD=2, DTA=2, DCO=0.05, DDType="global")
+
+
 if __name__ == '__main__':
     unittest.main()
