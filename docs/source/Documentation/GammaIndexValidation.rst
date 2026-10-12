@@ -5,7 +5,7 @@ Gamma Index Validation Report
 
 This report documents the validation of the gamma index (GI) analysis implemented in FREDtools (function :func:`fredtools.calcGammaIndex`, computation engine ``libFredGI``) against two independent, open-source implementations: the `PyMedPhys <https://docs.pymedphys.com/>`_ Python library and the `plastimatch <https://plastimatch.org/>`_ image computation toolkit. It describes the test data, the algorithms of the three tools, the metrics used for the comparison and the results, and it explains why the results of different gamma index tools are never exactly the same.
 
-The validation was performed on 12 October 2026 with FREDtools 0.8.30 (``libFredGI`` 4.5), PyMedPhys 0.41.0 and plastimatch 1.9.4, using Python 3.12.3, SimpleITK 2.5.6 and NumPy 2.5.3. It repeats the validation of 5 September 2026 with ``libFredGI`` 4.2; the differences between the two versions are summarised in :ref:`GammaIndexValidationChanges`.
+The validation was performed on 12 October 2026 with FREDtools 0.8.30 (``libFredGI`` 4.5), PyMedPhys 0.41.0 and plastimatch 1.9.4, using Python 3.12.3, SimpleITK 2.5.6 and NumPy 2.5.3.
 
 Purpose and acceptance criterion
 ------------------------------------------------
@@ -610,18 +610,6 @@ The three tools were also run on synthetic dose distributions with a known gamma
 All tools reproduce the exact gamma index in the cases where the minimum of :math:`\Gamma` lies at a tested position: the identical distributions (case A), the shift by one voxel (case B, maximum gamma index 0.5000 for ``libFredGI``, PyMedPhys and the default plastimatch search) and the uniform dose differences (cases D1–D3, gamma index 0.5 and 1.5 to four decimals for all tools, GIPR 100 % and 0 %). With the interpolated search, plastimatch gives 0.4957 in case B, marginally below the exact value, because the straight segments between the grid points in the four-dimensional space lie slightly inside the curved dose profile.
 
 Case C, with a shift of half a voxel, illustrates how the discretisation of the search affects the result (Figure 5). The shift of 0.5 mm is not a multiple of the search step of 0.2 mm used by ``libFredGI`` and PyMedPhys. The closest tested displacements along the profile are 0.4 mm and 0.6 mm, where the remaining dose difference in the steepest part of the profile (dose gradient up to 0.76 Gy/mm, i.e. 0.076 Gy or 0.38 of the dose tolerance for 0.1 mm) increases the gamma index to :math:`\sqrt{0.2^2 + 0.38^2} = 0.43` (``libFredGI``) instead of the exact 0.25. PyMedPhys arrives at 0.34, because the points of its 0.6 mm shell include positions with a component of about 0.5 mm along the profile, where the dose difference vanishes at the cost of a larger distance (:math:`\Gamma \approx 0.3`). The interpolated search of plastimatch, which projects the reference point onto the segments connecting the grid points, finds the minimum along the grid edge almost exactly (0.27), whereas the default search restricted to the grid points, for which the smallest displacement is 1 mm, gives a gamma index up to 1.5 and fails 0.7 % of the voxels of a distribution that differs from the reference only by a sub-millimetre shift. All these values are far below the pass/fail threshold, and the case shows only that correct implementations return different gamma index values in the same situation.
-
-.. _GammaIndexValidationChanges:
-
-Changes from libFredGI 4.2
-------------------------------------------------
-
-The first validation was performed with ``libFredGI`` 4.2. Version 4.5 corrects several errors found with the unit tests of the library: search points missing at the outer edge of every shell, voxels lost when the list of the analysed voxels was reordered, the interpolation at the edges of the dose grid and along an axis of a single voxel, and the validation of the input; it also runs in a background thread that can be interrupted, about 1.3 times faster, and gives the same results on Linux, Windows and macOS. On the test data the changes are small:
-
-- ``libFredGI`` 4.2 left 6, 10 and 13 of the 61 631 voxels above the dose cut-off unanalysed (gamma index -1), version 4.5 analyses all of them;
-- the GIPR changes by -0.005, -0.010 and -0.015 pp for the three criteria;
-- on the voxels analysed by both versions, the gamma index changes by more than 0.001 in 2 voxels for each criterion (by at most 0.26), and no voxel changes from passing to failing or vice versa; on the 1 mm grid the gamma index changes by more than 0.001 in 22 to 101 of the 939 693 voxels, with 5, 0 and 2 voxels changing their outcome;
-- the voxel-wise comparisons with PyMedPhys and plastimatch on the common voxels (Table 5) and the analytical checks (Table 6) are unchanged to the reported precision.
 
 Conclusion
 ------------------------------------------------
