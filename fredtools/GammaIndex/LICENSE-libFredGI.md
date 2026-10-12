@@ -1,7 +1,5 @@
 # libFredGI – gamma index library
 
-> **Draft:** the wording of this notice is to be confirmed by A. Schiavi.
-
 The following files in this folder are compiled builds of **libFredGI 4.5**, the gamma index library
 written by Angelo Schiavi for the FRED Monte Carlo project:
 
