@@ -1,0 +1,7 @@
+# compiled libraries and MetaImage files (a header followed by binary data): never convert line endings
+*.so binary
+*.dll binary
+*.dylib binary
+*.mhd binary
+*.mha binary
+*.raw binary
