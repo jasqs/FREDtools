@@ -51,3 +51,54 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: python -m unittest discover -s unittests -t . -v
+
+  other-os:
+    # Windows and macOS (Apple Silicon): the gamma index tests (with the libFredGI library of the
+    # platform) must pass; the other tests run as well, but do not fail the workflow yet
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-14]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    name: ${{ matrix.os }}, python ${{ matrix.python-version }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements/requirement_*.txt
+
+      - name: Install the dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/requirement_unittest.txt
+
+      - name: Show the versions of the installed packages
+        run: pip list
+
+      - name: Run the gamma index tests
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest discover -s unittests/GammaIndex -t . -v
+
+      - name: Run all unit tests (not required to pass on this platform yet)
+        continue-on-error: true
+        timeout-minutes: 40
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest discover -s unittests -t . -v
