@@ -31,7 +31,7 @@ To update an existing clone:
 
 Licence
 ----------------------------
-FRED tools is distributed under the GNU General Public License v3 (see `LICENSE <https://github.com/jasqs/FREDtools/blob/main/LICENSE>`_), except the compiled gamma index libraries in ``fredtools/GammaIndex`` (libFredGI), which have their own notice: `LICENSE-libFredGI.txt <https://github.com/jasqs/FREDtools/blob/main/fredtools/GammaIndex/LICENSE-libFredGI.txt>`_.
+FRED tools is distributed under the GNU General Public License v3 (see `LICENSE <https://github.com/jasqs/FREDtools/blob/main/LICENSE>`_), except the compiled gamma index libraries in ``fredtools/GammaIndex`` (libFredGI), which have their own notice: `LICENSE-libFredGI.md <https://github.com/jasqs/FREDtools/blob/main/fredtools/GammaIndex/LICENSE-libFredGI.md>`_.
 
 
 Development

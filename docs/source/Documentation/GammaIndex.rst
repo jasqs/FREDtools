@@ -10,7 +10,7 @@ A collection of functions for the Gamma Index (GI) analysis, implemented in the 
     - ``libFredGI.dll``: Windows 10 or newer on x86_64,
     - ``libFredGI.dylib``: macOS 11 or newer, on Apple Silicon and Intel (a universal library).
 
-    A 64-bit Python is needed, and the library of the running system is chosen automatically. The results are the same on all three systems (bit-identical in the tests of the library). The library is not covered by the GPL licence of FREDtools; see its notice `LICENSE-libFredGI.txt <https://github.com/jasqs/FREDtools/blob/main/fredtools/GammaIndex/LICENSE-libFredGI.txt>`_.
+    A 64-bit Python is needed, and the library of the running system is chosen automatically. The results are the same on all three systems (bit-identical in the tests of the library). The library is not covered by the GPL licence of FREDtools; see its notice `LICENSE-libFredGI.md <https://github.com/jasqs/FREDtools/blob/main/fredtools/GammaIndex/LICENSE-libFredGI.md>`_.
 
     On macOS, a library downloaded with a web browser (e.g. FREDtools downloaded as a ZIP archive) can be blocked by Gatekeeper. The quarantine attribute is then removed with ``xattr -d com.apple.quarantine fredtools/GammaIndex/libFredGI.dylib``; a clone made with git is not affected.
 

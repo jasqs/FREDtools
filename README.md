@@ -37,7 +37,7 @@ A few functions need additional packages (e.g. GPU support, GATE or opengate Mon
 
 Licence
 ----------------------------
-FRED tools is distributed under the GNU General Public License v3 (see [LICENSE](LICENSE)), except the compiled gamma index libraries in ``fredtools/GammaIndex`` (libFredGI), which have their own notice: [LICENSE-libFredGI.txt](fredtools/GammaIndex/LICENSE-libFredGI.txt).
+FRED tools is distributed under the GNU General Public License v3 (see [LICENSE](LICENSE)), except the compiled gamma index libraries in ``fredtools/GammaIndex`` (libFredGI), which have their own notice: [LICENSE-libFredGI.md](fredtools/GammaIndex/LICENSE-libFredGI.md).
 
 
 Development
