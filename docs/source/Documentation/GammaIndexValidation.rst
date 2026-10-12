@@ -5,7 +5,7 @@ Gamma Index Validation Report
 
 This report documents the validation of the gamma index (GI) analysis implemented in FREDtools (function :func:`fredtools.calcGammaIndex`, computation engine ``libFredGI``) against two independent, open-source implementations: the `PyMedPhys <https://docs.pymedphys.com/>`_ Python library and the `plastimatch <https://plastimatch.org/>`_ image computation toolkit. It describes the test data, the algorithms of the three tools, the metrics used for the comparison and the results, and it explains why the results of different gamma index tools are never exactly the same.
 
-The validation was performed on 12 October 2026 with FREDtools 0.8.30 (``libFredGI`` 4.5), PyMedPhys 0.41.0 and plastimatch 1.9.4, using Python 3.12.3, SimpleITK 2.5.6 and NumPy 2.5.3.
+The validation was performed on 12 October 2026 with FREDtools 0.8.32 (``libFredGI`` 4.6), PyMedPhys 0.41.0 and plastimatch 1.9.4, using Python 3.12.3, SimpleITK 2.5.6 and NumPy 2.5.3.
 
 Purpose and acceptance criterion
 ------------------------------------------------
@@ -98,7 +98,7 @@ The global normalisation dose was the maximum of the reference dose (39.12 Gy) i
 
    * - Tool
      - Call
-   * - FREDtools 0.8.30, ``libFredGI`` 4.5
+   * - FREDtools 0.8.32, ``libFredGI`` 4.6
      - ``calcGammaIndex(imgRef, imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")`` with the default ``stepSize=10``, ``fractionalStepSize=True``, ``globalNorm=None`` and ``mode="gamma"``
    * - PyMedPhys 0.41.0
      - ``pymedphys.gamma(axesRef, doseRef, axesEval, doseEval, dose_percent_threshold=2, distance_mm_threshold=2, lower_percent_dose_cutoff=5, interp_fraction=10, max_gamma=None, local_gamma=False, global_normalisation=None)``
@@ -111,7 +111,7 @@ Algorithms compared
 libFredGI (FREDtools)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The engine, developed by Angelo Schiavi, is a multithreaded C++ shared library distributed with FREDtools in binary form for Linux, Windows and macOS. It does not resample the input images. For every reference voxel above the DCO, :math:`\Gamma` is evaluated at the points of a cubic grid with a step of DTA/``stepSize`` (0.2 mm here), centred on the voxel and independent of the evaluation grid; the evaluation dose is interpolated trilinearly between the centres of the evaluation voxels at these points. The points are searched in spherical shells of width DTA (0–DTA, DTA–2·DTA, …), each ordered by the distance from the voxel, and the search of a voxel stops at the first point whose distance term :math:`|\mathbf{r}_e - \mathbf{r}_r|^2/\Delta d^2` is not smaller than the lowest :math:`\Gamma^2` found, because no farther point can give a lower value. The result is therefore the exact minimum over the grid of search points, without a limit of the search radius: a gamma index map on the reference grid with -1 for the voxels below the DCO.
+The engine, developed by Angelo Schiavi, is a multithreaded C++ shared library distributed with FREDtools in binary form for Linux, Windows and macOS. It does not resample the input images. For every reference voxel above the DCO, :math:`\Gamma` is evaluated at the points of a cubic grid with a step of DTA/``stepSize`` (0.2 mm here), centred on the voxel and independent of the evaluation grid; the evaluation dose is interpolated trilinearly between the centres of the evaluation voxels at these points. The points are searched in spherical shells of width DTA (0–DTA, DTA–2·DTA, …), and the search of a voxel stops when the distance term :math:`|\mathbf{r}_e - \mathbf{r}_r|^2/\Delta d^2` of the remaining points is not smaller than the lowest :math:`\Gamma^2` found, because no farther point can give a lower value. Within a shell, the points are grouped in small cubes, visited in the order of their distance from the voxel; a cube is skipped as a whole when a bound of the interpolated evaluation dose inside it shows that none of its points can lower :math:`\Gamma^2`. The skipped points do not change the result, which is therefore the exact minimum over the grid of search points, without a limit of the search radius (bit-identical to an evaluation of all points): a gamma index map on the reference grid with -1 for the voxels below the DCO.
 
 PyMedPhys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
