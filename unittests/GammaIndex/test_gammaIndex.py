@@ -6,11 +6,11 @@ import fredtools as ft
 GIImagesPath = "unittests/testData/MHDImages/GIImages"
 
 
-def _createGaussImg(shift=(0, 0, 0)):
-    """Create a 3D Gaussian dose distribution (sigma 8 mm, 10 Gy maximum, 41x41x41 voxels of 1 mm) shifted by `shift` [mm]."""
-    img = ft.createImg([41, 41, 41], spacing=[1, 1, 1], origin=[-20, -20, -20])
+def _createGaussImg(shift=(0, 0, 0), size=41, amplitude=10):
+    """Create a 3D Gaussian dose distribution (sigma 8 mm, `amplitude` [Gy] maximum, `size` voxels of 1 mm along each axis, centred at 0) shifted by `shift` [mm]."""
+    img = ft.createImg([size, size, size], spacing=[1, 1, 1], origin=[-(size // 2)] * 3)
     X, Y, Z = np.meshgrid(*ft.getVoxelCentres(img), indexing="ij")
-    arr = 10 * np.exp(-((X - shift[0])**2 + (Y - shift[1])**2 + (Z - shift[2])**2) / (2 * 8**2))
+    arr = amplitude * np.exp(-((X - shift[0])**2 + (Y - shift[1])**2 + (Z - shift[2])**2) / (2 * 8**2))
     imgGauss = sitk.GetImageFromArray(np.moveaxis(arr, [0, 1, 2], [2, 1, 0]))
     imgGauss.CopyInformation(img)
     return imgGauss
@@ -32,10 +32,8 @@ class test_calcGammaIndex(unittest.TestCase):
     def _assertPassRateMap(self, imgRefGI, imgPR):
         """Check a pass-rate map against the stored gamma map of the same configuration.
 
-        The gamma mode of the library leaves a few voxels at the border of the analysed region unevaluated (-1),
-        whereas the pass-rate mode evaluates all voxels above the dose cutoff. Therefore, the voxels analysed
-        in the gamma mode must be a subset of the voxels analysed in the pass-rate mode, and the pass/fail
-        outcome is compared on the common voxels.
+        Both modes analyse the same voxels (all voxels above the dose cutoff), so the masks of the analysed
+        voxels must be identical and the pass/fail outcome is compared on these voxels.
         """
         arrRefGI = ft.arr(imgRefGI)
         arrPR = ft.arr(imgPR)
@@ -44,8 +42,7 @@ class test_calcGammaIndex(unittest.TestCase):
         self.assertTrue(ft.compareImgFoR(imgRefGI, imgPR))
         self.assertEqual(imgPR.GetPixelIDTypeAsString(), "8-bit signed integer")
         self.assertTrue(set(np.unique(arrPR)).issubset({-1, 0, 1}))
-        self.assertTrue(np.all(analysedPR[analysed]))
-        self.assertLessEqual((analysedPR & ~analysed).sum(), 1E-3 * analysed.sum())
+        self.assertTrue(np.array_equal(analysedPR, analysed))
         self.assertGreaterEqual(np.mean((arrPR[analysed] == 1) == (arrRefGI[analysed] <= 1)), 0.999)
         self.assertAlmostEqual(float(imgPR.GetMetaData("GIPR")), ft.getGIstat(imgRefGI).passRate, delta=1)
         self.assertAlmostEqual(ft.getGIstat(imgPR).passRate, ft.getGIstat(imgRefGI).passRate, delta=1)
@@ -105,6 +102,17 @@ class test_calcGammaIndex(unittest.TestCase):
         imgPR = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global", stepSize=0.5, fractionalStepSize=False, mode="pass-rate")
         self._assertPassRateMap(imgRefGI, imgPR)
 
+    def test_calcGammaIndex_DD2_DTA2_local_DCO5_stepSize03abs(self):
+        imgRefGI = ft.readMHD(f"{GIImagesPath}/GI_DD2_DTA2_local_DCO5_stepSize0.3abs.mhd")
+        imgGI = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="local", stepSize=0.3, fractionalStepSize=False)
+        self.assertTrue(ft.compareImgFoR(imgRefGI, imgGI))
+        self.assertTrue(ft.compareImg(imgRefGI, imgGI, decimal=3))
+        self.assertEqual(imgGI.GetPixelIDTypeAsString(), "32-bit float")
+        self.assertAlmostEqual(float(imgGI.GetMetaData("GIPR")), float(imgRefGI.GetMetaData("GIPR")), delta=1)
+        self.assertAlmostEqual(ft.getGIstat(imgGI).passRate, ft.getGIstat(imgRefGI).passRate, delta=1)
+        imgPR = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="local", stepSize=0.3, fractionalStepSize=False, mode="pass-rate")
+        self._assertPassRateMap(imgRefGI, imgPR)
+
     def test_calcGammaIndex_DD2_DTA2_global_DCO10(self):
         imgRefGI = ft.readMHD(f"{GIImagesPath}/GI_DD2_DTA2_global_DCO10.mhd")
         imgGI = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.10, DDType="global")
@@ -117,12 +125,11 @@ class test_calcGammaIndex(unittest.TestCase):
         self._assertPassRateMap(imgRefGI, imgPR)
 
     def test_calcGammaIndex_metadata(self):
-        imgRefGI = ft.readMHD(f"{GIImagesPath}/GI_DD2_DTA2_global_DCO5.mhd")
         imgGI = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")
         for key in ["GIVersion", "DD", "DTA", "DDType", "DCO", "stepSize", "mode", "GIPR"]:
             with self.subTest(key=key):
                 self.assertTrue(imgGI.HasMetaDataKey(key))
-        self.assertEqual(imgGI.GetMetaData("GIVersion"), imgRefGI.GetMetaData("GIVersion"))
+        self.assertEqual(imgGI.GetMetaData("GIVersion"), "4.5")
         self.assertNotIn("\0", imgGI.GetMetaData("GIVersion"))
         self.assertEqual(imgGI.GetMetaData("DD"), "2")
         self.assertEqual(imgGI.GetMetaData("DTA"), "2")
@@ -136,6 +143,16 @@ class test_calcGammaIndex(unittest.TestCase):
         imgGI1 = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global")
         imgGI2 = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global")
         self.assertTrue(ft.compareImg(imgGI1, imgGI2, decimal=7))
+
+    def test_calcGammaIndex_interrupted(self):
+        from unittest import mock
+        imgRefGI = ft.readMHD(f"{GIImagesPath}/GI_DD2_DTA2_global_DCO5.mhd")
+        with self.assertLogs(ft.GammaIndex.gammaIndex._logger, level="WARNING"):
+            with self.assertRaises(KeyboardInterrupt):
+                with mock.patch("time.sleep", side_effect=KeyboardInterrupt):
+                    ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")
+        imgGI = ft.calcGammaIndex(self.imgRef, self.imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")
+        self.assertTrue(ft.compareImg(imgRefGI, imgGI, decimal=3))
 
     def test_calcGammaIndex_CPUNo(self):
         ft.CPUNO = "auto"
@@ -221,6 +238,13 @@ class test_calcGammaIndex(unittest.TestCase):
         self.assertAlmostEqual(statGI.max, 0.5, delta=0.02)
         self.assertEqual(statGI.passRate, 100)
 
+    def test_calcGammaIndex_largeGamma(self):
+        # gamma*DTA (about 99 mm) exceeds the reach of the 9 mm evaluation grid, so the search must end at the grid
+        imgGI = ft.calcGammaIndex(_createGaussImg(size=9), _createGaussImg(size=9, amplitude=0.1), DD=2, DTA=2, DCO=0.05, DDType="global", stepSize=0.5, fractionalStepSize=False)
+        statGI = ft.getGIstat(imgGI)
+        self.assertAlmostEqual(statGI.max, (10 - 0.1) / 0.2, delta=1E-3)
+        self.assertEqual(statGI.passRate, 0)
+
     def test_calcGammaIndex_flippedDirection(self):
         imgGI = ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05, DDType="global")
         for axis in range(3):
@@ -287,6 +311,16 @@ class test_calcGammaIndex(unittest.TestCase):
             ft.calcGammaIndex(self.imgGauss, imgEvalFlipped, DD=2, DTA=2, DCO=0.05)
         with self.assertRaises(ValueError):
             ft.calcGammaIndex(imgEvalFlipped, self.imgGauss, DD=2, DTA=2, DCO=0.05)
+
+    def test_calcGammaIndex_invalid_noOverlap(self):
+        imgEvalDetached = sitk.Image(self.imgGaussShifted)
+        for shiftX in [100, 41]:  # detached and touching (the images are 41 mm wide)
+            imgEvalDetached.SetOrigin([-20 + shiftX, -20, -20])
+            with self.subTest(shiftX=shiftX):
+                with self.assertRaises(ValueError):
+                    ft.calcGammaIndex(self.imgGauss, imgEvalDetached, DD=2, DTA=2, DCO=0.05)
+                with self.assertRaises(ValueError):
+                    ft.calcGammaIndex(imgEvalDetached, self.imgGauss, DD=2, DTA=2, DCO=0.05)
 
     def test_calcGammaIndex_invalid_DD(self):
         for DD in [0, 100, -1, "2"]:
@@ -452,6 +486,47 @@ class test_getGIcmap(unittest.TestCase):
             with self.subTest(N=N):
                 with self.assertRaises(ValueError):
                     ft.getGIcmap(3, N=N)
+
+
+class test__libFredGIFileName(unittest.TestCase):
+    """The library file of each platform (sys.platform, platform.machine and the Python word size are patched)."""
+
+    def _fileName(self, sysPlatform, machine, maxsize=2**63 - 1):
+        from unittest import mock
+        with mock.patch("sys.platform", sysPlatform), mock.patch("platform.machine", return_value=machine), mock.patch("sys.maxsize", maxsize):
+            return ft.GammaIndex.gammaIndex._libFredGIFileName()
+
+    def test__libFredGIFileName_supported(self):
+        for sysPlatform, machine, fileName in (("linux", "x86_64", "libFredGI.so"),
+                                               ("win32", "AMD64", "libFredGI.dll"),
+                                               ("darwin", "arm64", "libFredGI.dylib"),
+                                               ("darwin", "x86_64", "libFredGI.dylib")):
+            with self.subTest(platform=sysPlatform, machine=machine):
+                self.assertEqual(self._fileName(sysPlatform, machine), fileName)
+
+    def test__libFredGIFileName_unsupported(self):
+        for sysPlatform, machine, maxsize in (("linux", "aarch64", 2**63 - 1),
+                                              ("win32", "ARM64", 2**63 - 1),
+                                              ("freebsd14", "amd64", 2**63 - 1),
+                                              ("win32", "AMD64", 2**31 - 1)):  # 32-bit Python
+            with self.subTest(platform=sysPlatform, machine=machine, maxsize=maxsize):
+                with self.assertLogs(ft.GammaIndex.gammaIndex._logger, level="ERROR"):
+                    with self.assertRaises(OSError):
+                        self._fileName(sysPlatform, machine, maxsize)
+
+    def test__libFredGIFileName_shipped(self):
+        # the library of the running platform is shipped with FREDtools
+        import os
+        fileName = ft.GammaIndex.gammaIndex._libFredGIFileName()
+        self.assertTrue(os.path.isfile(os.path.join(os.path.dirname(ft.GammaIndex.gammaIndex.__file__), fileName)))
+
+    def test_calcGammaIndex_unsupportedPlatform(self):
+        from unittest import mock
+        imgGauss = _createGaussImg()
+        with mock.patch("sys.platform", "freebsd14"):
+            with self.assertLogs(ft.GammaIndex.gammaIndex._logger, level="ERROR"):
+                with self.assertRaises(OSError):
+                    ft.calcGammaIndex(imgGauss, imgGauss, DD=2, DTA=2, DCO=0.05, DDType="global")
 
 
 if __name__ == '__main__':

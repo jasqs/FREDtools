@@ -5,7 +5,7 @@ Gamma Index Validation Report
 
 This report documents the validation of the gamma index (GI) analysis implemented in FREDtools (function :func:`fredtools.calcGammaIndex`, computation engine ``libFredGI``) against two independent, open-source implementations: the `PyMedPhys <https://docs.pymedphys.com/>`_ Python library and the `plastimatch <https://plastimatch.org/>`_ image computation toolkit. It describes the test data, the algorithms of the three tools, the metrics used for the comparison and the results, and it explains why the results of different gamma index tools are never exactly the same.
 
-The validation was performed on 5 September 2026 with FREDtools 0.8.24 (``libFredGI`` 4.2), PyMedPhys 0.41.0 and plastimatch 1.9.4, using Python 3.12.3, SimpleITK 2.5.6 and NumPy 2.5.2.
+The validation was performed on 12 October 2026 with FREDtools 0.8.30 (``libFredGI`` 4.5), PyMedPhys 0.41.0 and plastimatch 1.9.4, using Python 3.12.3, SimpleITK 2.5.6 and NumPy 2.5.3. It repeats the validation of 5 September 2026 with ``libFredGI`` 4.2; the differences between the two versions are summarised in :ref:`GammaIndexValidationChanges`.
 
 Purpose and acceptance criterion
 ------------------------------------------------
@@ -98,7 +98,7 @@ The global normalisation dose was the maximum of the reference dose (39.12 Gy) i
 
    * - Tool
      - Call
-   * - FREDtools 0.8.24, ``libFredGI`` 4.2
+   * - FREDtools 0.8.30, ``libFredGI`` 4.5
      - ``calcGammaIndex(imgRef, imgEval, DD=2, DTA=2, DCO=0.05, DDType="global")`` with the default ``stepSize=10``, ``fractionalStepSize=True``, ``globalNorm=None`` and ``mode="gamma"``
    * - PyMedPhys 0.41.0
      - ``pymedphys.gamma(axesRef, doseRef, axesEval, doseEval, dose_percent_threshold=2, distance_mm_threshold=2, lower_percent_dose_cutoff=5, interp_fraction=10, max_gamma=None, local_gamma=False, global_normalisation=None)``
@@ -111,7 +111,7 @@ Algorithms compared
 libFredGI (FREDtools)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The engine, developed by Angelo Schiavi, is a multithreaded C++ shared library distributed with FREDtools in binary form; the following description is based on its interface and diagnostic output. It does not resample the input images. For every reference voxel above the DCO, the evaluation dose is interpolated from the neighbouring evaluation voxels at points of a search pattern with a step of DTA/``stepSize`` (0.2 mm here), independently of the evaluation grid spacing. The search region expands in shells of width DTA (0–DTA, DTA–2·DTA, …) and the minimum :math:`\Gamma` is updated until no smaller value can be found in a further shell. The result is a gamma index map on the reference grid with -1 for the voxels below the DCO.
+The engine, developed by Angelo Schiavi, is a multithreaded C++ shared library distributed with FREDtools in binary form for Linux, Windows and macOS. It does not resample the input images. For every reference voxel above the DCO, :math:`\Gamma` is evaluated at the points of a cubic grid with a step of DTA/``stepSize`` (0.2 mm here), centred on the voxel and independent of the evaluation grid; the evaluation dose is interpolated trilinearly between the centres of the evaluation voxels at these points. The points are searched in spherical shells of width DTA (0–DTA, DTA–2·DTA, …), each ordered by the distance from the voxel, and the search of a voxel stops at the first point whose distance term :math:`|\mathbf{r}_e - \mathbf{r}_r|^2/\Delta d^2` is not smaller than the lowest :math:`\Gamma^2` found, because no farther point can give a lower value. The result is therefore the exact minimum over the grid of search points, without a limit of the search radius: a gamma index map on the reference grid with -1 for the voxels below the DCO.
 
 PyMedPhys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -128,7 +128,7 @@ The ``plastimatch gamma`` command [PlastimatchDoc]_ (class ``Gamma_dose_comparis
 
 The gamma index is capped at ``gamma-max`` (3 in this validation), the voxels that are not analysed are set to 0, and the analysis threshold is applied to the reference dose only when ``--ref-only-threshold`` is given, which corresponds to the DCO definition of FREDtools and PyMedPhys. Note that version 1.9.4 terminated with a segmentation fault when reading the MetaImage files with double-precision voxel values, so the input images were converted to single precision.
 
-The comparison presented below uses plastimatch with the interpolated search and the reference resampled to 1 mm (``--interp-search --inherent-resample 1.0``), which is the most accurate mode of the tool for the test data. It returns the gamma index map on the 1 mm grid, so it is compared with ``libFredGI`` run on the same resampled reference image (with the global normalisation dose kept at the maximum of the original reference, as plastimatch does). The other two modes were also run and are mentioned here as a caveat for users comparing with plastimatch directly on the native 2.5 mm grid of the reference. The default discrete search gives GIPR values of 55.30 %, 23.74 % and 11.26 % for the three criteria (Table 3 gives 87.86 %, 85.42 % and 82.33 % for ``libFredGI``): with a voxel size larger than the DTA, the smallest displacement that can be tested, one voxel, already contributes 2.5 mm / 2 mm = 1.25 to the gamma index, so that a voxel passes only when the resampled evaluation dose agrees within the dose tolerance at the same position. The interpolated search on the native grid gives 84.48 %, 82.06 % and 78.50 %, i.e. 3.3–3.8 pp less than ``libFredGI``, with a voxel-wise pass/fail agreement of 93.7–94.8 %; the search along the segments between the grid voxels can still miss the true minimum, and the evaluation dose has already been resampled to the coarse reference grid. Only the resampling of the reference to a grid finer than the evaluation grid removes this dependence on the reference voxel size.
+The comparison presented below uses plastimatch with the interpolated search and the reference resampled to 1 mm (``--interp-search --inherent-resample 1.0``), which is the most accurate mode of the tool for the test data. It returns the gamma index map on the 1 mm grid, so it is compared with ``libFredGI`` run on the same resampled reference image (with the global normalisation dose kept at the maximum of the original reference, as plastimatch does). The other two modes were also run and are mentioned here as a caveat for users comparing with plastimatch directly on the native 2.5 mm grid of the reference. The default discrete search gives GIPR values of 55.30 %, 23.74 % and 11.26 % for the three criteria (Table 3 gives 87.85 %, 85.41 % and 82.31 % for ``libFredGI``): with a voxel size larger than the DTA, the smallest displacement that can be tested, one voxel, already contributes 2.5 mm / 2 mm = 1.25 to the gamma index, so that a voxel passes only when the resampled evaluation dose agrees within the dose tolerance at the same position. The interpolated search on the native grid gives 84.48 %, 82.06 % and 78.50 %, i.e. 3.3–3.8 pp less than ``libFredGI``, with a voxel-wise pass/fail agreement of 93.7–94.8 %; the search along the segments between the grid voxels can still miss the true minimum, and the evaluation dose has already been resampled to the coarse reference grid. Only the resampling of the reference to a grid finer than the evaluation grid removes this dependence on the reference voxel size.
 
 Why the results are never identical
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -170,23 +170,23 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - plastimatch interp-search, 1 mm
      - Δ [pp]
    * - 2 %/2 mm global
-     - 87.86
+     - 87.85
      - 87.71
-     - -0.15
+     - -0.14
      - 87.35
      - 86.51
      - -0.84
    * - 2 %/2 mm local
-     - 85.42
+     - 85.41
      - 84.79
-     - -0.63
+     - -0.62
      - 84.99
      - 84.20
      - -0.79
    * - 1 %/2 mm local
-     - 82.33
+     - 82.31
      - 81.42
-     - -0.90
+     - -0.89
      - 82.02
      - 81.09
      - -0.93
@@ -210,7 +210,7 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - γ ≥ 3 [%]
    * - 2 %/2 mm global
      - libFredGI
-     - 61 625
+     - 61 631
      - 0.47
      - 0.32
      - 0.42
@@ -228,10 +228,10 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 0.12
    * - 2 %/2 mm global
      - libFredGI (1 mm grid)
-     - 939 675
+     - 939 693
      - 0.48
      - 0.31
-     - 0.48
+     - 0.49
      - 1.36
      - 18.94
      - 0.97
@@ -246,13 +246,13 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 0.99
    * - 2 %/2 mm local
      - libFredGI
-     - 61 621
+     - 61 631
      - 0.53
      - 0.37
      - 0.45
      - 1.43
      - 10.80
-     - 0.34
+     - 0.35
    * - 2 %/2 mm local
      - PyMedPhys
      - 61 631
@@ -264,7 +264,7 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 0.34
    * - 2 %/2 mm local
      - libFredGI (1 mm grid)
-     - 939 673
+     - 939 693
      - 0.55
      - 0.36
      - 0.51
@@ -282,13 +282,13 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 1.25
    * - 1 %/2 mm local
      - libFredGI
-     - 61 618
+     - 61 631
      - 0.60
      - 0.41
      - 0.52
      - 1.69
      - 13.10
-     - 0.57
+     - 0.58
    * - 1 %/2 mm local
      - PyMedPhys
      - 61 631
@@ -300,7 +300,7 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 0.58
    * - 1 %/2 mm local
      - libFredGI (1 mm grid)
-     - 939 673
+     - 939 693
      - 0.61
      - 0.40
      - 0.56
@@ -338,7 +338,7 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - Disagreements with γ ∈ [0.9, 1.1] [%]
    * - 2 %/2 mm global
      - PyMedPhys
-     - 61 625
+     - 61 631
      - 99.64
      - 156
      - 68
@@ -349,18 +349,18 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 100.0
    * - 2 %/2 mm global
      - plastimatch interp-search, 1 mm (vs libFredGI on the 1 mm grid)
-     - 939 675
-     - 98.52
-     - 10 874
+     - 939 693
+     - 98.53
+     - 10 869
      - 2 990
      - -0.004
      - 0.038
      - 0.12
-     - 92.2
+     - 92.3
      - 92.9
    * - 2 %/2 mm local
      - PyMedPhys
-     - 61 621
+     - 61 631
      - 99.14
      - 458
      - 75
@@ -371,7 +371,7 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 100.0
    * - 2 %/2 mm local
      - plastimatch interp-search, 1 mm (vs libFredGI on the 1 mm grid)
-     - 939 673
+     - 939 693
      - 98.34
      - 11 496
      - 4 116
@@ -382,21 +382,21 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
      - 91.4
    * - 1 %/2 mm local
      - PyMedPhys
-     - 61 618
+     - 61 631
      - 98.86
      - 625
      - 76
      - -0.013
      - 0.041
-     - 0.15
+     - 0.14
      - 90.3
      - 100.0
    * - 1 %/2 mm local
      - plastimatch interp-search, 1 mm (vs libFredGI on the 1 mm grid)
-     - 939 673
+     - 939 693
      - 97.95
-     - 13 985
-     - 5 275
+     - 13 986
+     - 5 277
      - -0.034
      - 0.089
      - 0.28
@@ -429,12 +429,12 @@ The pass rates obtained with the three tools are compared in Table 3, the statis
 libFredGI and PyMedPhys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For the three criteria the GIPR of ``libFredGI`` is higher than that of PyMedPhys by 0.15, 0.63 and 0.90 pp (Table 3), which is within the acceptance criterion of ±1 pp. The two gamma index maps agree closely (Table 5, Figures 2 and 4): the pass/fail outcome is the same in 99.6 %, 99.1 % and 98.9 % of the analysed voxels, the mean absolute difference of the gamma index is 0.01–0.04, its 95th percentile 0.05–0.15 and the bias is below 0.015. In all voxels with a different outcome the gamma index of at least one of the tools lies within [0.9, 1.1], i.e. the disagreements are confined to the voxels at the pass/fail threshold, where the small differences resulting from the different sampling of the search space decide the outcome. The voxels passing only in ``libFredGI`` outnumber the voxels passing only in PyMedPhys (e.g. 156 versus 68 for the 2 %/2 mm global criteria), which explains the slightly higher pass rate of ``libFredGI``; the effect is largest for the local dose difference criteria, for which the dose tolerance in the low dose region is small and the gamma index changes rapidly between neighbouring voxels. The statistics of the maps (Table 4) are practically identical: the mean gamma index is 0.47 versus 0.47, 0.53 versus 0.52 and 0.60 versus 0.59, the 95th percentile 1.31 versus 1.31, 1.43 versus 1.43 and 1.69 versus 1.70, and the maximum 6.34 versus 6.32, 10.80 versus 10.72 and 13.10 versus 13.03 for the three criteria. ``libFredGI`` returns -1 for 6, 10 and 13 of the 61 631 voxels above the dose cut-off; these voxels lie at the border of the analysed region, adjacent to voxels below the cut-off, and their exclusion changes the GIPR by less than 0.02 pp.
+For the three criteria the GIPR of ``libFredGI`` is higher than that of PyMedPhys by 0.14, 0.62 and 0.89 pp (Table 3), which is within the acceptance criterion of ±1 pp. The two gamma index maps agree closely (Table 5, Figures 2 and 4): the pass/fail outcome is the same in 99.6 %, 99.1 % and 98.9 % of the analysed voxels, the mean absolute difference of the gamma index is 0.01–0.04, its 95th percentile 0.05–0.15 and the bias is below 0.015. In all voxels with a different outcome the gamma index of at least one of the tools lies within [0.9, 1.1], i.e. the disagreements are confined to the voxels at the pass/fail threshold, where the small differences resulting from the different sampling of the search space decide the outcome. The voxels passing only in ``libFredGI`` outnumber the voxels passing only in PyMedPhys (e.g. 156 versus 68 for the 2 %/2 mm global criteria), which explains the slightly higher pass rate of ``libFredGI``; the effect is largest for the local dose difference criteria, for which the dose tolerance in the low dose region is small and the gamma index changes rapidly between neighbouring voxels. The statistics of the maps (Table 4) are practically identical: the mean gamma index is 0.47 versus 0.47, 0.53 versus 0.52 and 0.60 versus 0.59, the 95th percentile 1.31 versus 1.31, 1.43 versus 1.43 and 1.69 versus 1.70, and the maximum 6.34 versus 6.32, 10.80 versus 10.72 and 13.10 versus 13.03 for the three criteria. Both tools analyse all 61 631 voxels above the dose cut-off.
 
 libFredGI and plastimatch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Plastimatch with the interpolated search on the reference resampled to 1 mm agrees with ``libFredGI`` run on the same 1 mm reference grid within 0.84, 0.79 and 0.93 pp of GIPR (Table 3), i.e. within the acceptance criterion for all three criteria, with a pass/fail agreement of 98.5 %, 98.3 % and 98.0 %, a mean absolute difference of the gamma index of 0.04–0.09 and 86–93 % of the disagreements at the threshold (Table 5, Figures 2 and 4). The agreement is somewhat looser than with PyMedPhys, as expected from the coarser interpolation along the grid segments and from the resampling of the evaluation dose, but the statistics of the maps are again very close (Table 4): the mean gamma index is 0.48 versus 0.48, 0.55 versus 0.52 and 0.61 versus 0.57, and the 95th percentile 1.36 versus 1.43, 1.50 versus 1.58 and 1.76 versus 1.90 for ``libFredGI`` and plastimatch, respectively. The gamma index on the 1 mm grid differs slightly from the one on the native grid also for ``libFredGI`` itself (GIPR 87.35 % versus 87.86 % for the 2 %/2 mm global criteria), because the linearly resampled reference is a different, smoother dose distribution with 15 times more voxels.
+Plastimatch with the interpolated search on the reference resampled to 1 mm agrees with ``libFredGI`` run on the same 1 mm reference grid within 0.84, 0.79 and 0.93 pp of GIPR (Table 3), i.e. within the acceptance criterion for all three criteria, with a pass/fail agreement of 98.5 %, 98.3 % and 98.0 %, a mean absolute difference of the gamma index of 0.04–0.09 and 86–93 % of the disagreements at the threshold (Table 5, Figures 2 and 4). The agreement is somewhat looser than with PyMedPhys, as expected from the coarser interpolation along the grid segments and from the resampling of the evaluation dose, but the statistics of the maps are again very close (Table 4): the mean gamma index is 0.48 versus 0.48, 0.55 versus 0.52 and 0.61 versus 0.57, and the 95th percentile 1.36 versus 1.43, 1.50 versus 1.58 and 1.76 versus 1.90 for ``libFredGI`` and plastimatch, respectively. The gamma index on the 1 mm grid differs slightly from the one on the native grid also for ``libFredGI`` itself (GIPR 87.35 % versus 87.85 % for the 2 %/2 mm global criteria), because the linearly resampled reference is a different, smoother dose distribution with 15 times more voxels.
 
 Analytical checks
 ------------------------------------------------
@@ -611,10 +611,22 @@ All tools reproduce the exact gamma index in the cases where the minimum of :mat
 
 Case C, with a shift of half a voxel, illustrates how the discretisation of the search affects the result (Figure 5). The shift of 0.5 mm is not a multiple of the search step of 0.2 mm used by ``libFredGI`` and PyMedPhys. The closest tested displacements along the profile are 0.4 mm and 0.6 mm, where the remaining dose difference in the steepest part of the profile (dose gradient up to 0.76 Gy/mm, i.e. 0.076 Gy or 0.38 of the dose tolerance for 0.1 mm) increases the gamma index to :math:`\sqrt{0.2^2 + 0.38^2} = 0.43` (``libFredGI``) instead of the exact 0.25. PyMedPhys arrives at 0.34, because the points of its 0.6 mm shell include positions with a component of about 0.5 mm along the profile, where the dose difference vanishes at the cost of a larger distance (:math:`\Gamma \approx 0.3`). The interpolated search of plastimatch, which projects the reference point onto the segments connecting the grid points, finds the minimum along the grid edge almost exactly (0.27), whereas the default search restricted to the grid points, for which the smallest displacement is 1 mm, gives a gamma index up to 1.5 and fails 0.7 % of the voxels of a distribution that differs from the reference only by a sub-millimetre shift. All these values are far below the pass/fail threshold, and the case shows only that correct implementations return different gamma index values in the same situation.
 
+.. _GammaIndexValidationChanges:
+
+Changes from libFredGI 4.2
+------------------------------------------------
+
+The first validation was performed with ``libFredGI`` 4.2. Version 4.5 corrects several errors found with the unit tests of the library: search points missing at the outer edge of every shell, voxels lost when the list of the analysed voxels was reordered, the interpolation at the edges of the dose grid and along an axis of a single voxel, and the validation of the input; it also runs in a background thread that can be interrupted, about 1.3 times faster, and gives the same results on Linux, Windows and macOS. On the test data the changes are small:
+
+- ``libFredGI`` 4.2 left 6, 10 and 13 of the 61 631 voxels above the dose cut-off unanalysed (gamma index -1), version 4.5 analyses all of them;
+- the GIPR changes by -0.005, -0.010 and -0.015 pp for the three criteria;
+- on the voxels analysed by both versions, the gamma index changes by more than 0.001 in 2 voxels for each criterion (by at most 0.26), and no voxel changes from passing to failing or vice versa; on the 1 mm grid the gamma index changes by more than 0.001 in 22 to 101 of the 939 693 voxels, with 5, 0 and 2 voxels changing their outcome;
+- the voxel-wise comparisons with PyMedPhys and plastimatch on the common voxels (Table 5) and the analytical checks (Table 6) are unchanged to the reported precision.
+
 Conclusion
 ------------------------------------------------
 
-For all three criteria the gamma index pass rate calculated with the FREDtools implementation agrees with PyMedPhys within 0.90 pp and with plastimatch (interpolated search on a common 1 mm grid) within 0.93 pp, which satisfies the acceptance criterion of ±1 pp. The pass/fail outcome agrees in at least 98.9 % (PyMedPhys) and 98.0 % (plastimatch) of the analysed voxels, and the disagreements are confined to the voxels at the pass/fail threshold, as expected from the different discretisation of the search. The analytical checks are reproduced exactly wherever the minimum lies at a tested position, and the case of a sub-voxel shift shows the size of the deviations that must be expected between correct implementations. The gamma index maps of ``libFredGI`` are deterministic: repeated runs with the same input give identical maps, also when the number of threads is changed (verified with 1 and 22 threads).
+For all three criteria the gamma index pass rate calculated with the FREDtools implementation agrees with PyMedPhys within 0.89 pp and with plastimatch (interpolated search on a common 1 mm grid) within 0.93 pp, which satisfies the acceptance criterion of ±1 pp. The pass/fail outcome agrees in at least 98.9 % (PyMedPhys) and 98.0 % (plastimatch) of the analysed voxels, and the disagreements are confined to the voxels at the pass/fail threshold, as expected from the different discretisation of the search. The analytical checks are reproduced exactly wherever the minimum lies at a tested position, and the case of a sub-voxel shift shows the size of the deviations that must be expected between correct implementations. The gamma index maps of ``libFredGI`` are deterministic: repeated runs with the same input give identical maps, also when the number of threads is changed (verified with 1 and 22 threads).
 
 The gamma index analysis implemented in FREDtools is therefore considered validated. The comparison also shows that a gamma index calculated without interpolation of the evaluation dose, such as the default mode of plastimatch, is not comparable with the interpolating implementations when the voxel size is comparable to or larger than the DTA; comparisons with other tools should be made with an interpolating search and, if the tool resamples the evaluation dose, on a grid finer than the evaluation grid.
 

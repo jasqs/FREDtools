@@ -38,6 +38,8 @@ Image analysis
 
 .. autofunction:: fredtools.compareImgFoR
 
+.. autofunction:: fredtools.compareImgFoROverlap
+
 .. autofunction:: fredtools.pos
 
 .. autofunction:: fredtools.arr

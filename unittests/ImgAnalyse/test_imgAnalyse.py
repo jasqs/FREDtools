@@ -749,6 +749,105 @@ class test_compareImgFoR(unittest.TestCase):
             ft.compareImgFoR(ft.arr(self.img3D), self.img3D)  # type: ignore
 
 
+class test_compareImgFoROverlap(unittest.TestCase):
+    def setUp(self):
+        self.img3D = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
+
+    def _createCube(self, centre, direction):
+        """Create a 10x10x10 image of 1 mm voxels with the centre `centre` [mm] and the direction matrix `direction` (columns are the axes)."""
+        img = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
+        img.SetDirection(np.array(direction).flatten().tolist())
+        img.SetOrigin((np.array(centre) - np.array(direction) @ np.full(3, 4.5)).tolist())
+        return img
+
+    def test_compareImgFoROverlap(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2, displayInfo=True))
+
+    def test_compareImgFoROverlap_partial(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[5.0, 0.0, 0.0])
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2))
+        self.assertTrue(ft.compareImgFoROverlap(img2, self.img3D))
+
+    def test_compareImgFoROverlap_inside(self):
+        img2 = ft.createImg([2, 2, 2], spacing=[1.0, 1.0, 1.0], origin=[4.0, 4.0, 4.0])
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2))
+        self.assertTrue(ft.compareImgFoROverlap(img2, self.img3D))
+
+    def test_compareImgFoROverlap_detached(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[20.0, 0.0, 0.0])
+        self.assertFalse(ft.compareImgFoROverlap(self.img3D, img2, displayInfo=True))
+
+    def test_compareImgFoROverlap_touching(self):
+        for origin in ([10.0, 0.0, 0.0], [-10.0, 0.0, 0.0], [10.0, 10.0, 0.0], [10.0, 10.0, 10.0]):  # common face, edge and corner
+            with self.subTest(origin=origin):
+                img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=origin)
+                self.assertFalse(ft.compareImgFoROverlap(self.img3D, img2))
+
+    def test_compareImgFoROverlap_decimal(self):
+        img2 = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[9.9998, 0.0, 0.0])  # overlap of 0.0002 mm
+        self.assertFalse(ft.compareImgFoROverlap(self.img3D, img2, decimal=3))
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2, decimal=5))
+
+    def test_compareImgFoROverlap_different_spacing(self):
+        img2 = ft.createImg([4, 4, 4], spacing=[3.0, 3.0, 3.0], origin=[10.0, 0.0, 0.0])  # overlap of 1 mm
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2))
+        img2 = ft.createImg([4, 4, 4], spacing=[3.0, 3.0, 3.0], origin=[12.0, 0.0, 0.0])  # gap of 1 mm
+        self.assertFalse(ft.compareImgFoROverlap(self.img3D, img2))
+
+    def test_compareImgFoROverlap_flipped(self):
+        img2 = sitk.Flip(self.img3D, flipAxes=[True, False, False])  # the same physical space with a different direction
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2))
+        img2.SetOrigin((np.array(img2.GetOrigin()) + [20.0, 0.0, 0.0]).tolist())
+        self.assertFalse(ft.compareImgFoROverlap(self.img3D, img2))
+
+    def test_compareImgFoROverlap_rotated(self):
+        s = np.sqrt(0.5)
+        rotationZ = [[s, -s, 0], [s, s, 0], [0, 0, 1]]
+        # the bounding boxes overlap but the vertex of the rotated cube does not reach the edge of the other cube
+        img2 = self._createCube([14.5, 14.5, 4.5], rotationZ)
+        self.assertFalse(ft.compareImgFoROverlap(self.img3D, img2))
+        img2 = self._createCube([11.5, 11.5, 4.5], rotationZ)
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2))
+
+    def test_compareImgFoROverlap_rotated_edges(self):
+        s = np.sqrt(0.5)
+        rotationZX = [[s, -s, 0], [0.5, 0.5, -s], [0.5, 0.5, s]]
+        shiftDirection = np.array([-1, -1, 0]) / np.sqrt(2)
+        # the cubes are 0.106 mm apart and separated only along the cross product of two edges, not along any face normal
+        img2 = self._createCube(np.array([4.5, 4.5, 4.5]) + 14.25 * shiftDirection, rotationZX)
+        self.assertFalse(ft.compareImgFoROverlap(self.img3D, img2))
+        img2 = self._createCube(np.array([4.5, 4.5, 4.5]) + 13.75 * shiftDirection, rotationZX)
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2))
+
+    def test_compareImgFoROverlap_2D(self):
+        img1 = ft.createImg([10, 10], spacing=[1.0, 1.0], origin=[0.0, 0.0])
+        self.assertTrue(ft.compareImgFoROverlap(img1, ft.createImg([10, 10], spacing=[1.0, 1.0], origin=[5.0, 5.0])))
+        self.assertFalse(ft.compareImgFoROverlap(img1, ft.createImg([10, 10], spacing=[1.0, 1.0], origin=[0.0, 20.0])))
+
+    def test_compareImgFoROverlap_4D(self):
+        img1 = sitk.Image([5, 5, 5, 3], sitk.sitkFloat32)
+        img2 = sitk.Image([5, 5, 5, 3], sitk.sitkFloat32)
+        img2.SetOrigin([0.0, 0.0, 0.0, 2.0])
+        self.assertTrue(ft.compareImgFoROverlap(img1, img2))
+        img2.SetOrigin([0.0, 0.0, 0.0, 3.0])  # touching along the fourth axis
+        self.assertFalse(ft.compareImgFoROverlap(img1, img2))
+
+    def test_compareImgFoROverlap_vector(self):
+        img2 = ft.createImg([10, 10, 10], components=3, spacing=[1.0, 1.0, 1.0], origin=[5.0, 0.0, 0.0])
+        self.assertTrue(ft.compareImgFoROverlap(self.img3D, img2))
+
+    def test_compareImgFoROverlap_invalid_dimension(self):
+        with self.assertRaises(ValueError):
+            ft.compareImgFoROverlap(self.img3D, ft.createImg([10, 10], spacing=[1.0, 1.0], origin=[0.0, 0.0]))
+
+    def test_compareImgFoROverlap_invalid_img(self):
+        with self.assertRaises(TypeError):
+            ft.compareImgFoROverlap(self.img3D, ft.arr(self.img3D))  # type: ignore
+        with self.assertRaises(TypeError):
+            ft.compareImgFoROverlap(ft.arr(self.img3D), self.img3D)  # type: ignore
+
+
 class test_compareImg(unittest.TestCase):
     def setUp(self):
         self.img3D = ft.createImg([10, 10, 10], spacing=[1.0, 1.0, 1.0], origin=[0.0, 0.0, 0.0])

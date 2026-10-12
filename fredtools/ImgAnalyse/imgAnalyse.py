@@ -1179,6 +1179,7 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInf
     See Also
     --------
         compareImg : compare two images voxel by voxel.
+        compareImgFoROverlap : check if the frames of reference of two images overlap.
     """
     import fredtools as ft
     import numpy as np
@@ -1222,3 +1223,95 @@ def compareImgFoR(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInf
         _logger.info("FoRs matching:\n\t" + "\n\t".join(strLog))
 
     return bool(match)
+
+
+def compareImgFoROverlap(img1: SITKImage, img2: SITKImage, decimal: int = 3, displayInfo: bool = False) -> bool:
+    """Check if the frames of reference of two images overlap.
+
+    The function gets two images defined as instances of a SimpleITK image
+    object and checks if the volumes occupied by the images, i.e. the boxes enclosed
+    by the outer edges of their voxels, overlap at least partially. The images can
+    have different size, spacing, origin and direction, but they must have the
+    same dimension. Images that only touch each other (with a common face, edge or
+    corner but no common volume) are considered detached.
+
+    Parameters
+    ----------
+    img1 : SimpleITK Image
+        An object of a SimpleITK image.
+    img2 : SimpleITK Image
+        An object of a SimpleITK image.
+    decimal: int, optional
+        Use rounding to a given number of decimals of the overlap depth. (def. 3)
+    displayInfo : bool, optional
+        Displays a summary of the function results. (def. False)
+
+    Returns
+    -------
+    bool
+        A true/false value describing if the frames of reference
+        of the images overlap at least partially.
+
+    Raises
+    ------
+    TypeError
+        If `img1` or `img2` is not an instance of a SimpleITK image.
+    ValueError
+        If `img1` and `img2` have different dimensions.
+
+    See Also
+    --------
+        compareImgFoR : compare two images frame of reference.
+
+    Notes
+    -----
+    The overlap is determined by the overlap depth, i.e. the radius of the largest sphere
+    (circle for 2D images) that fits inside both images, found with linear programming
+    (``scipy.optimize.linprog``). The images overlap if the overlap depth, given in the same
+    length unit as the images (in [mm] by default) and rounded to `decimal` decimals, is positive.
+    It is zero for touching images and negative for detached images. The method is exact for
+    images of any dimension and any direction matrices.
+    """
+    import fredtools as ft
+    import numpy as np
+    from scipy.optimize import linprog
+
+    ft._imgTypeChecker.isSITK(img1, raiseError=True)
+    ft._imgTypeChecker.isSITK(img2, raiseError=True)
+
+    if img1.GetDimension() != img2.GetDimension():
+        error = ValueError(f"The images have different dimensions ({img1.GetDimension()} and {img2.GetDimension()}) and their overlap cannot be determined.")
+        _logger.error(error)
+        raise error
+    dimension = img1.GetDimension()
+
+    # each image occupies the box in which the continuous index along each axis j, i_j = a_j * (p - origin) with a_j being
+    # the row j of the inverse direction matrix divided by the spacing, is within [-0.5, size_j - 0.5]. The linear program
+    # maximises t, the distance of a point p from all faces of both boxes (constraint for each face: +-a_j * p + t * |a_j| <= bound),
+    # so that the optimum is the radius of the largest sphere inside both images (positive for a common volume).
+    A, b = [], []
+    for img in (img1, img2):
+        rows = np.linalg.inv(_getDirectionArray(img)) / np.array(img.GetSpacing())[:, None]
+        rowsOrigin = rows @ np.array(img.GetOrigin())
+        for row, rowOrigin, size in zip(rows, rowsOrigin, img.GetSize()):
+            rowNorm = np.linalg.norm(row)
+            A.append([*-row, rowNorm])  # lower face: i_j >= -0.5
+            b.append(0.5 - rowOrigin)
+            A.append([*row, rowNorm])  # upper face: i_j <= size_j - 0.5
+            b.append(size - 0.5 + rowOrigin)
+    result = linprog(c=[0] * dimension + [-1], A_ub=A, b_ub=b, bounds=[(None, None)] * (dimension + 1), method="highs")
+    if not result.success:
+        error = RuntimeError(f"The overlap of the images could not be determined: {result.message}")
+        _logger.error(error)
+        raise error
+    overlapDepth = float(-result.fun)
+    overlap = bool(np.round(overlapDepth, decimals=decimal) > 0)
+
+    if displayInfo:
+        strLog = [
+            f"FoRs overlapping:  {overlap} ({decimal} decimals tolerance)",
+            f"Overlap depth:     {overlapDepth:.{decimal}f} mm (radius of the largest sphere inside both images, negative when detached)",
+        ]
+        _logger.info("FoRs overlap:\n\t" + "\n\t".join(strLog))
+
+    return overlap

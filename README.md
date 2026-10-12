@@ -35,6 +35,11 @@ The packages needed to use FRED tools are listed in ``requirements/requirement_l
 A few functions need additional packages (e.g. GPU support, GATE or opengate Monte Carlo), which are listed at the end of that file and should be installed separately if those functions are used.
 
 
+Licence
+----------------------------
+FRED tools is distributed under the GNU General Public License v3 (see [LICENSE](LICENSE)), except the compiled gamma index libraries in ``fredtools/GammaIndex`` (libFredGI), which have their own notice: [LICENSE-libFredGI.md](fredtools/GammaIndex/LICENSE-libFredGI.md).
+
+
 Development
 ----------------------------
 Everyone is invited to support the development of the FRED tools and to add functionalities needed for a specific application.
