@@ -129,7 +129,7 @@ class test_calcGammaIndex(unittest.TestCase):
         for key in ["GIVersion", "DD", "DTA", "DDType", "DCO", "stepSize", "mode", "GIPR"]:
             with self.subTest(key=key):
                 self.assertTrue(imgGI.HasMetaDataKey(key))
-        self.assertEqual(imgGI.GetMetaData("GIVersion"), "4.5")
+        self.assertEqual(imgGI.GetMetaData("GIVersion"), "4.6")
         self.assertNotIn("\0", imgGI.GetMetaData("GIVersion"))
         self.assertEqual(imgGI.GetMetaData("DD"), "2")
         self.assertEqual(imgGI.GetMetaData("DTA"), "2")

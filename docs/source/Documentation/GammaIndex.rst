@@ -4,7 +4,7 @@ Gamma Index Analysis
 A collection of functions for the Gamma Index (GI) analysis, implemented in the ``fredtools.GammaIndex`` subpackage.
 
 .. note::
-    The GI calculation is performed by libFredGI, an external C++ library (version 4.5), which is distributed with FREDtools in compiled form, in ``fredtools/GammaIndex``:
+    The GI calculation is performed by libFredGI, an external C++ library (version 4.6), which is distributed with FREDtools in compiled form, in ``fredtools/GammaIndex``:
 
     - ``libFredGI.so``: Linux on x86_64, with glibc 2.28 or newer (e.g. RHEL/Rocky 8, Ubuntu 20.04, Debian 10 and newer),
     - ``libFredGI.dll``: Windows 10 or newer on x86_64,
