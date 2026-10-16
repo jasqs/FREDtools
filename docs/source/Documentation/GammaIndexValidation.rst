@@ -40,7 +40,7 @@ The dose difference criterion is given in percent and can be interpreted in two 
 - *global*: :math:`\Delta D` is a percentage of a global normalisation dose, by default the maximum dose of the reference distribution;
 - *local*: :math:`\Delta D` is a percentage of the local reference dose :math:`D_r(\mathbf{r}_r)`.
 
-Only reference points with a dose not lower than the dose cut-off (DCO), given as a fraction of the global normalisation dose, are analysed. In FREDtools, voxels below the DCO are marked with -1 in the gamma index map, the search step is defined by the ``stepSize`` parameter (by default DTA/10) and the global normalisation dose can be set with the ``globalNorm`` parameter (by default the maximum of the reference image).
+Only reference points with a dose above the dose cut-off (DCO, strictly greater), given as a fraction of the global normalisation dose, are analysed. In FREDtools, voxels below the DCO are marked with -1 in the gamma index map, the search step is defined by the ``stepSize`` parameter (by default DTA/10) and the global normalisation dose can be set with the ``globalNorm`` parameter (by default the maximum of the reference image).
 
 Test data
 ------------------------------------------------

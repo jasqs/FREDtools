@@ -465,6 +465,43 @@ class test_calcGammaIndex(unittest.TestCase):
         with self.assertRaises(ValueError):
             ft.calcGammaIndex(self.imgGauss, self.imgGaussShifted, DD=2, DTA=2, DCO=0.5, globalNorm=3 * maxRef)
 
+    def test_calcGammaIndex_cutoffBoundary(self):
+        # the library analyses only the voxels strictly above the cut-off (here 0.5, exact in float32)
+        arr = np.ones((3, 3, 3), dtype=np.float32)
+        arr[0, 0, :2] = 0.5
+        arr[0, 1, 0] = np.nextafter(np.float32(0.5), np.float32(np.inf))
+        arr[0, 1, 1] = np.nextafter(np.float32(0.5), np.float32(-np.inf))
+        img = sitk.GetImageFromArray(arr)
+        imgGI = ft.calcGammaIndex(img, img, DD=2, DTA=2, DCO=0.25, DDType="global", globalNorm=2.0)
+        imgPR = ft.calcGammaIndex(img, img, DD=2, DTA=2, DCO=0.25, DDType="global", globalNorm=2.0, mode="pass-rate")
+        for arrResult, valueAnalysed in ((sitk.GetArrayFromImage(imgGI), 0), (sitk.GetArrayFromImage(imgPR), 1)):
+            self.assertEqual(arrResult[0, 0, :2].tolist(), [-1, -1])
+            self.assertEqual(arrResult[0, 1, 0], valueAnalysed)
+            self.assertEqual(arrResult[0, 1, 1], -1)
+            self.assertTrue(np.all(arrResult[1:] == valueAnalysed))
+
+    def test_calcGammaIndex_cutoffBoundaryGlobalNormNone(self):
+        # the cut-off is relative to the float32 maximum of the reference image (here 0.25 of 2.0)
+        arr = np.full((3, 3, 3), 2.0, dtype=np.float32)
+        arr[0, 0, 0] = 0.5
+        arr[0, 0, 1] = np.nextafter(np.float32(0.5), np.float32(np.inf))
+        img = sitk.GetImageFromArray(arr)
+        arrGI = sitk.GetArrayFromImage(ft.calcGammaIndex(img, img, DD=2, DTA=2, DCO=0.25, DDType="global"))
+        self.assertEqual(arrGI[0, 0, 0], -1)
+        self.assertEqual(arrGI[0, 0, 1], 0)
+
+    def test_calcGammaIndex_invalid_cutoffAtMax(self):
+        # the maximum of the reference image is exactly at the cut-off, so no voxel is analysed
+        img = sitk.GetImageFromArray(np.full((3, 3, 3), 0.5, dtype=np.float32))
+        with self.assertRaises(ValueError):
+            ft.calcGammaIndex(img, img, DD=2, DTA=2, DCO=0.25, DDType="global", globalNorm=2.0)
+
+    def test_calcGammaIndex_invalid_cutoffAtMaxFloat32(self):
+        # the cut-off computed in float32 equals float32(0.2), which is above 0.1*2.0 in double precision
+        img = sitk.GetImageFromArray(np.full((3, 3, 3), np.float32(0.2), dtype=np.float32))
+        with self.assertRaises(ValueError):
+            ft.calcGammaIndex(img, img, DD=2, DTA=2, DCO=0.1, DDType="global", globalNorm=2.0)
+
 
 class test_getGIstat(unittest.TestCase):
 

@@ -107,9 +107,10 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     and evaluation images, respectively.
     The gamma index test is performed with a defined dose difference (DD) given in [%],
     distance to agreement (DTA) given in the same length unit as the reference image
-    (in [mm] by default) and is calculated for the dose values greater or equal than
-    a fraction of the global normalisation dose (the maximum dose in the reference image
-    by default), given by the DCO parameter.
+    (in [mm] by default) and is calculated for the reference voxels with a dose strictly
+    greater than the dose cut-off, which is a fraction of the global normalisation dose
+    (the maximum dose in the reference image by default) given by the DCO parameter.
+    The voxels with a dose equal to the cut-off are not analysed (-1).
     The gamma index can be calculated for `local` or `global` dose difference in two modes:
 
         -  *gamma*: each voxel represents the gamma index value and the voxels excluded from the GI analysis have values -1.
@@ -135,8 +136,10 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     DTA : float
         Distance-to-agreement, usually in [mm].
     DCO : float
-        Lower dose cutoff below which gamma will not be calculated given as the fraction of the
-        global normalisation dose (the maximum reference value by default, see `globalNorm`).
+        Dose cut-off given as the fraction of the global normalisation dose (the maximum
+        reference value by default, see `globalNorm`). The gamma index is calculated only for
+        the reference voxels with a dose strictly greater than the cut-off. The voxels with
+        a dose equal to or lower than the cut-off are not analysed (-1).
     DDType : {'local', 'global'}, optional
         Method of calculating the absolute dose difference criterion. (def. 'local'):
 
@@ -227,7 +230,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     performed in the common index frame of the images, which preserves the distances for any
     common direction matrix, and the resulting gamma index map is returned in the frame of
     reference of the `imgRef`. The dose cutoff in dose units is `DCO` times the global
-    normalisation dose and the 'global' dose difference criterion is `DD` percent of the global
+    normalisation dose, computed by the gamma index library in single precision (float32),
+    and the 'global' dose difference criterion is `DD` percent of the global
     normalisation dose, which is the maximum of the reference image unless `globalNorm` is given.
 
     The calculation runs in a background thread of the gamma index library and can be interrupted
@@ -331,9 +335,12 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         error = ValueError(f"The reference image must contain positive values but its maximum is {refMax:g}.")
         _logger.error(error)
         raise error
-    globalNormValue = float(globalNorm) if globalNorm is not None else refMax
-    doseCutoff = DCO * globalNormValue
-    if refMax < doseCutoff:
+    # the dose cut-off as computed by the gamma index library in single precision (float32): the DCO is passed in [%]
+    # as float32, divided by 100 and multiplied by the global normalisation dose (globalNorm passed as float32, or the
+    # maximum of the float32 reference image), and only the voxels with a dose strictly greater than it are analysed
+    globalNormValue = np.float32(globalNorm) if globalNorm is not None else np.float32(refMax)
+    doseCutoff = np.float32(np.float32(DCO * 100) / np.float32(100)) * globalNormValue
+    if refMax <= doseCutoff:
         error = ValueError(f"No voxel of the reference image is above the dose cut-off {doseCutoff:g} (DCO {DCO:g} of the global normalisation {globalNormValue:g}), because the maximum of the reference image is {refMax:g}.")
         _logger.error(error)
         raise error
