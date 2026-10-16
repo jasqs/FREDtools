@@ -257,6 +257,14 @@ class test_getMaxPosition(unittest.TestCase):
             position = ft.getMaxPosition(self.img3D_twoMaxima)
         self.assertEqual(position, expected_position)
 
+    def test_getMaxPosition_exact(self):
+        # the position in double precision (100.1 + 0.1 is 100.19999999999999, not 100.2 as in single precision)
+        img = ft.createImg([5, 3, 3], spacing=[0.1, 1.0, 1.0], origin=[100.1, 0.0, 0.0])
+        img[1, 0, 0] = 1.0
+        position = ft.getMaxPosition(img)
+        self.assertEqual(position, (100.19999999999999, 0.0, 0.0))
+        self.assertEqual(position, img.TransformIndexToPhysicalPoint([1, 0, 0]))
+
     def test_getMaxPosition_invalid_img(self):
         with self.assertRaises(TypeError):
             ft.getMaxPosition(ft.arr(self.img3D))  # type: ignore
@@ -292,6 +300,14 @@ class test_getMinPosition(unittest.TestCase):
         with self.assertLogs(ft.ImgAnalyse.imgAnalyse._logger, level="WARNING"):
             position = ft.getMinPosition(self.img3D_uniform)
         self.assertEqual(position, expected_position)
+
+    def test_getMinPosition_exact(self):
+        # the position in double precision (100.1 + 0.1 is 100.19999999999999, not 100.2 as in single precision)
+        img = ft.createImg([5, 3, 3], spacing=[0.1, 1.0, 1.0], origin=[100.1, 0.0, 0.0])
+        img[1, 0, 0] = -1.0
+        position = ft.getMinPosition(img)
+        self.assertEqual(position, (100.19999999999999, 0.0, 0.0))
+        self.assertEqual(position, img.TransformIndexToPhysicalPoint([1, 0, 0]))
 
     def test_getMinPosition_invalid_img(self):
         with self.assertRaises(TypeError):
@@ -396,6 +412,20 @@ class test_getVoxelPhysicalPoints(unittest.TestCase):
         points = np.array(ft.getVoxelPhysicalPoints(self.imgMask, insideMask=True, displayInfo=True))
         self.assertEqual(points.shape, (int(ft.getStatistics(self.imgMask).GetSum()), 3))
         self.assertTrue(np.all(points >= 3.0) and np.all(points <= 7.0))
+
+    def test_getVoxelPhysicalPoints_dtype(self):
+        for imgName, img, insideMask in [("3D", self.img3D, False), ("2D", self.img2D, False), ("mask", self.imgMask, True)]:
+            with self.subTest(img=imgName):
+                self.assertEqual(ft.getVoxelPhysicalPoints(img, insideMask=insideMask).dtype, np.float64)
+
+    def test_getVoxelPhysicalPoints_rotated(self):
+        from scipy.spatial.transform import Rotation
+        img = ft.createImg([7, 6, 5], spacing=[0.1, 0.3, 1.1], origin=[100.1, -3.3, 7.7])
+        img.SetDirection(Rotation.from_euler("xyz", [20, -35, 50], degrees=True).as_matrix().flatten())
+        points = ft.getVoxelPhysicalPoints(img)
+        # the same positions as TransformIndexToPhysicalPoint (bit-identical), with x fastest
+        expectedPoints = np.array([img.TransformIndexToPhysicalPoint([i, j, k]) for k in range(5) for j in range(6) for i in range(7)])
+        self.assertTrue(np.array_equal(points, expectedPoints))
 
     def test_getVoxelPhysicalPoints_insideMask_invalid_mask(self):
         with self.assertRaises(TypeError):

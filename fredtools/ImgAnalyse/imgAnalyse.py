@@ -420,7 +420,7 @@ def getVoxelEdges(img: SITKImage, displayInfo: bool = False) -> tuple[tuple[floa
     return tuple(voxelEdges)
 
 
-def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo: bool = False) -> Iterable[PointLike]:
+def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo: bool = False) -> NDArray:
     """Get physical positions of voxels.
 
     The function gets voxels' physical positions of an image
@@ -441,8 +441,9 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo
     Returns
     -------
     NxD numpy.array
-        A numpy array of size NxD where N is the number of voxel
-        and D is the axis.
+        A numpy array of size NxD of float64 voxel positions, where N is the number
+        of voxels and D is the dimension. The positions are equal to those of
+        SimpleITK TransformIndexToPhysicalPoint, ordered with x fastest.
 
     Raises
     ------
@@ -453,6 +454,7 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo
     See Also
     --------
     getVoxelCentres : get voxel centres.
+    createImgFromFunction : create an image from a function of the voxel centres.
 
     """
     import fredtools as ft
@@ -473,6 +475,8 @@ def getVoxelPhysicalPoints(img: SITKImage, insideMask: bool = False, displayInfo
     # get all voxel positions
     PhysicalPointImageSource = sitk.PhysicalPointImageSource()
     PhysicalPointImageSource.SetReferenceImage(imgMask)
+    # the default output type is a float32 vector, the float64 vector gives exactly the positions of TransformIndexToPhysicalPoint
+    PhysicalPointImageSource.SetOutputPixelType(sitk.sitkVectorFloat64)
     imgMaskPhysPos = PhysicalPointImageSource.Execute()
 
     # get voxel positions in mask only
