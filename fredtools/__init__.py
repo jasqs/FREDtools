@@ -37,7 +37,7 @@ from .ImgIO.OmniPro_io import (readOPG, readOPD)
 from . import ImgManipulate
 from .ImgManipulate.imgGetSubimg import (getSlice, getProfile, getPoint, getInteg, getCumSum, getProfilePoints)
 from .ImgManipulate.imgManipulate import (mapStructToImg, floatingToBinaryMask, cropImgToMask, setValueMask, setNaNImg, resampleImg, sumImg, divideImg, sumVectorImg, expandDimsImg, getImgBEV, overwriteCTPhysicalProperties, setIdentityDirection, addMarginToMask, addGaussMarginToMask, addExpMarginToMask, maximumImg, minimumImg, meanImg)
-from .ImgManipulate.imgCreate import (createEllipseMask, createConeMask, createCylinderMask, createBoxMask, createImg)
+from .ImgManipulate.imgCreate import (createEllipseMask, createConeMask, createCylinderMask, createBoxMask, createImg, createImgFromFunction)
 from .ImgManipulate.inmManipulate import (inmSumVec, inmSumImg)
 
 from . import Miscellaneous

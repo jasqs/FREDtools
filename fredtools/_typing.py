@@ -6,7 +6,7 @@ so that all the modules can import a consistent set of types from a single place
 """
 # https://docs.pydantic.dev/latest/concepts/types/
 
-from typing import Any, Iterable, Sequence, Literal, Union, Annotated, TypeVar, List, Tuple, SupportsFloat, NewType, Type, NamedTuple, TypeAlias
+from typing import Any, Callable, Iterable, Sequence, Literal, Union, Annotated, TypeVar, List, Tuple, SupportsFloat, NewType, Type, NamedTuple, TypeAlias
 from typing import cast, overload
 from pydantic import Field, StringConstraints, NonNegativeInt, NonNegativeFloat, PositiveFloat, NegativeFloat, PositiveInt, NegativeInt
 from dotted_dict import DottedDict

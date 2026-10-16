@@ -81,6 +81,8 @@ Image creation
 
 .. autofunction:: fredtools.createImg
 
+.. autofunction:: fredtools.createImgFromFunction
+
 Influence matrix manipulation
 ------------------------------------------------
 
