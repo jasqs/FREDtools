@@ -103,7 +103,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     """Calculate gamma index map.
 
     The function calculates the gamma index map using the `imgRef` and `imgEval`,
-    defined SimpleITK 3D image objects, as the reference and evaluation images, respectively.
+    defined as SimpleITK 2D or 3D image objects of the same dimension, as the reference
+    and evaluation images, respectively.
     The gamma index test is performed with a defined dose difference (DD) given in [%],
     distance to agreement (DTA) given in the same length unit as the reference image
     (in [mm] by default) and is calculated for the dose values greater or equal than
@@ -122,12 +123,13 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     Parameters
     ----------
     imgRef : SimpleITK Image
-        An object of a SimpleITK 3D image describing the reference. The image must have
-        a scalar pixel type and at least two voxels along each axis.
+        An object of a SimpleITK 2D or 3D image describing the reference. The image must have
+        a scalar pixel type. An axis of size 1 is a single slice whose dose is constant
+        across its voxel thickness.
     imgEval : SimpleITK Image
-        An object of a SimpleITK 3D image describing the evaluation, with the same
-        requirements as for the `imgRef`. It can have a different size, spacing and origin
-        than the `imgRef` but must have the same direction matrix.
+        An object of a SimpleITK 2D or 3D image describing the evaluation, of the same
+        dimension and with the same requirements as for the `imgRef`. It can have a different
+        size, spacing and origin than the `imgRef` but must have the same direction matrix.
     DD : float
         Dose difference in [%].
     DTA : float
@@ -174,12 +176,10 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     ------
     TypeError
         If `imgRef` or `imgEval` is not an instance of a SimpleITK image object
-        describing a scalar 3D volume (e.g. a vector image).
-    NotImplementedError
-        If `imgRef` or `imgEval` is a 2D image or has an axis of size 1. Such images are
-        not supported by the current version of the gamma index library.
+        describing a scalar 2D or 3D image (e.g. a vector or a 4D image).
     ValueError
-        If the value of `DD`, `DTA`, `DCO`, `globalNorm` or `stepSize` is out of range,
+        If `imgRef` and `imgEval` have different dimensions,
+        the value of `DD`, `DTA`, `DCO`, `globalNorm` or `stepSize` is out of range,
         `DDType` or `mode` cannot be recognised, the direction matrices of `imgRef` and
         `imgEval` do not match, the images do not overlap (detached frames of reference,
         see :func:`fredtools.compareImgFoROverlap`), any of the images contains NaN or Inf values, the maximum
@@ -221,7 +221,9 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     discretise the search space and interpolate the evaluation dose differently.
     Refer to the :ref:`GammaIndexValidation` to read more about the validation results.
 
-    The images are required to be 3D and to have the same direction matrix. The calculation is
+    The images are required to be 2D or 3D, of the same dimension, and to have the same direction
+    matrix. 2D images are calculated as 3D images with a single slice, so the gamma index search
+    is in the image plane, and the gamma index map is returned as a 2D image. The calculation is
     performed in the common index frame of the images, which preserves the distances for any
     common direction matrix, and the resulting gamma index map is returned in the frame of
     reference of the `imgRef`. The dose cutoff in dose units is `DCO` times the global
@@ -248,25 +250,27 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     import ctypes
     import SimpleITK as sitk
 
-    # validate imgRef and imgEval (scalar 3D images with at least two voxels along each axis)
+    # validate imgRef and imgEval (scalar 2D or 3D images of the same dimension)
     for img, imgName in ((imgRef, "reference"), (imgEval, "evaluation")):
         ft._imgTypeChecker.isSITK(img, raiseError=True)
         if ft._imgTypeChecker.isSITK_vector(img, raiseError=False):
             error = TypeError(f"The {imgName} image must be a scalar SimpleITK image but a vector image of type '{img.GetPixelIDTypeAsString()}' was given.")
             _logger.error(error)
             raise error
-        if img.GetDimension() == 2:
-            error = NotImplementedError(f"The {imgName} image is a 2D SimpleITK image. Only 3D images are supported by the current version of the gamma index library (libFredGI).")
+        if img.GetDimension() not in [2, 3]:
+            error = TypeError(f"The {imgName} image must be an instance of a SimpleITK image object describing a 2D or 3D image but a {img.GetDimension()}D image was given.")
             _logger.error(error)
             raise error
-        if not ft._imgTypeChecker.isSITK3D(img, raiseError=False):
-            error = TypeError(f"The {imgName} image must be an instance of a SimpleITK image object describing a 3D volume.")
-            _logger.error(error)
-            raise error
-        if 1 in img.GetSize():
-            error = NotImplementedError(f"The {imgName} image of size {img.GetSize()} has an axis of size 1, which is not supported by the current version of the gamma index library (libFredGI). Resample or pad the image to at least two voxels along each axis.")
-            _logger.error(error)
-            raise error
+    if imgRef.GetDimension() != imgEval.GetDimension():
+        error = ValueError(f"The reference and evaluation images must have the same dimension, but the reference image is {imgRef.GetDimension()}D and the evaluation image is {imgEval.GetDimension()}D.")
+        _logger.error(error)
+        raise error
+
+    # calculate 2D images as 3D images with a single slice (the gamma index search is then in the image plane)
+    imgRefInput = imgRef
+    if imgRef.GetDimension() == 2:
+        imgRef = ft.expandDimsImg(imgRef, origin=0, spacing=1)
+        imgEval = ft.expandDimsImg(imgEval, origin=0, spacing=1)
 
     # validate DTA, DD, DDType, DCO and globalNorm
     if not isinstance(DTA, Numeric) or DTA <= 0:
@@ -436,8 +440,10 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
         arrGI = np.zeros(imgRef.GetSize(), dtype=np.float32, order="F")
         libFredGI.fredGI_getGammaIndex3DMap(arrGI)
         arrGI = np.moveaxis(arrGI, range(arrGI.ndim), range(arrGI.ndim)[::-1])
+        if imgRefInput.GetDimension() == 2:
+            arrGI = arrGI[0]  # the single slice of the expanded 2D images
         imgGI = sitk.GetImageFromArray(arrGI)
-        imgGI.CopyInformation(imgRef)
+        imgGI.CopyInformation(imgRefInput)  # the frame of reference of the input imgRef (2D or 3D)
         if mode == "pass-rate":
             imgGI = sitk.Cast(imgGI, sitk.sitkInt8)
 

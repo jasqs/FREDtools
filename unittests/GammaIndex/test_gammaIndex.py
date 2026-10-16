@@ -16,6 +16,25 @@ def _createGaussImg(shift=(0, 0, 0), size=41, amplitude=10):
     return imgGauss
 
 
+def _createGaussSlab(size, spacing, invariantAxis="z", shift=0, scale=1, originInvariant=None):
+    """Create a Gaussian dose distribution (sigma 12 mm, 2*`scale` [Gy] maximum) constant along `invariantAxis`, centred at 0 and shifted by `shift` [mm] along the first of the other axes.
+
+    The image is 2D if `size` has two elements (then the Gaussian is a function of x and y). The origin along `invariantAxis` is set to `originInvariant` if given.
+    """
+    img = ft.createImg(size, spacing=spacing, centred=True, dtype="float64")
+    if originInvariant is not None:
+        origin = list(img.GetOrigin())
+        origin["xyz".index(invariantAxis)] = originInvariant
+        img.SetOrigin(origin)
+    if len(size) == 2:
+        return ft.createImgFromFunction(img, lambda x, y: scale * 2 * np.exp(-((x - shift)**2 + y**2) / (2 * 12**2)))
+
+    def gauss(x, y, z):
+        planeCoords = {"x": (y, z), "y": (x, z), "z": (x, y)}[invariantAxis]
+        return scale * 2 * np.exp(-((planeCoords[0] - shift)**2 + planeCoords[1]**2) / (2 * 12**2))
+    return ft.createImgFromFunction(img, gauss)
+
+
 class test_calcGammaIndex(unittest.TestCase):
 
     def setUp(self):
@@ -276,6 +295,68 @@ class test_calcGammaIndex(unittest.TestCase):
         self.assertTrue(ft.compareImgFoR(imgRefOblique, imgGIOblique))
         self.assertTrue(np.allclose(ft.arr(imgGI), ft.arr(imgGIOblique), atol=1E-5))
 
+    def test_calcGammaIndex_singleSliceRef(self):
+        # a single slice of the reference (2 mm thick, at z=0) gives the same gamma as the middle slice of the 3D reference of a z-invariant field
+        imgEval = _createGaussSlab([61, 61, 9], [1, 1, 1], shift=1, scale=1.03)
+        for DDType in ["global", "local"]:
+            with self.subTest(DDType=DDType):
+                imgGI3D = ft.calcGammaIndex(_createGaussSlab([31, 31, 5], [2, 2, 2]), imgEval, DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                imgGISlice = ft.calcGammaIndex(_createGaussSlab([31, 31, 1], [2, 2, 2]), imgEval, DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                self.assertEqual(imgGISlice.GetSize(), (31, 31, 1))
+                self.assertTrue(np.array_equal(ft.arr(imgGISlice), ft.arr(imgGI3D)[2]))
+
+    def test_calcGammaIndex_singleSliceBoth(self):
+        for DDType in ["global", "local"]:
+            with self.subTest(DDType=DDType):
+                imgGI3D = ft.calcGammaIndex(_createGaussSlab([31, 31, 5], [2, 2, 2]), _createGaussSlab([61, 61, 9], [1, 1, 1], shift=1, scale=1.03), DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                imgGISlice = ft.calcGammaIndex(_createGaussSlab([31, 31, 1], [2, 2, 2]), _createGaussSlab([61, 61, 1], [1, 1, 1], shift=1, scale=1.03), DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                self.assertTrue(np.array_equal(ft.arr(imgGISlice), ft.arr(imgGI3D)[2]))
+
+    def test_calcGammaIndex_singleSliceAxis(self):
+        # the same field with the size-1 axis along x or y instead of z (the squeezed arrays have the same layout)
+        imgGIZ = ft.calcGammaIndex(_createGaussSlab([31, 31, 1], [2, 2, 2]), _createGaussSlab([61, 61, 1], [1, 1, 1], shift=1, scale=1.03), DD=2, DTA=2, DCO=0.1, DDType="global", globalNorm=2)
+        for invariantAxis, sizeRef, sizeEval in [("x", [1, 31, 31], [1, 61, 61]), ("y", [31, 1, 31], [61, 1, 61])]:
+            with self.subTest(invariantAxis=invariantAxis):
+                imgRef = _createGaussSlab(sizeRef, [2, 2, 2], invariantAxis=invariantAxis)
+                imgEval = _createGaussSlab(sizeEval, [1, 1, 1], invariantAxis=invariantAxis, shift=1, scale=1.03)
+                imgGI = ft.calcGammaIndex(imgRef, imgEval, DD=2, DTA=2, DCO=0.1, DDType="global", globalNorm=2)
+                self.assertTrue(ft.compareImgFoR(imgRef, imgGI))
+                self.assertTrue(np.array_equal(ft.arr(imgGI), ft.arr(imgGIZ)))
+
+    def test_calcGammaIndex_2D(self):
+        imgRef2D = _createGaussSlab([31, 31], [2, 2])
+        imgEval2D = _createGaussSlab([61, 61], [1, 1], shift=1, scale=1.03)
+        for DDType in ["global", "local"]:
+            with self.subTest(DDType=DDType):
+                imgGISlice = ft.calcGammaIndex(_createGaussSlab([31, 31, 1], [2, 2, 2]), _createGaussSlab([61, 61, 1], [1, 1, 1], shift=1, scale=1.03), DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                imgGI2D = ft.calcGammaIndex(imgRef2D, imgEval2D, DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                self.assertEqual(imgGI2D.GetDimension(), 2)
+                self.assertTrue(ft.compareImgFoR(imgRef2D, imgGI2D))
+                self.assertEqual(imgGI2D.GetDirection(), imgRef2D.GetDirection())
+                self.assertEqual(imgGI2D.GetPixelIDTypeAsString(), "32-bit float")
+                self.assertTrue(np.array_equal(ft.arr(imgGI2D), ft.arr(imgGISlice)))
+                self.assertEqual(imgGI2D.GetMetaData("GIPR"), imgGISlice.GetMetaData("GIPR"))
+                self.assertEqual(imgGI2D.GetMetaData("DDType"), DDType)
+
+    def test_calcGammaIndex_2D_passRate(self):
+        imgRef2D = _createGaussSlab([31, 31], [2, 2])
+        imgEval2D = _createGaussSlab([61, 61], [1, 1], shift=1, scale=1.03)
+        imgGI2D = ft.calcGammaIndex(imgRef2D, imgEval2D, DD=2, DTA=2, DCO=0.1, DDType="global", globalNorm=2)
+        imgPR2D = ft.calcGammaIndex(imgRef2D, imgEval2D, DD=2, DTA=2, DCO=0.1, DDType="global", globalNorm=2, mode="pass-rate")
+        self.assertEqual(imgPR2D.GetDimension(), 2)
+        self._assertPassRateMap(imgGI2D, imgPR2D)
+        arrGI = ft.arr(imgGI2D)
+        arrPR = ft.arr(imgPR2D)
+        self.assertTrue(np.any(arrPR == 0))
+        self.assertTrue(np.array_equal(arrPR[arrGI >= 0] == 1, arrGI[arrGI >= 0] <= 1))
+
+    def test_calcGammaIndex_singleSliceShifted(self):
+        # the evaluation slice (1 mm thick) shifted by 0.25 mm in z still contains the reference plane at z=0
+        imgRef = _createGaussSlab([31, 31, 1], [2, 2, 2])
+        imgGI = ft.calcGammaIndex(imgRef, _createGaussSlab([61, 61, 1], [1, 1, 1], shift=1, scale=1.03), DD=2, DTA=2, DCO=0.1, DDType="global", globalNorm=2)
+        imgGIShifted = ft.calcGammaIndex(imgRef, _createGaussSlab([61, 61, 1], [1, 1, 1], shift=1, scale=1.03, originInvariant=0.25), DD=2, DTA=2, DCO=0.1, DDType="global", globalNorm=2)
+        self.assertTrue(np.array_equal(ft.arr(imgGIShifted), ft.arr(imgGI)))
+
     def test_calcGammaIndex_invalid_imgRef(self):
         with self.assertRaises(TypeError):
             ft.calcGammaIndex(ft.arr(self.imgGauss), self.imgGaussShifted, DD=2, DTA=2, DCO=0.05)  # type: ignore
@@ -291,19 +372,21 @@ class test_calcGammaIndex(unittest.TestCase):
         with self.assertRaises(TypeError):
             ft.calcGammaIndex(self.imgGauss, imgVector, DD=2, DTA=2, DCO=0.05)
 
-    def test_calcGammaIndex_invalid_2D(self):
-        img2D = sitk.GetImageFromArray(np.ones((20, 20), dtype=np.float32))
-        with self.assertRaises(NotImplementedError):
+    def test_calcGammaIndex_invalid_dimensionMismatch(self):
+        img2D = _createGaussSlab([31, 31], [2, 2])
+        with self.assertRaises(ValueError):
             ft.calcGammaIndex(img2D, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05)
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(ValueError):
             ft.calcGammaIndex(self.imgGauss, img2D, DD=2, DTA=2, DCO=0.05)
 
-    def test_calcGammaIndex_invalid_size1Axis(self):
-        imgSlice = sitk.GetImageFromArray(np.ones((1, 20, 20), dtype=np.float32))
-        with self.assertRaises(NotImplementedError):
-            ft.calcGammaIndex(imgSlice, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05)
-        with self.assertRaises(NotImplementedError):
-            ft.calcGammaIndex(self.imgGauss, imgSlice, DD=2, DTA=2, DCO=0.05)
+    def test_calcGammaIndex_invalid_4D(self):
+        img4D = sitk.Image([5, 5, 5, 5], sitk.sitkFloat32)
+        with self.assertRaises(TypeError):
+            ft.calcGammaIndex(img4D, img4D, DD=2, DTA=2, DCO=0.05)
+        with self.assertRaises(TypeError):
+            ft.calcGammaIndex(img4D, self.imgGaussShifted, DD=2, DTA=2, DCO=0.05)
+        with self.assertRaises(TypeError):
+            ft.calcGammaIndex(self.imgGauss, img4D, DD=2, DTA=2, DCO=0.05)
 
     def test_calcGammaIndex_invalid_directionMismatch(self):
         imgEvalFlipped = sitk.Flip(self.imgGaussShifted, [True, False, False])
