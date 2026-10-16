@@ -30,23 +30,25 @@ class test_CreateImg(unittest.TestCase):
             ft.createImg(components=-1)
 
     def test_createImg_dtype(self):
-        dtypes = {"uint8": sitk.sitkUInt8,
-                  "uint16": sitk.sitkUInt16,
-                  "uint32": sitk.sitkUInt32,
-                  "uint64": sitk.sitkUInt64,
-                  "int8": sitk.sitkInt8,
-                  "int16": sitk.sitkInt16,
-                  "int32": sitk.sitkInt32,
-                  "int64": sitk.sitkInt64,
-                  "float32": sitk.sitkFloat32,
-                  "float64": sitk.sitkFloat64,
-                  "f4": sitk.sitkFloat32,
-                  np.int16: sitk.sitkInt16,
-                  np.dtype("uint32"): sitk.sitkUInt32,
-                  float: sitk.sitkFloat64,
-                  int: sitk.sitkInt64,
-                  }
-        for dtype, pixelID in dtypes.items():
+        dtypes = [("uint8", sitk.sitkUInt8),
+                  ("uint16", sitk.sitkUInt16),
+                  ("uint32", sitk.sitkUInt32),
+                  ("uint64", sitk.sitkUInt64),
+                  ("int8", sitk.sitkInt8),
+                  ("int16", sitk.sitkInt16),
+                  ("int32", sitk.sitkInt32),
+                  ("int64", sitk.sitkInt64),
+                  ("float32", sitk.sitkFloat32),
+                  ("float64", sitk.sitkFloat64),
+                  ("f4", sitk.sitkFloat32),
+                  (np.int16, sitk.sitkInt16),
+                  (np.dtype("uint32"), sitk.sitkUInt32),
+                  (np.dtype(">f4"), sitk.sitkFloat32),
+                  (np.dtype("<f8"), sitk.sitkFloat64),
+                  (float, sitk.sitkFloat64),
+                  (int, sitk.sitkInt64),
+                  ]
+        for dtype, pixelID in dtypes:
             with self.subTest(dtype=dtype):
                 img = ft.createImg(size=[5, 6, 7], dtype=dtype)
                 self.assertEqual(img.GetPixelID(), pixelID)

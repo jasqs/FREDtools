@@ -98,8 +98,9 @@ def getSITKPixelID(dtype: DTypeLike, vector: bool = False) -> int:
         _logger.error(error)
         raise error
 
+    # SimpleITK images always use the native byte order, so e.g. '>f4' is converted to float32
     try:
-        dtypeNP = np.dtype(dtype)
+        dtypeNP = np.dtype(dtype).newbyteorder("=")
     except TypeError:
         error = TypeError(f"The data type '{dtype}' cannot be interpreted as a numpy data type.")
         _logger.error(error)
