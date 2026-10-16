@@ -62,6 +62,78 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     return interpolator
 
 
+def getSITKPixelID(dtype: DTypeLike, vector: bool = False) -> int:
+    """Get SimpleITK pixel ID for a data type.
+
+    The function converts a data type, given in any form accepted
+    by `numpy.dtype`, to a SimpleITK pixel ID of a scalar or vector image.
+
+    Parameters
+    ----------
+    dtype : data-type
+        The data type in any form accepted by `numpy.dtype`, e.g. 'float32',
+        'f4', numpy.int16 or float. The supported types are (u)int8, (u)int16,
+        (u)int32, (u)int64, float32 and float64. The type bool is converted to uint8,
+        because SimpleITK does not have a boolean pixel type.
+    vector : bool, optional
+        If True, the pixel ID of a vector image is returned. (def. False)
+
+    Returns
+    -------
+    int
+        SimpleITK pixel ID, e.g. sitk.sitkFloat32 or sitk.sitkVectorFloat32.
+
+    Raises
+    ------
+    TypeError
+        If `dtype` is None, cannot be interpreted as a numpy data type
+        or is not supported.
+    """
+    import numpy as np
+    import SimpleITK as sitk
+
+    # numpy interprets None as float64, which might be misleading
+    if dtype is None:
+        error = TypeError("The data type cannot be None.")
+        _logger.error(error)
+        raise error
+
+    try:
+        dtypeNP = np.dtype(dtype)
+    except TypeError:
+        error = TypeError(f"The data type '{dtype}' cannot be interpreted as a numpy data type.")
+        _logger.error(error)
+        raise error
+
+    # SimpleITK has no boolean pixel type, a boolean image is a uint8 image with 0/1 values
+    if dtypeNP == np.bool_:
+        dtypeNP = np.dtype(np.uint8)
+
+    # mapping of numpy data types to SimpleITK pixel IDs of scalar and vector images
+    pixelIDs = {
+        np.dtype(np.uint8): (sitk.sitkUInt8, sitk.sitkVectorUInt8),
+        np.dtype(np.uint16): (sitk.sitkUInt16, sitk.sitkVectorUInt16),
+        np.dtype(np.uint32): (sitk.sitkUInt32, sitk.sitkVectorUInt32),
+        np.dtype(np.uint64): (sitk.sitkUInt64, sitk.sitkVectorUInt64),
+        np.dtype(np.int8): (sitk.sitkInt8, sitk.sitkVectorInt8),
+        np.dtype(np.int16): (sitk.sitkInt16, sitk.sitkVectorInt16),
+        np.dtype(np.int32): (sitk.sitkInt32, sitk.sitkVectorInt32),
+        np.dtype(np.int64): (sitk.sitkInt64, sitk.sitkVectorInt64),
+        np.dtype(np.float32): (sitk.sitkFloat32, sitk.sitkVectorFloat32),
+        np.dtype(np.float64): (sitk.sitkFloat64, sitk.sitkVectorFloat64),
+    }
+
+    if dtypeNP not in pixelIDs:
+        error = TypeError(f"The data type '{dtypeNP}' is not supported. Only {', '.join([str(dtypeSupported) for dtypeSupported in pixelIDs])} and bool are supported.")
+        _logger.error(error)
+        raise error
+
+    pixelID = pixelIDs[dtypeNP][1 if vector else 0]
+
+    _logger.debug(f"Data type '{dtypeNP}' converted to SimpleITK pixel type '{sitk.GetPixelIDValueAsString(pixelID)}'.")
+    return pixelID
+
+
 def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3):
     """Get a 1D interpolator for data points.
 

@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 import SimpleITK as sitk
 import fredtools as ft
 
@@ -27,6 +28,56 @@ class test_CreateImg(unittest.TestCase):
     def test_createImg_invalid_components(self):
         with self.assertRaises(ValueError):
             ft.createImg(components=-1)
+
+    def test_createImg_dtype(self):
+        dtypes = {"uint8": sitk.sitkUInt8,
+                  "uint16": sitk.sitkUInt16,
+                  "uint32": sitk.sitkUInt32,
+                  "uint64": sitk.sitkUInt64,
+                  "int8": sitk.sitkInt8,
+                  "int16": sitk.sitkInt16,
+                  "int32": sitk.sitkInt32,
+                  "int64": sitk.sitkInt64,
+                  "float32": sitk.sitkFloat32,
+                  "float64": sitk.sitkFloat64,
+                  "f4": sitk.sitkFloat32,
+                  np.int16: sitk.sitkInt16,
+                  np.dtype("uint32"): sitk.sitkUInt32,
+                  float: sitk.sitkFloat64,
+                  int: sitk.sitkInt64,
+                  }
+        for dtype, pixelID in dtypes.items():
+            with self.subTest(dtype=dtype):
+                img = ft.createImg(size=[5, 6, 7], dtype=dtype)
+                self.assertEqual(img.GetPixelID(), pixelID)
+                self.assertEqual(img.GetSize(), (5, 6, 7))
+                self.assertEqual(sitk.GetArrayViewFromImage(img).max(), 0)
+
+    def test_createImg_dtype_vector(self):
+        dtypes = {"int16": sitk.sitkVectorInt16,
+                  "uint8": sitk.sitkVectorUInt8,
+                  "float64": sitk.sitkVectorFloat64,
+                  }
+        for dtype, pixelID in dtypes.items():
+            with self.subTest(dtype=dtype):
+                img = ft.createImg(size=[5, 6, 7], components=3, dtype=dtype)
+                self.assertEqual(img.GetPixelID(), pixelID)
+                self.assertEqual(img.GetNumberOfComponentsPerPixel(), 3)
+
+    def test_createImg_dtype_bool(self):
+        img = ft.createImg(dtype=bool)
+        self.assertEqual(img.GetPixelID(), sitk.sitkUInt8)
+
+    def test_createImg_dtype_invalid(self):
+        for dtype in ["float16", "complex64", "U3", "notatype", None]:
+            with self.subTest(dtype=dtype):
+                with self.assertRaises(TypeError):
+                    ft.createImg(dtype=dtype)
+
+    def test_createImg_fillRandom_dtype(self):
+        img = ft.createImg(size=[20, 20, 20], fillRandom=True, dtype="int16")
+        self.assertEqual(img.GetPixelID(), sitk.sitkInt16)
+        self.assertAlmostEqual(np.mean(sitk.GetArrayViewFromImage(img)), 10, delta=0.5)
 
 
 class test_CreateEllipseMask(unittest.TestCase):

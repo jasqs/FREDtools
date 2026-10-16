@@ -3,12 +3,12 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0, spacing: Sequence[Numeric] = [1, 1, 1], origin: Sequence[Numeric] = [0.5, 0.5, 0.5], centred: bool = False, fillRandom: bool = False, displayInfo: bool = False) -> SITKImage:
+def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0, spacing: Sequence[Numeric] = [1, 1, 1], origin: Sequence[Numeric] = [0.5, 0.5, 0.5], centred: bool = False, fillRandom: bool = False, dtype: DTypeLike = "float32", displayInfo: bool = False) -> SITKImage:
     """Create an empty image with a given size, spacing, and origin.
 
     The function creates an empty image, i.e. filled with 0 values
     (or Gaussian noise if `fillRandom` is True), with a given size, spacing,
-    and origin. The image can be 2D or 3D.
+    origin, and data type. The image can be 2D or 3D.
 
     Parameters
     ----------
@@ -26,7 +26,13 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
     centred : bool, optional
         If True, the origin is centred and the `origin` parameter is ignored. (def. False)
     fillRandom : bool, optional
-        If True, the image is filled with random Gaussian white noise (mean=10, std=1). (def. False)
+        If True, the image is filled with random Gaussian white noise (mean=10, std=1).
+        For integer data types, the noise has integer values. (def. False)
+    dtype : data-type, optional
+        The data type of the image voxels (of each component for a vector image)
+        in any form accepted by `numpy.dtype`, e.g. 'float32', 'f4', numpy.int16 or float.
+        The supported types are (u)int8, (u)int16, (u)int32, (u)int64, float32 and float64.
+        The type bool creates a 'uint8' image. (def. 'float32')
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -40,6 +46,8 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
     ValueError
         If the size is not 2D or 3D, if `components` is a negative integer,
         or if `spacing` does not have the same length as `size`.
+    TypeError
+        If `dtype` is not a supported data type.
 
     See Also
     --------
@@ -60,14 +68,13 @@ def createImg(size: Sequence[int] = [10, 20, 30], components: NonNegativeInt = 0
         _logger.error(error)
         raise error
 
-    if components == 0:
-        sitkType = sitk.sitkFloat32
-    elif components >= 1:
-        sitkType = sitk.sitkVectorFloat32
-    else:
+    if components < 0:
         error = ValueError(f"The parameter components must be a non-negative integer. The parameter components={components} was used.")
         _logger.error(error)
         raise error
+
+    # validate dtype and get the SimpleITK pixel type
+    sitkType = ft._helper.getSITKPixelID(dtype, vector=components >= 1)
 
     # validate spacing
     if len(spacing) != len(size):
