@@ -153,6 +153,35 @@ class test_mapStructToImg(unittest.TestCase):
         finally:
             shutil.rmtree(tempDir, ignore_errors=True)
 
+    def test_mapStructToImg_contourOutsideImage(self):
+        """A contour lying completely outside the image extent is not mapped and does not change the mask."""
+        import copy
+        import os
+        import shutil
+        import tempfile
+        import pydicom as dicom
+
+        # build an RS in which 'PTV_sphere' has an additional small contour outside the image, at the depth of an existing contour
+        tempDir = tempfile.mkdtemp(prefix="test_mapStructToImg_contourOutsideImage_", dir="unittests/imgManipulate")
+        try:
+            dicomTags = dicom.dcmread(self.RSfileName)
+            ROINumber = next(int(ROI.ROINumber) for ROI in dicomTags.StructureSetROISequence if ROI.ROIName == "PTV_sphere")
+            ROIContour = next(ROIContour for ROIContour in dicomTags.ROIContourSequence if int(ROIContour.ReferencedROINumber) == ROINumber)
+            contour = ROIContour.ContourSequence[len(ROIContour.ContourSequence) // 2]
+            contourOutside = copy.deepcopy(contour)
+            x0, y0, depth = ft.getExtent(self.img)[0][1] + 5, ft.getExtent(self.img)[1][0] + 5, float(contour.ContourData[2])
+            contourOutside.ContourData = [x0, y0, depth, x0 + 0.7, y0, depth, x0 + 0.7, y0 + 0.05, depth, x0, y0 + 0.05, depth]
+            contourOutside.NumberOfContourPoints = 4
+            ROIContour.ContourSequence.append(contourOutside)
+            RSfileName = os.path.join(tempDir, "RS.contourOutsideImage.dcm")
+            dicomTags.save_as(RSfileName)
+
+            imgROIref = ft.mapStructToImg(self.img, self.RSfileName, "PTV_sphere")
+            imgROI = ft.mapStructToImg(self.img, RSfileName, "PTV_sphere", displayInfo=True)
+            np.testing.assert_allclose(ft.arr(imgROI), ft.arr(imgROIref), atol=1e-6)
+        finally:
+            shutil.rmtree(tempDir, ignore_errors=True)
+
 
 class test_floatingToBinaryMask(unittest.TestCase):
 

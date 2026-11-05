@@ -264,6 +264,12 @@ def mapStructToImg(img: SITKImage, RSfileName: PathLike, structName: str, binary
         if not imgMaskSlicePolygon.contains(StructurePolygon):
             StructurePolygons[StructurePolygonIdx] = imgMaskSlicePolygon.intersection(StructurePolygon)
 
+    # remove the structure polygons lying completely outside the image mask (empty or with no area after cropping)
+    StructurePolygonsOutsideNo = sum(StructurePolygon.area == 0 for StructurePolygon in StructurePolygons)
+    if StructurePolygonsOutsideNo:
+        StructurePolygons = [StructurePolygon for StructurePolygon in StructurePolygons if StructurePolygon.area > 0]
+        _logger.debug(f"{StructurePolygonsOutsideNo} contour(s) of the structure '{structName}' lie completely outside the image extent and were not mapped.")
+
     # convert all structure Polygons from the physical to pixel coordinates
     StructurePolygonsPx = sph.transform(StructurePolygons, lambda point: np.array(ft.transformPhysicalPointToContinuousIndex(imgMaskBase, point)), include_z=True)
 
