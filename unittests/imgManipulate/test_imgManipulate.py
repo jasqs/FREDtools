@@ -3,6 +3,7 @@ import SimpleITK as sitk
 import fredtools as ft
 import numpy as np
 import pandas as pd
+import shapely as sph
 
 
 class test_mapStructToImg(unittest.TestCase):
@@ -14,6 +15,16 @@ class test_mapStructToImg(unittest.TestCase):
     def test_mapStructToImg(self):
         imgROI = ft.mapStructToImg(self.img, self.RSfileName, "testStuct_SphHoleDet", displayInfo=True)
         self.assertAlmostEqual(ft.getStatistics(imgROI).GetSum()*np.prod(imgROI.GetSpacing()), 130987, places=-1)
+
+    def test_mapStructToImg_structureWithHole(self):
+        """'External-body' is 'External' minus 'BODY' (a shell with a hole), so its mask must be the difference of their masks.
+
+        On this 3 mm grid the earlier flood fill left about half of 'External-body' empty (1101 instead of 2130 cm3)."""
+        imgROIs = {structName: ft.mapStructToImg(self.img, self.RSfileName, structName) for structName in ("External-body", "External", "BODY")}
+        volumeDifference = ft.getStructVolume(imgROIs["External"]) - ft.getStructVolume(imgROIs["BODY"])
+        self.assertAlmostEqual(ft.getStructVolume(imgROIs["External-body"]), volumeDifference, delta=0.005 * volumeDifference)
+        arrDifference = ft.arr(imgROIs["External-body"]) - (ft.arr(imgROIs["External"]) - ft.arr(imgROIs["BODY"]))
+        self.assertLess(np.abs(arrDifference).mean(), 2e-3)
 
     def test_mapStructToImg_invalidStruct(self):
         with self.assertRaises(ValueError):
@@ -181,6 +192,88 @@ class test_mapStructToImg(unittest.TestCase):
             np.testing.assert_allclose(ft.arr(imgROI), ft.arr(imgROIref), atol=1e-6)
         finally:
             shutil.rmtree(tempDir, ignore_errors=True)
+
+
+class test_getStructureArray(unittest.TestCase):
+    """_getStructureArray (used by mapStructToImg) maps a polygon given in pixel coordinates (continuous indices) to an array
+    of the pixel occupancy: 1 for the pixels lying completely inside the polygon, the area inside the polygon for the pixels
+    crossed by the contour and 0 outside, so that the sum of the array is the polygon area."""
+
+    def assertOccupancy(self, polygon, arr):
+        self.assertTrue(np.all((arr >= 0) & (arr <= 1 + 1e-12)))
+        self.assertAlmostEqual(arr.sum(), polygon.area, places=9)
+
+    def test_getStructureArray_square(self):
+        """A square of 10x10 pixels from pixel edge to pixel edge fills exactly the 100 pixels inside."""
+        polygon = sph.box(1.5, 2.5, 11.5, 12.5)
+        arr = ft.ImgManipulate.imgManipulate._getStructureArray(polygon)
+        self.assertOccupancy(polygon, arr)
+        np.testing.assert_allclose(arr[3:13, 2:12], 1)
+        self.assertEqual(np.count_nonzero(arr), 100)
+
+    def test_getStructureArray_edgesThroughPixelCentres(self):
+        """The pixels crossed by the contour in their centres are occupied by half (by a quarter in the corners)."""
+        polygon = sph.box(2, 3, 12, 13)
+        arr = ft.ImgManipulate.imgManipulate._getStructureArray(polygon)
+        self.assertOccupancy(polygon, arr)
+        np.testing.assert_allclose(arr[4:13, 3:12], 1)
+        np.testing.assert_allclose(arr[3, 3:12], 0.5)
+        np.testing.assert_allclose(arr[3, 2], 0.25)
+
+    def test_getStructureArray_smallerThanPixel(self):
+        """A polygon lying inside a single pixel occupies that pixel by its area."""
+        polygon = sph.box(4.6, 4.6, 5.2, 5.1)
+        arr = ft.ImgManipulate.imgManipulate._getStructureArray(polygon)
+        self.assertOccupancy(polygon, arr)
+        self.assertAlmostEqual(arr[5, 5], 0.3, places=12)
+        self.assertEqual(np.count_nonzero(arr), 1)
+
+    def test_getStructureArray_hole(self):
+        """The pixels of a hole in the polygon stay empty."""
+        polygon = sph.Polygon(sph.box(-0.5, -0.5, 19.5, 19.5).exterior.coords, [sph.box(5.5, 5.5, 13.5, 13.5).exterior.coords])
+        arr = ft.ImgManipulate.imgManipulate._getStructureArray(polygon)
+        self.assertOccupancy(polygon, arr)
+        np.testing.assert_array_equal(arr[6:14, 6:14], 0)
+        np.testing.assert_allclose(arr[0:5, 0:20], 1)
+
+    def test_getStructureArray_representativePointOnContour(self):
+        """A square with a thin stem above it, whose representative point lies in the stem, i.e. in a pixel crossed by the contour.
+
+        The old flood fill started from that pixel and left the inside of the square empty."""
+        polygon = sph.Polygon([(0.2, 0.2), (20.2, 0.2), (20.2, 20.2), (10.5, 20.2), (10.5, 40.5), (9.9, 40.5), (9.9, 20.2), (0.2, 20.2)])
+        arr = ft.ImgManipulate.imgManipulate._getStructureArray(polygon)
+        self.assertOccupancy(polygon, arr)
+        np.testing.assert_allclose(arr[2:19, 2:19], 1)
+
+    def test_getStructureArray_insideSplitByContour(self):
+        """Two squares joined by a thin neck, whose pixels crossed by the contour split the inside into two regions.
+
+        The old flood fill filled only the region with its starting point."""
+        polygon = sph.Polygon([(0.2, 0.2), (10.2, 0.2), (10.2, 5.0), (20.2, 5.0), (20.2, 0.2), (30.2, 0.2), (30.2, 10.2),
+                               (20.2, 10.2), (20.2, 5.4), (10.2, 5.4), (10.2, 10.2), (0.2, 10.2)])
+        arr = ft.ImgManipulate.imgManipulate._getStructureArray(polygon)
+        self.assertOccupancy(polygon, arr)
+        np.testing.assert_allclose(arr[2:9, 2:9], 1)
+        np.testing.assert_allclose(arr[2:9, 22:29], 1)
+
+    def test_getStructureArray_randomPolygons(self):
+        """Random star-shaped polygons (some thin, some with a hole) in the coordinates used by mapStructToImg (x, y >= -0.5)."""
+        rng = np.random.default_rng(12345)
+        for polygonIdx in range(300):
+            radius = float(rng.choice([0.4, 1.5, 3, 8, 20])) * rng.uniform(0.7, 1.3)
+            verticesNo = int(rng.integers(3, 40))
+            angles = np.sort(rng.uniform(0, 2 * np.pi, verticesNo))
+            radii = radius * (1 + float(rng.choice([0, 0.3, 0.8])) * rng.uniform(-1, 1, verticesNo))
+            shell = np.column_stack([radii * np.cos(angles), radii * np.sin(angles)])
+            if rng.random() < 0.2:  # thin polygon
+                shell[:, int(rng.integers(0, 2))] *= rng.uniform(0.02, 0.2)
+            shell = shell - shell.min(axis=0) - 0.5 + (0 if rng.random() < 0.3 else rng.uniform(0, 30, 2))  # some touch x=-0.5 or y=-0.5
+            holes = [shell.mean(axis=0) + 0.35 * (shell - shell.mean(axis=0))] if rng.random() < 0.3 and radius > 3 else []
+            polygon = sph.Polygon(shell, holes)
+            if not polygon.is_valid or polygon.area == 0:
+                continue
+            with self.subTest(polygonIdx=polygonIdx):
+                self.assertOccupancy(polygon, ft.ImgManipulate.imgManipulate._getStructureArray(polygon))
 
 
 class test_floatingToBinaryMask(unittest.TestCase):

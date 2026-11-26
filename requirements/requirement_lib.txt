@@ -20,7 +20,6 @@ dotted_dict
 typing_extensions ; python_version < '3.11'
 
 # imported inside the functions that need them
-opencv-python-headless  # ImgManipulate.mapStructToImg (only cv2.floodFill is used, no GUI)
 pymupdf                 # Miscellaneous.getPDFInfo
 PyYAML                  # MonteCarlo.beamModel
 ipython                 # _helper.checkJupyterMode, ImgAnalyse.imgDisplay

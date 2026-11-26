@@ -399,7 +399,11 @@ def _getStructureContourBorderPixels(StructureContourPx: NDArray) -> NDArray:
 
 
 def _getStructureArray(StructurePolygonPx: ShapePolygon) -> NDArray:
-    import cv2
+    """
+    Maps a structure polygon given in pixel coordinates (continuous indices) to a 2D array of the pixel occupancy:
+    1 for the pixels lying completely inside the polygon, the area of the pixel inside the polygon for the pixels
+    crossed by the contour, and 0 outside, so that the sum of the array is the polygon area.
+    """
     import shapely as sph
 
     # get a list of pixels at the contour exterior
@@ -419,15 +423,15 @@ def _getStructureArray(StructurePolygonPx: ShapePolygon) -> NDArray:
     # generate contour slice
     arr = np.zeros(StructureContourBorderPixels.max(axis=0)[::-1] + 1, dtype="float")
 
-    # set pixels at the contour border to 1
-    arr[StructureContourBorderPixels[:, 1], StructureContourBorderPixels[:, 0]] = 1
-
     # fill pixels inside the contour
-    StructureContourPxPolygonRepresentativePoint = StructurePolygonPx.representative_point()  # get the representative point of the polygon (guaranteed to be within the object)
-    StructureContourPxPolygonRepresentativePoint = np.round([StructureContourPxPolygonRepresentativePoint.x, StructureContourPxPolygonRepresentativePoint.y]).astype(int)  # convert the point to integer
-    arrFill = arr.astype("uint8")  # convert the array to uint8 as the floodFill function requires this type
-    cv2.floodFill(arrFill, None, StructureContourPxPolygonRepresentativePoint, newVal=1)  # type: ignore
-    arr = arrFill.astype("float")  # convert the array back to float
+    """
+    note: the pixels with the centre inside the polygon are set to 1; the pixels crossed by the contour are set below to the
+          area inside the polygon, so the remaining ones lie completely inside. Unlike a flood fill from a single point,
+          this fills all the inside, also when the pixels crossed by the contour split it into separate regions
+          (e.g. thin parts of the polygon or a polygon with a hole) or when the starting point is a pixel crossed by the contour.
+    """
+    pixelsY, pixelsX = np.indices(arr.shape)
+    arr[sph.contains_xy(StructurePolygonPx, pixelsX, pixelsY)] = 1
 
     # calculate the contour pixels area inside the contour
     StructureContourBorderPixelsArea = [StructureContourBorderPixelsPolygon.intersection(StructurePolygonPx).area for StructureContourBorderPixelsPolygon in StructureContourBorderPixelsPolygons]

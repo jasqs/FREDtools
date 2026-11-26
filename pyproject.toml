@@ -19,7 +19,6 @@ dependencies = [
     "pydantic",
     "dotted_dict",
     "typing_extensions; python_version < '3.11'",
-    "opencv-python-headless",
     "pymupdf",
     "PyYAML",
     "ipython",
