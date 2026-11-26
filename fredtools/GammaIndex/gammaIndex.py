@@ -126,7 +126,8 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     imgRef : SimpleITK Image
         An object of a SimpleITK 2D or 3D image describing the reference. The image must have
         a scalar pixel type. An axis of size 1 is a single slice whose dose is constant
-        across its voxel thickness.
+        across its voxel thickness. A 1D profile is given as a 2D or 3D image with all axes
+        but one of size 1 (see Notes).
     imgEval : SimpleITK Image
         An object of a SimpleITK 2D or 3D image describing the evaluation, of the same
         dimension and with the same requirements as for the `imgRef`. It can have a different
@@ -233,6 +234,17 @@ def calcGammaIndex(imgRef: SITKImage, imgEval: SITKImage, DD: Annotated[Numeric,
     normalisation dose, computed by the gamma index library in single precision (float32),
     and the 'global' dose difference criterion is `DD` percent of the global
     normalisation dose, which is the maximum of the reference image unless `globalNorm` is given.
+
+    A 1D gamma index (of dose profiles) is calculated with images in which all axes but the one
+    of the profile have size 1, because SimpleITK has no 1D images:
+
+        -  a 2D image with a single row or column, for instance of size [N, 1] for a profile along x,
+        -  a 3D image with two axes of size 1, for instance of size [N, 1, 1], [1, N, 1] or [1, 1, N].
+
+    The dose is constant across the voxel thickness of the axes of size 1, so the gamma index
+    search is along the profile, and the result equals the gamma index of the central row of
+    a 3D image constant along the other two axes. Both images must describe the profile along the
+    same axis, and the gamma index map has the size of the reference image.
 
     The calculation runs in a background thread of the gamma index library and can be interrupted
     with Ctrl+C (or by interrupting the Jupyter kernel), which stops the calculation and raises

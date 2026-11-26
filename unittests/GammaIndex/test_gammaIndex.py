@@ -35,6 +35,15 @@ def _createGaussSlab(size, spacing, invariantAxis="z", shift=0, scale=1, originI
     return ft.createImgFromFunction(img, gauss)
 
 
+def _createGaussProfile(size, spacing, profileAxis="x", shift=0, scale=1):
+    """Create a Gaussian dose profile (sigma 12 mm, 2*`scale` [Gy] maximum) along `profileAxis`, centred at 0, shifted by `shift` [mm] and constant along the other axes.
+
+    The image is 2D or 3D, depending on the number of elements of `size`. A size of 1 along the other axes gives a 1D profile.
+    """
+    img = ft.createImg(size, spacing=spacing, centred=True, dtype="float64")
+    return ft.createImgFromFunction(img, lambda *coordinates: scale * 2 * np.exp(-(coordinates["xyz".index(profileAxis)] - shift)**2 / (2 * 12**2)))
+
+
 class test_calcGammaIndex(unittest.TestCase):
 
     def setUp(self):
@@ -349,6 +358,40 @@ class test_calcGammaIndex(unittest.TestCase):
         arrPR = ft.arr(imgPR2D)
         self.assertTrue(np.any(arrPR == 0))
         self.assertTrue(np.array_equal(arrPR[arrGI >= 0] == 1, arrGI[arrGI >= 0] <= 1))
+
+    def _gamma1DReference(self, DDType):
+        """Gamma index of the central row of the 3D image of the profile along x, constant along y and z."""
+        imgGI3D = ft.calcGammaIndex(_createGaussProfile([31, 5, 5], [2, 2, 2]), _createGaussProfile([61, 9, 9], [1, 1, 1], shift=1, scale=1.03), DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+        arrGI = ft.arr(imgGI3D)[2, 2]
+        self.assertTrue(np.any(arrGI > 1) and np.any((arrGI >= 0) & (arrGI <= 1)))  # passing and failing voxels
+        return arrGI
+
+    def test_calcGammaIndex_1D_2DImage(self):
+        # a 1D profile given as a 2D image with a single row (profile along x) or column (along y)
+        for DDType in ["global", "local"]:
+            arrGI1D = self._gamma1DReference(DDType)
+            for profileAxis, sizeRef, sizeEval in [("x", [31, 1], [61, 1]), ("y", [1, 31], [1, 61])]:
+                with self.subTest(DDType=DDType, profileAxis=profileAxis):
+                    imgRef = _createGaussProfile(sizeRef, [2, 2], profileAxis=profileAxis)
+                    imgEval = _createGaussProfile(sizeEval, [1, 1], profileAxis=profileAxis, shift=1, scale=1.03)
+                    imgGI = ft.calcGammaIndex(imgRef, imgEval, DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                    self.assertEqual(imgGI.GetDimension(), 2)
+                    self.assertEqual(imgGI.GetSize(), tuple(sizeRef))
+                    self.assertTrue(ft.compareImgFoR(imgRef, imgGI))
+                    self.assertTrue(np.array_equal(ft.arr(imgGI), arrGI1D))
+
+    def test_calcGammaIndex_1D_3DImage(self):
+        # a 1D profile given as a 3D image with two axes of size 1 (profile along x, y or z)
+        for DDType in ["global", "local"]:
+            arrGI1D = self._gamma1DReference(DDType)
+            for profileAxis, sizeRef, sizeEval in [("x", [31, 1, 1], [61, 1, 1]), ("y", [1, 31, 1], [1, 61, 1]), ("z", [1, 1, 31], [1, 1, 61])]:
+                with self.subTest(DDType=DDType, profileAxis=profileAxis):
+                    imgRef = _createGaussProfile(sizeRef, [2, 2, 2], profileAxis=profileAxis)
+                    imgEval = _createGaussProfile(sizeEval, [1, 1, 1], profileAxis=profileAxis, shift=1, scale=1.03)
+                    imgGI = ft.calcGammaIndex(imgRef, imgEval, DD=2, DTA=2, DCO=0.1, DDType=DDType, globalNorm=2)
+                    self.assertEqual(imgGI.GetSize(), tuple(sizeRef))
+                    self.assertTrue(ft.compareImgFoR(imgRef, imgGI))
+                    self.assertTrue(np.array_equal(ft.arr(imgGI), arrGI1D))
 
     def test_calcGammaIndex_singleSliceShifted(self):
         # the evaluation slice (1 mm thick) shifted by 0.25 mm in z still contains the reference plane at z=0

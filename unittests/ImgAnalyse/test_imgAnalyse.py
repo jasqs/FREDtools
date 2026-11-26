@@ -3,7 +3,6 @@ import SimpleITK as sitk
 import numpy as np
 
 import fredtools as ft
-print(ft.__version__)
 
 
 class test_getExtent(unittest.TestCase):
