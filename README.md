@@ -34,6 +34,18 @@ The packages needed to use FRED tools are listed in ``requirements/requirement_l
 
 A few functions need additional packages (e.g. GPU support, GATE or opengate Monte Carlo), which are listed at the end of that file and should be installed separately if those functions are used.
 
+### Install with pip or uv
+
+FRED tools can also be installed as a package directly from GitHub, which installs the same packages as ``requirements/requirement_lib.txt``:
+
+  $ pip install git+https://github.com/jasqs/FREDtools
+
+or with uv:
+
+  $ uv pip install git+https://github.com/jasqs/FREDtools
+
+To install a fixed version, add a commit, tag or branch, e.g. ``git+https://github.com/jasqs/FREDtools@<commit>``. In a uv project, the dependency can be declared in ``pyproject.toml`` as ``fredtools = { git = "https://github.com/jasqs/FREDtools", rev = "<commit>" }`` under ``[tool.uv.sources]``.
+
 
 Licence
 ----------------------------
