@@ -54,14 +54,16 @@ jobs:
 
   other-os:
     # Windows and macOS (Apple Silicon): the gamma index tests (with the libFredGI library of the
-    # platform) must pass; the other tests run as well, but do not fail the workflow yet
+    # platform) must pass; the other tests run as well, but do not fail the workflow yet.
+    # macos-latest is always an Apple Silicon image; a pinned label such as macos-14 stops
+    # working when GitHub retires that image (the jobs are then cancelled, not failed)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
 
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-14]
+        os: [windows-latest, macos-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     name: ${{ matrix.os }}, python ${{ matrix.python-version }}
