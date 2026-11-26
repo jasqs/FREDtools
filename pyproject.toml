@@ -1,6 +1,6 @@
 [project]
 name = "fredtools"
-version = "0.8.34"
+version = "0.8.35"
 description = "Tools for FRED Monte Carlo and proton therapy images"
 readme = "README.md"
 license = "GPL-3.0-only AND LicenseRef-libFredGI"
