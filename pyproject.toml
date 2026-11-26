@@ -1,0 +1,39 @@
+[project]
+name = "fredtools"
+version = "0.8.34"
+description = "Tools for FRED Monte Carlo and proton therapy images"
+readme = "README.md"
+license = "GPL-3.0-only AND LicenseRef-libFredGI"
+license-files = ["LICENSE", "fredtools/GammaIndex/LICENSE-libFredGI.md"]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "matplotlib",
+    "SimpleITK",
+    "itk",
+    "pydicom",
+    "lmfit",
+    "shapely",
+    "pydantic",
+    "dotted_dict",
+    "typing_extensions; python_version < '3.11'",
+    "opencv-python-headless",
+    "pymupdf",
+    "PyYAML",
+    "ipython",
+    "ipywidgets",
+]
+
+[project.urls]
+Homepage = "https://github.com/jasqs/FREDtools"
+Documentation = "https://jasqs.github.io/FREDtools/"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "fredtools"
+module-root = ""
