@@ -1,22 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
 [project]
 name = "fredtools"
-version = "0.8.35"
-description = "Tools for FRED Monte Carlo and proton therapy images"
+dynamic = ["version"]  # read from fredtools/_version.py, see [tool.hatch.version]
+description = "A collection of python functions for radiotherapy (RT) data and Monte Carlo results manipulation and analysis"
 readme = "README.md"
 license = "GPL-3.0-only AND LicenseRef-libFredGI"
 license-files = ["LICENSE", "fredtools/GammaIndex/LICENSE-libFredGI.md"]
 requires-python = ">=3.11"
+authors = [{ name = "FRED Collaboration" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 dependencies = [
     "numpy",
     "scipy",
     "pandas",
     "matplotlib",
-    "SimpleITK>=2.2",  # B-spline interpolators sitkBSpline1-5
+    "SimpleITK>=2.2",
     "itk",
     "pydicom",
     "lmfit",
-    "shapely",
-    "pydantic",
+    "shapely>=2",
+    "pydantic>=2",
     "dotted_dict",
     "pymupdf",
     "PyYAML",
@@ -24,14 +38,45 @@ dependencies = [
     "ipywidgets",
 ]
 
+[project.optional-dependencies]
+mc = [
+    "uproot",
+    "opengate",
+    "landaupy",
+    "pyamtrack",
+    "scikit-image",
+]
+cuda12 = [
+    "cupy-cuda12x",
+]
+cuda13 = [
+    "cupy-cuda13x",
+]
+
 [project.urls]
 Homepage = "https://github.com/jasqs/FREDtools"
 Documentation = "https://jasqs.github.io/FREDtools/"
+"FRED MC" = "https://www.fred-mc.org/"
 
-[build-system]
-requires = ["uv_build>=0.13.1,<0.14.0"]
-build-backend = "uv_build"
+[dependency-groups]
+unittests = [
+    "pydvh",
+]
+docs = [
+    "sphinx>=4",
+    "sphinx-rtd-theme",
+    "sphinx-copybutton",
+]
 
-[tool.uv.build-backend]
-module-name = "fredtools"
-module-root = ""
+# the version is the __version__ of fredtools/_version.py
+[tool.hatch.version]
+source = "code"
+path = "fredtools/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fredtools"]
+
+[tool.hatch.build.targets.sdist]
+# only the package (pyproject.toml, README.md and the licence files are always added),
+# not the 720 MB of test data
+only-include = ["fredtools"]

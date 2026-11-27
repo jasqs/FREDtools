@@ -1,0 +1,225 @@
+name: Tests, documentation and PyPI release
+
+# Runs on every push to main:
+#   1. the unit tests (unittests.yml),
+#   2. when they pass, the documentation is built and deployed to GitHub Pages (documentation.yml),
+#   3. when the version in fredtools/_version.py (e.g. _version = [0, 9, 0]) is not on PyPI yet, the
+#      package is published on PyPI and the tag v<version> with a GitHub release is created.
+# Pushes that do not change the version run steps 1 and 2 only.
+# If the publication on PyPI or the release fails, use "Re-run failed jobs" in the same run: it reuses
+# the same commit, version and built files (files already on PyPI are skipped).
+# The name of this file (publish.yml) and the environment "pypi" are registered on PyPI as the
+# trusted publisher of fredtools: renaming either needs the same change on PyPI.
+on:
+  push:
+    branches: [main]
+  # to run the whole pipeline by hand for the current main
+  workflow_dispatch:
+
+# one run at a time, and a run is never cancelled in the middle of a deployment or publication
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Build and check the version
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      new: ${{ steps.check.outputs.new }}
+
+    steps:
+      - name: Check out the package
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          # the package and the root files (pyproject.toml, README.md, LICENSE), not the test data
+          sparse-checkout: fredtools
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build the wheel and the source distribution
+        run: |
+          python -m pip install --upgrade pip build twine packaging
+          python -m build
+          twine check --strict dist/*
+          ls -l dist
+
+      - name: Check the content of the wheel and compare the version with PyPI
+        id: check
+        shell: python
+        run: |
+          import glob, json, os, urllib.error, urllib.request, zipfile
+          from packaging.version import Version
+
+          def getJSON(url):
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as response:
+                      return json.load(response)
+              except urllib.error.HTTPError as error:
+                  if error.code == 404:
+                      return None
+                  raise
+
+          # the version of the built wheel is what would be uploaded (read by hatchling from fredtools/_version.py)
+          wheel = glob.glob("dist/*.whl")[0]
+          version = os.path.basename(wheel).split("-")[1]
+          files = sorted(os.path.basename(file) for file in glob.glob("dist/*"))
+          if files != [f"fredtools-{version}-py3-none-any.whl", f"fredtools-{version}.tar.gz"]:
+              raise SystemExit(f"Unexpected files in dist: {files}")
+
+          # the gamma index libraries and their licence must be in the wheel
+          wheelFiles = zipfile.ZipFile(wheel).namelist()
+          for file in ["libFredGI.so", "libFredGI.dll", "libFredGI.dylib", "LICENSE-libFredGI.md"]:
+              if f"fredtools/GammaIndex/{file}" not in wheelFiles:
+                  raise SystemExit(f"fredtools/GammaIndex/{file} is missing in the wheel")
+
+          # the version is new when any of the files is not on PyPI yet (also after an incomplete upload)
+          release = getJSON(f"https://pypi.org/pypi/fredtools/{version}/json")
+          filesPyPI = {file["filename"] for file in release["urls"]} if release else set()
+          missing = [file for file in files if file not in filesPyPI]
+          new = bool(missing)
+          latest = getJSON("https://pypi.org/pypi/fredtools/json")["info"]["version"]
+          print(f"version: {version}, latest on PyPI: {latest}, files not on PyPI: {missing}")
+          if new and Version(version) < Version(latest):
+              raise SystemExit(f"The version {version} is lower than the latest version {latest} on PyPI (typo?)")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"version={version}\nnew={str(new).lower()}\n")
+
+      - name: Upload the distributions
+        if: steps.check.outputs.new == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  tests:
+    name: Unit tests
+    uses: ./.github/workflows/unittests.yml
+
+  documentation:
+    name: Documentation
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write  # for the deployment to GitHub Pages
+    uses: ./.github/workflows/documentation.yml
+
+  wheel:
+    needs: version
+    if: needs.version.outputs.new == 'true'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        # the oldest and the newest supported Python version
+        python-version: ["3.11", "3.15"]
+
+    name: Test the wheel, ${{ matrix.os }}, python ${{ matrix.python-version }}
+
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download the distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Install the wheel with its dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "dist/fredtools-${VERSION}-py3-none-any.whl"
+
+      - name: Import FREDtools and load the gamma index library
+        # outside the source folder, so that the installed package is imported
+        working-directory: ${{ runner.temp }}
+        env:
+          MPLBACKEND: Agg
+        shell: python
+        run: |
+          import importlib.metadata, os
+          import fredtools
+          from fredtools.GammaIndex.gammaIndex import _loadLibFredGI, _unloadLibFredGI
+
+          version = os.environ["VERSION"]
+          assert fredtools.__version__ == importlib.metadata.version("fredtools") == version, fredtools.__version__
+          _unloadLibFredGI(_loadLibFredGI())
+          print("fredtools", fredtools.__version__, "from", fredtools.__file__)
+
+  pypi:
+    name: Publish on PyPI
+    needs: [version, tests, documentation, wheel]
+    if: needs.version.outputs.new == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # the environment registered in the trusted publisher on PyPI
+    environment:
+      name: pypi
+      url: https://pypi.org/project/fredtools/${{ needs.version.outputs.version }}/
+    permissions:
+      id-token: write  # trusted publishing: no PyPI token is stored in the repository
+
+    steps:
+      - name: Download the distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish on PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # after an incomplete upload, only the missing files are uploaded
+          skip-existing: true
+
+  release:
+    name: Tag and GitHub release
+    needs: [version, pypi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write  # creates the tag and the release
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Download the distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      # safe to run again: an existing release is left as it is
+      - name: Create the tag and the release
+        run: |
+          gh release view "v${VERSION}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1 && exit 0
+          gh release create "v${VERSION}" dist/* \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "FREDtools ${VERSION}" \
+            --generate-notes

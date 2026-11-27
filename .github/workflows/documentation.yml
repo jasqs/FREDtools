@@ -1,14 +1,9 @@
 name: Build and deploy documentation
 
+# For main, the documentation is built and deployed by publish.yml (workflow_call), after the tests pass.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/**"
-      - "fredtools/**"
-      - "requirements/**"
-      - ".github/workflows/documentation.yml"
   workflow_dispatch:
+  workflow_call:
 
 # the token of the deploy job is allowed to publish the pages, nothing else
 permissions:
@@ -31,24 +26,25 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-          # only the folders needed to build the documentation, which skips
-          # the large test data in unittests/testData
+          # only the folders needed to build the documentation (and the root files, e.g. pyproject.toml),
+          # which skips the large test data in unittests/testData
           sparse-checkout: |
             docs
             fredtools
-            requirements
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: requirements/requirement_*.txt
+          cache-dependency-path: pyproject.toml
 
-      - name: Install the dependencies
+      # FREDtools itself is installed too, because docs/source/conf.py imports fredtools
+      # for the version number and autodoc imports every module
+      - name: Install FREDtools with the packages needed by the documentation
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements/requirement_docs.txt
+          pip install -e . --group docs
 
       - name: Build the documentation
         env:
