@@ -17,7 +17,6 @@ lmfit
 shapely
 pydantic
 dotted_dict
-typing_extensions ; python_version < '3.11'
 
 # imported inside the functions that need them
 pymupdf                 # Miscellaneous.getPDFInfo
