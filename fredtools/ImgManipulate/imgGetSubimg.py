@@ -37,6 +37,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
         Additional keyword arguments determining the interpolation method:
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+               With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
             -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
@@ -130,6 +131,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
     # generate slice
     sl = sitk.Resample(img,
                        size=[int(x) for x in slSize],  # type: ignore
+                       transform=ft._helper.getHalfwayToHigherIndexTransform(img, interpolator),  # halfway positions take the higher index (nearest)
                        outputSpacing=img.GetSpacing(),
                        outputDirection=img.GetDirection(),
                        outputOrigin=slOrigin3D,
@@ -190,6 +192,7 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
         Additional keyword arguments determining the interpolation method:
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+               With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
             -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
@@ -292,6 +295,7 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
     # generate profile
     prof = sitk.Resample(img,
                          size=[int(x) for x in prSize],  # type: ignore
+                         transform=ft._helper.getHalfwayToHigherIndexTransform(img, interpolator),  # halfway positions take the higher index (nearest)
                          outputSpacing=img.GetSpacing(),
                          outputDirection=img.GetDirection(),
                          outputOrigin=prOrigin,
@@ -335,6 +339,7 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
         Additional keyword arguments determining the interpolation method:
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+               With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
             -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
@@ -398,6 +403,7 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
     # generate point value
     pointVal = sitk.Resample(img,
                              size=[1] * img.GetDimension(),
+                             transform=ft._helper.getHalfwayToHigherIndexTransform(img, interpolator),  # halfway positions take the higher index (nearest)
                              outputSpacing=img.GetSpacing(),
                              outputDirection=img.GetDirection(),
                              outputOrigin=[float(x) for x in point],
@@ -710,6 +716,7 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
         Additional keyword arguments determining the interpolation method:
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
+               With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
             -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
 
     Returns
@@ -766,16 +773,22 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
     # calculate points along the line
     points = _calcPointsAlongLine(pointA, pointB, spacing)
 
-    # check which points are inside the image physical bounds
-    pointsInsideFlag = ft.isPointInside(img, points)
+    # points at which the image is interpolated: for the nearest-neighbour interpolation moved by a tiny fraction
+    # of a voxel, so that a point lying exactly halfway between two voxels takes the voxel with the higher index
+    halfwayTransform = ft._helper.getHalfwayToHigherIndexTransform(img, interpolator)
+    pointsEval = [halfwayTransform.TransformPoint([float(x) for x in point]) for point in points]
+
+    # check which points are inside the image physical bounds (a point exactly on the upper border of the image
+    # is moved outside by the nearest-neighbour interpolation, like in the other interpolating functions)
+    pointsInsideFlag = ft.isPointInside(img, pointsEval)
     if isinstance(pointsInsideFlag, bool):
         pointsInsideFlag = (pointsInsideFlag, )
 
     # interpolate values at the points
     values = []
-    for idx, point in enumerate(points):
+    for idx, pointEval in enumerate(pointsEval):
         if pointsInsideFlag[idx]:
-            values.append(img.EvaluateAtPhysicalPoint(point, interp=interpolator))
+            values.append(img.EvaluateAtPhysicalPoint(pointEval, interp=interpolator))
         else:
             values.append(np.nan)
 

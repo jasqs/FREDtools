@@ -6,6 +6,27 @@ import pandas as pd
 import shapely as sph
 
 
+def _higherIndexValue(img, point, outsideValue=np.nan):
+    """Value of the voxel of `img` that the nearest-neighbour interpolation takes at `point`, with the rule written out:
+    a position lying exactly halfway between two voxels takes the voxel with the higher index (`outsideValue` outside)."""
+    index = np.floor(np.array(img.TransformPhysicalPointToContinuousIndex([float(x) for x in point])) + 0.5 + 1e-6).astype(int)
+    if np.any(index < 0) or np.any(index >= np.array(img.GetSize())):
+        return outsideValue
+    return float(sitk.GetArrayViewFromImage(img)[tuple(index[::-1])])
+
+
+def _countHalfway(img, imgRes, transform=None):
+    """Number of voxels of `imgRes` whose centre lies exactly halfway between two voxels of `img` along any axis."""
+    count = 0
+    for index in np.ndindex(*imgRes.GetSize()):
+        point = imgRes.TransformIndexToPhysicalPoint([int(i) for i in index])
+        if transform is not None:
+            point = transform.TransformPoint(point)
+        continuousIndex = np.array(img.TransformPhysicalPointToContinuousIndex(point))
+        count += bool(np.any(np.abs(continuousIndex - np.floor(continuousIndex) - 0.5) < 1e-6))
+    return count
+
+
 class test_mapStructToImg(unittest.TestCase):
 
     def setUp(self):
@@ -352,6 +373,35 @@ class test_resampleImg(unittest.TestCase):
                 imgRes = ft.resampleImg(self.img, spacing=[2, 1, 3], interpolation="spline", splineOrder=splineOrder)
                 self.assertTrue(ft.compareImg(imgRes, imgRef))
 
+    def test_resampleImg_nearestNoHalfway(self):
+        """No output voxel lies halfway between two input voxels, so the nearest voxel is unique; the expected image is
+        calculated in numpy from the voxel positions."""
+        imgRes = ft.resampleImg(self.img, spacing=[2.5, 1, 3], interpolation="nearest")
+        indices = []
+        for axis in range(3):
+            centres = imgRes.GetOrigin()[axis] + np.arange(imgRes.GetSize()[axis]) * imgRes.GetSpacing()[axis]
+            continuousIndex = (centres - self.img.GetOrigin()[axis]) / self.img.GetSpacing()[axis]
+            self.assertTrue(np.all(np.abs(continuousIndex - np.floor(continuousIndex) - 0.5) > 1e-6))
+            indices.append(np.floor(continuousIndex + 0.5).astype(int))
+        arrExpected = sitk.GetArrayFromImage(self.img)[np.ix_(indices[2], indices[1], indices[0])]
+        np.testing.assert_array_equal(sitk.GetArrayFromImage(imgRes), arrExpected)
+
+    def test_resampleImg_nearestHalfway(self):
+        """Resampling from 3 mm to 2 mm puts every third output voxel exactly halfway between two input voxels; it takes
+        the voxel with the higher index, also when the x axis of the image is flipped."""
+        for direction in ((1, 0, 0, 0, 1, 0, 0, 0, 1), (-1, 0, 0, 0, 1, 0, 0, 0, 1)):
+            with self.subTest(directionX=direction[0]):
+                img = sitk.GetImageFromArray(np.arange(10, 10 + 4 * 3 * 2, dtype="float32").reshape(2, 3, 4))
+                img.SetSpacing((3.0, 3.0, 3.0))
+                img.SetOrigin((1.0, -2.0, 3.0))
+                img.SetDirection(direction)
+                imgRes = ft.resampleImg(img, spacing=[2, 3, 3], interpolation="nearest")
+                self.assertGreater(_countHalfway(img, imgRes), 0)
+                arrExpected = np.zeros(imgRes.GetSize()[::-1])
+                for index in np.ndindex(*imgRes.GetSize()):
+                    arrExpected[index[::-1]] = _higherIndexValue(img, imgRes.TransformIndexToPhysicalPoint([int(i) for i in index]))
+                np.testing.assert_array_equal(sitk.GetArrayFromImage(imgRes), arrExpected)
+
 
 class test_sumImg(unittest.TestCase):
 
@@ -459,6 +509,43 @@ class test_setNaNImg(unittest.TestCase):
         imgResult = ft.setNaNImg(img, value=-1, displayInfo=True)
         self.assertEqual(sitk.GetArrayViewFromImage(imgResult)[5, 5, 5], 1)
         self.assertNotIn(float('nan'), sitk.GetArrayViewFromImage(imgResult))
+
+
+class test_getImgBEV(unittest.TestCase):
+
+    @staticmethod
+    def _transformBEV(isocentrePosition, gantryAngle, couchAngle):
+        """The transform used by getImgBEV (from the BEV to the image space), rebuilt for the expected values."""
+        translation = sitk.TranslationTransform(3)
+        translation.SetOffset(isocentrePosition)
+        gantry = sitk.Euler3DTransform()
+        gantry.SetRotation(angleX=0, angleY=0, angleZ=np.deg2rad(gantryAngle))
+        couch = sitk.Euler3DTransform()
+        couch.SetRotation(angleX=0, angleY=np.deg2rad(couchAngle), angleZ=0)
+        rotateBEV = sitk.Euler3DTransform()
+        rotateBEV.SetRotation(angleX=np.deg2rad(-90), angleY=0, angleZ=0)
+        transformBEV = sitk.CompositeTransform(3)
+        transformBEV.AddTransform(rotateBEV)
+        transformBEV.AddTransform(sitk.ScaleTransform(3, (1, -1, 1)))
+        transform = sitk.CompositeTransform(3)
+        for transformSingle in (translation, couch, gantry, transformBEV):
+            transform.AddTransform(transformSingle)
+        return transform
+
+    def test_getImgBEV_nearestHalfway(self):
+        """With different spacings along the axes, the BEV voxels can lie exactly halfway between two image voxels;
+        they take the voxel with the higher index."""
+        img = sitk.GetImageFromArray(np.arange(10, 10 + 4 * 5 * 6, dtype="float32").reshape(6, 5, 4))
+        img.SetSpacing((1.0, 3.0, 2.0))
+        isocentrePosition, gantryAngle, couchAngle = [2.0, 6.0, 5.0], 0, 0
+        imgBEV = ft.getImgBEV(img, isocentrePosition=isocentrePosition, gantryAngle=gantryAngle, couchAngle=couchAngle, defaultPixelValue=-1, interpolation="nearest")
+        transform = self._transformBEV(isocentrePosition, gantryAngle, couchAngle)
+        self.assertGreater(_countHalfway(img, imgBEV, transform), 0)
+        arrExpected = np.zeros(imgBEV.GetSize()[::-1])
+        for index in np.ndindex(*imgBEV.GetSize()):
+            point = transform.TransformPoint(imgBEV.TransformIndexToPhysicalPoint([int(i) for i in index]))
+            arrExpected[index[::-1]] = _higherIndexValue(img, point, outsideValue=-1)
+        np.testing.assert_array_equal(sitk.GetArrayFromImage(imgBEV), arrExpected)
 
 
 if __name__ == '__main__':

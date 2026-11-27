@@ -54,7 +54,7 @@ jobs:
 
   other-os:
     # Windows and macOS (Apple Silicon): the gamma index tests (with the libFredGI library of the
-    # platform) must pass; the other tests run as well, but do not fail the workflow yet.
+    # platform) are run first, then all the unit tests; both must pass.
     # macos-latest is always an Apple Silicon image; a pinned label such as macos-14 stops
     # working when GitHub retires that image (the jobs are then cancelled, not failed)
     runs-on: ${{ matrix.os }}
@@ -98,8 +98,7 @@ jobs:
           MPLBACKEND: Agg
         run: python -m unittest discover -s unittests/GammaIndex -t . -v
 
-      - name: Run all unit tests (not required to pass on this platform yet)
-        continue-on-error: true
+      - name: Run all unit tests
         timeout-minutes: 40
         env:
           MPLBACKEND: Agg

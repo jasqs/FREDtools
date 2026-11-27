@@ -727,7 +727,9 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
         New spacing in each direction. The length should be the same as the `img`
         dimension or as the number of axes of the `img` with the size different than one.
     interpolation : {'linear', 'nearest', 'spline'}, optional
-        Determine the interpolation method. (def. 'linear')
+        Determine the interpolation method. With 'nearest', a position lying
+        exactly halfway between two voxels takes the voxel with the higher index,
+        the same on every platform. (def. 'linear')
     splineOrder : int, optional
         Order of spline interpolation. Must be in the range 0-5. (def. 3)
     displayInfo : bool, optional
@@ -798,6 +800,7 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     # Execute interpolation
     imgRes = sitk.Resample(img,
                            size=[int(i) for i in newSize],  # type: ignore
+                           transform=ft._helper.getHalfwayToHigherIndexTransform(img, interpolator),  # halfway positions take the higher index (nearest)
                            outputOrigin=[i for i in newOrigin],
                            outputSpacing=[i for i in np.abs(spacingCorr)],
                            outputDirection=img.GetDirection(),
@@ -1261,7 +1264,9 @@ def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3]
         If 'auto', then the value will be calculated automatically as the
         minimum value of the `img`. (def. 'auto')
     interpolation : {'linear', 'nearest', 'spline'}, optional
-        Determine the interpolation method. (def. 'linear')
+        Determine the interpolation method. With 'nearest', a position lying
+        exactly halfway between two voxels takes the voxel with the higher index,
+        the same on every platform. (def. 'linear')
     splineOrder : int, optional
         Order of spline interpolation. Must be in the range 0-5. (def. 3)
     displayInfo : bool, optional
@@ -1348,7 +1353,7 @@ def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3]
 
     # transform with resampling
     imgBEV = sitk.Resample(img,
-                           transform=compositTransform,
+                           transform=ft._helper.getHalfwayToHigherIndexTransform(img, interpolator, compositTransform),  # halfway positions take the higher index (nearest)
                            size=size,
                            outputOrigin=origin,
                            outputSpacing=spacing,

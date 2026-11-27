@@ -62,6 +62,58 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     return interpolator
 
 
+def getHalfwayToHigherIndexTransform(img: SITKImage, interpolator: int, transform: SITKTransform | None = None, shiftVoxelFraction: float = 1e-9) -> SITKTransform:
+    """Get a transform making the nearest-neighbour interpolation the same on every platform.
+
+    With the nearest-neighbour interpolation, a sampling position lying exactly halfway between
+    two voxels of `img` has two equally near voxels. Which of them SimpleITK takes is decided by
+    the last bits of the floating-point rounding, so it can differ between platforms (e.g. Linux on
+    x86_64 and macOS on Apple Silicon). The returned transform moves every sampling position by a
+    tiny fraction of a voxel towards the higher indices of `img`, so that a position lying halfway
+    always takes the voxel with the higher index. Other sampling positions are not affected.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image to be interpolated.
+    interpolator : int
+        SimpleITK interpolator, e.g. from `fredtools._helper.setSITKInterpolator`.
+    transform : SimpleITK Transform, optional
+        Transform from the output to the `img` physical space used for the resampling,
+        e.g. the rotation of `getImgBEV`. (def. None, meaning the identity)
+    shiftVoxelFraction : float, optional
+        Shift of every sampling position towards the higher indices of `img`, as a fraction of
+        the voxel size. It must be much larger than the floating-point rounding errors (about
+        1e-14 mm) and much smaller than a voxel. (def. 1e-9)
+
+    Returns
+    -------
+    SimpleITK Transform
+        For the nearest-neighbour interpolation, `transform` followed by the shift; otherwise
+        `transform` itself (the identity if `transform` is None). It is passed to `SimpleITK.Resample`
+        or applied to a point with `TransformPoint` before `EvaluateAtPhysicalPoint`.
+    """
+    import numpy as np
+    import SimpleITK as sitk
+
+    if transform is None:
+        transform = sitk.Transform(img.GetDimension(), sitk.sitkIdentity)
+
+    if interpolator != sitk.sitkNearestNeighbor:
+        return transform
+
+    # shift by shiftVoxelFraction of a voxel along every axis of img, expressed in the physical space
+    direction = np.array(img.GetDirection()).reshape(img.GetDimension(), img.GetDimension())
+    shift = direction @ (np.array(img.GetSpacing()) * shiftVoxelFraction)
+
+    # a composite transform applies the transform added last first: 'transform', then the shift in the img space
+    halfwayTransform = sitk.CompositeTransform(img.GetDimension())
+    halfwayTransform.AddTransform(sitk.TranslationTransform(img.GetDimension(), shift.tolist()))
+    halfwayTransform.AddTransform(transform)
+
+    return halfwayTransform
+
+
 def getSITKPixelID(dtype: DTypeLike, vector: bool = False) -> int:
     """Get SimpleITK pixel ID for a data type.
 
