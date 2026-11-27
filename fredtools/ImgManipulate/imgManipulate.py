@@ -729,7 +729,8 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. With 'nearest', a position lying
         exactly halfway between two voxels takes the voxel with the higher index,
-        the same on every platform. (def. 'linear')
+        the same on every platform. 'spline' is a B-spline interpolation passing
+        through the voxel values, which can overshoot near sharp edges. (def. 'linear')
     splineOrder : int, optional
         Order of spline interpolation. Must be in the range 1-5. (def. 3)
     displayInfo : bool, optional
@@ -1266,7 +1267,8 @@ def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3]
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. With 'nearest', a position lying
         exactly halfway between two voxels takes the voxel with the higher index,
-        the same on every platform. (def. 'linear')
+        the same on every platform. 'spline' is a B-spline interpolation passing
+        through the voxel values, which can overshoot near sharp edges. (def. 'linear')
     splineOrder : int, optional
         Order of spline interpolation. Must be in the range 1-5. (def. 3)
     displayInfo : bool, optional

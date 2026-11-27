@@ -25,6 +25,17 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     ------
     ValueError
         If the interpolation method cannot be recognised or the spline order is not in range 1-5.
+
+    Notes
+    -----
+    The 'spline' interpolation is a B-spline interpolation (SimpleITK sitkBSpline1-5): the B-spline
+    coefficients of the whole image are calculated first (with mirror boundary conditions), so that the
+    interpolated values pass through the voxel values. Near sharp edges, the values can overshoot the
+    range of the voxel values. For an integer pixel type, they are limited to the range of the type.
+    For an image axis of exactly 2 voxels, the spline orders 4 and 5 are not exact.
+
+    The interpolators sitkBSplineResamplerOrder1-5 must not be used here, because they take the image
+    itself as the B-spline coefficients, which smooths the image instead of interpolating it.
     """
     import SimpleITK as sitk
 
@@ -42,15 +53,15 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
                 raise error
             match splineOrder:
                 case 1:
-                    interpolator = sitk.sitkBSplineResamplerOrder1
+                    interpolator = sitk.sitkBSpline1
                 case 2:
-                    interpolator = sitk.sitkBSplineResamplerOrder2
+                    interpolator = sitk.sitkBSpline2
                 case 3:
-                    interpolator = sitk.sitkBSplineResamplerOrder3
+                    interpolator = sitk.sitkBSpline3
                 case 4:
-                    interpolator = sitk.sitkBSplineResamplerOrder4
+                    interpolator = sitk.sitkBSpline4
                 case 5:
-                    interpolator = sitk.sitkBSplineResamplerOrder5
+                    interpolator = sitk.sitkBSpline5
         case _:
             error = ValueError(f"Interpolation type '{interpolation}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
             _logger.error(error)
@@ -110,6 +121,54 @@ def getHalfwayToHigherIndexTransform(img: SITKImage, interpolator: int, transfor
     halfwayTransform.AddTransform(transform)
 
     return halfwayTransform
+
+
+def getImgPointInterpolator(img: SITKImage, interpolator: int) -> Callable:
+    """Get a function interpolating the image at single physical points.
+
+    For the B-spline interpolators (SimpleITK sitkBSpline1-5), SimpleITK's `EvaluateAtPhysicalPoint`
+    calculates the B-spline coefficients of the whole image for every point, and it does not support
+    vector images. The returned function calculates the coefficients only once (for every component of
+    a vector image) and interpolates them with the B-spline resampler of the same order, which gives the
+    same values as `EvaluateAtPhysicalPoint` with the B-spline interpolator. For the other interpolators,
+    `EvaluateAtPhysicalPoint` is used directly.
+
+    Parameters
+    ----------
+    img : SimpleITK Image
+        An object of a SimpleITK image to be interpolated.
+    interpolator : int
+        SimpleITK interpolator, e.g. from `fredtools._helper.setSITKInterpolator`.
+
+    Returns
+    -------
+    callable
+        A function taking a physical point and returning the interpolated value (a float for a scalar
+        image or a tuple of floats for a vector image).
+    """
+    import SimpleITK as sitk
+
+    splineOrders = {sitk.sitkBSpline1: 1, sitk.sitkBSpline2: 2, sitk.sitkBSpline3: 3, sitk.sitkBSpline4: 4, sitk.sitkBSpline5: 5}
+
+    if interpolator not in splineOrders:
+        return lambda point: img.EvaluateAtPhysicalPoint([float(x) for x in point], interpolator)
+
+    # B-spline coefficients of the image (of every component of a vector image), calculated in double precision
+    splineOrder = splineOrders[interpolator]
+    if img.GetNumberOfComponentsPerPixel() > 1:
+        components = [sitk.VectorIndexSelectionCast(img, componentIdx, sitk.sitkFloat64) for componentIdx in range(img.GetNumberOfComponentsPerPixel())]
+    else:
+        components = [sitk.Cast(img, sitk.sitkFloat64)]
+    coefficients = [sitk.BSplineDecomposition(component, splineOrder=splineOrder) for component in components]
+
+    # the B-spline resampler interpolates an image of B-spline coefficients
+    resampler = getattr(sitk, f"sitkBSplineResamplerOrder{splineOrder}")
+
+    def interpolate(point):
+        values = [coefficient.EvaluateAtPhysicalPoint([float(x) for x in point], resampler) for coefficient in coefficients]
+        return tuple(values) if img.GetNumberOfComponentsPerPixel() > 1 else values[0]
+
+    return interpolate
 
 
 def getSITKPixelID(dtype: DTypeLike, vector: bool = False) -> int:

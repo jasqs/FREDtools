@@ -54,7 +54,7 @@ Image manipulation
 Subimage extraction
 ------------------------------------------------
 
-Functions for getting subimages of lower dimension, e.g. a slice or a profile from a 3D image. The image must be an instance of a SimpleITK image and the same image, with the same dimension is returned. The subimages are calculated with a user-defined interpolation. The interpolation of 'nearest', 'linear' and 'spline' with order from 1 to 5 are available. With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
+Functions for getting subimages of lower dimension, e.g. a slice or a profile from a 3D image. The image must be an instance of a SimpleITK image and the same image, with the same dimension is returned. The subimages are calculated with a user-defined interpolation. The interpolation of 'nearest', 'linear' and 'spline' with order from 1 to 5 are available. 'spline' is a B-spline interpolation passing through the voxel values, which can overshoot near sharp edges (for an image axis of exactly 2 voxels, the orders 4 and 5 are not exact). With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
 
 .. autofunction:: fredtools.getSlice
 

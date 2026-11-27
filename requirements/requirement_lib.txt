@@ -10,7 +10,7 @@ numpy
 scipy
 pandas
 matplotlib
-SimpleITK
+SimpleITK>=2.2  # B-spline interpolators sitkBSpline1-5
 itk
 pydicom
 lmfit

@@ -260,5 +260,78 @@ class test_nearestHalfway(unittest.TestCase):
             np.testing.assert_allclose(values, [self.img.EvaluateAtPhysicalPoint([float(x) for x in point], sitk.sitkLinear) for point in points])
 
 
+class test_splineInterpolation(unittest.TestCase):
+    """The spline interpolation is a B-spline interpolation: it passes through the voxel values and between the
+    voxel centres equals the B-spline interpolation of SimpleITK (sitkBSpline1..5)."""
+
+    def setUp(self):
+        rng = np.random.default_rng(9)
+        self.arr = rng.uniform(0, 100, (5, 6, 9))  # [z, y, x]
+        self.img = sitk.GetImageFromArray(self.arr)
+        self.img.SetSpacing((2.0, 3.0, 4.0))
+        self.img.SetOrigin((1.0, -2.0, 3.0))
+
+    def point(self, img, continuousIndex):
+        return np.array(img.TransformContinuousIndexToPhysicalPoint(continuousIndex))
+
+    def test_getPoint_singleVoxel(self):
+        # a single bright voxel keeps its value (a smoothing would lower it, e.g. to 29.6 for order 3)
+        arr = np.zeros((7, 7, 7))
+        arr[3, 3, 3] = 100
+        img = sitk.GetImageFromArray(arr)
+        for splineOrder in range(1, 6):
+            with self.subTest(splineOrder=splineOrder):
+                value = ft.getPoint(img, self.point(img, (3, 3, 3)), interpolation="spline", splineOrder=splineOrder)
+                self.assertAlmostEqual(float(ft.arr(value)), 100, delta=1e-6)
+
+    def test_getProfilePoints_voxelCentres(self):
+        # along x through the voxel centres y=2, z=1 -> the voxel values
+        for splineOrder in range(1, 6):
+            with self.subTest(splineOrder=splineOrder):
+                _, values = ft.getProfilePoints(self.img, self.point(self.img, (0, 2, 1)), self.point(self.img, (8, 2, 1)), spacing=2, interpolation="spline", splineOrder=splineOrder)
+                np.testing.assert_allclose(values, self.arr[1, 2, :], rtol=0, atol=1e-6)
+
+    def test_getProfilePoints_betweenVoxelCentres(self):
+        pointA, pointB = self.point(self.img, (0.4, 2.3, 1.6)), self.point(self.img, (7.7, 3.4, 2.9))
+        for splineOrder in range(1, 6):
+            with self.subTest(splineOrder=splineOrder):
+                _, values = ft.getProfilePoints(self.img, pointA, pointB, spacing=1.7, interpolation="spline", splineOrder=splineOrder)
+                points = ft.ImgManipulate.imgGetSubimg._calcPointsAlongLine(pointA, pointB, 1.7)
+                valuesRef = [self.img.EvaluateAtPhysicalPoint([float(x) for x in point], getattr(sitk, f"sitkBSpline{splineOrder}")) if ft.isPointInside(self.img, point) else np.nan for point in points]
+                np.testing.assert_allclose(values, valuesRef, rtol=1e-12, atol=1e-9)
+
+    def test_getProfilePoints_vector(self):
+        # each component of a vector image is interpolated like the scalar image of that component
+        arrs = [self.arr, self.arr[::-1].copy(), 2 * self.arr + 5]
+        components = []
+        for arr in arrs:
+            component = sitk.GetImageFromArray(arr)
+            component.CopyInformation(self.img)
+            components.append(component)
+        imgVec = sitk.Compose(components)
+        pointA, pointB = self.point(self.img, (0.4, 2.3, 1.6)), self.point(self.img, (7.7, 3.4, 2.9))
+        _, values = ft.getProfilePoints(imgVec, pointA, pointB, spacing=1.7, interpolation="spline", splineOrder=3)
+        for idx, component in enumerate(components):
+            with self.subTest(component=idx):
+                _, valuesComponent = ft.getProfilePoints(component, pointA, pointB, spacing=1.7, interpolation="spline", splineOrder=3)
+                np.testing.assert_allclose([value[idx] for value in values], valuesComponent, rtol=1e-12, atol=1e-9)
+
+
+class test_getImgPointInterpolator(unittest.TestCase):
+    """The image point interpolator gives the same values as SimpleITK's EvaluateAtPhysicalPoint, with the B-spline
+    coefficients computed only once for the spline interpolation."""
+
+    def setUp(self):
+        self.img = sitk.GetImageFromArray(np.random.default_rng(10).uniform(0, 100, (5, 6, 9)).astype("float32"))
+        self.img.SetSpacing((2.0, 3.0, 4.0))
+        self.points = [self.img.TransformContinuousIndexToPhysicalPoint(ci) for ci in ((0.4, 2.3, 1.6), (4.0, 3.0, 2.0), (7.7, 3.4, 2.9))]
+
+    def test_getImgPointInterpolator(self):
+        for interpolator in (sitk.sitkNearestNeighbor, sitk.sitkLinear, sitk.sitkBSpline1, sitk.sitkBSpline2, sitk.sitkBSpline3, sitk.sitkBSpline4, sitk.sitkBSpline5):
+            with self.subTest(interpolator=interpolator):
+                interpolate = ft._helper.getImgPointInterpolator(self.img, interpolator)
+                np.testing.assert_allclose([interpolate(point) for point in self.points], [self.img.EvaluateAtPhysicalPoint(point, interpolator) for point in self.points], rtol=1e-12, atol=1e-9)
+
+
 if __name__ == '__main__':
     unittest.main()

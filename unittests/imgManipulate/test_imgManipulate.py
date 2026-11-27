@@ -373,6 +373,18 @@ class test_resampleImg(unittest.TestCase):
                 imgRes = ft.resampleImg(self.img, spacing=[2, 1, 3], interpolation="spline", splineOrder=splineOrder)
                 self.assertTrue(ft.compareImg(imgRes, imgRef))
 
+    def test_resampleImg_splineInterpolates(self):
+        """The spline interpolation passes through the voxel values: resampling to the same spacing returns the image."""
+        arr = np.random.default_rng(7).uniform(0, 100, (6, 7, 8))
+        img = sitk.GetImageFromArray(arr)
+        img.SetSpacing((2.0, 3.0, 4.0))
+        img.SetOrigin((1.0, -2.0, 3.0))
+        for splineOrder in range(1, 6):
+            with self.subTest(splineOrder=splineOrder):
+                imgRes = ft.resampleImg(img, spacing=img.GetSpacing(), interpolation="spline", splineOrder=splineOrder)
+                # tolerance: ITK calculates the B-spline coefficients with a relative precision of about 1e-10
+                np.testing.assert_allclose(sitk.GetArrayFromImage(imgRes), arr, rtol=0, atol=1e-6)
+
     def test_resampleImg_invalidSplineOrder(self):
         """The spline order must be in range 1-5."""
         for splineOrder in (0, 6):
@@ -553,6 +565,17 @@ class test_getImgBEV(unittest.TestCase):
             point = transform.TransformPoint(imgBEV.TransformIndexToPhysicalPoint([int(i) for i in index]))
             arrExpected[index[::-1]] = _higherIndexValue(img, point, outsideValue=-1)
         np.testing.assert_array_equal(sitk.GetArrayFromImage(imgBEV), arrExpected)
+
+    def test_getImgBEV_spline(self):
+        """With equal spacings along the axes, the BEV voxels lie on the image voxel centres, where the spline
+        interpolation passes through the voxel values, i.e. equals the nearest-neighbour result."""
+        img = sitk.GetImageFromArray(np.random.default_rng(8).uniform(0, 100, (7, 6, 5)))
+        img.SetSpacing((2.0, 2.0, 2.0))
+        imgNearest = ft.getImgBEV(img, isocentrePosition=[4.0, 6.0, 6.0], gantryAngle=90, couchAngle=0, defaultPixelValue=-1, interpolation="nearest")
+        for splineOrder in range(1, 6):
+            with self.subTest(splineOrder=splineOrder):
+                imgSpline = ft.getImgBEV(img, isocentrePosition=[4.0, 6.0, 6.0], gantryAngle=90, couchAngle=0, defaultPixelValue=-1, interpolation="spline", splineOrder=splineOrder)
+                np.testing.assert_allclose(sitk.GetArrayFromImage(imgSpline), sitk.GetArrayFromImage(imgNearest), rtol=0, atol=1e-6)
 
 
 if __name__ == '__main__':
