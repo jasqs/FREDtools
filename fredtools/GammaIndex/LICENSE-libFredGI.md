@@ -13,7 +13,7 @@ Copyright © A. Schiavi and the FRED collaboration.
 
 These libraries may be used free of charge, and redistributed unmodified together with FREDtools.
 Their source code is not public. They are not covered by the GNU General Public License of FREDtools
-(see [LICENSE](../../LICENSE) in the repository root); FREDtools calls them through their C interface.
+(see [LICENSE](../../LICENSE) in the repository root). FREDtools calls them through their C interface.
 
 The libraries are provided "as is", without warranty of any kind.
 
