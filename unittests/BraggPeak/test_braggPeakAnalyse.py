@@ -45,8 +45,19 @@ class test_braggPeak(unittest.TestCase):
         braggPeak = ft.braggPeak(self.BPdata[1]['depth'], self.BPdata[1]['signal'])
         braggPeak.splineOrder = 4
         self.assertEqual(braggPeak.splineOrder, 4)
-        with self.assertRaises(ValueError):
-            braggPeak.splineOrder = 6
+        for splineOrder in (0, 6):
+            with self.subTest(splineOrder=splineOrder):
+                with self.assertRaises(ValueError):
+                    braggPeak.splineOrder = splineOrder
+
+    def test_braggPeak_invalidSplineOrder(self):
+        """The spline order must be in range 1-5, also when given to the constructor and to the 1D interpolator."""
+        for splineOrder in (0, 6):
+            with self.subTest(splineOrder=splineOrder):
+                with self.assertRaises(ValueError):
+                    ft.braggPeak(self.BPdata[1]['depth'], self.BPdata[1]['signal'], interpolation='spline', splineOrder=splineOrder)
+                with self.assertRaises(ValueError):
+                    ft._helper.get1DInterpolator(self.BPdata[1]['depth'], self.BPdata[1]['signal'], interpolation='spline', splineOrder=splineOrder)
 
     def test_braggPeak_accuracy_setter(self):
         braggPeak = ft.braggPeak(self.BPdata[1]['depth'], self.BPdata[1]['signal'])

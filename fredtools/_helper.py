@@ -3,7 +3,7 @@ from fredtools import getLogger
 _logger = getLogger(__name__)
 
 
-def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3) -> int:
+def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=1, le=5)] = 3) -> int:
     """Set SimpleITK interpolator for interpolation method.
 
     The function is setting a specific interpolation method for
@@ -14,7 +14,7 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
+        Order of spline interpolation. Must be in range 1-5. (def. 3)
 
     Returns
     -------
@@ -24,7 +24,7 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
     Raises
     ------
     ValueError
-        If the interpolation method cannot be recognised or the spline order is not in range 0-5.
+        If the interpolation method cannot be recognised or the spline order is not in range 1-5.
     """
     import SimpleITK as sitk
 
@@ -36,13 +36,11 @@ def setSITKInterpolator(interpolation: Literal['linear', 'nearest', 'spline'] = 
         case "nearest":
             interpolator = sitk.sitkNearestNeighbor
         case "spline":
-            if splineOrder > 5 or splineOrder < 0:
-                error = ValueError(f"Spline order must be in range 0-5.")
+            if splineOrder > 5 or splineOrder < 1:
+                error = ValueError(f"Spline order must be in range 1-5.")
                 _logger.error(error)
                 raise error
             match splineOrder:
-                case 0:
-                    interpolator = sitk.sitkBSplineResampler
                 case 1:
                     interpolator = sitk.sitkBSplineResamplerOrder1
                 case 2:
@@ -187,7 +185,7 @@ def getSITKPixelID(dtype: DTypeLike, vector: bool = False) -> int:
     return pixelID
 
 
-def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=0, le=5)] = 3):
+def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder:  Annotated[int, Field(strict=True, ge=1, le=5)] = 3):
     """Get a 1D interpolator for data points.
 
     The function creates a one-dimensional interpolator for the data points
@@ -209,7 +207,7 @@ def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation:
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
+        Order of spline interpolation. Must be in range 1-5. (def. 3)
 
     Returns
     -------
@@ -220,7 +218,7 @@ def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation:
     Raises
     ------
     ValueError
-        If the interpolation method cannot be recognised or the spline order is not in range 0-5.
+        If the interpolation method cannot be recognised or the spline order is not in range 1-5.
     """
     from scipy.interpolate import make_interp_spline
     from functools import partial
@@ -244,14 +242,12 @@ def get1DInterpolator(x: Iterable[Numeric], y: Iterable[Numeric], interpolation:
         case "nearest":
             interpolator = nearest1Dinterpolator(x, y)
         case "spline":
-            if splineOrder > 5 or splineOrder < 0:
-                error = ValueError(f"Spline order must be in range 0-5.")
+            if splineOrder > 5 or splineOrder < 1:
+                error = ValueError(f"Spline order must be in range 1-5.")
                 _logger.error(error)
                 raise error
             interpolator = make_interp_spline(x, y, k=splineOrder)
             match splineOrder:
-                case 0:
-                    _logger.warning("The spline order 0 is not equivalent to 'nearest' but to 'previous' interpolation type.")
                 case 1:
                     _logger.info("The spline order 1 is equivalent to 'linear' interpolation type.")
         case _:

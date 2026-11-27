@@ -36,14 +36,14 @@ class braggPeak:
             interpolation : {'spline', 'linear', 'nearest'}
                 Interpolation method. (def. 'spline')
             splineOrder : int
-                Order of spline interpolation. Must be in range 0-5. (def. 3)
+                Order of spline interpolation. Must be in range 1-5. (def. 3)
 
     Raises
     ------
     TypeError
         If `pos` or `vec` is not iterable, not one-dimensional, or they are not of the same length.
     ValueError
-        If the interpolation method is not 'linear', 'nearest' or 'spline', or the spline order is not in range 0-5.
+        If the interpolation method is not 'linear', 'nearest' or 'spline', or the spline order is not in range 1-5.
 
     Examples
     --------
@@ -88,10 +88,10 @@ class braggPeak:
         if "splineOrder" not in kwargs:
             self.__splineOrder = 3
             _logger.debug(f"Setting spline order to default value, i.e., 3.")
-        elif isinstance(kwargs["splineOrder"], int) and kwargs["splineOrder"] >= 0 and kwargs["splineOrder"] <= 5:
+        elif isinstance(kwargs["splineOrder"], int) and kwargs["splineOrder"] >= 1 and kwargs["splineOrder"] <= 5:
             self.__splineOrder = kwargs["splineOrder"]
         else:
-            error = ValueError(f"Spline order must be in range 0-5.")
+            error = ValueError(f"Spline order must be in range 1-5.")
             _logger.error(error)
             raise error
 
@@ -170,20 +170,20 @@ class braggPeak:
 
     @property
     def splineOrder(self) -> int:
-        """int: Order of the spline interpolation. Must be in range 0-5.
+        """int: Order of the spline interpolation. Must be in range 1-5.
 
         Raises
         ------
         ValueError
-            If the value assigned is not an integer in range 0-5.
+            If the value assigned is not an integer in range 1-5.
         """
         return self.__splineOrder
 
     @splineOrder.setter
-    def splineOrder(self, splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)]) -> None:
+    def splineOrder(self, splineOrder: Annotated[int, Field(strict=True, ge=1, le=5)]) -> None:
         # validate argument
-        if not isinstance(splineOrder, int) or splineOrder > 5 or splineOrder < 0:
-            error = ValueError(f"Spline order must be a scalar in range 0-5.")
+        if not isinstance(splineOrder, int) or splineOrder > 5 or splineOrder < 1:
+            error = ValueError(f"Spline order must be a scalar in range 1-5.")
             _logger.error(error)
             raise error
         self.__splineOrder = splineOrder
@@ -196,8 +196,8 @@ class braggPeak:
             error = ValueError(f"Interpolation type '{self.__interpolation}' cannot be recognised. Only 'linear', 'nearest' and 'spline' are supported.")
             _logger.error(error)
             raise error
-        if self.__splineOrder > 5 or self.__splineOrder < 0:
-            error = ValueError(f"Spline order must be in range 0-5.")
+        if self.__splineOrder > 5 or self.__splineOrder < 1:
+            error = ValueError(f"Spline order must be in range 1-5.")
             _logger.error(error)
             raise error
 

@@ -38,7 +38,7 @@ def getSlice(img: SITKImage, point: PointLike, plane: str = "XY", displayInfo: b
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
                With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
-            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
+            -  splineOrder : int, order of spline interpolation, must be in range 1-5 (def. 3).
 
     Returns
     -------
@@ -193,7 +193,7 @@ def getProfile(img: SITKImage, point: PointLike, axis: str = "X", displayInfo: b
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
                With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
-            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
+            -  splineOrder : int, order of spline interpolation, must be in range 1-5 (def. 3).
 
     Returns
     -------
@@ -340,7 +340,7 @@ def getPoint(img: SITKImage, point: PointLike, displayInfo: bool = False, **kwar
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
                With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
-            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
+            -  splineOrder : int, order of spline interpolation, must be in range 1-5 (def. 3).
 
     Returns
     -------
@@ -717,7 +717,7 @@ def getProfilePoints(img: SITKImage, pointA: PointLike, pointB: PointLike, spaci
 
             -  interpolation : {'linear', 'nearest', 'spline'}, determines the interpolation method (def. 'linear').
                With 'nearest', a position lying exactly halfway between two voxels takes the voxel with the higher index, the same on every platform.
-            -  splineOrder : int, order of spline interpolation, must be in range 0-5 (def. 3).
+            -  splineOrder : int, order of spline interpolation, must be in range 1-5 (def. 3).
 
     Returns
     -------

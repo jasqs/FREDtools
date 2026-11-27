@@ -705,7 +705,7 @@ def setNaNImg(img: SITKImage, value: Numeric = 0, displayInfo: bool = False) -> 
     return img
 
 
-def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
+def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linear', 'nearest', 'spline'] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=1, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
     """Resample image to other voxel spacing.
 
     The function resamples an image defined as an instance of a
@@ -731,7 +731,7 @@ def resampleImg(img: SITKImage, spacing: Iterable, interpolation: Literal['linea
         exactly halfway between two voxels takes the voxel with the higher index,
         the same on every platform. (def. 'linear')
     splineOrder : int, optional
-        Order of spline interpolation. Must be in the range 0-5. (def. 3)
+        Order of spline interpolation. Must be in the range 1-5. (def. 3)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 
@@ -1239,7 +1239,7 @@ def _getFORTransformed(img: SITKImage, transform: SITKTransform) -> tuple:
     return sizePX, originRW, spacingRW, directionIdentity
 
 
-def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3], gantryAngle: Numeric, couchAngle: Numeric, defaultPixelValue: Numeric | Literal["auto"] = "auto", interpolation:  Literal["linear", "nearest", "spline"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
+def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3], gantryAngle: Numeric, couchAngle: Numeric, defaultPixelValue: Numeric | Literal["auto"] = "auto", interpolation:  Literal["linear", "nearest", "spline"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=1, le=5)] = 3, displayInfo: bool = False) -> SITKImage:
     """Transform an image to Beam's Eye View (BEV).
 
     The function transforms a 3D image defined as a SimpleITK 3D image object to
@@ -1268,7 +1268,7 @@ def getImgBEV(img: SITKImage, isocentrePosition: Annotated[Sequence[Numeric], 3]
         exactly halfway between two voxels takes the voxel with the higher index,
         the same on every platform. (def. 'linear')
     splineOrder : int, optional
-        Order of spline interpolation. Must be in the range 0-5. (def. 3)
+        Order of spline interpolation. Must be in the range 1-5. (def. 3)
     displayInfo : bool, optional
         Displays a summary of the function results. (def. False)
 

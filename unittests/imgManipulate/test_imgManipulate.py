@@ -373,6 +373,13 @@ class test_resampleImg(unittest.TestCase):
                 imgRes = ft.resampleImg(self.img, spacing=[2, 1, 3], interpolation="spline", splineOrder=splineOrder)
                 self.assertTrue(ft.compareImg(imgRes, imgRef))
 
+    def test_resampleImg_invalidSplineOrder(self):
+        """The spline order must be in range 1-5."""
+        for splineOrder in (0, 6):
+            with self.subTest(splineOrder=splineOrder):
+                with self.assertRaises(ValueError):
+                    ft.resampleImg(self.img, spacing=[2, 1, 3], interpolation="spline", splineOrder=splineOrder)
+
     def test_resampleImg_nearestNoHalfway(self):
         """No output voxel lies halfway between two input voxels, so the nearest voxel is unique; the expected image is
         calculated in numpy from the voxel positions."""
@@ -408,7 +415,7 @@ class test_sumImg(unittest.TestCase):
     def setUp(self):
         self.fileNames = ["unittests/testData/MHDImages/img3D_resampleLinear.mhd",
                           "unittests/testData/MHDImages/img3D_resampleNearest.mhd",
-                          "unittests/testData/MHDImages/img3D_resampleSpline0.mhd"]
+                          "unittests/testData/MHDImages/img3D_resampleSpline3.mhd"]
         self.imgs = ft.readMHD(self.fileNames)
 
     def test_sumImg(self):

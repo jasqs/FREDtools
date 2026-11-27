@@ -284,13 +284,13 @@ class beamModel:
         return self._splineOrder
 
     @splineOrder.setter
-    def splineOrder(self, splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)]) -> None:
+    def splineOrder(self, splineOrder: Annotated[int, Field(strict=True, ge=1, le=5)]) -> None:
         """Sets the order of the spline used for the energy model."""
-        if not isinstance(splineOrder, int) or splineOrder < 0 or splineOrder > 5:
-            error = AttributeError("The splineOrder parameter must be an integer between 0 and 5.")
+        if not isinstance(splineOrder, int) or splineOrder < 1 or splineOrder > 5:
+            error = AttributeError("The splineOrder parameter must be an integer between 1 and 5.")
             _logger.error(error)
             raise error
-        self._splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = splineOrder
+        self._splineOrder: Annotated[int, Field(strict=True, ge=1, le=5)] = splineOrder
 
     def interpolateBeamModel(self, nomEnergy: Numeric | Iterable[Numeric]) -> DataFrame:
         """Interpolate the energy model for given nominal energies.
@@ -892,12 +892,12 @@ def writeBeamModel(beamModel: dict, fileName: PathLike) -> None:
         yaml.dump(beamModelSave, yaml_file, sort_keys=False, width=2000, default_flow_style=False, allow_unicode=True)
 
 
-def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Numeric], interpolation: Literal["linear", "spline", "nearest"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=0, le=5)] = 3) -> DataFrame:
+def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Numeric], interpolation: Literal["linear", "spline", "nearest"] = "linear", splineOrder: Annotated[int, Field(strict=True, ge=1, le=5)] = 3) -> DataFrame:
     """Interpolate beam model for a given nominal energy.
 
     The function interpolates all the beam model parameters for a given nominal energies
     which must be in range of the defined nominal energies in the beam model. The possible
-    interpolation methods are 'nearest', 'linear' or 'spline' with order in range 0-5.
+    interpolation methods are 'nearest', 'linear' or 'spline' with order in range 1-5.
 
     Parameters
     ----------
@@ -908,7 +908,7 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Num
     interpolation : {'linear', 'nearest', 'spline'}, optional
         Determine the interpolation method. (def. 'linear')
     splineOrder : int, optional
-        Order of spline interpolation. Must be in range 0-5. (def. 3)
+        Order of spline interpolation. Must be in range 1-5. (def. 3)
 
     Returns
     -------
@@ -919,7 +919,7 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Num
     ------
     ValueError
         If the interpolation method cannot be recognised, if the spline order is
-        not in range 0-5, or if any of the given nominal energies is outside
+        not in range 1-5, or if any of the given nominal energies is outside
         the beam model nominal energy range.
 
     See Also
@@ -945,8 +945,8 @@ def interpolateBeamModel(beamModel: DataFrame, nomEnergy: Numeric | Iterable[Num
 
     # set the proper interpolation method for spline
     if interp == "spline":
-        if splineOrder > 5 or splineOrder < 0:
-            error = ValueError(f"Spline order must be in range 0-5.")
+        if splineOrder > 5 or splineOrder < 1:
+            error = ValueError(f"Spline order must be in range 1-5.")
             _logger.error(error)
             raise error
         else:
